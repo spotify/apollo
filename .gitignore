@@ -1,0 +1,18 @@
+# Build products and artifacts
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Stuff from various IDE's and editors
+*.iml
+*~
+.idea/*
+
+# Mac OS X Finder
+.DS_Store
+
+.classpath
+.project

@@ -1,0 +1,15 @@
+.DS_Store
+debian/*.log
+debian/*.debhelper
+debian/*.substvars
+debian/tmp/
+debian/files
+target
+project/
+.idea/
+.idea_modules/
+*.iml
+.project
+.classpath
+.settings
+.checkstyle
