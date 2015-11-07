@@ -8,7 +8,7 @@ Include the maven dependency in your project pom.xml
 <dependency>
   <groupId>com.spotify</groupId>
   <artifactId>apollo-test</artifactId>
-  <version>${apollo.version}</version>
+  <version>${apollo.version}</version>  <!-- (version not needed with apollo-bom) -->
   <scope>test</scope>
 </dependency>
 ```
@@ -120,7 +120,9 @@ endpoint using `serviceHelper.send(...)` and verify the response.
 There are a couple of handy utility classes that can help you write your tests more succinctly:
 
 * [RequestMatchers.java](src/main/java/com/spotify/apollo/test/unit/RequestMatchers.java)
+* [ResponseMatchers.java](src/main/java/com/spotify/apollo/test/unit/ResponseMatchers.java)
 * [RouteMatchers.java](src/main/java/com/spotify/apollo/unit/RouteMatchers.java)
+* [StatusTypeMatchers.java](src/main/java/com/spotify/apollo/unit/StatusTypeMatchers.java)
 
 #### More tests
 
