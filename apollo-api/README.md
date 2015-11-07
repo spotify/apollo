@@ -1,6 +1,7 @@
 # Apollo API
 
-This Apollo library gives you the tools you need to define your service routes and your request/reply handlers. It provides several Java mechanisms, including classes and method references to help you.
+This Apollo library gives you the tools you need to define your service routes and your
+request/reply handlers. For some overview documentation, see:
 
 * [AppInit & Environment](docs/app-init-environment.md)
 * [Routing Engine](docs/routing-engine.md)
@@ -49,6 +50,8 @@ public final class Small {
 
 ### 2. Build it with Maven!
 
+TODO: link to a full template pom for a standalone service
+
 Add a dependency to `apollo-standalone-service` to your `pom.xml`. Use a build property for the
 version since you'll need it later in the build configuration.
 
@@ -58,6 +61,7 @@ version since you'll need it later in the build configuration.
 </properties>
 ```
 
+TODO: apollo-bom?
 ```xml
 <dependency>
     <groupId>com.spotify</groupId>

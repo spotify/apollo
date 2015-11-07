@@ -1,11 +1,11 @@
 # Apollo Extra
 
-This Apollo library contains some utilites that may make your life easier.
+This Apollo library contains some utilities that may make your life easier.
 
 ## com.spotify.apollo.concurrent
 
-Defines a couple of utilities that make it easier to move between ```ListenableFuture```s and 
-```CompletionStage```s. Example usage:
+Defines a couple of utilities that make it easier to move between `ListenableFuture`s and
+`CompletionStage`s. Example usage:
 
 ```java
     ListenableFuture<Message> future = listenableFutureClient.send(myRequest);

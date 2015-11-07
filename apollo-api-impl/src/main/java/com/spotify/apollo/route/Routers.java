@@ -31,6 +31,7 @@ public final class Routers {
 
     for (Object object : objects) {
       if (object instanceof Route) {
+        //noinspection unchecked
         rules.add(RouteRuleBuilder.toRule((Route) object));
       } else if (object instanceof RouteProvider) {
         ((RouteProvider) object).routes()

@@ -34,9 +34,13 @@ The matrix of sync/async and plain/response combinations looks like this:
 
 ## Route providers
 
-[`RouteProvider`](/apollo-api/src/main/java/com/spotify/apollo/route/RouteProvider.java) is a functional interface for creating a [`Stream`](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html) of routes.
+[`RouteProvider`](/apollo-api/src/main/java/com/spotify/apollo/route/RouteProvider.java) is a
+functional interface for creating a
+[`Stream`](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html)
+of routes.
 
-This is useful for when the application needs to group routes in some logical way and treat them all in bulk. A REST-ful api with endpoints grouped by resource is a common use case.
+This is useful for when the application needs to group routes in some logical way and treat them
+all in bulk. A REST-ful api with endpoints grouped by resource is a common use case.
 
 ```java
 static class BlogPost implements RouteProvider {

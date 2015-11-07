@@ -25,7 +25,7 @@ public interface Environment {
   /**
    * The domain that the application is running in.
    *
-   * @return The domain name. E.g. shared.cloud, sto3, etc.
+   * @return The domain name. For example shared.cloud, example.org, etc.
    */
   String domain();
 
