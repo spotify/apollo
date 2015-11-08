@@ -3,8 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>Spotify Apollo Bill of Materials</name>
-    <!-- TODO: fix URL -->
-    <url>https://ghe.spotify.net/apollo</url>
+    <url>https://github.com/spotify/apollo</url>
 
     <groupId>com.spotify</groupId>
     <artifactId>apollo-bom</artifactId>
@@ -13,7 +12,6 @@
 
     <properties>
         <cucumber.version>1.2.4</cucumber.version>
-
         <auto-matter.version>0.11.0</auto-matter.version>
     </properties>
 
@@ -271,11 +269,6 @@
                 <groupId>uk.org.lidalia</groupId>
                 <artifactId>slf4j-test</artifactId>
                 <version>1.1.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.spotify</groupId>
-                <artifactId>test-util</artifactId>
-                <version>0.0.7</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

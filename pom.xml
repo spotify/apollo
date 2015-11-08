@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>Spotify Apollo Parent</name>
-    <url>https://ghe.spotify.net/apollo</url>
+    <url>https://github.com/spotify/apollo</url>
 
     <groupId>com.spotify</groupId>
     <artifactId>apollo-parent</artifactId>
@@ -33,13 +33,13 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <cucumber.version>1.1.3</cucumber.version>
-
         <auto-matter.version>0.11.0</auto-matter.version>
     </properties>
 
     <scm>
-        <developerConnection>scm:git:ssh://git@ghe.spotify.net/apollo/apollo-api
-        </developerConnection>
+        <url>https://github.com/spotify/apollo</url>
+        <connection>scm:git:ssh://git@github.com:spotify/apollo.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:spotify/apollo.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
@@ -59,6 +59,17 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.1</version>
+                    <configuration>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                        <compilerArgs>
+                            <compilerArg>-Xlint:all</compilerArg>
+                        </compilerArgs>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <groupId>com.spotify</groupId>
                     <artifactId>missinglink-maven-plugin</artifactId>
                     <version>0.1.1</version>
@@ -73,17 +84,6 @@
                             <phase>process-classes</phase>
                         </execution>
                     </executions>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.1</version>
-                    <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
-                        <compilerArgs>
-                            <compilerArg>-Xlint:all</compilerArg>
-                        </compilerArgs>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-enforcer-plugin</artifactId>
@@ -103,23 +103,6 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>2.16</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>integration-test</goal>
-                                <goal>verify</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <includes>
-                            <include>**/*IT.java</include>
-                        </includes>
-                    </configuration>
-                </plugin>
-                <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>2.5</version>
                     <configuration>
@@ -136,10 +119,23 @@
                     <version>2.8.1</version>
                     <configuration>
                         <show>private</show>
+                        <failOnError>false</failOnError>
                     </configuration>
                     <executions>
                         <execution>
                             <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.2</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
                             <goals>
                                 <goal>jar</goal>
                             </goals>
@@ -162,16 +158,21 @@
                     </dependencies>
                 </plugin>
                 <plugin>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>2.2</version>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>2.16</version>
                     <executions>
                         <execution>
-                            <id>attach-sources</id>
                             <goals>
-                                <goal>jar</goal>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
                             </goals>
                         </execution>
                     </executions>
+                    <configuration>
+                        <includes>
+                            <include>**/*IT.java</include>
+                        </includes>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
@@ -195,16 +196,10 @@
                 <artifactId>maven-enforcer-plugin</artifactId>
             </plugin>
             <plugin>
-                <artifactId>maven-source-plugin</artifactId>
+                <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
             <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <failOnError>false</failOnError>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-release-plugin</artifactId>
+                <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
