@@ -9,7 +9,6 @@ import com.spotify.apollo.Response;
 import com.spotify.apollo.Serializer;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.StatusType;
-import com.spotify.test.Util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +30,7 @@ import static com.spotify.apollo.Status.NO_CONTENT;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -117,33 +117,6 @@ public class MiddlewaresTest {
   }
 
   @Test
-  public void asShouldSerializeProtobufAsProtobuf() throws Exception {
-    ChartsProto.Album message = ChartsProto.Album.newBuilder()
-        .setImageUrl("hey")
-        .build();
-
-    ByteString expected = ByteString.of(message.toByteArray());
-
-    serializationFuture.complete(message);
-
-    assertThat(getResult(Middlewares.autoSerialize(serializationDelegate)).payload(),
-               equalTo(Optional.of(expected)));
-  }
-
-  @Test
-  public void asShouldSerializeResponseProtobufAsProtobuf() throws Exception {
-    ChartsProto.Album message = ChartsProto.Album.newBuilder()
-        .setImageUrl("hey")
-        .build();
-    ByteString expected = ByteString.of(message.toByteArray());
-
-    serializationFuture.complete(Response.forPayload(message));
-
-    assertThat(getResult(Middlewares.autoSerialize(serializationDelegate)).payload(),
-               equalTo(Optional.of(expected)));
-  }
-
-  @Test
   public void asShouldSerializeObjectAsJson() throws Exception {
     class TestData {
       public String theString = "hi";
@@ -153,8 +126,9 @@ public class MiddlewaresTest {
     serializationFuture.complete(new TestData());
 
     //noinspection ConstantConditions
-    assertThat(getResult(Middlewares.autoSerialize(serializationDelegate)).payload().get().utf8(),
-               Util.jsonMatches("{\"theString\":\"hi\", \"theInteger\": 42 }"));
+    String json =
+        getResult(Middlewares.autoSerialize(serializationDelegate)).payload().get().utf8();
+    assertThat(json, equalToIgnoringWhiteSpace("{\"theString\":\"hi\",\"theInteger\":42}"));
   }
 
   @Test
@@ -167,8 +141,9 @@ public class MiddlewaresTest {
     serializationFuture.complete(Response.forPayload(new TestData()));
 
     //noinspection ConstantConditions
-    assertThat(getResult(Middlewares.autoSerialize(serializationDelegate)).payload().get().utf8(),
-               Util.jsonMatches("{\"theString\":\"hi\", \"theInteger\": 42 }"));
+    String json =
+        getResult(Middlewares.autoSerialize(serializationDelegate)).payload().get().utf8();
+    assertThat(json, equalToIgnoringWhiteSpace("{\"theString\":\"hi\",\"theInteger\":42}"));
   }
 
   @Test

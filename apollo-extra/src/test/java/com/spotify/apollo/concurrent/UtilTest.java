@@ -10,12 +10,13 @@ import org.junit.rules.ExpectedException;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 
-import static com.spotify.test.Util.hasAncestor;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class UtilTest {
 
@@ -71,13 +72,18 @@ public class UtilTest {
   }
 
   @Test
-  public void shouldPropagateExceptionsToFuture() throws Exception {
+  public void shouldPropagateExceptionsToFuture() throws Throwable {
     ListenableFuture<Integer> converted = Util.asFuture(stage);
 
     NullPointerException expected = new NullPointerException("expected");
     stage.completeExceptionally(expected);
 
-    thrown.expect(hasAncestor(expected));
-    converted.get();
+    thrown.expect(is(expected));
+    try {
+      converted.get();
+    } catch (ExecutionException ee) {
+      throw ee.getCause();
+    }
+    fail("should throw");
   }
 }

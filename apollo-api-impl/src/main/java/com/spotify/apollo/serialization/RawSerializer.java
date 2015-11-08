@@ -4,8 +4,8 @@
 
 package com.spotify.apollo.serialization;
 
-import com.spotify.apollo.Request;
 import com.spotify.apollo.Payloads;
+import com.spotify.apollo.Request;
 import com.spotify.apollo.Serializer;
 import com.spotify.apollo.route.Middleware;
 
@@ -24,10 +24,6 @@ public class RawSerializer implements Serializer {
   }
 
   public static ByteString serialize(Object o) {
-    if (o instanceof com.google.protobuf.ByteString) {
-      return ByteString.of(((com.google.protobuf.ByteString) o).toByteArray());
-    }
-
     if (o instanceof ByteString) {
       return (ByteString) o;
     }
