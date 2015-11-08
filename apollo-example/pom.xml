@@ -28,11 +28,7 @@
     <dependencies>
         <dependency>
             <groupId>com.spotify</groupId>
-            <artifactId>apollo-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.spotify</groupId>
-            <artifactId>apollo-environment</artifactId>
+            <artifactId>apollo-standalone-service</artifactId>
         </dependency>
 
         <dependency>

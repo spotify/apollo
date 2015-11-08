@@ -100,8 +100,6 @@ Lists the endpoints of the service, with as much metadata as available.
       }
     }
 
-TODO: List publishers/subscribers? Would need topics.
-
 
 Config filtering
 ----------------

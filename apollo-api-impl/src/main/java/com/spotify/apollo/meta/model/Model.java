@@ -16,7 +16,6 @@ import io.norberg.automatter.AutoMatter;
 
 /**
  * TODO: document.
- * TODO: make a separate artifact with the meta model classes
  */
 public interface Model {
 

@@ -30,7 +30,7 @@ public static void init(Environment environment) {
 ```
 
 > Note that, for an Apollo-based service, you can see the routes defined for a service by querying
-`_meta/0/endpoints`.
+[`_meta/0/endpoints`](apollo-api-impl/src/main/java/com/spotify/apollo/meta/model).
 
 The apollo-api library uses several Java mechanisms, including classes and method references,
 to help you define your request/reply handlers. You can specify how responses should be serialized

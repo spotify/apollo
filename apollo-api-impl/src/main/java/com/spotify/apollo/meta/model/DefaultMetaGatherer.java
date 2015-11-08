@@ -77,7 +77,8 @@ public class DefaultMetaGatherer implements MetaGatherer {
       if (!ConfigFilter.metaConfigEnabled(config)) {
         String disableMessage =
             "enable by adding '\"_meta\": { \"expose-config\": true },' to root level service "
-            + "config. See meta/model/README.md#config"; // TODO github link
+            + "config. See https://github.com/spotify/apollo/tree/master/apollo-api-impl"
+            + "/src/main/java/com/spotify/apollo/meta/model";
         return parseMap(singletonMap("disabled", disableMessage));
       } else {
         Set<String> filter = ConfigFilter.configFilter(config);

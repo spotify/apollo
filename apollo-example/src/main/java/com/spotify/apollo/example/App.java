@@ -3,6 +3,7 @@ package com.spotify.apollo.example;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.core.Services;
+import com.spotify.apollo.http.server.HttpServerModule;
 import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestHandler;
 
@@ -17,13 +18,12 @@ final class App {
 
   public static void main(String[] args) throws IOException, InterruptedException {
     Service service = Services.usingName("test")
-        // TODO: add server here
+        .withModule(HttpServerModule.create())
         .build();
 
     try (Service.Instance instance = service.start(args)) {
       final RequestHandler handler = new Handler();
-//      HttpServerModule.server(instance).start(handler);
-      // TODO: start server here
+      HttpServerModule.server(instance).start(handler);
 
       LOG.info("Started service '{}'", service.getServiceName());
 
