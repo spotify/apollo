@@ -6,12 +6,12 @@ The `apollo-standalone` library is a small bundle of Apollo modules. It incorpor
 standard modules to make a complete service.
 
 Apollo-standalone gives you what you need to start your backend service. Here, for example, we tell
-`apollo-standalone` to boot the service defined by the method `Small::init`, call it `"small"` and
+`apollo-standalone` to boot a service named `"ping"`, defined by the function `Ping::init`, and
 handle any command line arguments passed in through the `args` variable:
 
 ```java
 public static void main(String[] args) throws LoadingException {
-  StandaloneService.boot(Small::init, "small", args);
+  StandaloneService.boot(Ping::init, "ping", args);
 }
 ```
 
@@ -19,18 +19,19 @@ Apollo-standalone also provides features that simplify the:
 - using http clients for sending requests to other services
 - configuring logging?
 
-The [StandaloneService#builder]( https://ghe.spotify.net/apollo/opensourceapollo/StandaloneService.java)
+The [StandaloneService#builder](src/main/java/com/spotify/apollo/standalone/StandaloneService.java)
 method is a good summary of the modules you get in the bundle. You can find documentation for each
-module in its respective folder. The documentation includes the configuration keys for
-HTTP Server.
+module in its respective [folder](../modules).
 
 Minimal project skeleton
 ========================
 
-The code examples are for a service called `ping` # FIXME include ping in opensource-apollo?
+### FIXME include ping in opensource-apollo?
+
+The code examples are for a service called `ping`
 ([ghe:tools/ping](https://ghe.spotify.net/tools/ping)).
 
-# TODO include opensource cookiecutter skeleton?
+### TODO include opensource cookiecutter skeleton?
 There's also a project template that you can use to spawn a new repository from:
 ([ghe:skeletons/simple-apollo-standalone](https://ghe.spotify.net/skeletons/simple-apollo-standalone)).
 
@@ -42,12 +43,13 @@ There's also a project template that you can use to spawn a new repository from:
     └── main/
         ├── java/
         │   └── com/
-        │       └── spotify/
-        │           └── ping/
-        │               └── Ping.java
+        │       └── example/
+        │           └── Ping.java
         └── resources/
             └── ping.conf
 ```
+
+### FIXME use apollo-bom
 
 `./pom.xml`
 ```xml
@@ -58,14 +60,14 @@ There's also a project template that you can use to spawn a new repository from:
     <artifactId>ping</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <parent> # FIXME use apollo-bom
+    <parent>
         <groupId>com.spotify</groupId>
         <artifactId>apollo-standalone</artifactId>
         <version>1.0.0</version>
     </parent>
 
     <properties>
-        <apollo.runner>com.spotify.ping.Ping</apollo.runner>
+        <apollo.runner>com.example.Ping</apollo.runner>
     </properties>
 </project>
 ```
@@ -77,9 +79,9 @@ http.server.port = 8080
 http.server.port = ${?HTTP_PORT}
 ```
 
-`./src/main/java/com/spotify/ping/Ping.java`
+`./src/main/java/com/example/Ping.java`
 ```java
-package com.spotify.ping;
+package com.example;
 
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Environment;
@@ -108,19 +110,11 @@ public final class Ping {
    */
   static void init(Environment environment) {
     environment.routingEngine()
-        .registerRoute(Route.sync("GET", "/", requestContext -> "hello world"));
+        .registerRoute(Route.sync("GET", "/ping", requestContext -> "pong"));
   }
 }
 ```
 
-Running in intellij
-===================
-Create a run configuration for ServiceRunner.java and make sure you give it the `run <pod>` program
-arguments.
-
+Compile and Run
+===============
 TBW
-
-
-Deployment
-==========
-You can deploy Apollo Standalone application using a docker container, or just run it... # TODO TBW
