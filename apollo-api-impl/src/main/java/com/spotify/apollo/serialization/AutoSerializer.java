@@ -5,7 +5,6 @@
 package com.spotify.apollo.serialization;
 
 import com.spotify.apollo.Payloads;
-
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Serializer;
 import com.spotify.apollo.route.Middleware;
@@ -31,12 +30,8 @@ public class AutoSerializer implements Serializer {
       return StringSerializer.serialize(o.toString());
     }
 
-    if (o instanceof com.google.protobuf.ByteString || o instanceof byte[]) {
+    if (o instanceof byte[]) {
       return RawSerializer.serialize(o);
-    }
-
-    if (o instanceof com.google.protobuf.Message) {
-      return ProtobufSerializer.serialize(o);
     }
 
     return JsonSerializer.serialize(o);
