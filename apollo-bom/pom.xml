@@ -11,6 +11,9 @@
     <packaging>pom</packaging>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
         <cucumber.version>1.2.4</cucumber.version>
         <auto-matter.version>0.11.0</auto-matter.version>
     </properties>
