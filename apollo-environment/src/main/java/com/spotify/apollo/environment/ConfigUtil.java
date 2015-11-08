@@ -5,7 +5,7 @@ import com.typesafe.config.Config;
 import java.util.Optional;
 
 /**
- * TODO: document!
+ * Helper functions for reading keys as {@link Optional} values.
  */
 public final class ConfigUtil {
   private ConfigUtil() {}

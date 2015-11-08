@@ -20,17 +20,6 @@ import static com.spotify.apollo.route.Route.DocString.doc;
  *
  * If the handler returns a Response apollo will unwrap it and use the extra information that can be
  * specified, like headers, and reply with the given status code and serializeed payload if it exists.
- *
- * todo: notes {@code
- *    List<Routes<AsyncHandler<Response<String>>>> does not work with mixed type arg endpoints
- *    => one has to use a variant declaration of routes, which in turn causes problems with
- *    middleware
- *
- *    Predicate on Response changes
- *    => conditional building instead of re-assignments inside if-blocks
- * }
- *
- * todo: document
  */
 public interface Route<H> {
 
@@ -68,7 +57,6 @@ public interface Route<H> {
       K handler,
       @Nullable DocString docString);
 
-  // TODO: this is tied to implementation; should ideally not have it here
   static <H> Route<H> create(
       String method,
       String uri,
@@ -94,24 +82,14 @@ public interface Route<H> {
     return create(method, uri, m.apply(handler));
   }
 
-  // TODO: this should possibly return something else than Route<AsyncHandler<T>>, so as to make it
-  // clearer that the 'async' in the name refers to the type of the handler parameter, rather than
-  // the return type
   static <T> Route<AsyncHandler<T>> async(String method, String uri, AsyncHandler<T> handler) {
     return create(method, uri, handler);
   }
 
-  // TODO: this should possibly return something else than Route<AsyncHandler<T>>, so as to make it
-  // clearer that the 'sync' in the name refers to the type of the handler parameter, rather than
-  // the return type. That probably comes with other problems, so doesn't feel like it's really a
-  // good idea.
   static <T> Route<AsyncHandler<T>> sync(String method, String uri, SyncHandler<T> handler) {
     return create(method, uri, handler).withMiddleware(Middleware::syncToAsync);
   }
 
-  // TODO: this should possibly return something else than Route<AsyncHandler<T>>, so as to make it
-  // clearer that the 'future' in the name refers to the type of the handler parameter, rather than
-  // the return type
   static <T> Route<AsyncHandler<T>> future(String method, String uri,
                                            ListenableFutureHandler<T> handler) {
     return create(method, uri, handler).withMiddleware(Middleware::guavaToAsync);

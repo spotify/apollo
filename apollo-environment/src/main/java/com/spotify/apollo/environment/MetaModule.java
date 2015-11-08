@@ -18,7 +18,7 @@ import java.io.IOException;
 import javax.inject.Singleton;
 
 /**
- * TODO: document.
+ * Module for setting up service metadata collection objects.
  */
 class MetaModule extends AbstractModule {
 

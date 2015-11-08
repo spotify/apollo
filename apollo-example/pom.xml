@@ -2,18 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.spotify</groupId>
-        <artifactId>root</artifactId>
-        <version>1</version>
-    </parent>
-
     <name>Spotify Apollo Example App</name>
     <description>
         Used both as examples of how a minimal apollo-core and an apollo-standalone-service would
         look, but also used to verify that the enforcer plugin is happy with the versions that
         those dependencies transitively bring in.
     </description>
+    <groupId>com.spotify</groupId>
     <artifactId>apollo-example</artifactId>
     <version>1.0.0-rc3-foss-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -33,11 +28,7 @@
     <dependencies>
         <dependency>
             <groupId>com.spotify</groupId>
-            <artifactId>apollo-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.spotify</groupId>
-            <artifactId>apollo-environment</artifactId>
+            <artifactId>apollo-standalone-service</artifactId>
         </dependency>
 
         <dependency>
@@ -62,9 +53,8 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>1.2</version>
+                <version>1.4.1</version>
                 <executions>
                     <execution>
                         <id>enforce</id>
@@ -82,6 +72,14 @@
 
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <compilerArgs>
+                        <compilerArg>-Xlint:all</compilerArg>
+                    </compilerArgs>
+                </configuration>
             </plugin>
         </plugins>
     </build>

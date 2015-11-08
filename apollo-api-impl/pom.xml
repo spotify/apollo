@@ -23,10 +23,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.spotify</groupId>
-            <artifactId>proto2json</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.norberg</groupId>
             <artifactId>auto-matter-jackson</artifactId>
         </dependency>
@@ -77,11 +73,6 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.spotify</groupId>
-            <artifactId>test-util</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -26,29 +26,6 @@ import static java.util.concurrent.CompletableFuture.completedFuture;
 /**
  * A service implemented using the things that currently represent the 'blessed path', or the
  * latest-and-greatest version of the API.
- *
- * DONE:
- * - pick one of annotations or programmatic routes? probably want to keep supporting both.
- *   => picked programmatic only
- * - clean up and/or remove RequestContext. Maybe it should be RequestScope and include the message?
- *   => keeping it and calling it RequestContext for now.
- * - create Response API
- * - change Invokable to return Response
- * - define Status/StatusType/Family hierarchy with overrides for reason phrase
- * - implement Response
- * - consider changing Invokable to 'inline' InvokeArgs?
- * - figure out a way to handle default values for things like serialization:
- *   * maybe a toggle for the Environment?
- *   * maybe a new interface that something like the RoutesClass below could implement? That way,
- *     you could set a default for a group of related routes/invokables.
- *   * maybe as a sub-interface of Invokable? That way, people could let their handlers extend some
- *     app-specific class that would set the serializer.
- *   * maybe as an optional argument to the Route? That would sort of be hard to do DRY.
- * - Consider replacing RouteProvider with Iterable<Route>
- *
- * TODO:
- * - A more complex example of how things should best be done (grouping related resources into
- *   a RouteProvider class, etc.)
  */
 public class BlessedPathService implements AppInit {
 

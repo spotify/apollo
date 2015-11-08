@@ -50,10 +50,5 @@
       <artifactId>mockserver-netty</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>com.spotify</groupId>
-      <artifactId>apollo-test</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 </project>

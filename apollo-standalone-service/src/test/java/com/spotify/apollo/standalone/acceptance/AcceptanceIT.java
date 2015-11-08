@@ -19,6 +19,4 @@ public class AcceptanceIT {
   public static synchronized void start() throws Exception {
     log.info("AcceptanceIT start()");
   }
-
-
 }

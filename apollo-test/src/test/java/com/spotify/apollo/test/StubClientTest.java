@@ -22,11 +22,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 
 import okio.ByteString;
 
 import static com.spotify.apollo.test.unit.StatusTypeMatchers.withCode;
-import static com.spotify.test.Util.hasCause;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.stream.Collectors.toSet;
 import static okio.ByteString.encodeUtf8;
@@ -205,15 +205,20 @@ public class StubClientTest {
   }
 
   @Test
-  public void shouldClearSetupRequestsOnClear() throws Exception {
+  public void shouldClearSetupRequestsOnClear() throws Throwable {
     stubClient.respond(Response.forPayload(encodeUtf8("Hello World"))).to("http://ping");
 
     stubClient.clear();
 
     CompletionStage<String> future = getString("http://ping");
 
-    exception.expect(hasCause(isA(StubClient.NoMatchingResponseFoundException.class)));
-    future.toCompletableFuture().get();
+    exception.expect(isA(StubClient.NoMatchingResponseFoundException.class));
+    try {
+      future.toCompletableFuture().get();
+    } catch (ExecutionException ee) {
+      throw ee.getCause();
+    }
+    fail("should throw");
   }
 
   @Test
