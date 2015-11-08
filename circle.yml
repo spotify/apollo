@@ -7,3 +7,8 @@ dependencies:
   # our best option (that I know of) is to just do a compile
   override:
     - mvn --fail-never dependency:go-offline compiler:compile || true
+
+test:
+  post:
+    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
