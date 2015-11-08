@@ -17,11 +17,6 @@
             <groupId>com.spotify</groupId>
             <artifactId>apollo-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.squareup.okio</groupId>
-            <artifactId>okio</artifactId>
-            <scope>provided</scope>
-        </dependency>
 
         <dependency>
             <groupId>io.norberg</groupId>
