@@ -5,6 +5,7 @@
 package com.spotify.apollo.standalone;
 
 import com.spotify.apollo.AppInit;
+import com.spotify.apollo.Client;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.core.Services;
@@ -26,12 +27,10 @@ import javax.inject.Provider;
 import static java.lang.String.format;
 
 /**
- * Support for different usages
- * FIXME update javadoc
+ * A standard setup for and apollo api service.
  *
- * If the application needs objects from custom modules to be injected - that is, things beyond
- * what is provided through {@link Environment}, a {@link Provider} can be used with a
- * {@link Inject} annotated constructor.
+ * The setup uses {@link HttpServerModule} for binding the api {@link RequestHandler} and
+ * {@link HttpClientModule} to add http request support to the service {@link Client}.
  */
 public final class StandaloneService {
 

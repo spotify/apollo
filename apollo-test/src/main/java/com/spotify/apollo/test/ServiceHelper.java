@@ -20,6 +20,7 @@ import com.spotify.apollo.core.Service;
 import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.ApolloConfig;
 import com.spotify.apollo.environment.ApolloEnvironmentModule;
+import com.spotify.apollo.http.client.HttpClientModule;
 import com.spotify.apollo.module.ApolloModule;
 import com.spotify.apollo.request.RequestHandler;
 import com.typesafe.config.Config;
@@ -459,7 +460,7 @@ public class ServiceHelper implements TestRule, Closeable {
         Service.Builder serviceBuilder = Services.usingName(serviceName)
             .usingModuleDiscovery(false)
             .withModule(ApolloEnvironmentModule.create())
-                // TODO: add http client here so non-stubbed requests can fall back to http calls
+            .withModule(HttpClientModule.create())
             .withModule(
                 ForwardingStubClientModule
                     .create(forwardNonStubbedRequests, stubClient.asRequestAwareClient()));

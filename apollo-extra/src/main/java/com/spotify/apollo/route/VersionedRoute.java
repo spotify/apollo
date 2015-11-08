@@ -42,7 +42,6 @@ public interface VersionedRoute {
   /**
    * Create a new com.spotify.apollo.route.VersionedRoute, which is valid from version 0.
    */
-  // TODO: consider not tying this to the (single) implementation we have
   static VersionedRoute of(Route<AsyncHandler<Response<ByteString>>> route) {
     return new AutoValue_VersionedRouteImpl(route, 0, Optional.empty());
   }
