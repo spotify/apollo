@@ -2,8 +2,8 @@ Apollo Standalone Service
 =========================
 
 The `apollo-standalone` library is a small bundle of Apollo modules. It incorporates both
-[apollo-api](apollo-api) and [apollo-core](apollo-core) and ties them together with several other
-standard modules to make a complete service.
+[apollo-api](../apollo-api) and [apollo-core](../apollo-core) and ties them together with several
+other standard modules to make a complete service.
 
 Apollo-standalone gives you what you need to start your backend service. Here, for example, we tell
 `apollo-standalone` to boot a service named `"ping"`, defined by the function `Ping::init`, and
@@ -15,7 +15,7 @@ public static void main(String[] args) throws LoadingException {
 }
 ```
 
-Apollo-standalone also provides features that simplify the:
+Apollo-standalone also provides features that simplify:
 - using http clients for sending requests to other services
 - configuring logging?
 
@@ -28,12 +28,10 @@ Minimal project skeleton
 
 ### FIXME include ping in opensource-apollo?
 
-The code examples are for a service called `ping`
-([ghe:tools/ping](https://ghe.spotify.net/tools/ping)).
+The code examples are for a service called `ping`.
 
 ### TODO include opensource cookiecutter skeleton?
-There's also a project template that you can use to spawn a new repository from:
-([ghe:skeletons/simple-apollo-standalone](https://ghe.spotify.net/skeletons/simple-apollo-standalone)).
+TODO: There's also a project template that you can use to spawn a new repository from:
 
 
 ```plain
@@ -60,7 +58,7 @@ There's also a project template that you can use to spawn a new repository from:
     <artifactId>ping</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <parent>
+    <parent> # FIXME no parent, only bom
         <groupId>com.spotify</groupId>
         <artifactId>apollo-standalone</artifactId>
         <version>1.0.0</version>
@@ -69,6 +67,25 @@ There's also a project template that you can use to spawn a new repository from:
     <properties>
         <apollo.runner>com.example.Ping</apollo.runner>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.spotify</groupId>
+                <artifactId>apollo-bom</artifactId>
+                <version>1.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+   <dependencies>
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>apollo-standalone-service</artifactId>
+        </dependency>
+   </dependencies>
 </project>
 ```
 
@@ -117,4 +134,8 @@ public final class Ping {
 
 Compile and Run
 ===============
-TBW
+TODO: TBW
+```
+mvn package
+java -jar target/app.jar -Dhttp.server.port=8080
+```

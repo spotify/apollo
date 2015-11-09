@@ -151,7 +151,7 @@ public class HttpServerModuleTest {
 
     try (Service.Instance instance = service.start("-Dhttp.server.port=9083",
                                                    "-Dhttp.server.useFirstPathSegmentAsAuthority=false",
-                                                   "-Dhttp.server.hermesAuthority=authooo")) {
+                                                   "-Dhttp.server.authority=authooo")) {
       TestHandler requestHandler = new TestHandler();
       HttpServerModule.server(instance).start(requestHandler);
 

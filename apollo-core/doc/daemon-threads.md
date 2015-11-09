@@ -48,11 +48,11 @@ class MyRunnable implements Runnable {
 ```
 
 This is not so bad if your background threads only do things like
-logging or setting flags on other threads. However, typically within
-Spotify, our threads do things like log reporting, connection pooling,
+logging or setting flags on other threads. However, you may need to
+do things like log reporting, connection pooling,
 and other such things that rely on sane shutdown behavior (closing
 files and sockets, sending "disconnect" messages, reporting leader
-re-election) and that shutdown behavior never happens if you use
+re-election), and that shutdown behavior never happens if you use
 daemon threads.
 
 Sources:

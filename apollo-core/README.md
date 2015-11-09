@@ -70,15 +70,13 @@ configuration in the situations when it's necessary).
 Service service = Services.usingName("test").build();
 
 try (Service.Instance instance = service.start(args)) {
-  instance.getConfig(); // Type-safe config
-  instance.getConfigNode(); // Spotify config node for compatibility
+  instance.getConfig(); // typesafe.config
 }
 ```
 
-The configuration is loaded from the usual Spotify locations.
-Additionally, Apollo Core adds support for overriding configuration keys
-using `-D` command-line options.  For example, `-Ddomain=sto3.spotify.net`
-sets the `domain` config key to `sto3.spotify.net`.
+Apollo Core adds support for overriding configuration keys
+using `-D` command-line options.  For example, `-Ddomain=example.org`
+sets the `domain` config key to `example.org`.
 
 Apollo Core also considers environment variables of the form
 `SPOTIFY_X_Y=ab`.  These are translated into configuration keys
@@ -88,6 +86,7 @@ supported.
 
 ### Logging configuration
 
+NOTE/TODO: a logging module is currently not included
 Apollo Core sets up logging for you.  Some supported ways of doing that:
 
 | Argument                 | Impact                             |
@@ -169,10 +168,11 @@ such as a HTTP server, Cassandra connections and so on.
 The module system is built on top of Google Guice.  This was deemed to
 be the most light-weight module system available for Java that still
 supports dynamic configuration (Dagger for example only supports
-static configuration).  Leto extends Guice by making modules
+static configuration).  Apollo Core extends Guice by making modules
 auto-loadable, and configuration-driven.
 
 Modules can be found under [modules](../modules):
 
-* [Http Server](../modules/jetty-http-server-jetty)
+* [Http Server](../modules/jetty-http-server)
+* [Http Client](../modules/okhttp-client)
 * [Slack integration](../modules/slack)

@@ -320,6 +320,7 @@ public class MiddlewaresTest {
   }
 
   private <T> AsyncHandler<T> serializationDelegate() {
+    //noinspection unchecked
     return (AsyncHandler<T>) serializationDelegate;
   }
 

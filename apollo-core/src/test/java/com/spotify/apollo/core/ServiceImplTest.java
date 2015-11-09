@@ -478,6 +478,7 @@ public class ServiceImplTest {
         .withRuntime(runtime)
         .build();
 
+    //noinspection EmptyTryBlock
     try (Service.Instance ignored = service.start()) {
       // Do nothing
     }
