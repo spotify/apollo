@@ -9,22 +9,25 @@ The environment will contain a `RoutingEngine` and a configurable, managed
 
 The main module is `ApolloEnvironmentModule` providing an `ApolloEnvironment` instance that can be
 used to initialize an `AppInit` instance, returning a `RequestHandler` to be used with any
-server module: [`http-server-jetty`](../modules/http-server-jetty).
+server module (for example the [`jetty-http-server`](../modules/jetty-http-server)).
 
 ## Configuration
 
 key | type | required | note
 --- | --- | --- | ---
-`apollo.backend` | string | optional | eg., `lon3`
+`apollo.backend` | string | optional | eg., `example.org`
 `apollo.logIncomingRequests` | boolean | optional | default `true`
 
 
 ## Example
 
+NOTE: [apollo-standalone-service](../apollo-standalone-service) provides a simpler way to start a
+service.
+
 ```java
 public static void main(String[] args) {
   final Service service = Services.usingName("ping")
-      .withModule(HttpServerModule.create()) // TODO jetty/netty?
+      .withModule(HttpServerModule.create())
       .withModule(ApolloEnvironmentModule.create())
       .build();
 
@@ -50,4 +53,4 @@ public static void main(String[] args) {
 ```
 
 For a runnable example, see [`ExampleService`]
-(src/test/java/com/spotify/apollo/example/ExampleService.java)
+(../apollo-standalone-service/src/test/java/com/spotify/apollo/standalone/example/ExampleService.java)

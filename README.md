@@ -30,11 +30,11 @@ public static void init(Environment environment) {
 ```
 
 > Note that, for an Apollo-based service, you can see the routes defined for a service by querying
-[`_meta/0/endpoints`](apollo-api-impl/src/main/java/com/spotify/apollo/meta/model).
+[`/_meta/0/endpoints`](apollo-api-impl/src/main/java/com/spotify/apollo/meta/model).
 
-The apollo-api library uses several Java mechanisms, including classes and method references,
-to help you define your request/reply handlers. You can specify how responses should be serialized
-(such as to JSON). Read more about this library in the [Apollo API Readme](apollo-api).
+The apollo-api library provides several ways to help you define your request/reply handlers.
+You can specify how responses should be serialized (such as JSON). Read more about
+this library in the [Apollo API Readme](apollo-api).
 
 ### Apollo Core
 The [apollo-core](apollo-core) library manages the lifecycle (loading, starting, and stopping) of
@@ -51,4 +51,20 @@ For releases see the [releases](https://github.com/spotify/apollo/releases) page
 
 ### Getting Started with Apollo
 The quickest way to get started with Apollo is by setting up an
-[apollo-standalone-service](apollo-standalone-service), and run it directly (`java -jar ...`).
+[apollo-standalone-service](apollo-standalone-service), and run it directly (`java -jar ...`)
+(or in a docker container).
+
+This is a complete service:
+```java
+public class MiniService {
+  public static void main(String[] args) throws LoadingException {
+    StandaloneService.boot(
+        env ->
+            env.routingEngine().registerRoute(
+                Route.sync("GET", "/hello", context -> "Hello Apollo")),
+        "mini-service", args);
+  }
+}
+```
+
+TODO: link to a full template pom for a standalone service
