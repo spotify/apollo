@@ -1,8 +1,8 @@
 # Routes
 
 There are basically two types of routes based on the type of request handler, synchronous and
-asynchronous. Each route, apart from defining basic information like method, uri and handler, can
-have a reply content type, a serializer and a documentation string.
+asynchronous. Each route defines basic information like method, uri, documentation string and
+handler.
 
 The two main methods for creating routes are:
 
