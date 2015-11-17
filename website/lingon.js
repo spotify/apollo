@@ -45,7 +45,7 @@ lingon.preProcessors.push('scss', function(context, globals) {
 lingon.postProcessors.push('scss', function() {
   return autoprefixer();
 });
-lingon.postProcessors.push('html', function() {
+lingon.postProcessors.push(['html', 'ejs'], function() {
   return [highlight(), unescapeQuot()];
 });
 
