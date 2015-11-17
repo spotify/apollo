@@ -48,7 +48,7 @@ public class MinimalAppTest {
         .toCompletableFuture().get()
         .statusCode();
 
-    assertThat(status.statusCode(), is(Status.INTERNAL_SERVER_ERROR.statusCode()));
+    assertThat(status.code(), is(Status.INTERNAL_SERVER_ERROR.code()));
   }
 
   @Test
@@ -60,6 +60,6 @@ public class MinimalAppTest {
         .toCompletableFuture().get()
         .statusCode();
 
-    assertThat(status.statusCode(), is(Status.INTERNAL_SERVER_ERROR.statusCode()));
+    assertThat(status.code(), is(Status.INTERNAL_SERVER_ERROR.code()));
   }
 }

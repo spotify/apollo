@@ -27,7 +27,7 @@ public class ResponseTest {
   static class CustomOK implements StatusType {
 
     @Override
-    public int statusCode() {
+    public int code() {
       return 200;
     }
 
