@@ -14,17 +14,4 @@ public interface TrackedOngoingRequest extends OngoingRequest {
    * request's endpoint handler.
    */
   void incrementDownstreamRequests();
-
-  /**
-   * Fails this request because of some exceptional cause. This should only be called if the normal
-   * endpoint handling flow is not able to execute properly.
-   *
-   * @param cause  The cause for failing this request
-   */
-  void fail(FailureCause cause);
-
-  enum FailureCause {
-    EXCEPTION,
-    TIMEOUT
-  }
 }
