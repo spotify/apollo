@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
-* TODO: document.
-*/
+ * Size limited gathering of metadata about a single endpoint.
+ */
 class EndpointInfoGatherer implements MetaGatherer.EndpointGatherer {
   private int sizeLimit;
   private Model.EndpointInfo endpointInfo = new Model.EndpointInfo();

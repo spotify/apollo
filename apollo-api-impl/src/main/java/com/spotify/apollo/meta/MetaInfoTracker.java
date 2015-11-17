@@ -56,7 +56,7 @@ public class MetaInfoTracker {
       endpointGatherer.addMethod(info.getRequestMethod());
       endpointGatherer.setDocstring(endpointDocString);
 
-      // TODO: find a solution
+      // see https://github.com/spotify/apollo/issues/13
 //      endpointGatherer.setResponseContentType(endpoint.getContentType());
 
       // query parameters are not available
