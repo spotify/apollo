@@ -140,27 +140,6 @@ public class ApolloEnvironmentModuleTest {
   }
 
   @Test
-  public void shouldGetDomainFromArgsIfCompatMode() throws Exception {
-    final AtomicReference<Environment> envReference = new AtomicReference<>();
-
-    final Service service = this.service
-        .apolloCompatibilityMode(true)
-        .build();
-
-    try (Service.Instance i = service.start("run", "my-domain")) {
-      final ApolloEnvironment environment = ApolloEnvironmentModule.environment(i);
-      final RequestHandler handler = environment.initialize(new EnvApp(envReference::set));
-      assertNotNull(handler);
-
-      final Environment e = envReference.get();
-      assertNotNull(e);
-      assertEquals("my-domain", e.domain());
-    } catch (IOException e) {
-      fail(e.getMessage());
-    }
-  }
-
-  @Test
   public void shouldUseRequestRunnableFactoryDecorator() throws Exception {
     final AtomicInteger counter = new AtomicInteger();
 
