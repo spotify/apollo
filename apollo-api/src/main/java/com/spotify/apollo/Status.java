@@ -78,7 +78,7 @@ public enum Status implements StatusType {
   }
 
   @Override
-  public int statusCode() {
+  public int code() {
     return statusCode;
   }
 
@@ -94,7 +94,7 @@ public enum Status implements StatusType {
 
   @Override
   public StatusType withReasonPhrase(String reasonPhrase) {
-    return WithReasonPhrase.create(statusCode(), reasonPhrase);
+    return WithReasonPhrase.create(code(), reasonPhrase);
   }
 
   public static Status existingFromStatusCode(int statusCode) {
@@ -119,7 +119,7 @@ public enum Status implements StatusType {
   @AutoValue
   public static abstract class WithReasonPhrase implements StatusType {
     @Override
-    public abstract int statusCode();
+    public abstract int code();
 
     @Override
     public abstract String reasonPhrase();
@@ -134,7 +134,7 @@ public enum Status implements StatusType {
 
     @Override
     public StatusType withReasonPhrase(String reasonPhrase) {
-      return create(statusCode(), reasonPhrase);
+      return create(code(), reasonPhrase);
     }
   }
 }

@@ -76,11 +76,11 @@ public class TrackedOngoingRequestImplTest {
 
   private Matcher<Response<ByteString>> hasStatus(StatusType status) {
     return new FeatureMatcher<Response<ByteString>, Integer>(
-        is(status.statusCode()), "status matches", "status") {
+        is(status.code()), "status matches", "status") {
 
       @Override
       protected Integer featureValueOf(Response<ByteString> actual) {
-        return actual.statusCode().statusCode();
+        return actual.statusCode().code();
       }
     };
   }

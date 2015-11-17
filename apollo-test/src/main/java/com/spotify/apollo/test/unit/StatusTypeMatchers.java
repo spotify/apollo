@@ -58,7 +58,7 @@ public final class StatusTypeMatchers {
     return new TypeSafeMatcher<StatusType>() {
       @Override
       protected boolean matchesSafely(StatusType item) {
-        return item.statusCode() == code;
+        return item.code() == code;
       }
 
       @Override
@@ -68,13 +68,13 @@ public final class StatusTypeMatchers {
 
       @Override
       protected void describeMismatchSafely(StatusType item, Description mismatchDescription) {
-        mismatchDescription.appendText("the status code was ").appendValue(item.statusCode());
+        mismatchDescription.appendText("the status code was ").appendValue(item.code());
       }
     };
   }
 
   /**
-   * Builds a matcher for {@link StatusType}s whose {@link StatusType#statusCode()} matches the
+   * Builds a matcher for {@link StatusType}s whose {@link StatusType#code()} matches the
    * specified {@link StatusType}'s status code. Reason phrases are not included in the comparison.
    *
    * @param code The StatusType whose code should match.
@@ -83,17 +83,17 @@ public final class StatusTypeMatchers {
     return new TypeSafeMatcher<StatusType>() {
       @Override
       protected boolean matchesSafely(StatusType item) {
-        return item.statusCode() == code.statusCode();
+        return item.code() == code.code();
       }
 
       @Override
       public void describeTo(Description description) {
-        description.appendText("a status type with status code equals to ").appendValue(code.statusCode());
+        description.appendText("a status type with status code equals to ").appendValue(code.code());
       }
 
       @Override
       protected void describeMismatchSafely(StatusType item, Description mismatchDescription) {
-        mismatchDescription.appendText("the status code was ").appendValue(item.statusCode());
+        mismatchDescription.appendText("the status code was ").appendValue(item.code());
       }
     };
   }

@@ -80,8 +80,8 @@ public class EndpointInvocationHandlerTest {
 
     verify(ongoingRequest).reply(messageArgumentCaptor.capture());
 
-    assertThat(messageArgumentCaptor.getValue().statusCode().statusCode(),
-               equalTo(INTERNAL_SERVER_ERROR.statusCode()));
+    assertThat(messageArgumentCaptor.getValue().statusCode().code(),
+               equalTo(INTERNAL_SERVER_ERROR.code()));
   }
 
   @Test

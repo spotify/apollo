@@ -60,7 +60,7 @@ public interface Response<T> {
   /**
    * Creates a {@link Response} with the given status code.
    *
-   * If {@code statusCode} is OK, this function will be equivalent to {@link #ok()}.
+   * If {@code code} is OK, this function will be equivalent to {@link #ok()}.
    *
    * @param statusCode  The status code
    * @param <T>         The response payload type

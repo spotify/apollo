@@ -122,7 +122,7 @@ class ApolloRequestHandler extends AbstractHandler {
       final HttpServletResponse httpResponse = (HttpServletResponse) asyncContext.getResponse();
 
       final StatusType status = response.statusCode();
-      httpResponse.setStatus(status.statusCode(), status.reasonPhrase());
+      httpResponse.setStatus(status.code(), status.reasonPhrase());
 
       response.headers().forEach(httpResponse::addHeader);
 

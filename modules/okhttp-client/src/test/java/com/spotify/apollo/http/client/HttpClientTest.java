@@ -116,7 +116,7 @@ public class HttpClientTest {
     return new TypeSafeMatcher<StatusType>() {
       @Override
       protected boolean matchesSafely(StatusType item) {
-        return item.statusCode() == code;
+        return item.code() == code;
       }
 
       @Override
@@ -126,7 +126,7 @@ public class HttpClientTest {
 
       @Override
       protected void describeMismatchSafely(StatusType item, Description mismatchDescription) {
-        mismatchDescription.appendText("the status code was ").appendValue(item.statusCode());
+        mismatchDescription.appendText("the status code was ").appendValue(item.code());
       }
     };
   }
