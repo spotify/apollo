@@ -6,7 +6,7 @@ package com.spotify.apollo.meta.model;
 import com.typesafe.config.Config;
 
 /**
- * TODO: document.
+ * Factory methods for creating metadata gatherers.
  */
 public final class Meta {
 

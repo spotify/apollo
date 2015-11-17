@@ -141,32 +141,6 @@ public class HttpServerModuleTest {
     return "http://localhost:" + port;
   }
 
-  /* FIXME: this might be useful as a way to populate the Request.service() field
-  @Test
-  public void shouldNotStripFirstPathSegmentIfAuthoritySet() throws Exception {
-    final Service service = Services.usingName("test")
-        .withModule(new HttpServerProviderTest.TestDependencies())
-        .withModule(HttpServerModule.create())
-        .build();
-
-    try (Service.Instance instance = service.start("-Dhttp.server.port=9083",
-                                                   "-Dhttp.server.useFirstPathSegmentAsAuthority=false",
-                                                   "-Dhttp.server.authority=authooo")) {
-      TestHandler requestHandler = new TestHandler();
-      HttpServerModule.server(instance).start(requestHandler);
-
-      OkHttpClient client = new OkHttpClient();
-
-      Call call = client.newCall(new Request.Builder().url("http://localhost:9083/foo").build());
-
-      Response response = call.execute();
-
-      assertThat(response.code(), equalTo(200));
-      assertThat(requestHandler.requests.size(), equalTo(1));
-      assertThat(requestHandler.requests.get(0).request().uri(), equalTo("http://authooo/foo"));
-    }
-  } */
-
   private static void assertCanConnect(int port) throws IOException {
     try (Socket localhost = new Socket("localhost", port)) {
       assertTrue(localhost.isConnected());
