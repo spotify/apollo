@@ -8,6 +8,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +24,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.util.concurrent.Futures.getUnchecked;
-import static com.spotify.apollo.request.TrackedOngoingRequest.FailureCause.TIMEOUT;
 
 public class RequestTracker implements Closeable {
 
@@ -84,7 +86,7 @@ public class RequestTracker implements Closeable {
     for (TrackedOngoingRequest id : requests) {
       final boolean removed = outstanding.remove(id);
       if (removed) {
-        id.fail(TIMEOUT);
+        id.reply(Response.forStatus(Status.SERVICE_UNAVAILABLE));
       }
     }
   }

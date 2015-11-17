@@ -1,11 +1,19 @@
 package com.spotify.apollo.request;
 
 import com.spotify.apollo.Request;
+import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
+import com.spotify.apollo.StatusType;
 
+import org.hamcrest.FeatureMatcher;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.spotify.apollo.request.TrackedOngoingRequest.FailureCause.TIMEOUT;
+import okio.ByteString;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,6 +50,17 @@ public class RequestTrackerTest {
     tracker.register(ongoingRequest);
     tracker.close();
 
-    verify(ongoingRequest).fail(TIMEOUT);
+    verify(ongoingRequest).reply(argThat(hasStatus(Status.SERVICE_UNAVAILABLE)));
+  }
+
+  private Matcher<Response<ByteString>> hasStatus(StatusType status) {
+    return new FeatureMatcher<Response<ByteString>, Integer>(
+        is(status.code()), "status matches", "status") {
+
+      @Override
+      protected Integer featureValueOf(Response<ByteString> actual) {
+        return actual.status().code();
+      }
+    };
   }
 }
