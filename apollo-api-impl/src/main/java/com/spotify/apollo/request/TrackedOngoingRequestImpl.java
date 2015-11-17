@@ -45,10 +45,7 @@ class TrackedOngoingRequestImpl
     if (removed) {
       super.reply(message);
     }
-    // TODO: how to log this?
-//    else {
-//      logRequest("DROPPED");
-//    }
+
     return removed;
   }
 }
