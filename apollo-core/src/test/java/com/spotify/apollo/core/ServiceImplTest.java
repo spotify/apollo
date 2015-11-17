@@ -64,6 +64,16 @@ public class ServiceImplTest {
   }
 
   @Test
+  public void testEnvConfigCustomPrefix() throws Exception {
+    Service service = ServiceImpl.builder("test").withEnvVarPrefix("horse").build();
+
+    try (Service.Instance instance = service
+        .start(new String[]{}, ImmutableMap.of("horse_A_B", "value"))) {
+      assertThat(instance.getConfig().getString("a.b"), is("value"));
+    }
+  }
+
+  @Test
   public void testEnvConfigWithLeadingUnderscores() throws Exception {
     Service service = ServiceImpl.builder("test").build();
 
