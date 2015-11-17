@@ -46,7 +46,7 @@ public class JsonSerializerMiddlewaresTest {
         .handler().invoke(null).toCompletableFuture().get();
 
     checkPayloadAndContentType(response);
-    assertThat(response.statusCode(), equalTo(Status.CONFLICT));
+    assertThat(response.status(), equalTo(Status.CONFLICT));
   }
 
   @Test
@@ -68,6 +68,6 @@ public class JsonSerializerMiddlewaresTest {
         .invoke(null).toCompletableFuture().get();
 
     checkPayloadAndContentType(response);
-    assertThat(response.statusCode(), equalTo(Status.CONFLICT));
+    assertThat(response.status(), equalTo(Status.CONFLICT));
   }
 }

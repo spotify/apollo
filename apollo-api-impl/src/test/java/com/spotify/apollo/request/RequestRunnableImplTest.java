@@ -89,7 +89,7 @@ public class RequestRunnableImplTest {
 
     verify(ongoingRequest).reply(responseArgumentCaptor.capture());
     Response<ByteString> reply = responseArgumentCaptor.getValue();
-    assertEquals(reply.statusCode(), Status.METHOD_NOT_ALLOWED);
+    assertEquals(reply.status(), Status.METHOD_NOT_ALLOWED);
     assertEquals(reply.headers(), Collections.singletonMap("Allow", "OPTIONS, POST"));
   }
 
@@ -104,7 +104,7 @@ public class RequestRunnableImplTest {
 
     verify(ongoingRequest).reply(responseArgumentCaptor.capture());
     Response<ByteString> response = responseArgumentCaptor.getValue();
-    assertThat(response.statusCode(), is(Status.NO_CONTENT));
+    assertThat(response.status(), is(Status.NO_CONTENT));
     assertThat(response.headers(), is(Collections.singletonMap("Allow", "OPTIONS, POST")));
   }
 

@@ -51,7 +51,7 @@ public class HttpClientTest {
         .send(request, empty())
         .toCompletableFuture().get();
 
-    assertThat(response.statusCode(), withCode(204));
+    assertThat(response.status(), withCode(204));
     assertThat(response.payload(), is(empty()));
   }
 
@@ -83,7 +83,7 @@ public class HttpClientTest {
         .send(request, empty())
         .toCompletableFuture().get();
 
-    assertThat(response.statusCode(), withCode(200));
+    assertThat(response.status(), withCode(200));
     assertThat(response.headers(), allOf(
                    hasEntry("Content-Type", "application/x-spotify-location"),
                    hasEntry("Vary", "Content-Type, Accept")
@@ -108,7 +108,7 @@ public class HttpClientTest {
         .send(request, empty())
         .toCompletableFuture().get();
 
-    assertThat(response.statusCode(), withCode(299));
+    assertThat(response.status(), withCode(299));
     assertThat(response.payload(), is(empty()));
   }
 
@@ -116,7 +116,7 @@ public class HttpClientTest {
     return new TypeSafeMatcher<StatusType>() {
       @Override
       protected boolean matchesSafely(StatusType item) {
-        return item.statusCode() == code;
+        return item.code() == code;
       }
 
       @Override
@@ -126,7 +126,7 @@ public class HttpClientTest {
 
       @Override
       protected void describeMismatchSafely(StatusType item, Description mismatchDescription) {
-        mismatchDescription.appendText("the status code was ").appendValue(item.statusCode());
+        mismatchDescription.appendText("the status code was ").appendValue(item.code());
       }
     };
   }

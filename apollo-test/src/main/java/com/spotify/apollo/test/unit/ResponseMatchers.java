@@ -152,7 +152,7 @@ public final class ResponseMatchers {
                                                        "status") {
       @Override
       protected StatusType featureValueOf(Response<T> item) {
-        return item.statusCode();
+        return item.status();
       }
     };
   }

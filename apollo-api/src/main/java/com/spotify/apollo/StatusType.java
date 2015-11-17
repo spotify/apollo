@@ -5,12 +5,12 @@ package com.spotify.apollo;
  */
 public interface StatusType {
 
-  int statusCode();
+  int code();
   String reasonPhrase();
   Family family();
 
   /**
-   * Returns a StatusType instance with the same statusCode value as the current instance, but
+   * Returns a StatusType instance with the same code value as the current instance, but
    * using the supplied reasonPhrase. The returned instance may be the same as object the method
    * is invoked on, or different.
    *

@@ -52,7 +52,7 @@ final class MinimalApp {
 
     return orderRequest.thenApply(
         orderResponse -> {
-          if (orderResponse.statusCode() != Status.OK) {
+          if (orderResponse.status() != Status.OK) {
             return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
           }
 
