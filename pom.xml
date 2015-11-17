@@ -108,7 +108,7 @@
                     </configuration>
                     <executions>
                         <execution>
-                            <id>first</id>
+                            <id>check-file-header</id>
                             <goals>
                                 <goal>check-file-header</goal>
                             </goals>
