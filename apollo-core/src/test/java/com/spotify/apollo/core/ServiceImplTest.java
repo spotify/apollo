@@ -336,48 +336,6 @@ public class ServiceImplTest {
   }
 
   @Test
-  public void testApolloCompatMode() throws Exception {
-    Service service = ServiceImpl.builder("test")
-        .apolloCompatibilityMode(true)
-        .build();
-
-    try (Service.Instance instance = service.start("run", "shared.cloud", "-Dkey=value")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getString("apollo.command"), is("run"));
-      assertThat(instance.getConfig().getString("apollo.backend"), is("shared.cloud"));
-      assertThat(instance.getConfig().getString("key"), is("value"));
-    }
-  }
-
-  @Test
-  public void testApolloCompatModeArgsAreOptional() throws Exception {
-    Service service = ServiceImpl.builder("test")
-        .apolloCompatibilityMode(true)
-        .build();
-
-    try (Service.Instance instance = service.start("-Dkey=value")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getString("apollo.command"), is("run"));
-      assertThat(instance.getConfig().getString("apollo.backend"), is(""));
-      assertThat(instance.getConfig().getString("key"), is("value"));
-    }
-  }
-
-  @Test
-  public void testApolloCompatModeArgsArePariallyOptional() throws Exception {
-    Service service = ServiceImpl.builder("test")
-        .apolloCompatibilityMode(true)
-        .build();
-
-    try (Service.Instance instance = service.start("other-command", "-Dkey=value")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getString("apollo.command"), is("other-command"));
-      assertThat(instance.getConfig().getString("apollo.backend"), is(""));
-      assertThat(instance.getConfig().getString("key"), is("value"));
-    }
-  }
-
-  @Test
   public void testUnresolvedMixed() throws Exception {
     // Issue #8
     Service service = ServiceImpl.builder("test").build();

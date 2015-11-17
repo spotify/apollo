@@ -101,18 +101,6 @@ public interface Service {
     Builder usingModuleDiscovery(boolean moduleDiscovery);
 
     /**
-     * <p>Enable/disable Apollo Compatibility Mode®.</p>
-     *
-     * <p>Adds some extra command line argument preprocessing to support apollo-standalone. This
-     * means that the two first command line arguments will be removed and put in the config under
-     * the 'apollo' key.</p>
-     *
-     * @param enabled {@code true} to enable Apollo Compatibility Mode®, {@code false} otherwise.
-     * @return This builder.
-     */
-    Builder apolloCompatibilityMode(boolean enabled);
-
-    /**
      * Enable/disable whether the thread calling {@link Service#start(String...)} will be
      * interrupted when the application is requested to shut down.  The default is to not interrupt
      * the thread.
