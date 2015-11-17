@@ -12,6 +12,7 @@ import com.typesafe.config.Config;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A service that is controlled by Apollo.
@@ -132,6 +133,18 @@ public interface Service {
      * @return This builder.
      */
     Builder withEnvVarPrefix(String prefix);
+
+    /**
+     * Set the timeout for how long Apollo will wait for the service to clean itself up upon
+     * shutdown.  Apollo will keep a reaper thread running as long as there are shutdown operations
+     * pending.  After the timeout has elapsed, the reaper thread will die, but other threads might
+     * still linger.
+     *
+     * @param timeout The timeout value.
+     * @param unit    The time unit of the timeout value.
+     * @return This builder.
+     */
+    Builder withWatchdogTimeout(long timeout, TimeUnit unit);
 
     /**
      * The Java runtime to use when constructing service instances.  This is only respected by

@@ -65,15 +65,20 @@ class ServiceImpl implements Service {
   private final String serviceName;
   private final ImmutableSet<ApolloModule> modules;
   private final String envVarPrefix;
+  private final long watchdogTimeout;
+  private final TimeUnit watchdogTimeoutUnit;
   private final Runtime runtime;
   private final boolean moduleDiscovery;
   private final boolean shutdownInterrupt;
   private final boolean cliHelp;
 
   ServiceImpl(
-      String serviceName, ImmutableSet<ApolloModule> modules, String envVarPrefix, Runtime runtime,
+      String serviceName, ImmutableSet<ApolloModule> modules, String envVarPrefix,
+      long watchdogTimeout, TimeUnit watchdogTimeoutUnit, Runtime runtime,
       boolean moduleDiscovery, boolean shutdownInterrupt, boolean cliHelp) {
     this.envVarPrefix = envVarPrefix;
+    this.watchdogTimeout = watchdogTimeout;
+    this.watchdogTimeoutUnit = watchdogTimeoutUnit;
     this.serviceName = Objects.requireNonNull(serviceName);
     this.modules = Objects.requireNonNull(modules);
     this.runtime = runtime;
@@ -115,7 +120,8 @@ class ServiceImpl implements Service {
 
     // If the user presses Ctrl+C at any point, ensure safe clean-up
     runtime.addShutdownHook(
-        new Thread(new Reaper(signaller, started, stopped), serviceName + "-reaper"));
+        new Thread(new Reaper(signaller, started, stopped, watchdogTimeout, watchdogTimeoutUnit),
+                   serviceName + "-reaper"));
 
     try {
       final ImmutableList.Builder<String> unprocessedArgsBuilder = ImmutableList.builder();
@@ -393,7 +399,8 @@ class ServiceImpl implements Service {
 
   static Builder builder(String serviceName) {
     return new BuilderImpl(
-        serviceName, ImmutableSet.builder(), "SPOTIFY", Runtime.getRuntime(), false, false, true);
+        serviceName, ImmutableSet.builder(), "SPOTIFY", 1, TimeUnit.MINUTES, Runtime.getRuntime(),
+        false, false, true);
   }
 
   static class BuilderImpl implements Builder {
@@ -401,6 +408,8 @@ class ServiceImpl implements Service {
     private final String serviceName;
     private final ImmutableSet.Builder<ApolloModule> moduleBuilder;
     private String envVarPrefix;
+    private long watchdogTimeout;
+    private TimeUnit watchdogTimeoutUnit;
     private Runtime runtime;
     private boolean moduleDiscovery;
     private boolean shutdownInterrupt;
@@ -410,13 +419,15 @@ class ServiceImpl implements Service {
         String serviceName,
         ImmutableSet.Builder<ApolloModule> moduleBuilder,
         String envVarPrefix,
-        Runtime runtime,
+        long watchdogTimeout, TimeUnit watchdogTimeoutUnit, Runtime runtime,
         boolean moduleDiscovery,
         boolean shutdownInterrupt,
         boolean cliHelp) {
       this.serviceName = Objects.requireNonNull(serviceName);
       this.moduleBuilder = moduleBuilder;
       this.envVarPrefix = envVarPrefix;
+      this.watchdogTimeout = watchdogTimeout;
+      this.watchdogTimeoutUnit = watchdogTimeoutUnit;
       this.runtime = runtime;
       this.moduleDiscovery = moduleDiscovery;
       this.shutdownInterrupt = shutdownInterrupt;
@@ -442,6 +453,11 @@ class ServiceImpl implements Service {
     }
 
     @Override
+    public Builder withWatchdogTimeout(long timeout, TimeUnit unit) {
+      return null;
+    }
+
+    @Override
     public Builder withRuntime(Runtime runtime) {
       this.runtime = runtime;
       return this;
@@ -462,7 +478,8 @@ class ServiceImpl implements Service {
     @Override
     public Service build() {
       return new ServiceImpl(
-          serviceName, moduleBuilder.build(), envVarPrefix, runtime, moduleDiscovery, shutdownInterrupt, cliHelp);
+          serviceName, moduleBuilder.build(), envVarPrefix, watchdogTimeout, watchdogTimeoutUnit,
+          runtime, moduleDiscovery, shutdownInterrupt, cliHelp);
     }
   }
 
@@ -506,11 +523,16 @@ class ServiceImpl implements Service {
     private final Signaller signaller;
     private final AtomicBoolean started;
     private final CountDownLatch stopped;
+    private final long watchdogTimeout;
+    private final TimeUnit watchdogTimeoutUnit;
 
-    public Reaper(Signaller signaller, AtomicBoolean started, CountDownLatch stopped) {
+    public Reaper(Signaller signaller, AtomicBoolean started, CountDownLatch stopped, long watchdogTimeout,
+                  TimeUnit watchdogTimeoutUnit) {
       this.signaller = signaller;
       this.started = started;
       this.stopped = stopped;
+      this.watchdogTimeout = watchdogTimeout;
+      this.watchdogTimeoutUnit = watchdogTimeoutUnit;
     }
 
     @Override
@@ -518,10 +540,9 @@ class ServiceImpl implements Service {
       if (started.get()) {
         signaller.signalShutdown();
         try {
-          // The service gets one minute to shut down.  We can't wait forever here because that
+          // The service gets some time to shut down.  We can't wait forever here because that
           // will dead-lock the JVM, forcing us to SIGKILL
-          // this should be configurable, perhaps
-          stopped.await(1, TimeUnit.MINUTES);
+          stopped.await(watchdogTimeout, watchdogTimeoutUnit);
         } catch (InterruptedException e) {
           LOG.error("Interrupted while doing Apollo shutdown", e);
           Thread.currentThread().interrupt();
