@@ -5,7 +5,6 @@
 package com.spotify.apollo.request;
 
 import com.spotify.apollo.Response;
-import com.spotify.apollo.Status;
 
 import okio.ByteString;
 
@@ -39,18 +38,6 @@ class TrackedOngoingRequestImpl
 
   @Override
   public void incrementDownstreamRequests() {
-  }
-
-  /**
-   * Fail this request and reply 500 Server Error.
-   */
-  @Override
-  public void fail(FailureCause cause) {
-    final boolean sent = doReply(Response.forStatus(Status.INTERNAL_SERVER_ERROR));
-    // TODO: how to log this?
-//    if (!sent) {
-//      logRequest(cause);
-//    }
   }
 
   private boolean doReply(Response<ByteString> message) {
