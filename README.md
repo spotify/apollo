@@ -4,18 +4,18 @@
 Apollo
 ======
 
-Apollo is a set of Java libraries that we use at Spotify when writing microservices. Apollo includes an internal http server, making it easy to implement a restful API service. There are three main libraries in Apollo:
+Apollo is a set of Java libraries that we use at Spotify when writing microservices. Apollo
+includes an internal http server, making it easy to implement a restful API service. There are
+three main libraries in Apollo:
 
-* [apollo-standalone](apollo-standalone-service)
+* [apollo-http-service](apollo-http-service)
 * [apollo-api](apollo-api)
 * [apollo-core](apollo-core)
 
-### Apollo Standalone
-The [apollo-standalone](apollo-standalone-service) library is a standardized bundle of Apollo
-modules. It incorporates both apollo-api and apollo-core and ties them together with several other
-standard modules to get a standard api service using http for incoming and outgoing communication.
-
-### TODO apollo-standalone-service -> apollo-http-standalone-app?
+### Apollo HTTP Service
+The [apollo-http-service](apollo-http-service) library is a standardized assembly of Apollo
+modules. It incorporates both apollo-api and apollo-core and ties them together with other
+modules to get a standard api service using http for incoming and outgoing communication.
 
 ### Apollo API
 The [apollo-api](apollo-api) library is the Apollo library you are most likely to interact with.
@@ -52,7 +52,7 @@ For releases see the [releases](https://github.com/spotify/apollo/releases) page
 
 ### Getting Started with Apollo
 The quickest way to get started with Apollo is by setting up an
-[apollo-standalone-service](apollo-standalone-service), and run it directly (`java -jar ...`)
+[apollo-http-service](apollo-http-service), and run it directly (`java -jar ...`)
 (or in a docker container).
 
 This is a complete service:
@@ -67,5 +67,3 @@ public class MiniService {
   }
 }
 ```
-
-TODO: link to a full template pom for a standalone service

@@ -21,9 +21,6 @@ key | type | required | note
 
 ## Example
 
-NOTE: [apollo-standalone-service](../apollo-standalone-service) provides a simpler way to start a
-service.
-
 ```java
 public static void main(String[] args) {
   final Service service = Services.usingName("ping")
@@ -52,5 +49,5 @@ public static void main(String[] args) {
 }
 ```
 
-For a runnable example, see [`ExampleService`]
-(../apollo-standalone-service/src/test/java/com/spotify/apollo/standalone/example/ExampleService.java)
+For a runnable example, see [`MinimalRunner`]
+(../apollo-http-service/src/test/java/com/spotify/apollo/httpservice/MinimalRunner.java)

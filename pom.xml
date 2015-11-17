@@ -20,12 +20,17 @@
         <module>apollo-route</module>
         <module>apollo-test</module>
         <module>apollo-extra</module>
-        <module>apollo-standalone-service</module>
+        <module>apollo-http-service</module>
 
         <module>modules/slack</module>
         <module>modules/jetty-http-server</module>
         <module>modules/okhttp-client</module>
     </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
 
     <scm>
         <url>https://github.com/spotify/apollo</url>

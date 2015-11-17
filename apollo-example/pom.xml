@@ -4,7 +4,7 @@
 
     <name>Spotify Apollo Example App</name>
     <description>
-        Used both as examples of how a minimal apollo-core and an apollo-standalone-service would
+        Used both as examples of how a minimal apollo-core and an apollo-http-service would
         look, but also used to verify that the enforcer plugin is happy with the versions that
         those dependencies transitively bring in.
     </description>
@@ -28,7 +28,7 @@
     <dependencies>
         <dependency>
             <groupId>com.spotify</groupId>
-            <artifactId>apollo-standalone-service</artifactId>
+            <artifactId>apollo-http-service</artifactId>
         </dependency>
 
         <dependency>
