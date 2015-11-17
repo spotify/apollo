@@ -92,7 +92,7 @@ public class StubClientTest {
     stubClient.respond(Response.of(Status.IM_A_TEAPOT, encodeUtf8("Hello World"))).to("http://ping");
 
     Response<ByteString> response = getResponseFromPing().toCompletableFuture().get();
-    assertThat(response.statusCode(), is(Status.IM_A_TEAPOT));
+    assertThat(response.status(), is(Status.IM_A_TEAPOT));
   }
 
   @Test
@@ -100,7 +100,7 @@ public class StubClientTest {
     stubClient.respond(Response.forStatus(Status.IM_A_TEAPOT)).to("http://ping");
 
     Response<ByteString> response = getResponseFromPing().toCompletableFuture().get();
-    assertThat(response.statusCode(), is(Status.IM_A_TEAPOT));
+    assertThat(response.status(), is(Status.IM_A_TEAPOT));
   }
 
   @Test
@@ -120,7 +120,7 @@ public class StubClientTest {
     stubClient.respond(responses).to("http://ping");
 
     Response<ByteString> reply = getResponseFromPing().toCompletableFuture().get();
-    assertThat(reply.statusCode(), withCode(666));
+    assertThat(reply.status(), withCode(666));
   }
 
   @Test
@@ -164,8 +164,8 @@ public class StubClientTest {
     Response<ByteString> message1 = reply1.toCompletableFuture().get();
     Response<ByteString> message2 = reply2.toCompletableFuture().get();
 
-    assertThat(message1.statusCode(), is(Status.ACCEPTED));
-    assertThat(message2.statusCode(), is(Status.FORBIDDEN));
+    assertThat(message1.status(), is(Status.ACCEPTED));
+    assertThat(message2.status(), is(Status.FORBIDDEN));
 
     assertThat(message1.payload().get().utf8(), is("first response"));
     assertThat(message2.payload().get().utf8(), is("second response"));
@@ -290,7 +290,7 @@ public class StubClientTest {
     getResponse("http://pong").toCompletableFuture().get();
 
     Set<StatusType> statii = stubClient.requestsAndResponses().stream()
-        .map(requestAndResponse -> requestAndResponse.response().statusCode())
+        .map(requestAndResponse -> requestAndResponse.response().status())
         .collect(toSet());
 
     assertThat(statii, equalTo(ImmutableSet.of(Status.OK, Status.BAD_GATEWAY)));

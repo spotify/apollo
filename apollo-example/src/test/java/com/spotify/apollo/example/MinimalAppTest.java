@@ -46,9 +46,9 @@ public class MinimalAppTest {
 
     StatusType status = serviceHelper.request("GET", "/beer")
         .toCompletableFuture().get()
-        .statusCode();
+        .status();
 
-    assertThat(status.statusCode(), is(Status.INTERNAL_SERVER_ERROR.statusCode()));
+    assertThat(status.code(), is(Status.INTERNAL_SERVER_ERROR.code()));
   }
 
   @Test
@@ -58,8 +58,8 @@ public class MinimalAppTest {
     StatusType status = serviceHelper
         .request("POST", "/beer", ByteString.encodeUtf8("{\"key\": \"value\"}"))
         .toCompletableFuture().get()
-        .statusCode();
+        .status();
 
-    assertThat(status.statusCode(), is(Status.INTERNAL_SERVER_ERROR.statusCode()));
+    assertThat(status.code(), is(Status.INTERNAL_SERVER_ERROR.code()));
   }
 }

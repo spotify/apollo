@@ -99,13 +99,13 @@ public final class Middlewares {
     return response -> {
       Response<ByteString> result = response;
       Optional<ByteString> payload = response.payload();
-      if (setContentLengthForStatus(response.statusCode())) {
+      if (setContentLengthForStatus(response.status())) {
         int payloadSize = payload.isPresent() ? payload.get().size() : 0;
         result = result.withHeader("Content-Length", String.valueOf(payloadSize));
       }
 
       if (!setPayloadForMethod(request.method()) ||
-          !setPayloadForStatus(response.statusCode())) {
+          !setPayloadForStatus(response.status())) {
         result = result.withPayload(null);
       }
 
@@ -115,8 +115,8 @@ public final class Middlewares {
 
   // see http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.3
   private static boolean setPayloadForStatus(StatusType statusType) {
-    return statusType.statusCode() != Status.NOT_MODIFIED.statusCode() &&
-           statusType.statusCode() != Status.NO_CONTENT.statusCode() &&
+    return statusType.code() != Status.NOT_MODIFIED.code() &&
+           statusType.code() != Status.NO_CONTENT.code() &&
            statusType.family() != StatusType.Family.INFORMATIONAL;
   }
 

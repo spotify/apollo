@@ -70,7 +70,7 @@ public class MetaApplicationTest {
     Response<ByteString> response = serviceHelper.request("GET", API_BASE + "/info")
         .toCompletableFuture().get();
 
-    assertThat(response.statusCode(), withCode(200));
+    assertThat(response.status(), withCode(200));
 
     String responseJson = response.payload().get().utf8();
 
@@ -91,7 +91,7 @@ public class MetaApplicationTest {
     Response<ByteString> response = serviceHelper.request("GET", API_BASE + "/config")
         .toCompletableFuture().get();
 
-    assertThat(response.statusCode(), withCode(200));
+    assertThat(response.status(), withCode(200));
     String responseJson = response.payload().get().utf8();
 
     assertThat("is wrapped in result.spNode", responseJson,
@@ -118,7 +118,7 @@ public class MetaApplicationTest {
     Response<ByteString> response = serviceHelper.request("GET", API_BASE + "/config")
         .toCompletableFuture().get();
 
-    assertThat(response.statusCode(), withCode(200));
+    assertThat(response.status(), withCode(200));
     String responseJson = response.payload().get().utf8();
 
     assertThat("is wrapped in result.spNode", responseJson,
@@ -153,7 +153,7 @@ public class MetaApplicationTest {
     Response<ByteString> response = serviceHelper.request("GET", API_BASE + "/config?origins")
         .toCompletableFuture().get();
 
-    assertThat(response.statusCode(), withCode(200));
+    assertThat(response.status(), withCode(200));
     String responseJson = response.payload().get().utf8();
 
     assertThat("is wrapped in result.spNode", responseJson,
@@ -203,7 +203,7 @@ public class MetaApplicationTest {
     Response<ByteString> response = serviceHelper.request("GET", API_BASE + "/endpoints")
         .toCompletableFuture().get();
 
-    assertThat(response.statusCode(), withCode(200));
+    assertThat(response.status(), withCode(200));
     String responseJson = response.payload().get().utf8();
 
     assertThat("is wrapped in result", responseJson,
@@ -227,7 +227,7 @@ public class MetaApplicationTest {
     Response<ByteString> response = serviceHelper.request("GET", API_BASE + "/calls")
         .toCompletableFuture().get();
 
-    assertThat(response.statusCode(), withCode(200));
+    assertThat(response.status(), withCode(200));
     String responseJson = response.payload().get().utf8();
 
     assertThat("is wrapped in result", responseJson,

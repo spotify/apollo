@@ -60,7 +60,7 @@ public class HttpServerModuleTest {
           .build();
 
       com.squareup.okhttp.Response response = okHttpClient.newCall(request).execute();
-      assertThat(response.code(), is(IM_A_TEAPOT.statusCode()));
+      assertThat(response.code(), is(IM_A_TEAPOT.code()));
 
       assertThat(testHandler.requests.size(), is(1));
       OngoingRequest incomingRequest = testHandler.requests.get(0);
@@ -85,7 +85,7 @@ public class HttpServerModuleTest {
           .build();
 
       com.squareup.okhttp.Response response = okHttpClient.newCall(httpRequest).execute();
-      assertThat(response.code(), is(IM_A_TEAPOT.statusCode()));
+      assertThat(response.code(), is(IM_A_TEAPOT.code()));
 
       assertThat(testHandler.requests.size(), is(1));
       final com.spotify.apollo.Request apolloRequest = testHandler.requests.get(0).request();
@@ -114,7 +114,7 @@ public class HttpServerModuleTest {
           .build();
 
       com.squareup.okhttp.Response response = okHttpClient.newCall(httpRequest).execute();
-      assertThat(response.code(), is(IM_A_TEAPOT.statusCode()));
+      assertThat(response.code(), is(IM_A_TEAPOT.code()));
 
       assertThat(testHandler.requests.size(), is(1));
       final com.spotify.apollo.Request apolloRequest = testHandler.requests.get(0).request();

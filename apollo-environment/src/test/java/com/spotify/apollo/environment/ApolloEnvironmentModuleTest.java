@@ -217,7 +217,7 @@ public class ApolloEnvironmentModuleTest {
     return new TypeSafeMatcher<Response<ByteString>>() {
       @Override
       protected boolean matchesSafely(Response<ByteString> item) {
-        return item.statusCode() == statusCode;
+        return item.status() == statusCode;
       }
 
       @Override
