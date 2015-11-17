@@ -454,7 +454,9 @@ class ServiceImpl implements Service {
 
     @Override
     public Builder withWatchdogTimeout(long timeout, TimeUnit unit) {
-      return null;
+      watchdogTimeout = timeout;
+      watchdogTimeoutUnit = unit;
+      return this;
     }
 
     @Override
@@ -526,7 +528,8 @@ class ServiceImpl implements Service {
     private final long watchdogTimeout;
     private final TimeUnit watchdogTimeoutUnit;
 
-    public Reaper(Signaller signaller, AtomicBoolean started, CountDownLatch stopped, long watchdogTimeout,
+    public Reaper(Signaller signaller, AtomicBoolean started, CountDownLatch stopped,
+                  long watchdogTimeout,
                   TimeUnit watchdogTimeoutUnit) {
       this.signaller = signaller;
       this.started = started;
