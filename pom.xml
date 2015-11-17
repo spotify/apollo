@@ -19,7 +19,6 @@
         <module>apollo-environment</module>
         <module>apollo-route</module>
         <module>apollo-test</module>
-        <module>apollo-example</module>
         <module>apollo-extra</module>
         <module>apollo-standalone-service</module>
 
@@ -34,18 +33,6 @@
         <developerConnection>scm:git:ssh://git@github.com:spotify/apollo.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.spotify</groupId>
-                <artifactId>apollo-bom</artifactId>
-                <version>1.0.0-rc3-foss-SNAPSHOT</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <build>
         <pluginManagement>
@@ -180,6 +167,11 @@
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.7.4.201502262128</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.3</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -195,6 +187,30 @@
             </plugin>
         </plugins>
     </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.8.1</version>
+            </plugin>
+            <plugin>
+                <artifactId>maven-changelog-plugin</artifactId>
+                <version>2.3</version>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.3</version>
+                <configuration>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>2.19</version>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <profiles>
         <profile>
@@ -333,5 +349,10 @@
             <id>ossrh</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
+
+        <site>
+            <id>spotify-apollo</id>
+            <url>http://spotify.github.io/apollo/maven</url>
+        </site>
     </distributionManagement>
 </project>

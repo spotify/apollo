@@ -1,3 +1,4 @@
-#!/bin/bash
-
+#!/bin/sh -e
 ./lingon.js build
+cd ..
+mvn site site:stage -DstagingDirectory="$PWD/website/build/maven"
