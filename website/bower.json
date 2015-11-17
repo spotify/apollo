@@ -1,0 +1,9 @@
+{
+  "name": "spotify-github",
+  "version": "0.0.1",
+  "dependencies": {
+    "jquery": "~2.1.4",
+    "bootstrap": "4.0.0-alpha",
+    "highlightjs": "~8.9.1"
+  }
+}
