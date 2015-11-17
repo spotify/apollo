@@ -103,7 +103,6 @@ public class StubClient implements Client, Closeable {
 
   @Override
   public void close() {
-    // TODO: is this correct behaviour?
     if (ownExecutor) {
       executor.shutdown();
     }

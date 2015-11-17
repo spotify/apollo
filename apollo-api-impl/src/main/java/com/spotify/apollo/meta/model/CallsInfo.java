@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
 /**
-* TODO: document.
+* Tracks information about calls made to different endpoints.
 */
 class CallsInfo implements MetaGatherer.CallsGatherer {
   private int sizeLimit;
