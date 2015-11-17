@@ -66,19 +66,16 @@ class ServiceImpl implements Service {
   private final ImmutableSet<ApolloModule> modules;
   private final Runtime runtime;
   private final boolean moduleDiscovery;
-  private final boolean apolloCompat;
   private final boolean shutdownInterrupt;
   private final boolean cliHelp;
 
   ServiceImpl(
       String serviceName, ImmutableSet<ApolloModule> modules, Runtime runtime,
-      boolean moduleDiscovery,
-      boolean apolloCompat, boolean shutdownInterrupt, boolean cliHelp) {
+      boolean moduleDiscovery, boolean shutdownInterrupt, boolean cliHelp) {
     this.serviceName = Objects.requireNonNull(serviceName);
     this.modules = Objects.requireNonNull(modules);
     this.runtime = runtime;
     this.moduleDiscovery = moduleDiscovery;
-    this.apolloCompat = apolloCompat;
     this.shutdownInterrupt = shutdownInterrupt;
     this.cliHelp = cliHelp;
   }
@@ -121,8 +118,7 @@ class ServiceImpl implements Service {
     try {
       final ImmutableList.Builder<String> unprocessedArgsBuilder = ImmutableList.builder();
       Config parsedArguments = parseArgs(
-          serviceConfig, args,
-          apolloCompat, cliHelp, unprocessedArgsBuilder);
+          serviceConfig, args, cliHelp, unprocessedArgsBuilder);
       final ImmutableList<String> unprocessedArgs = unprocessedArgsBuilder.build();
 
       final Config config = addEnvOverrides(env, parsedArguments).resolve();
@@ -242,39 +238,13 @@ class ServiceImpl implements Service {
   }
 
   static Config parseArgs(
-      Config config, String[] args, boolean apolloCompat, boolean cliHelp,
+      Config config, String[] args, boolean cliHelp,
       ImmutableList.Builder<String> unprocessedArgsBuilder) throws IOException {
 
     config = appendConfig(
         config,
         CommonConfigKeys.APOLLO_ARGS_CORE.getKey(), Arrays.asList(args),
         "apollo cli args");
-
-    if (apolloCompat) {
-      String apolloCommand = "run";
-      String apolloBackend = "";
-
-      int consumed = 0;
-      if (args.length > consumed && !flag(args[consumed])) {
-        apolloCommand = args[consumed];
-        consumed++;
-      }
-      if (args.length > consumed && !flag(args[consumed])) {
-        apolloBackend = args[consumed];
-        consumed++;
-      }
-
-      config = appendConfig(
-          config,
-          CommonConfigKeys.APOLLO_COMMAND.getKey(), apolloCommand,
-          "Apollo command");
-      config = appendConfig(
-          config,
-          CommonConfigKeys.APOLLO_BACKEND.getKey(), apolloBackend,
-          "Apollo backend (domain)");
-
-      args = Arrays.copyOfRange(args, consumed, args.length);
-    }
 
     final OptionParser parser = new OptionParser();
 
@@ -421,8 +391,7 @@ class ServiceImpl implements Service {
 
   static Builder builder(String serviceName) {
     return new BuilderImpl(
-        serviceName, ImmutableSet.builder(), Runtime.getRuntime(),
-        false, false, false, true);
+        serviceName, ImmutableSet.builder(), Runtime.getRuntime(), false, false, true);
   }
 
   static class BuilderImpl implements Builder {
@@ -431,7 +400,6 @@ class ServiceImpl implements Service {
     private final ImmutableSet.Builder<ApolloModule> moduleBuilder;
     private Runtime runtime;
     private boolean moduleDiscovery;
-    private boolean apolloCompat;
     private boolean shutdownInterrupt;
     private boolean cliHelp;
 
@@ -440,22 +408,14 @@ class ServiceImpl implements Service {
         ImmutableSet.Builder<ApolloModule> moduleBuilder,
         Runtime runtime,
         boolean moduleDiscovery,
-        boolean apolloCompat,
         boolean shutdownInterrupt,
         boolean cliHelp) {
       this.serviceName = Objects.requireNonNull(serviceName);
       this.moduleBuilder = moduleBuilder;
       this.runtime = runtime;
       this.moduleDiscovery = moduleDiscovery;
-      this.apolloCompat = apolloCompat;
       this.shutdownInterrupt = shutdownInterrupt;
       this.cliHelp = cliHelp;
-    }
-
-    @Override
-    public Builder apolloCompatibilityMode(boolean enabled) {
-      this.apolloCompat = enabled;
-      return this;
     }
 
     @Override
@@ -491,8 +451,7 @@ class ServiceImpl implements Service {
     @Override
     public Service build() {
       return new ServiceImpl(
-          serviceName, moduleBuilder.build(), runtime, moduleDiscovery,
-          apolloCompat, shutdownInterrupt, cliHelp);
+          serviceName, moduleBuilder.build(), runtime, moduleDiscovery, shutdownInterrupt, cliHelp);
     }
   }
 
