@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -40,24 +41,34 @@ public class MetaDescriptor {
   // TODO: can apollo version be loaded more reliably?
   public static MetaDescriptor readMetaDescriptor(String serviceName, ClassLoader classLoader)
       throws IOException {
-    final String apolloVersion;
-    final String version;
+    String apolloVersion;
+    String version;
+
+    try {
+      apolloVersion = loadApolloVersion(classLoader);
+    } catch (IOException e) {
+      apolloVersion = "0.0.0-UNKNOWN";
+    }
+
     final Manifest manifest = getManifest(classLoader);
 
     if (manifest != null) {
       final Attributes attributes = manifest.getMainAttributes();
-      apolloVersion = attributes.getValue(APOLLO_VERSION);
       version = attributes.getValue(IMPL_VERSION);
     } else {
       LOG.warn("Could not find manifest, continuing with default artifact metadata");
-
-      apolloVersion = "0.0.0-UNKNOWN";
       version = "0.0.0-UNKNOWN";
     }
 
     return new MetaDescriptor(
         Descriptor.create("com.spotify", serviceName, version),
         apolloVersion);
+  }
+
+  protected static String loadApolloVersion(ClassLoader classLoader) throws IOException {
+    Properties properties = new Properties();
+    properties.load(classLoader.getResourceAsStream("metaDescriptor.properties"));
+    return properties.getProperty("apolloVersion");
   }
 
   private static Manifest getManifest(ClassLoader classLoader) throws IOException {
