@@ -64,14 +64,16 @@ class ServiceImpl implements Service {
 
   private final String serviceName;
   private final ImmutableSet<ApolloModule> modules;
+  private final String envVarPrefix;
   private final Runtime runtime;
   private final boolean moduleDiscovery;
   private final boolean shutdownInterrupt;
   private final boolean cliHelp;
 
   ServiceImpl(
-      String serviceName, ImmutableSet<ApolloModule> modules, Runtime runtime,
+      String serviceName, ImmutableSet<ApolloModule> modules, String envVarPrefix, Runtime runtime,
       boolean moduleDiscovery, boolean shutdownInterrupt, boolean cliHelp) {
+    this.envVarPrefix = envVarPrefix;
     this.serviceName = Objects.requireNonNull(serviceName);
     this.modules = Objects.requireNonNull(modules);
     this.runtime = runtime;
@@ -153,8 +155,8 @@ class ServiceImpl implements Service {
   Config addEnvOverrides(Map<String, String> env, Config config) {
     for (Map.Entry<String, String> var : env.entrySet()) {
       String envKey = var.getKey();
-      if (envKey.startsWith("SPOTIFY_")) {
-        String configKey = envKey.substring("SPOTIFY".length())
+      if (envKey.startsWith(envVarPrefix + "_")) {
+        String configKey = envKey.substring(envVarPrefix.length())
             .toLowerCase()
             .replaceAll("(?<!_)_(?!_(__)*([^_]|$))", ".")
             .replaceAll("__", "_")
@@ -391,13 +393,14 @@ class ServiceImpl implements Service {
 
   static Builder builder(String serviceName) {
     return new BuilderImpl(
-        serviceName, ImmutableSet.builder(), Runtime.getRuntime(), false, false, true);
+        serviceName, ImmutableSet.builder(), "SPOTIFY", Runtime.getRuntime(), false, false, true);
   }
 
   static class BuilderImpl implements Builder {
 
     private final String serviceName;
     private final ImmutableSet.Builder<ApolloModule> moduleBuilder;
+    private String envVarPrefix;
     private Runtime runtime;
     private boolean moduleDiscovery;
     private boolean shutdownInterrupt;
@@ -406,12 +409,14 @@ class ServiceImpl implements Service {
     BuilderImpl(
         String serviceName,
         ImmutableSet.Builder<ApolloModule> moduleBuilder,
+        String envVarPrefix,
         Runtime runtime,
         boolean moduleDiscovery,
         boolean shutdownInterrupt,
         boolean cliHelp) {
       this.serviceName = Objects.requireNonNull(serviceName);
       this.moduleBuilder = moduleBuilder;
+      this.envVarPrefix = envVarPrefix;
       this.runtime = runtime;
       this.moduleDiscovery = moduleDiscovery;
       this.shutdownInterrupt = shutdownInterrupt;
@@ -427,6 +432,12 @@ class ServiceImpl implements Service {
     @Override
     public Builder withCliHelp(boolean enabled) {
       this.cliHelp = enabled;
+      return this;
+    }
+
+    @Override
+    public Builder withEnvVarPrefix(String prefix) {
+      this.envVarPrefix = prefix;
       return this;
     }
 
@@ -451,7 +462,7 @@ class ServiceImpl implements Service {
     @Override
     public Service build() {
       return new ServiceImpl(
-          serviceName, moduleBuilder.build(), runtime, moduleDiscovery, shutdownInterrupt, cliHelp);
+          serviceName, moduleBuilder.build(), envVarPrefix, runtime, moduleDiscovery, shutdownInterrupt, cliHelp);
     }
   }
 

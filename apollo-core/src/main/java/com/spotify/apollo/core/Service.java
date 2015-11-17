@@ -124,6 +124,16 @@ public interface Service {
     Builder withCliHelp(boolean enabled);
 
     /**
+     * Set the prefix that is used to convert environment variables into configuration keys.  By
+     * default, the prefix is {@code "SPOTIFY"}, which means that an environment variable like
+     * {@code "SPOTIFY_DOMAIN_NAME"} is translated into the config key {@code "domain.name"}.
+     *
+     * @param prefix The environment variable prefix to use.
+     * @return This builder.
+     */
+    Builder withEnvVarPrefix(String prefix);
+
+    /**
      * The Java runtime to use when constructing service instances.  This is only respected by
      * Apollo itself; the service instance(s) configured by Apollo might decide to use the global
      * runtime. The default is to use the global JVM runtime.
