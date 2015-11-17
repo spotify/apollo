@@ -31,11 +31,11 @@ public interface Service {
    *
    * @param args Command-line arguments for the service.
    * @return a new instance of this service that is up and running.
-   * @throws ApolloHelpException     if the user wants to show command-line help and not start the
+   * @throws ApolloHelpException   if the user wants to show command-line help and not start the
    *                               application.
    * @throws ApolloCompatException if Apollo compatibility mode was requested but the command line
    *                               was not in the Apollo format.
-   * @throws ApolloCliException      if something else related to CLI parsing failed.
+   * @throws ApolloCliException    if something else related to CLI parsing failed.
    * @throws java.io.IOException   if the application could not start for some other reason.
    */
   Instance start(String... args) throws IOException;
@@ -49,28 +49,28 @@ public interface Service {
    *             variables, but instead replaces the set of environment variables that Apollo sees,
    *             generally used for testing.
    * @return a new instance of this service that is up and running.
-   * @throws ApolloHelpException     if the user wants to show command-line help and not start the
+   * @throws ApolloHelpException   if the user wants to show command-line help and not start the
    *                               application.
    * @throws ApolloCompatException if Apollo compatibility mode was requested but the command line
    *                               was not in the Apollo format.
-   * @throws ApolloCliException      if something else related to CLI parsing failed.
+   * @throws ApolloCliException    if something else related to CLI parsing failed.
    * @throws java.io.IOException   if the application could not start for some other reason.
    */
   @VisibleForTesting
   Instance start(String[] args, Map<String, String> env) throws IOException;
 
   /**
-   * Starts a new instance of this service that is fully initialized. It will initialize the
-   * service using the {@code config} passed as an argument and the environment variables.
+   * Starts a new instance of this service that is fully initialized. It will initialize the service
+   * using the {@code config} passed as an argument and the environment variables.
    *
    * @param args   Command-line arguments for the service.
    * @param config Configuration for the service.
    * @return a new instance of this service that is up and running.
-   * @throws ApolloHelpException     if the user wants to show command-line help and not start the
+   * @throws ApolloHelpException   if the user wants to show command-line help and not start the
    *                               application.
    * @throws ApolloCompatException if Apollo compatibility mode was requested but the command line
    *                               was not in the Apollo format.
-   * @throws ApolloCliException      if something else related to CLI parsing failed.
+   * @throws ApolloCliException    if something else related to CLI parsing failed.
    * @throws java.io.IOException   if the application could not start for some other reason.
    */
   @VisibleForTesting
@@ -82,9 +82,9 @@ public interface Service {
   interface Builder {
 
     /**
-     * Registers the specified module as loadable by this service.  This does not guarantee that
-     * the module is actually loaded; the modules themselves will inspect the configuration and
-     * actually determine if they should be loaded.
+     * Registers the specified module as loadable by this service.  This does not guarantee that the
+     * module is actually loaded; the modules themselves will inspect the configuration and actually
+     * determine if they should be loaded.
      *
      * @param module The module to register.
      * @return This builder.
@@ -92,8 +92,8 @@ public interface Service {
     Builder withModule(ApolloModule module);
 
     /**
-     * Enables or disables module discovery, which will use SPI to discover all available modules
-     * on the classpath.  By default, module discovery is disabled.
+     * Enables or disables module discovery, which will use SPI to discover all available modules on
+     * the classpath.  By default, module discovery is disabled.
      *
      * @param moduleDiscovery {@code true} if module discovery should be used, {@code false}
      *                        otherwise.
@@ -102,20 +102,19 @@ public interface Service {
     Builder usingModuleDiscovery(boolean moduleDiscovery);
 
     /**
-     * Enable/disable whether the thread calling {@link Service#start(String...)} will be
+     * Enables/disables whether the thread calling {@link Service#start(String...)} will be
      * interrupted when the application is requested to shut down.  The default is to not interrupt
      * the thread.
      *
-     * @param enabled {@code true} if {@link Thread#interrupt()} should be called on the thread
-     *                that called {@link #start(String...)} when the service is signalled to shut
-     *                down;
+     * @param enabled {@code true} if {@link Thread#interrupt()} should be called on the thread that
+     *                called {@link #start(String...)} when the service is signalled to shut down;
      *                {@code false} if nothing should happen.
      * @return This builder.
      */
     Builder withShutdownInterrupt(boolean enabled);
 
     /**
-     * Enable/disable whether Apollo should handle the {@code --help/-h} flags and display
+     * Enables/disables whether Apollo should handle the {@code --help/-h} flags and display
      * command-line help.  The default is to handle the flags.
      *
      * @param enabled {@code true} if Apollo should intercept {@code --help/-h}, {@code false}
@@ -125,7 +124,7 @@ public interface Service {
     Builder withCliHelp(boolean enabled);
 
     /**
-     * Set the prefix that is used to convert environment variables into configuration keys.  By
+     * Sets the prefix that is used to convert environment variables into configuration keys.  By
      * default, the prefix is {@code "SPOTIFY"}, which means that an environment variable like
      * {@code "SPOTIFY_DOMAIN_NAME"} is translated into the config key {@code "domain.name"}.
      *
@@ -135,7 +134,7 @@ public interface Service {
     Builder withEnvVarPrefix(String prefix);
 
     /**
-     * Set the timeout for how long Apollo will wait for the service to clean itself up upon
+     * Sets the timeout for how long Apollo will wait for the service to clean itself up upon
      * shutdown.  Apollo will keep a reaper thread running as long as there are shutdown operations
      * pending.  After the timeout has elapsed, the reaper thread will die, but other threads might
      * still linger.
@@ -234,8 +233,7 @@ public interface Service {
      *
      * @param type the type of the instance to get.
      * @return an instance of this type.
-     * @throws ApolloConfigurationException if no suitable instance of this type
-     *                                                          can be found.
+     * @throws ApolloConfigurationException if no suitable instance of this type can be found.
      */
     <T> T resolve(Class<T> type);
 
