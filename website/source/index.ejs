@@ -1,0 +1,144 @@
+<!-- lingon: layout '/_layouts/default.ejs' -->
+<h1>Spotify Apollo<br/> Operations Manual</h1>
+
+<p class="small disclaimer">
+  A library for writing services that focuses on composability and simplicity, with high performace
+  using modern Java idioms and features.
+</p>
+
+<section>
+  <h1>General Description</h1>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h2>Apollo</h2>
+
+      <p>
+        Apollo is a set of Java libraries that we use at Spotify when
+        writing micro-services. Apollo includes modules such as an
+        HTTP server and a URI routing system, making it trivial to
+        implement restful API services.
+      </p>
+
+      <p>
+        Within Spotify, Apollo has been powering backend services for
+        a long time. As part of its 1.0 release, the development of
+        Apollo has been moved into the open.
+      </p>
+
+      <p>
+        There are three main libraries in Apollo:
+      </p>
+
+      <ol>
+        <li>
+          <a href="https://github.com/spotify/apollo/tree/master/apollo-standalone-service">
+            apollo-standalone
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/spotify/apollo/tree/master/apollo-api">
+            apollo-api
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/spotify/apollo/tree/master/apollo-core">
+            apollo-core
+          </a>
+        </li>
+      </ol>
+    </div>
+
+    <div>
+      <h3>Apollo Standalone</h3>
+
+      <p>
+        The apollo-standalone library is a standardized bundle of
+        Apollo modules. It incorporates both apollo-api and
+        apollo-core and ties them together with several other standard
+        modules to get a standard api service using http for incoming
+        and outgoing communication.
+      </p>
+
+      <h3>Apollo API</h3>
+
+      <p>
+        The apollo-api library gives you the tools you need to define
+        your service routes and your request/reply handlers.
+      </p>
+
+      <h3>Apollo Core</h3>
+
+      <p>
+        The apollo-core library manages the lifecycle (loading,
+        starting, and stopping) of your service. You do not usually
+        need to interact directly with apollo-core; think of it merely
+        as “plumbing.”
+      </p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h1>Getting started</h1>
+
+  <p>
+    Apollo is distributed as a set of Maven artifacts, which makes it
+    easy to get started no matter the build tool; Maven, Ant + Ivy or
+    Gradle.  Below is a very simple but functional service &mdash;
+    more extensive examples are available
+    in <a href="https://github.com/spotify/apollo/tree/master/examples">the
+    GitHub repository</a>.
+  </p>
+
+  
+  <fieldset>
+    <legend>Use the latest maven artifact</legend>
+
+    <pre><code class="xml"><dependency>
+    <groupId>com.spotify</groupId>
+    <artifactId>apollo-standlone-service</artifactId>
+    <version><%= global.apolloVersion %></version>
+</dependency></code></pre>
+  </fieldset>
+
+
+  <fieldset>
+    <legend>Minimal Apollo Standalone Application</legend>
+
+    <pre><code class="java">public final class App {
+
+    public static void main(String[] args) throws LoadingException {
+        StandaloneService.boot(App::init, "my-app", args);
+    }
+
+    static void init(Environment environment) {
+        environment.routingEngine()
+            .registerRoute(Route.sync("GET", "/", rc -> "hello world"));
+    }
+ }</code></pre>
+  </fieldset>
+</section>
+
+<section>
+  <h1>Internals</h1>
+
+  <div class="two-columns">
+    <h2>Apollo Core</h2>
+
+    <p>
+      The apollo-core library manages the lifecycle (loading, starting, and stopping) of your
+      service on production machines. You do not usually need to interact directly with apollo-core;
+      think of it merely as "plumbing". For more information about this library, see the Apollo Core
+      Readme. <!-- TODO: add readme link -->
+    </p>
+
+    <h2>Apollo Test</h2>
+
+    <p>
+      In addition to the three main Apollo libraries listed above, to help you write tests for your
+      service we have an additional library called apollo-test. It has helpers to set up a servicea
+      for testing, and to mock outgoing request responses.<
+    </p>
+  </div>
+</section>
