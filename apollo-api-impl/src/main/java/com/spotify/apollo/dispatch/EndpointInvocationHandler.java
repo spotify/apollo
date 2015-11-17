@@ -37,7 +37,6 @@ public class EndpointInvocationHandler {
             if (message != null) {
               ongoingRequest.reply(message);
             } else if (throwable != null) {
-              // TODO: when are exceptions wrapped?
               // unwrap CompletionException
               if (throwable instanceof CompletionException) {
                 throwable = throwable.getCause();

@@ -58,7 +58,7 @@ import static com.spotify.apollo.core.Services.CommonConfigKeys;
 class ServiceImpl implements Service {
 
   private static final Logger LOG = LoggerFactory.getLogger(ServiceImpl.class);
-  // TODO: assumes that there is 3 levels between OFF and the default logging level.  The
+  // NOTE: assumes that there is 3 levels between OFF and the default logging level.  The
   // alternative is to somehow let the logging lib inform what this number should be...
   private static final int LOGGING_OFF_OFFSET = -3;
 
@@ -550,7 +550,7 @@ class ServiceImpl implements Service {
         try {
           // The service gets one minute to shut down.  We can't wait forever here because that
           // will dead-lock the JVM, forcing us to SIGKILL
-          // TODO: make this configurable, perhaps
+          // this should be configurable, perhaps
           stopped.await(1, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
           LOG.error("Interrupted while doing Apollo shutdown", e);
