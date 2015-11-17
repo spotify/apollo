@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 import io.norberg.automatter.AutoMatter;
 
 /**
- * TODO: document.
+ * Data model for application metadata.
  */
 public interface Model {
 
