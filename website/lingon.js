@@ -14,6 +14,8 @@ lingon.global.title = 'Apollo';
 lingon.global.description = 'Apollo';
 lingon.global.url = 'https://spotify.github.io/apollo';
 
+lingon.global.apolloVersion = "1.0.1";
+
 // Necessary until this is fixed: https://github.com/johannestroeger/gulp-highlight/pull/5
 var unescapeQuot = function() {
   return through.obj(function(file, enc, cont) {
