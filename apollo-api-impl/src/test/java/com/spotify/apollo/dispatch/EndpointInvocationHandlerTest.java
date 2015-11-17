@@ -79,7 +79,7 @@ public class EndpointInvocationHandlerTest {
 
     verify(ongoingRequest).reply(messageArgumentCaptor.capture());
 
-    assertThat(messageArgumentCaptor.getValue().statusCode().code(),
+    assertThat(messageArgumentCaptor.getValue().status().code(),
                equalTo(INTERNAL_SERVER_ERROR.code()));
   }
 
@@ -94,7 +94,7 @@ public class EndpointInvocationHandlerTest {
 
     verify(ongoingRequest).reply(messageArgumentCaptor.capture());
 
-    assertThat(messageArgumentCaptor.getValue().statusCode().reasonPhrase(),
+    assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
                containsString(exception.getMessage()));
   }
 
@@ -127,15 +127,15 @@ public class EndpointInvocationHandlerTest {
 
     verify(ongoingRequest).reply(messageArgumentCaptor.capture());
 
-    assertThat(messageArgumentCaptor.getValue().statusCode().reasonPhrase(),
+    assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
                containsString("expected"));
-    assertThat(messageArgumentCaptor.getValue().statusCode().reasonPhrase(),
+    assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
                containsString("with multiple"));
-    assertThat(messageArgumentCaptor.getValue().statusCode().reasonPhrase(),
+    assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
                containsString("lines"));
-    assertThat(messageArgumentCaptor.getValue().statusCode().reasonPhrase(),
+    assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
                not(containsString("\r")));
-    assertThat(messageArgumentCaptor.getValue().statusCode().reasonPhrase(),
+    assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
                not(containsString("\n")));
   }
 
@@ -149,7 +149,7 @@ public class EndpointInvocationHandlerTest {
 
     verify(ongoingRequest).reply(messageArgumentCaptor.capture());
 
-    assertThat(messageArgumentCaptor.getValue().statusCode().reasonPhrase(),
+    assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
         containsString(exception.getMessage()));
   }
 

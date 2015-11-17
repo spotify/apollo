@@ -17,7 +17,7 @@ public interface Response<T> {
   /**
    * The status of the response message.
    */
-  StatusType statusCode();
+  StatusType status();
 
   /**
    * The response headers.

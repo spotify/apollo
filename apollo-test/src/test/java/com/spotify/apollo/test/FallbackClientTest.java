@@ -8,7 +8,6 @@ import com.spotify.apollo.environment.IncomingRequestAwareClient;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -37,7 +36,7 @@ public class FallbackClientTest {
   private String call(String uri) throws Exception {
     return fallbackClient.send(Request.forUri(uri), empty()).thenApply(
         response -> {
-          if (response.statusCode() != Status.OK) {
+          if (response.status() != Status.OK) {
             throw new IllegalStateException();
           }
 
