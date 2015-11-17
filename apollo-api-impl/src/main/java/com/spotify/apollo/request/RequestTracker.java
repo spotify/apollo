@@ -14,13 +14,12 @@ import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.google.common.collect.Maps.newConcurrentMap;
 import static com.google.common.util.concurrent.Futures.getUnchecked;
 import static com.spotify.apollo.request.TrackedOngoingRequest.FailureCause.TIMEOUT;
 
@@ -35,8 +34,7 @@ public class RequestTracker implements Closeable {
               .setNameFormat("apollo-request-reaper")
               .build());
 
-  // TODO: this should be sorted out to match whatever we decide to do with message id
-  private final ConcurrentMap<TrackedOngoingRequest, TrackedOngoingRequest> outstanding = newConcurrentMap();
+  private final Set<TrackedOngoingRequest> outstanding = ConcurrentHashMap.newKeySet();
 
   private final ScheduledFuture<?> future;
 
@@ -47,11 +45,11 @@ public class RequestTracker implements Closeable {
   }
 
   public void register(TrackedOngoingRequest request) {
-    outstanding.put(request, request);
+    outstanding.add(request);
   }
 
   public boolean remove(TrackedOngoingRequest request) {
-    return this.outstanding.remove(request) != null;
+    return this.outstanding.remove(request);
   }
 
   @Override
@@ -68,7 +66,7 @@ public class RequestTracker implements Closeable {
 
   @VisibleForTesting
   void reap() {
-    outstanding.values().stream()
+    outstanding.stream()
         // Drop expired requests
         .filter(TrackedOngoingRequest::isExpired)
         .forEach(
@@ -82,11 +80,11 @@ public class RequestTracker implements Closeable {
    * Fail all outstanding requests.
    */
   private void failRequests() {
-    final Set<TrackedOngoingRequest> requests = ImmutableSet.copyOf(outstanding.keySet());
+    final Set<TrackedOngoingRequest> requests = ImmutableSet.copyOf(outstanding);
     for (TrackedOngoingRequest id : requests) {
-      final TrackedOngoingRequest removed = outstanding.remove(id);
-      if (removed != null) {
-        removed.fail(TIMEOUT);
+      final boolean removed = outstanding.remove(id);
+      if (removed) {
+        id.fail(TIMEOUT);
       }
     }
   }
