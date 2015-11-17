@@ -30,7 +30,7 @@ public class MetaInfoTracker {
       String containerVersion,
       Config configNode) {
     final Model.MetaInfo metaInfo = new MetaInfoBuilder()
-        .buildVersion(descriptor.artifactId() + ' ' + descriptor.version())
+        .buildVersion(descriptor.serviceName() + ' ' + descriptor.version())
         .containerVersion(containerVersion)
         .build();
 

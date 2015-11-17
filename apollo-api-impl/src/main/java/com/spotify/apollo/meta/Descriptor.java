@@ -7,20 +7,15 @@ package com.spotify.apollo.meta;
 import com.google.auto.value.AutoValue;
 
 /**
- * Describes an application artifact in maven terms, i.e. groupId, artifactId and version.
+ * Describes an application with serviceName and version.
  */
 @AutoValue
 public abstract class Descriptor {
 
   /**
-   * @return The groupId.
+   * @return The serviceName.
    */
-  public abstract String groupId();
-
-  /**
-   * @return The artifactId.
-   */
-  public abstract String artifactId();
+  public abstract String serviceName();
 
   /**
    * @return The version.
@@ -30,7 +25,7 @@ public abstract class Descriptor {
   /**
    * Create a new application artifact descriptor.
    */
-  public static Descriptor create(String groupId, String artifactId, String version) {
-    return new AutoValue_Descriptor(groupId, artifactId, version);
+  public static Descriptor create(String serviceName, String version) {
+    return new AutoValue_Descriptor(serviceName, version);
   }
 }

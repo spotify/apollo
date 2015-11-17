@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -17,7 +18,6 @@ public class MetaDescriptor {
 
   private static final Logger LOG = LoggerFactory.getLogger(MetaDescriptor.class);
 
-  private static final String APOLLO_VERSION = "X-Spotify-Apollo-Version";
   private static final String IMPL_VERSION = "Implementation-Version";
 
   private final Descriptor descriptor;
@@ -36,31 +36,40 @@ public class MetaDescriptor {
     return apolloVersion;
   }
 
-  // TODO: load real artifact and group id
-  // TODO: can apollo version be loaded more reliably?
   public static MetaDescriptor readMetaDescriptor(String serviceName, ClassLoader classLoader)
       throws IOException {
-    final String apolloVersion;
-    final String version;
-    final Manifest manifest = getManifest(classLoader);
+    String apolloVersion;
+    String version;
 
-    if (manifest != null) {
-      final Attributes attributes = manifest.getMainAttributes();
-      apolloVersion = attributes.getValue(APOLLO_VERSION);
-      version = attributes.getValue(IMPL_VERSION);
-    } else {
-      LOG.warn("Could not find manifest, continuing with default artifact metadata");
-
+    try {
+      apolloVersion = loadApolloVersion(classLoader);
+    } catch (IOException e) {
       apolloVersion = "0.0.0-UNKNOWN";
-      version = "0.0.0-UNKNOWN";
     }
 
+    version = loadVersion(classLoader);
+    version = version != null ? version : "0.0.0-UNKNOWN";
+
     return new MetaDescriptor(
-        Descriptor.create("com.spotify", serviceName, version),
+        Descriptor.create(serviceName, version),
         apolloVersion);
   }
 
-  private static Manifest getManifest(ClassLoader classLoader) throws IOException {
+  protected static String loadApolloVersion(ClassLoader classLoader) throws IOException {
+    Properties properties = new Properties();
+    properties.load(classLoader.getResourceAsStream("metaDescriptor.properties"));
+    return properties.getProperty("apolloVersion");
+  }
+
+  /**
+   * Tries to load the first "Implementation-Version" manifest entry it can find in the given
+   * classloader.
+   *
+   * @param classLoader  The classloader to load manifests from
+   * @return a version string
+   * @throws IOException
+   */
+  private static String loadVersion(ClassLoader classLoader) throws IOException {
     try {
       Enumeration<URL> resources = classLoader.getResources("META-INF/MANIFEST.MF");
 
@@ -68,11 +77,13 @@ public class MetaDescriptor {
         final URL url = resources.nextElement();
         final Manifest manifest = new Manifest(url.openStream());
         final Attributes mainAttributes = manifest.getMainAttributes();
-        final String value = mainAttributes.getValue(APOLLO_VERSION);
+        final String value = mainAttributes.getValue(IMPL_VERSION);
+
         if (value != null) {
-          return manifest;
+          return value;
         }
       }
+
     } catch (IOException e) {
       LOG.error("Failed to read manifest", e);
       throw new IOException("Failed to find manifest", e);
