@@ -50,15 +50,8 @@ public class MetaDescriptor {
       apolloVersion = "0.0.0-UNKNOWN";
     }
 
-    final Manifest manifest = getManifest(classLoader);
-
-    if (manifest != null) {
-      final Attributes attributes = manifest.getMainAttributes();
-      version = attributes.getValue(IMPL_VERSION);
-    } else {
-      LOG.warn("Could not find manifest, continuing with default artifact metadata");
-      version = "0.0.0-UNKNOWN";
-    }
+    version = loadVersion();
+    version = version != null ? version : "0.0.0-UNKNOWN";
 
     return new MetaDescriptor(
         Descriptor.create(serviceName, version),
@@ -71,24 +64,7 @@ public class MetaDescriptor {
     return properties.getProperty("apolloVersion");
   }
 
-  private static Manifest getManifest(ClassLoader classLoader) throws IOException {
-    try {
-      Enumeration<URL> resources = classLoader.getResources("META-INF/MANIFEST.MF");
-
-      while (resources.hasMoreElements()) {
-        final URL url = resources.nextElement();
-        final Manifest manifest = new Manifest(url.openStream());
-        final Attributes mainAttributes = manifest.getMainAttributes();
-        final String value = mainAttributes.getValue(APOLLO_VERSION);
-        if (value != null) {
-          return manifest;
-        }
-      }
-    } catch (IOException e) {
-      LOG.error("Failed to read manifest", e);
-      throw new IOException("Failed to find manifest", e);
-    }
-
-    return null;
+  protected static String loadVersion() {
+    return MetaDescriptor.class.getPackage().getImplementationVersion();
   }
 }
