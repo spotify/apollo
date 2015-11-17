@@ -4,9 +4,7 @@
 Apollo
 ======
 
-Apollo is a set of Java libraries that we use at Spotify when writing backend services. The Apollo
-libraries help to simplify the integration of a Spotify backend service with the other parts of our
-backend infrastructure. There are three main libraries in Apollo:
+Apollo is a set of Java libraries that we use at Spotify when writing microservices. Apollo includes an internal http server, making it easy to implement a restful API service. There are three main libraries in Apollo:
 
 * [apollo-standalone](apollo-standalone-service)
 * [apollo-api](apollo-api)

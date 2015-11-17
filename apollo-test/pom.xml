@@ -16,42 +16,34 @@
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>apollo-core</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>apollo-api-impl</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>apollo-environment</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>apollo-okhttp-client</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
