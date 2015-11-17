@@ -14,9 +14,6 @@
     <packaging>pom</packaging>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
         <cucumber.version>1.2.4</cucumber.version>
         <auto-matter.version>0.11.0</auto-matter.version>
     </properties>
@@ -46,7 +43,7 @@
                 <version>1.0.0-rc3-foss-SNAPSHOT</version>
             </dependency>
 
-            <!-- api & standalone -->
+            <!-- api & http service -->
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-api</artifactId>
@@ -74,7 +71,7 @@
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
-                <artifactId>apollo-standalone-service</artifactId>
+                <artifactId>apollo-http-service</artifactId>
                 <version>1.0.0-rc3-foss-SNAPSHOT</version>
             </dependency>
             <dependency>
@@ -278,4 +275,11 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

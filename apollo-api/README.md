@@ -19,20 +19,20 @@ package com.spotify;
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.route.Route;
-import com.spotify.apollo.standalone.LoadingException;
-import com.spotify.apollo.standalone.StandaloneService;
+import com.spotify.apollo.httpservice.LoadingException;
+import com.spotify.apollo.httpservice.HttpService;
 
 public final class Small {
 
   /**
    * The main entry point of the java process which will delegate to
-   * {@link StandaloneService#boot(AppInit, String, String...)}.
+   * {@link HttpService#boot(AppInit, String, String...)}.
    *
    * @param args  program arguments passed in from the command line
    * @throws LoadingException if anything goes wrong during the service boot sequence
    */
   public static void main(String[] args) throws LoadingException {
-    StandaloneService.boot(Small::init, "small", args);
+    HttpService.boot(Small::init, "small", args);
   }
 
   /**
@@ -50,24 +50,32 @@ public final class Small {
 
 ### 2. Build it with Maven!
 
-TODO: link to a full template pom for a standalone service
-
-Add a dependency to `apollo-standalone-service` to your `pom.xml`. Use a build property for the
+Add a dependency to `apollo-http-service` to your `pom.xml`. Use a build property for the
 version since you'll need it later in the build configuration.
 
 ```xml
 <properties>
     <apollo.version>1.0.0-rc1</apollo.version>
 </properties>
-```
 
-TODO: apollo-bom?
-```xml
-<dependency>
-    <groupId>com.spotify</groupId>
-    <artifactId>apollo-standalone-service</artifactId>
-    <version>${apollo.version}</version>
-</dependency>
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>apollo-bom</artifactId>
+            <version>${apollo.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+<dependencies>
+    <dependency>
+        <groupId>com.spotify</groupId>
+        <artifactId>apollo-http-service</artifactId>
+    </dependency>
+</dependencies>
 ```
 
 Set up the build to produce a jar with a classpath pointing to the dependency jars under `lib/`
