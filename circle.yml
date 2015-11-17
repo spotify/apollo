@@ -6,12 +6,13 @@ dependencies:
   # since dependency:resolve fails for multi-module builds
   # our best option (that I know of) is to just do a compile
   override:
-    - mvn -Pcoverage -Pmissinglink --fail-never dependency:go-offline compiler:compile || true
+    - mvn -Pcoverage -Pmissinglink --fail-never dependency:go-offline clean compile || true
 
 test:
   override:
     - mvn -Pcoverage -Pmissinglink verify
   post:
+    - mvn org.eluder.coveralls:coveralls-maven-plugin:report -Dcoveralls.token=$COVERALLS_TOKEN
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
 
