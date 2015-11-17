@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var lingon = require('lingon');
+var execSync = require('child_process').execSync;
 var gitDeploy = require('lingon-git-deploy');
 var lr = require('lingon-livereload');
 var sass = require('gulp-sass');
@@ -14,7 +15,16 @@ lingon.global.title = 'Apollo';
 lingon.global.description = 'Apollo';
 lingon.global.url = 'https://spotify.github.io/apollo';
 
-lingon.global.apolloVersion = "1.0.1";
+var apolloVersion;
+
+try {
+  apolloVersion = execSync("git describe --tag --abbrev=0");
+  lingon.global.apolloVersion = apolloVersion.toString().trim();
+}catch(e){
+  console.log("Unable to read Apollo version, no tag found in repo.");
+  lingon.global.apolloVersion = "UNKNOWN";
+}
+
 
 // Necessary until this is fixed: https://github.com/johannestroeger/gulp-highlight/pull/5
 var unescapeQuot = function() {
