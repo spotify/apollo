@@ -12,8 +12,8 @@ import com.spotify.apollo.Status;
 import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Middleware;
 import com.spotify.apollo.route.Route;
-import com.spotify.apollo.standalone.LoadingException;
-import com.spotify.apollo.standalone.StandaloneService;
+import com.spotify.apollo.httpservice.LoadingException;
+import com.spotify.apollo.httpservice.StandaloneService;
 
 import java.util.concurrent.CompletionStage;
 

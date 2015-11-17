@@ -40,7 +40,7 @@ class MetaModule extends AbstractModule {
   private MetaInfoTracker metaInfoTracker(Config configNode, MetaDescriptor metaDescriptor) {
     return new MetaInfoTracker(
         metaDescriptor.descriptor(),
-        "apollo-standalone " + metaDescriptor.apolloVersion(),
+        "apollo-standalone " + metaDescriptor.apolloVersion(), // FIXME: no 'standalone' here
         configNode);
   }
 }
