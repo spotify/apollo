@@ -24,7 +24,6 @@ import static com.spotify.apollo.Status.INTERNAL_SERVER_ERROR;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -97,24 +96,6 @@ public class EndpointInvocationHandlerTest {
 
     assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
                containsString(exception.getMessage()));
-  }
-
-  @Test
-  public void shouldRespondWithNoMessageForClientCallers() throws Exception {
-    RuntimeException exception = new RuntimeException("expected");
-    when(endpoint.invoke(any(RequestContext.class)))
-        .thenReturn(future);
-    future.completeExceptionally(exception);
-
-    requestMessage = requestMessage.withService("ap");
-    when(ongoingRequest.request()).thenReturn(requestMessage);
-
-    handler.handle(ongoingRequest, requestContext, endpoint);
-
-    verify(ongoingRequest).reply(messageArgumentCaptor.capture());
-
-    assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
-               is(INTERNAL_SERVER_ERROR.reasonPhrase()));
   }
 
   @Test
