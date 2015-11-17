@@ -51,9 +51,6 @@ In addition to the three main Apollo libraries listed above, to help you write t
 service we have an additional library called [apollo-test](apollo-test). It has helpers to set up
 a service for testing, and to mock outgoing request responses.
 
-### Apollo Releases
-For releases see the [releases](https://github.com/spotify/apollo/releases) page.
-
 ### Getting Started with Apollo
 Apollo is distributed as a set of Maven artifacts, which makes it easy to get started no matter the build tool; Maven, Ant + Ivy or Gradle. Below is a very simple but functional service — more extensive examples are available in the [examples](examples) directory.
 
