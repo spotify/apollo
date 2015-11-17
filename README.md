@@ -59,7 +59,7 @@ This is a complete service:
 ```java
 public class MiniService {
   public static void main(String[] args) throws LoadingException {
-    StandaloneService.boot(
+    HttpService.boot(
         env ->
             env.routingEngine().registerRoute(
                 Route.sync("GET", "/hello", context -> "Hello Apollo")),
