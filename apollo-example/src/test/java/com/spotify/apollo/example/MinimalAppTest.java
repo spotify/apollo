@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2013-2015 Spotify AB
- */
-
 package com.spotify.apollo.example;
 
 import com.spotify.apollo.Response;
