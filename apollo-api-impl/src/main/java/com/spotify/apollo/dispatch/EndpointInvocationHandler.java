@@ -22,10 +22,6 @@ public class EndpointInvocationHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(EndpointInvocationHandler.class);
 
-  private static final String ACCESS_POINT_REQUEST_SERVICE = "ap";
-  private static final String ACCESS_POINT_ANONYMOUS_REQUEST_SERVICE = "ap/anonymous";
-  private static final String WEBGATE_REQUEST_SERVICE = "webgate";
-
   /**
    * Fires off the request processing asynchronously - that is, this method is likely to return
    * before the request processing finishes.
@@ -63,17 +59,6 @@ public class EndpointInvocationHandler {
     LOG.warn("Got Exception {} when invoking endpoint for request: {}",
              message, ongoingRequest.request(), e);
 
-    String service = ongoingRequest.request().service().orElse(null);
-    // TODO this is shaky security-wise. this could already fall through in, for example, external
-    // api calls, that do not go through the ap, ap-anonymous, or webgate.
-    boolean isClientRequest = ACCESS_POINT_REQUEST_SERVICE.equals(service)
-                              || ACCESS_POINT_ANONYMOUS_REQUEST_SERVICE.equals(service)
-                              || WEBGATE_REQUEST_SERVICE.equals(service);
-
-    if (!isClientRequest) {
-      ongoingRequest.reply(forStatus(INTERNAL_SERVER_ERROR.withReasonPhrase(message)));
-    } else {
-      ongoingRequest.reply(forStatus(INTERNAL_SERVER_ERROR));
-    }
+    ongoingRequest.reply(forStatus(INTERNAL_SERVER_ERROR.withReasonPhrase(message)));
   }
 }
