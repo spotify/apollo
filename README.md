@@ -4,7 +4,11 @@
 Apollo
 ======
 
-Apollo is a set of Java libraries that we use at Spotify when writing micro-services. Apollo includes modules such as an HTTP server and a URI routing system, making it trivial to implement restful API services. There are
+Apollo is a set of Java libraries that we use at Spotify when writing micro-services. Apollo includes modules such as an HTTP server and a URI routing system, making it trivial to implement restful API services. 
+
+Within Spotify, Apollo has been powering backend services for a long time. As part of its upcoming 1.0 release, the development of Apollo has been moved into the open.
+
+There are
 three main libraries in Apollo:
 
 * [apollo-http-service](apollo-http-service)
