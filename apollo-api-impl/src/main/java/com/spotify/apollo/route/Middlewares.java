@@ -99,13 +99,13 @@ public final class Middlewares {
     return response -> {
       Response<ByteString> result = response;
       Optional<ByteString> payload = response.payload();
-      if (setContentLengthForStatus(response.statusCode())) {
+      if (setContentLengthForStatus(response.status())) {
         int payloadSize = payload.isPresent() ? payload.get().size() : 0;
         result = result.withHeader("Content-Length", String.valueOf(payloadSize));
       }
 
       if (!setPayloadForMethod(request.method()) ||
-          !setPayloadForStatus(response.statusCode())) {
+          !setPayloadForStatus(response.status())) {
         result = result.withPayload(null);
       }
 

@@ -27,12 +27,12 @@ abstract class ResponseImpl<T> implements Response<T> {
     headers.putAll(headers());
     headers.put(header, value);
 
-    return createInternal(statusCode(), ImmutableMap.copyOf(headers), payload());
+    return createInternal(status(), ImmutableMap.copyOf(headers), payload());
   }
 
   @Override
   public <P> Response<P> withPayload(@Nullable P newPayload) {
-    return createInternal(statusCode(), headers(), Optional.ofNullable(newPayload));
+    return createInternal(status(), headers(), Optional.ofNullable(newPayload));
   }
 
   static <T> Response<T> create(StatusType statusCode) {

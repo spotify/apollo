@@ -80,7 +80,7 @@ public class TrackedOngoingRequestImplTest {
 
       @Override
       protected Integer featureValueOf(Response<ByteString> actual) {
-        return actual.statusCode().code();
+        return actual.status().code();
       }
     };
   }

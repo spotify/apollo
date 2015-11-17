@@ -274,7 +274,7 @@ public class MiddlewaresTest {
     serializationFuture.complete(Response.of(CREATED, response));
 
     assertThat(getResult(
-        Middlewares.serialize(serializer).apply(serializationDelegate)).statusCode(),
+        Middlewares.serialize(serializer).apply(serializationDelegate)).status(),
                equalTo(CREATED));
   }
 
@@ -315,7 +315,7 @@ public class MiddlewaresTest {
     Response<ByteString> response =
         getResult(Middlewares.serialize(serializer).apply(serializationDelegate));
 
-    assertThat(response.statusCode(), equalTo(Status.BAD_REQUEST));
+    assertThat(response.status(), equalTo(Status.BAD_REQUEST));
     verify(serializer, never()).serialize(any(Request.class), any());
   }
 

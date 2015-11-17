@@ -43,7 +43,7 @@ public class RequestStepdefs {
   @Then("^the response is \"([^\"]*)\"$")
   public void the_response_is(String expected) throws Throwable {
     Response<ByteString> response = getResponseFuture();
-    assertThat(response.statusCode(), withCode(Status.OK));
+    assertThat(response.status(), withCode(Status.OK));
 
     String actual = response.payload().get().utf8();
 
@@ -75,7 +75,7 @@ public class RequestStepdefs {
   @Then("^the response code is (\\d+)$")
   public void the_response_code_is(int statusCode) throws Throwable {
     Response<ByteString> response = getResponseFuture();
-    assertThat(response.statusCode(), withCode(statusCode));
+    assertThat(response.status(), withCode(statusCode));
   }
 
   @And("^the response has a header \"([^\"]*)\" with value \"([^\"]*)\"$")
@@ -89,7 +89,7 @@ public class RequestStepdefs {
   public void the_reason_phrase_is(String expected) throws Throwable {
     Response<ByteString> response = getResponseFuture();
 
-    assertThat(response.statusCode(), withReasonPhrase(is(expected)));
+    assertThat(response.status(), withReasonPhrase(is(expected)));
   }
 
   @And("^requests to \"([^\"]*)\" lead to a response with payload \"([^\"]*)\"$")
