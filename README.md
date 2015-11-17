@@ -55,19 +55,18 @@ a service for testing, and to mock outgoing request responses.
 For releases see the [releases](https://github.com/spotify/apollo/releases) page.
 
 ### Getting Started with Apollo
-The quickest way to get started with Apollo is by setting up an
-[apollo-http-service](apollo-http-service), and run it directly (`java -jar ...`)
-(or in a docker container).
+Apollo is distributed as a set of Maven artifacts, which makes it easy to get started no matter the build tool; Maven, Ant + Ivy or Gradle. Below is a very simple but functional service — more extensive examples are available in the [examples](examples) directory.
 
-This is a complete service:
 ```java
-public class MiniService {
-  public static void main(String[] args) throws LoadingException {
-    HttpService.boot(
-        env ->
-            env.routingEngine().registerRoute(
-                Route.sync("GET", "/hello", context -> "Hello Apollo")),
-        "mini-service", args);
-  }
-}
+public final class App {
+
+    public static void main(String[] args) throws LoadingException {
+        StandaloneService.boot(App::init, "my-app", args);
+    }
+
+    static void init(Environment environment) {
+        environment.routingEngine()
+            .registerRoute(Route.sync("GET", "/", rc -> "hello world"));
+    }
+ }
 ```
