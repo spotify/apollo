@@ -64,21 +64,25 @@ class ServiceImpl implements Service {
 
   private final String serviceName;
   private final ImmutableSet<ApolloModule> modules;
+  private final String envVarPrefix;
+  private final long watchdogTimeout;
+  private final TimeUnit watchdogTimeoutUnit;
   private final Runtime runtime;
   private final boolean moduleDiscovery;
-  private final boolean apolloCompat;
   private final boolean shutdownInterrupt;
   private final boolean cliHelp;
 
   ServiceImpl(
-      String serviceName, ImmutableSet<ApolloModule> modules, Runtime runtime,
-      boolean moduleDiscovery,
-      boolean apolloCompat, boolean shutdownInterrupt, boolean cliHelp) {
+      String serviceName, ImmutableSet<ApolloModule> modules, String envVarPrefix,
+      long watchdogTimeout, TimeUnit watchdogTimeoutUnit, Runtime runtime,
+      boolean moduleDiscovery, boolean shutdownInterrupt, boolean cliHelp) {
+    this.envVarPrefix = envVarPrefix;
+    this.watchdogTimeout = watchdogTimeout;
+    this.watchdogTimeoutUnit = watchdogTimeoutUnit;
     this.serviceName = Objects.requireNonNull(serviceName);
     this.modules = Objects.requireNonNull(modules);
     this.runtime = runtime;
     this.moduleDiscovery = moduleDiscovery;
-    this.apolloCompat = apolloCompat;
     this.shutdownInterrupt = shutdownInterrupt;
     this.cliHelp = cliHelp;
   }
@@ -116,13 +120,13 @@ class ServiceImpl implements Service {
 
     // If the user presses Ctrl+C at any point, ensure safe clean-up
     runtime.addShutdownHook(
-        new Thread(new Reaper(signaller, started, stopped), serviceName + "-reaper"));
+        new Thread(new Reaper(signaller, started, stopped, watchdogTimeout, watchdogTimeoutUnit),
+                   serviceName + "-reaper"));
 
     try {
       final ImmutableList.Builder<String> unprocessedArgsBuilder = ImmutableList.builder();
       Config parsedArguments = parseArgs(
-          serviceConfig, args,
-          apolloCompat, cliHelp, unprocessedArgsBuilder);
+          serviceConfig, args, cliHelp, unprocessedArgsBuilder);
       final ImmutableList<String> unprocessedArgs = unprocessedArgsBuilder.build();
 
       final Config config = addEnvOverrides(env, parsedArguments).resolve();
@@ -157,8 +161,8 @@ class ServiceImpl implements Service {
   Config addEnvOverrides(Map<String, String> env, Config config) {
     for (Map.Entry<String, String> var : env.entrySet()) {
       String envKey = var.getKey();
-      if (envKey.startsWith("SPOTIFY_")) {
-        String configKey = envKey.substring("SPOTIFY".length())
+      if (envKey.startsWith(envVarPrefix + "_")) {
+        String configKey = envKey.substring(envVarPrefix.length())
             .toLowerCase()
             .replaceAll("(?<!_)_(?!_(__)*([^_]|$))", ".")
             .replaceAll("__", "_")
@@ -242,39 +246,13 @@ class ServiceImpl implements Service {
   }
 
   static Config parseArgs(
-      Config config, String[] args, boolean apolloCompat, boolean cliHelp,
+      Config config, String[] args, boolean cliHelp,
       ImmutableList.Builder<String> unprocessedArgsBuilder) throws IOException {
 
     config = appendConfig(
         config,
         CommonConfigKeys.APOLLO_ARGS_CORE.getKey(), Arrays.asList(args),
         "apollo cli args");
-
-    if (apolloCompat) {
-      String apolloCommand = "run";
-      String apolloBackend = "";
-
-      int consumed = 0;
-      if (args.length > consumed && !flag(args[consumed])) {
-        apolloCommand = args[consumed];
-        consumed++;
-      }
-      if (args.length > consumed && !flag(args[consumed])) {
-        apolloBackend = args[consumed];
-        consumed++;
-      }
-
-      config = appendConfig(
-          config,
-          CommonConfigKeys.APOLLO_COMMAND.getKey(), apolloCommand,
-          "Apollo command");
-      config = appendConfig(
-          config,
-          CommonConfigKeys.APOLLO_BACKEND.getKey(), apolloBackend,
-          "Apollo backend (domain)");
-
-      args = Arrays.copyOfRange(args, consumed, args.length);
-    }
 
     final OptionParser parser = new OptionParser();
 
@@ -421,41 +399,39 @@ class ServiceImpl implements Service {
 
   static Builder builder(String serviceName) {
     return new BuilderImpl(
-        serviceName, ImmutableSet.builder(), Runtime.getRuntime(),
-        false, false, false, true);
+        serviceName, ImmutableSet.builder(), "SPOTIFY", 1, TimeUnit.MINUTES, Runtime.getRuntime(),
+        false, false, true);
   }
 
   static class BuilderImpl implements Builder {
 
     private final String serviceName;
     private final ImmutableSet.Builder<ApolloModule> moduleBuilder;
+    private String envVarPrefix;
+    private long watchdogTimeout;
+    private TimeUnit watchdogTimeoutUnit;
     private Runtime runtime;
     private boolean moduleDiscovery;
-    private boolean apolloCompat;
     private boolean shutdownInterrupt;
     private boolean cliHelp;
 
     BuilderImpl(
         String serviceName,
         ImmutableSet.Builder<ApolloModule> moduleBuilder,
-        Runtime runtime,
+        String envVarPrefix,
+        long watchdogTimeout, TimeUnit watchdogTimeoutUnit, Runtime runtime,
         boolean moduleDiscovery,
-        boolean apolloCompat,
         boolean shutdownInterrupt,
         boolean cliHelp) {
       this.serviceName = Objects.requireNonNull(serviceName);
       this.moduleBuilder = moduleBuilder;
+      this.envVarPrefix = envVarPrefix;
+      this.watchdogTimeout = watchdogTimeout;
+      this.watchdogTimeoutUnit = watchdogTimeoutUnit;
       this.runtime = runtime;
       this.moduleDiscovery = moduleDiscovery;
-      this.apolloCompat = apolloCompat;
       this.shutdownInterrupt = shutdownInterrupt;
       this.cliHelp = cliHelp;
-    }
-
-    @Override
-    public Builder apolloCompatibilityMode(boolean enabled) {
-      this.apolloCompat = enabled;
-      return this;
     }
 
     @Override
@@ -467,6 +443,19 @@ class ServiceImpl implements Service {
     @Override
     public Builder withCliHelp(boolean enabled) {
       this.cliHelp = enabled;
+      return this;
+    }
+
+    @Override
+    public Builder withEnvVarPrefix(String prefix) {
+      this.envVarPrefix = prefix;
+      return this;
+    }
+
+    @Override
+    public Builder withWatchdogTimeout(long timeout, TimeUnit unit) {
+      watchdogTimeout = timeout;
+      watchdogTimeoutUnit = unit;
       return this;
     }
 
@@ -491,8 +480,8 @@ class ServiceImpl implements Service {
     @Override
     public Service build() {
       return new ServiceImpl(
-          serviceName, moduleBuilder.build(), runtime, moduleDiscovery,
-          apolloCompat, shutdownInterrupt, cliHelp);
+          serviceName, moduleBuilder.build(), envVarPrefix, watchdogTimeout, watchdogTimeoutUnit,
+          runtime, moduleDiscovery, shutdownInterrupt, cliHelp);
     }
   }
 
@@ -536,11 +525,17 @@ class ServiceImpl implements Service {
     private final Signaller signaller;
     private final AtomicBoolean started;
     private final CountDownLatch stopped;
+    private final long watchdogTimeout;
+    private final TimeUnit watchdogTimeoutUnit;
 
-    public Reaper(Signaller signaller, AtomicBoolean started, CountDownLatch stopped) {
+    public Reaper(Signaller signaller, AtomicBoolean started, CountDownLatch stopped,
+                  long watchdogTimeout,
+                  TimeUnit watchdogTimeoutUnit) {
       this.signaller = signaller;
       this.started = started;
       this.stopped = stopped;
+      this.watchdogTimeout = watchdogTimeout;
+      this.watchdogTimeoutUnit = watchdogTimeoutUnit;
     }
 
     @Override
@@ -548,10 +543,9 @@ class ServiceImpl implements Service {
       if (started.get()) {
         signaller.signalShutdown();
         try {
-          // The service gets one minute to shut down.  We can't wait forever here because that
+          // The service gets some time to shut down.  We can't wait forever here because that
           // will dead-lock the JVM, forcing us to SIGKILL
-          // this should be configurable, perhaps
-          stopped.await(1, TimeUnit.MINUTES);
+          stopped.await(watchdogTimeout, watchdogTimeoutUnit);
         } catch (InterruptedException e) {
           LOG.error("Interrupted while doing Apollo shutdown", e);
           Thread.currentThread().interrupt();
