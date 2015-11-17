@@ -20,10 +20,13 @@
         implement restful API services.
       </p>
 
-      <p>
-        Within Spotify, Apollo has been powering backend services for
-        a long time. As part of its upcoming 1.0 release, the development of
-        Apollo has been moved into the open.
+      <!-- <p>
+        Apollo has been used in production at Spotify for a long time. 
+        As a part of the work to release version 1.0.0 we are moving the development of Apollo in to the open. 
+      </p> -->
+
+      <p class="warning">
+        Open-source Apollo is still in development and only release candidates are available. The API and documentation might change prior to the stable 1.0.0 open source release.
       </p>
 
       <p>
@@ -109,7 +112,7 @@
     <pre><code class="java">public final class App {
 
     public static void main(String[] args) throws LoadingException {
-        StandaloneService.boot(App::init, "my-app", args);
+        HttpService.boot(App::init, "my-app", args);
     }
 
     static void init(Environment environment) {
