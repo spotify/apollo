@@ -61,7 +61,7 @@ public class MetaDescriptor {
     }
 
     return new MetaDescriptor(
-        Descriptor.create("com.spotify", serviceName, version),
+        Descriptor.create(serviceName, version),
         apolloVersion);
   }
 
