@@ -69,7 +69,7 @@ The decoration chain looks like:
 
 1. [`OutgoingCallsGatheringClient`](../apollo-api-impl/src/main/java/com/spotify/apollo/meta/OutgoingCallsGatheringClient.java)
 1. [`ServiceSettingClient`](../apollo-environment/src/main/java/com/spotify/apollo/environment/ServiceSettingClient.java)
-1. `[IncomingRequestAwareClient]*` <- [`Set<ClientDecorator>`](../apollo-api-impl/src/main/java/com/spotify/apollo/environment/ClientDecorator.java)
+1. [`[IncomingRequestAwareClient]*`](../apollo-api-impl/src/main/java/com/spotify/apollo/environment/IncomingRequestAwareClient.java) <- [`Set<ClientDecorator>`](../apollo-api-impl/src/main/java/com/spotify/apollo/environment/ClientDecorator.java)
 1. [`NoopClient`](../apollo-environment/src/main/java/com/spotify/apollo/environment/NoopClient.java)
 
 
