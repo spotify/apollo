@@ -51,3 +51,63 @@ public static void main(String[] args) {
 
 For a runnable example, see [`MinimalRunner`]
 (../apollo-http-service/src/test/java/com/spotify/apollo/httpservice/MinimalRunner.java)
+
+
+## Extending incoming/outgoing request handling
+
+`ApolloEnvironmentModule` has a few extension points that allow 3rd party modules to
+decorate internal components involved in incoming/outgoing request handling.
+
+
+### IncomingRequestAwareClient
+One important aspect of the Apollo `Client` is that it does not come with any protocol
+support out of the box. Instead, support for different protocols should be added by
+modules. These modules do so by injecting themselves into the `IncomingRequestAwareClient`
+decoration chain.
+
+The decoration chain looks like:
+
+1. `OutgoingCallsGatheringClient`
+1. `ServiceSettingClient`
+1. `[IncomingRequestAwareClient]* <- Set<ClientDecorator>`
+1. `NoopClient`
+
+
+### RequestRunnableFactory
+
+1. `[RequestRunnableFactory]*   <- Set<RequestRunnableFactoryDecorator>`
+1. `RequestRunnableImpl`
+
+
+### EndpointRunnableFactory
+
+1. `TrackingEndpointRunnableFactory`
+1. `[EndpointRunnableFactory]*  <- Set<EndpointRunnableFactoryDecorator>`
+1. `EndpointInvocationHandler`
+
+
+### RequestHandler
+This is what is ultimately created from the `ApolloEnvironmentModule`. It will use
+the `RequestRunnableFactory`, `EndpointRunnableFactory` and `IncomingRequestAwareClient`
+decoration chains that were constructed above. See `RequestHandlerImpl` for how they are
+used, but in short terms it's something like:
+
+```java
+RequestHandler requestHandler = ongoingRequest ->
+    rrf.create(ongoingRequest).run((ongoingRequest, match) ->
+        erf.create(ongoingRequest, requestContext, endpoint).run());
+```
+
+
+### Injecting decorators
+To contribute to any of the sets of decorators mentioned above, use Guice Multibinder.
+
+Here's an example of how a `ClientDecorator` is injected:
+
+```java
+@Override
+protected void configure() {
+  Multibinder.newSetBinder(binder(), ClientDecorator.class)
+      .addBinding().toProvider(HttpClientDecoratorProvider.class);
+}
+```
