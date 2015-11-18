@@ -52,7 +52,7 @@ service we have an additional library called [apollo-test](apollo-test). It has 
 a service for testing, and to mock outgoing request responses.
 
 ### Getting Started with Apollo
-Apollo is distributed as a set of Maven artifacts, which makes it easy to get started no matter the build tool; Maven, Ant + Ivy or Gradle. Below is a very simple but functional service — more extensive examples are available in the [examples](examples) directory.
+Apollo will be distributed as a set of Maven artifacts, which makes it easy to get started no matter the build tool; Maven, Ant + Ivy or Gradle. Below is a very simple but functional service — more extensive examples are available in the [examples](examples) directory. Until these are released, you can build and install Apollo from source by running `mvn install`.
 
 ```java
 public final class App {
