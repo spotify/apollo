@@ -60,37 +60,40 @@ decorate internal components involved in incoming/outgoing request handling.
 
 
 ### IncomingRequestAwareClient
-One important aspect of the Apollo `Client` is that it does not come with any protocol
-support out of the box. Instead, support for different protocols should be added by
-modules. These modules do so by injecting themselves into the `IncomingRequestAwareClient`
-decoration chain.
+One important aspect of the Apollo [`Client`](../apollo-api/src/main/java/com/spotify/apollo/Client.java)
+is that it does not come with any protocol support out of the box. Instead, support for
+different protocols should be added by modules. These modules do so by injecting themselves
+into the [`IncomingRequestAwareClient`](../apollo-api-impl/src/main/java/com/spotify/apollo/environment/IncomingRequestAwareClient.java) decoration chain.
 
 The decoration chain looks like:
 
-1. `OutgoingCallsGatheringClient`
-1. `ServiceSettingClient`
-1. `[IncomingRequestAwareClient]* <- Set<ClientDecorator>`
-1. `NoopClient`
+1. [`OutgoingCallsGatheringClient`](../apollo-api-impl/src/main/java/com/spotify/apollo/meta/OutgoingCallsGatheringClient.java)
+1. [`ServiceSettingClient`](../apollo-environment/src/main/java/com/spotify/apollo/environment/ServiceSettingClient.java)
+1. `[IncomingRequestAwareClient]*` <- [`Set<ClientDecorator>`](../apollo-api-impl/src/main/java/com/spotify/apollo/environment/ClientDecorator.java)
+1. [`NoopClient`](../apollo-environment/src/main/java/com/spotify/apollo/environment/NoopClient.java)
 
 
 ### RequestRunnableFactory
 
-1. `[RequestRunnableFactory]*   <- Set<RequestRunnableFactoryDecorator>`
-1. `RequestRunnableImpl`
+1. [`[RequestRunnableFactory]*`](../apollo-api-impl/src/main/java/com/spotify/apollo/request/RequestRunnableFactory.java) <- [`Set<RequestRunnableFactoryDecorator>`](../apollo-environment/src/main/java/com/spotify/apollo/environment/RequestRunnableFactoryDecorator.java)
+1. [`RequestRunnableImpl`](../apollo-api-impl/src/main/java/com/spotify/apollo/request/RequestRunnableImpl.java)
 
 
 ### EndpointRunnableFactory
 
-1. `TrackingEndpointRunnableFactory`
-1. `[EndpointRunnableFactory]*  <- Set<EndpointRunnableFactoryDecorator>`
-1. `EndpointInvocationHandler`
+1. [`TrackingEndpointRunnableFactory`](../apollo-api-impl/src/main/java/com/spotify/apollo/request/TrackingEndpointRunnableFactory.java)
+1. [`[EndpointRunnableFactory]*`](../apollo-api-impl/src/main/java/com/spotify/apollo/request/EndpointRunnableFactory.java) <- [`Set<EndpointRunnableFactoryDecorator>`](../apollo-environment/src/main/java/com/spotify/apollo/environment/EndpointRunnableFactoryDecorator.java)
+1. [`EndpointInvocationHandler`](../apollo-api-impl/src/main/java/com/spotify/apollo/dispatch/EndpointInvocationHandler.java)
 
 
 ### RequestHandler
-This is what is ultimately created from the `ApolloEnvironmentModule`. It will use
-the `RequestRunnableFactory`, `EndpointRunnableFactory` and `IncomingRequestAwareClient`
-decoration chains that were constructed above. See `RequestHandlerImpl` for how they are
-used, but in short terms it's something like:
+This is what is ultimately created from the
+[`ApolloEnvironmentModule`](../apollo-environment/src/main/java/com/spotify/apollo/environment/ApolloEnvironmentModule.java). It will use the
+[`RequestRunnableFactory`](../apollo-api-impl/src/main/java/com/spotify/apollo/request/RequestRunnableFactory.java),
+[`EndpointRunnableFactory`](../apollo-api-impl/src/main/java/com/spotify/apollo/request/EndpointRunnableFactory.java)
+and [`IncomingRequestAwareClient`](../apollo-api-impl/src/main/java/com/spotify/apollo/environment/IncomingRequestAwareClient.java)
+decoration chains that were constructed above. See [`RequestHandlerImpl`](../apollo-api-impl/src/main/java/com/spotify/apollo/request/RequestHandlerImpl.java)
+for how they are used, but in short terms it's something like:
 
 ```java
 RequestHandler requestHandler = ongoingRequest ->
