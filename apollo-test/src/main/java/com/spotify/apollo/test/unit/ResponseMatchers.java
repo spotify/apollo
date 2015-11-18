@@ -154,7 +154,8 @@ public final class ResponseMatchers {
         if (!payload.isPresent()) {
           mismatchDescription.appendText("there is no payload");
         } else {
-          mismatchDescription.appendText("payload is ").appendValue(payload.get());
+          mismatchDescription.appendText("payload ");
+          payloadMatcher.describeMismatch(payload.get(), mismatchDescription);
         }
       }
     };
