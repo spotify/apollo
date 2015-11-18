@@ -23,6 +23,7 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 
 import com.spotify.apollo.RequestContext;
+import com.spotify.apollo.request.EndpointRunnableFactory;
 import com.spotify.apollo.request.OngoingRequest;
 
 import org.slf4j.Logger;
@@ -33,15 +34,24 @@ import java.util.concurrent.CompletionException;
 import static com.spotify.apollo.Response.forStatus;
 import static com.spotify.apollo.Status.INTERNAL_SERVER_ERROR;
 
-public class EndpointInvocationHandler {
+public class EndpointInvocationHandler implements EndpointRunnableFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(EndpointInvocationHandler.class);
+
+  @Override
+  public Runnable create(
+      OngoingRequest ongoingRequest,
+      RequestContext requestContext,
+      Endpoint endpoint) {
+
+    return () -> handle(ongoingRequest, requestContext, endpoint);
+  }
 
   /**
    * Fires off the request processing asynchronously - that is, this method is likely to return
    * before the request processing finishes.
    */
-  public void handle(OngoingRequest ongoingRequest, RequestContext requestContext, Endpoint endpoint) {
+  void handle(OngoingRequest ongoingRequest, RequestContext requestContext, Endpoint endpoint) {
     try {
       endpoint.invoke(requestContext)
           .whenComplete((message, throwable) -> {

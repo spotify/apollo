@@ -24,9 +24,6 @@ import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.request.OngoingRequest;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,7 +52,6 @@ public class EndpointInvocationHandlerTest {
   EndpointInvocationHandler handler;
 
   @Mock private OngoingRequest ongoingRequest;
-  private Request requestMessage;
 
   @Mock private RequestContext requestContext;
   @Mock private Endpoint endpoint;
@@ -69,10 +65,9 @@ public class EndpointInvocationHandlerTest {
   public void setUp() throws Exception {
     handler = new EndpointInvocationHandler();
 
-    requestMessage = Request.forUri("http://foo/bar").withService("nameless-registry");
+    Request requestMessage = Request.forUri("http://foo/bar").withService("nameless-registry");
 
     when(ongoingRequest.request()).thenReturn(requestMessage);
-
     when(requestContext.request()).thenReturn(requestMessage);
     future = new CompletableFuture<>();
   }
@@ -170,19 +165,5 @@ public class EndpointInvocationHandlerTest {
 
     assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
         containsString(exception.getMessage()));
-  }
-
-  private Matcher<String> nullOrEmpty() {
-    return new BaseMatcher<String>() {
-      @Override
-      public boolean matches(Object item) {
-        return item == null || (item instanceof String) && ((String) item).isEmpty();
-      }
-
-      @Override
-      public void describeTo(Description description) {
-        description.appendText("a null or empty string");
-      }
-    };
   }
 }
