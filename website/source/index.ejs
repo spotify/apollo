@@ -15,9 +15,9 @@
 
       <p>
         Apollo is a set of Java libraries that we use at Spotify when
-        writing micro-services. Apollo includes modules such as an
+        writing micro-services. Apollo includes features such as an
         HTTP server and a URI routing system, making it trivial to
-        implement restful API services.
+        implement RESTful services.
       </p>
 
       <!-- <p>
@@ -30,15 +30,10 @@
       </p>
 
       <p>
-        There are three main libraries in Apollo:
+        Apollo has three main parts:
       </p>
 
       <ol>
-        <li>
-          <a href="https://github.com/spotify/apollo/tree/master/apollo-http-service">
-            apollo-http-service
-          </a>
-        </li>
         <li>
           <a href="https://github.com/spotify/apollo/tree/master/apollo-api">
             apollo-api
@@ -49,10 +44,32 @@
             apollo-core
           </a>
         </li>
+        <li>
+          <a href="https://github.com/spotify/apollo/tree/master/apollo-http-service">
+            apollo-http-service
+          </a>
+        </li>
       </ol>
     </div>
 
     <div>
+      <h3>Apollo API</h3>
+
+      <p>
+        The apollo-api library defines the interfaces for your request routing
+        and request/reply handlers.
+      </p>
+
+      <h3>Apollo Core</h3>
+
+      <p>
+        The apollo-core library manages the lifecycle (loading,
+        starting, and stopping) of your service and defines a powerful module system for adding
+        functionality to an Apollo assembly. You do not usually
+        need to interact directly with apollo-core; think of it merely
+        as “plumbing.”
+      </p>
+
       <h3>Apollo HTTP Service</h3>
 
       <p>
@@ -61,22 +78,6 @@
         apollo-core and ties them together with several other useful
         modules to get a standard api service using HTTP for incoming
         and outgoing communication.
-      </p>
-
-      <h3>Apollo API</h3>
-
-      <p>
-        The apollo-api library gives you the tools you need to define
-        your service routes and your request/reply handlers.
-      </p>
-
-      <h3>Apollo Core</h3>
-
-      <p>
-        The apollo-core library manages the lifecycle (loading,
-        starting, and stopping) of your service. You do not usually
-        need to interact directly with apollo-core; think of it merely
-        as “plumbing.”
       </p>
     </div>
   </div>
