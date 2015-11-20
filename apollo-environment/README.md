@@ -15,7 +15,7 @@ server module (for example the [`jetty-http-server`](../modules/jetty-http-serve
 
 key | type | required | note
 --- | --- | --- | ---
-`apollo.backend` | string | optional | eg., `example.org`
+`apollo.domain` | string | optional | eg., `example.org`
 `apollo.logIncomingRequests` | boolean | optional | default `true`
 
 
