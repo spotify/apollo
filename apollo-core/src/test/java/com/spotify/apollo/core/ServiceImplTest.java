@@ -77,7 +77,7 @@ public class ServiceImplTest {
     Service service = ServiceImpl.builder("test").build();
 
     try (Service.Instance instance = service
-        .start(new String[]{}, ImmutableMap.of("SPOTIFY_A_B", "value"))) {
+        .start(new String[]{}, ImmutableMap.of("APOLLO_A_B", "value"))) {
       assertThat(instance.getConfig().getString("a.b"), is("value"));
     }
   }
@@ -97,7 +97,7 @@ public class ServiceImplTest {
     Service service = ServiceImpl.builder("test").build();
 
     try (Service.Instance instance = service
-        .start(new String[]{}, ImmutableMap.of("SPOTIFY___A_B", "value"))) {
+        .start(new String[]{}, ImmutableMap.of("APOLLO___A_B", "value"))) {
       assertThat(instance.getConfig().getString("_a.b"), is("value"));
     }
   }
@@ -107,7 +107,7 @@ public class ServiceImplTest {
     Service service = ServiceImpl.builder("test").build();
 
     try (Service.Instance instance = service
-        .start(new String[]{}, ImmutableMap.of("SPOTIFY_A___B__C______D_____E__", "value"))) {
+        .start(new String[]{}, ImmutableMap.of("APOLLO_A___B__C______D_____E__", "value"))) {
       assertThat(instance.getConfig().getString("a._b_c___d.__e_"), is("value"));
     }
   }

@@ -227,7 +227,7 @@ public class ServiceHelper implements TestRule, Closeable {
    * @return This ServiceHelper instance
    */
   public ServiceHelper domain(String domain) {
-    return conf(Services.CommonConfigKeys.APOLLO_BACKEND.getKey(), domain);
+    return conf(Services.CommonConfigKeys.APOLLO_DOMAIN.getKey(), domain);
   }
 
   /**
