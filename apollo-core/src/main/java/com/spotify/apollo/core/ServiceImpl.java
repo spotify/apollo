@@ -80,6 +80,7 @@ class ServiceImpl implements Service {
   // NOTE: assumes that there is 3 levels between OFF and the default logging level.  The
   // alternative is to somehow let the logging lib inform what this number should be...
   private static final int LOGGING_OFF_OFFSET = -3;
+  private static final String ENV_VAR_PREFIX = "APOLLO";
 
   private final String serviceName;
   private final ImmutableSet<ApolloModule> modules;
@@ -418,7 +419,7 @@ class ServiceImpl implements Service {
 
   static Builder builder(String serviceName) {
     return new BuilderImpl(
-        serviceName, ImmutableSet.builder(), "SPOTIFY", 1, TimeUnit.MINUTES, Runtime.getRuntime(),
+        serviceName, ImmutableSet.builder(), ENV_VAR_PREFIX, 1, TimeUnit.MINUTES, Runtime.getRuntime(),
         false, false, true);
   }
 

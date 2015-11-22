@@ -136,7 +136,7 @@ public class ApolloEnvironmentModuleTest {
   public void shouldSetUpConfig() throws Exception {
     final AtomicReference<Environment> envReference = new AtomicReference<>();
 
-    final Map<String, String> env = ImmutableMap.of("SPOTIFY_APOLLO_BACKEND", "my-domain");
+    final Map<String, String> env = ImmutableMap.of("APOLLO_APOLLO_DOMAIN", "my-domain");
 
     try (Service.Instance i = service.build().start(ZERO_ARGS, env)) {
       final ApolloEnvironment environment = ApolloEnvironmentModule.environment(i);

@@ -55,6 +55,7 @@ public final class Services {
     APOLLO("apollo"),
     APOLLO_COMMAND("apollo.command"),
     APOLLO_BACKEND("apollo.backend"),
+    APOLLO_DOMAIN("apollo.domain"),
     APOLLO_ARGS_CORE("apollo.args.core"),
     APOLLO_ARGS_UNPARSED("apollo.args.unparsed");
 
