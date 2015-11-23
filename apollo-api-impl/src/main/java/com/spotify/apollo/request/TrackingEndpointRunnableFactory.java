@@ -48,7 +48,7 @@ class TrackingEndpointRunnableFactory implements EndpointRunnableFactory {
 
     incomingCallsGatherer.gatherIncomingCall(ongoingRequest, endpoint);
 
-    final TrackedOngoingRequest trackedRequest =
+    final OngoingRequest trackedRequest =
         new TrackedOngoingRequestImpl(ongoingRequest, requestTracker);
 
     return delegate.create(trackedRequest, requestContext, endpoint);

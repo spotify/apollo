@@ -23,7 +23,6 @@ import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 
-import java.io.IOException;
 import java.util.concurrent.CompletionStage;
 
 import okio.ByteString;

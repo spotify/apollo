@@ -52,8 +52,6 @@ public interface Service {
    * @return a new instance of this service that is up and running.
    * @throws ApolloHelpException   if the user wants to show command-line help and not start the
    *                               application.
-   * @throws ApolloCompatException if Apollo compatibility mode was requested but the command line
-   *                               was not in the Apollo format.
    * @throws ApolloCliException    if something else related to CLI parsing failed.
    * @throws java.io.IOException   if the application could not start for some other reason.
    */
@@ -70,8 +68,6 @@ public interface Service {
    * @return a new instance of this service that is up and running.
    * @throws ApolloHelpException   if the user wants to show command-line help and not start the
    *                               application.
-   * @throws ApolloCompatException if Apollo compatibility mode was requested but the command line
-   *                               was not in the Apollo format.
    * @throws ApolloCliException    if something else related to CLI parsing failed.
    * @throws java.io.IOException   if the application could not start for some other reason.
    */
@@ -87,8 +83,6 @@ public interface Service {
    * @return a new instance of this service that is up and running.
    * @throws ApolloHelpException   if the user wants to show command-line help and not start the
    *                               application.
-   * @throws ApolloCompatException if Apollo compatibility mode was requested but the command line
-   *                               was not in the Apollo format.
    * @throws ApolloCliException    if something else related to CLI parsing failed.
    * @throws java.io.IOException   if the application could not start for some other reason.
    */
@@ -144,8 +138,8 @@ public interface Service {
 
     /**
      * Sets the prefix that is used to convert environment variables into configuration keys.  By
-     * default, the prefix is {@code "SPOTIFY"}, which means that an environment variable like
-     * {@code "SPOTIFY_DOMAIN_NAME"} is translated into the config key {@code "domain.name"}.
+     * default, the prefix is {@code "APOLLO"}, which means that an environment variable like
+     * {@code "APOLLO_DOMAIN_NAME"} is translated into the config key {@code "domain.name"}.
      *
      * @param prefix The environment variable prefix to use.
      * @return This builder.

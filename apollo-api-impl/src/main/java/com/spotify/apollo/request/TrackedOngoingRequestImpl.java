@@ -23,15 +23,11 @@ import com.spotify.apollo.Response;
 
 import okio.ByteString;
 
-class TrackedOngoingRequestImpl
-    extends ForwardingOngoingRequest
-    implements TrackedOngoingRequest {
+class TrackedOngoingRequestImpl extends ForwardingOngoingRequest {
 
   private final RequestTracker requestTracker;
 
-  TrackedOngoingRequestImpl(
-      OngoingRequest ongoingRequest,
-      RequestTracker requestTracker) {
+  TrackedOngoingRequestImpl(OngoingRequest ongoingRequest, RequestTracker requestTracker) {
     super(ongoingRequest);
     this.requestTracker = requestTracker;
 
@@ -49,10 +45,6 @@ class TrackedOngoingRequestImpl
     if (removed) {
       super.drop();
     }
-  }
-
-  @Override
-  public void incrementDownstreamRequests() {
   }
 
   private boolean doReply(Response<ByteString> message) {

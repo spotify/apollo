@@ -409,10 +409,6 @@ class ServiceImpl implements Service {
     return config;
   }
 
-  private static boolean flag(String arg) {
-    return arg.startsWith("-");
-  }
-
   static Config appendConfig(Config config, String key, Object value, String description) {
     return config.withValue(key, ConfigValueFactory.fromAnyRef(value, description));
   }
