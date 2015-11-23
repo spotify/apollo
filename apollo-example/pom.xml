@@ -10,7 +10,7 @@
     </description>
     <groupId>com.spotify</groupId>
     <artifactId>apollo-example</artifactId>
-    <version>1.0.0-rc3-foss-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <dependencyManagement>
@@ -18,7 +18,7 @@
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-bom</artifactId>
-                <version>1.0.0-rc3-foss-SNAPSHOT</version>
+                <version>1.0.0-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
