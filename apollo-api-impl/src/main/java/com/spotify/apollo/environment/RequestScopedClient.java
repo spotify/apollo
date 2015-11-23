@@ -22,9 +22,7 @@ package com.spotify.apollo.environment;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
-import com.spotify.apollo.environment.IncomingRequestAwareClient;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 

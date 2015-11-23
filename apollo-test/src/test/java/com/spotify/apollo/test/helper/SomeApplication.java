@@ -19,10 +19,9 @@
  */
 package com.spotify.apollo.test.helper;
 
+import com.spotify.apollo.Client;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.Request;
-import com.spotify.apollo.Client;
-import com.spotify.apollo.environment.ConfigUtil;
 import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Route;
 import com.spotify.apollo.route.RouteProvider;
@@ -30,7 +29,7 @@ import com.spotify.apollo.route.RouteProvider;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Stream;
 
-import static com.spotify.apollo.environment.ConfigUtil.*;
+import static com.spotify.apollo.environment.ConfigUtil.optionalString;
 import static com.spotify.apollo.route.Route.async;
 import static com.spotify.apollo.route.Route.sync;
 

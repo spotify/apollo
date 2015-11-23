@@ -24,7 +24,6 @@ import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.Objects;
 import java.util.Optional;

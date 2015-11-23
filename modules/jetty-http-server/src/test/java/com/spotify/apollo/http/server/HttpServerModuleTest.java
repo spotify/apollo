@@ -145,8 +145,8 @@ public class HttpServerModuleTest {
 
   Service service() {
     return Services.usingName("test")
-          .withModule(HttpServerModule.create())
-          .build();
+        .withModule(HttpServerModule.create())
+        .build();
   }
 
   Config onPort(int port) {

@@ -19,7 +19,6 @@
  */
 package com.spotify.apollo;
 
-import java.io.Closeable;
 import java.util.concurrent.CompletionStage;
 
 import okio.ByteString;
