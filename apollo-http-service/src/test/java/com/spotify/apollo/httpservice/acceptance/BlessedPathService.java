@@ -58,7 +58,7 @@ public class BlessedPathService implements AppInit {
   public void create(Environment environment) {
     LOG.info("starting");
     environment.routingEngine()
-        .registerSafeRoutes(routes())
+        .registerRoutes(routes())
         .registerAutoRoute(
             Route.sync("GET", "/route2/<arg>", new MyHandler("Direct"))) // will use the apollo default serializer
         .registerAutoRoute(
