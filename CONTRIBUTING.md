@@ -16,17 +16,15 @@ Ok, so now you can write some code. Have fun!
 
 ### 4. Add tests for your feature. Make the tests pass:
 
-    mvn verify
+    mvn -Pcoverage verify
     
 ### 5. Write documentation
 
 Make sure to document your feature in the relevant places (Javadoc comments, README files, etc).
 
-### 6. Briefly describe your change in the CHANGELOG.md file under HEAD
+### 6. Push to your fork and [submit a pull request][pr].
 
-This makes sure we announce the change in the next release.
-
-### 7. Push to your fork and [submit a pull request][pr].
+Make sure the PR text mentions the motivation and details for your change.
 
 [pr]: https://github.com/spotify/apollo/compare/
 
