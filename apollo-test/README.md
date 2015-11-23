@@ -37,7 +37,7 @@ our application under test
 class MinimalApp {
 
   static void main(String[] args) throws LoadingException {
-    StandaloneService.boot(MinimalApp::init, "test", args);
+    HttpService.boot(MinimalApp::init, "test", args);
   }
 
   static void init(Environment environment) {
