@@ -79,10 +79,10 @@ using `-D` command-line options.  For example, `-Ddomain=example.org`
 sets the `domain` config key to `example.org`.
 
 Apollo Core also considers environment variables of the form
-`SPOTIFY_X_Y=ab`.  These are translated into configuration keys
-of the form `x.y=ab`.  The values of the environment variables are
-treated as strings and copied verbatim; no special syntax is
-supported.
+`APOLLO_X_Y=ab`, where the `APOLLO` prefix is [configurable with `Service.Builder.withEnvVarPrefix()`](src/main/java/com/spotify/apollo/core/Service.java).
+These are translated into configuration keys of the form `x.y=ab`.
+The values of the environment variables are treated as strings and
+copied verbatim; no special syntax is supported.
 
 ### Logging configuration
 
