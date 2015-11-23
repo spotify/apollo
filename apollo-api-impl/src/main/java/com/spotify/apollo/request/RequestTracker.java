@@ -51,7 +51,7 @@ public class RequestTracker implements Closeable {
               .setNameFormat("apollo-request-reaper")
               .build());
 
-  private final Set<TrackedOngoingRequest> outstanding = ConcurrentHashMap.newKeySet();
+  private final Set<OngoingRequest> outstanding = ConcurrentHashMap.newKeySet();
 
   private final ScheduledFuture<?> future;
 
@@ -61,11 +61,11 @@ public class RequestTracker implements Closeable {
     this.future = TRACKER_EXECUTOR.scheduleWithFixedDelay(this::reap, 10, 10, TimeUnit.MILLISECONDS);
   }
 
-  public void register(TrackedOngoingRequest request) {
+  public void register(OngoingRequest request) {
     outstanding.add(request);
   }
 
-  public boolean remove(TrackedOngoingRequest request) {
+  public boolean remove(OngoingRequest request) {
     return this.outstanding.remove(request);
   }
 
@@ -85,7 +85,7 @@ public class RequestTracker implements Closeable {
   void reap() {
     outstanding.stream()
         // Drop expired requests
-        .filter(TrackedOngoingRequest::isExpired)
+        .filter(OngoingRequest::isExpired)
         .forEach(
             request -> {
               LOG.warn("Dropping expired request: {}", request);
@@ -97,8 +97,8 @@ public class RequestTracker implements Closeable {
    * Fail all outstanding requests.
    */
   private void failRequests() {
-    final Set<TrackedOngoingRequest> requests = ImmutableSet.copyOf(outstanding);
-    for (TrackedOngoingRequest id : requests) {
+    final Set<OngoingRequest> requests = ImmutableSet.copyOf(outstanding);
+    for (OngoingRequest id : requests) {
       final boolean removed = outstanding.remove(id);
       if (removed) {
         id.reply(Response.forStatus(Status.SERVICE_UNAVAILABLE));

@@ -24,28 +24,39 @@ import com.spotify.apollo.Response;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class TrackedOngoingRequestImplTest {
 
-  private RequestTracker tracker = new RequestTracker();
+  @Mock OngoingRequest ongoingRequest;
+  @Mock RequestTracker requestTracker;
+
+  RequestTracker tracker = new RequestTracker();
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    when(ongoingRequest.request()).thenReturn(Request.forUri("http://service/path"));
+    when(ongoingRequest.isExpired()).thenReturn(false);
+  }
 
+  @Test
+  public void shouldRegisterWithRequestTracker() throws Exception {
+    OngoingRequest tr = new TrackedOngoingRequestImpl(ongoingRequest, requestTracker);
+
+    verify(requestTracker).register(eq(tr));
   }
 
   @Test
   public void shouldNotReplyIfNotTracked() throws Exception {
-    Request requestMessage = Request.forUri("http://service/path");
-    OngoingRequest ongoingRequest = mock(OngoingRequest.class);
-    when(ongoingRequest.request()).thenReturn(requestMessage);
-    when(ongoingRequest.isExpired()).thenReturn(false);
-
-    final TrackedOngoingRequest trackedOngoingRequest =
+    final OngoingRequest trackedOngoingRequest =
         new TrackedOngoingRequestImpl(ongoingRequest, tracker);
 
     tracker.remove(trackedOngoingRequest);
@@ -53,5 +64,4 @@ public class TrackedOngoingRequestImplTest {
 
     verifyNoMoreInteractions(ongoingRequest);
   }
-
 }
