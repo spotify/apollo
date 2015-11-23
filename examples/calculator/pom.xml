@@ -5,8 +5,8 @@
     <name>Spotify Apollo Example Calculator App</name>
     <description>A simple calculator application</description>
     <groupId>com.spotify</groupId>
-    <artifactId>calculator-service</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <artifactId>calculator-example-service</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <dependencyManagement>
