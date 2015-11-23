@@ -25,6 +25,13 @@
         <module>modules/slack</module>
         <module>modules/jetty-http-server</module>
         <module>modules/okhttp-client</module>
+
+        <!-- include examples as modules, to get them built and verified -->
+        <!-- NOTE: they configure the maven-deploy-plugin to skip deployment -->
+        <!-- TODO: should separate ci builds be set up for each independent group of artifacts? -->
+        <!-- (api, impl, modules, assemblies, examples, ...) -->
+        <module>apollo-example</module>
+        <module>examples/calculator</module>
     </modules>
 
     <properties>
