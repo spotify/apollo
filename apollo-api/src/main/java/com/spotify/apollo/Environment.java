@@ -100,14 +100,14 @@ public interface Environment {
      *
      * @param routeProvider The {@link RouteProvider} to register.
      */
-    RoutingEngine registerRoutes(RouteProvider routeProvider);
+    RoutingEngine registerAutoRoutes(RouteProvider routeProvider);
 
     /**
      * Registers a {@link Route}.
      *
      * @param route The {@link Route} to register.
      */
-    RoutingEngine registerRoute(Route<? extends AsyncHandler<?>> route);
+    RoutingEngine registerAutoRoute(Route<? extends AsyncHandler<?>> route);
 
     /**
      * Registers routes. Apollo will not apply any further Middlewares to the routes.

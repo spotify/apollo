@@ -46,14 +46,14 @@ class SimpleService implements AppInit, ServiceStepdefs.BootedApplication {
     pod = environment.domain();
 
     environment.routingEngine()
-        .registerRoute(
+        .registerAutoRoute(
             Route.sync("GET", "/greet/<arg>",
                        context -> handle(context.request(), context.pathArgs().get("arg")))
                 .withDocString(
                     "Responds with pod and argument.",
                     "Pod, (domain from the app environment) and" +
                     " the call argument are baked into a free-form string."))
-        .registerRoute(
+        .registerAutoRoute(
             Route.sync("GET", "/uriencodingtest/<parameter>",
                         context -> testUri(context.pathArgs().get("parameter"))));
   }

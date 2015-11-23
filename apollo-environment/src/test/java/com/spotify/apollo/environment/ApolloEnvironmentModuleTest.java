@@ -193,7 +193,7 @@ public class ApolloEnvironmentModuleTest {
       final RequestHandler handler = environment.initialize(
           env -> {
             env.routingEngine()
-                .registerRoute(Route.sync("GET", "/", ctx -> "hello"));
+                .registerAutoRoute(Route.sync("GET", "/", ctx -> "hello"));
           });
       assertNotNull(handler);
 

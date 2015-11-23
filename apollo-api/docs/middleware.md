@@ -67,7 +67,7 @@ This middleware can then be used together with route definitions.
 ```java
 static void init(Environment environment) {
   environment.routingEngine()
-      .registerRoute(
+      .registerAutoRoute(
           Route.<SyncHandler<String>>create("GET", "/foo", requestContext -> "hello world")
               .withMiddleware(Small::myMiddleware)
               .withMiddleware(Middleware::syncToAsync))

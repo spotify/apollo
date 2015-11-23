@@ -52,7 +52,7 @@ class RoutingContextImpl implements RoutingContext {
   }
 
   @Override
-  public synchronized RoutingEngine registerRoutes(RouteProvider routeProvider) {
+  public synchronized RoutingEngine registerAutoRoutes(RouteProvider routeProvider) {
     ensureNotBuilt();
 
     routeProvider.routes()
@@ -62,7 +62,7 @@ class RoutingContextImpl implements RoutingContext {
   }
 
   @Override
-  public synchronized RoutingEngine registerRoute(Route<? extends AsyncHandler<?>> route) {
+  public synchronized RoutingEngine registerAutoRoute(Route<? extends AsyncHandler<?>> route) {
     ensureNotBuilt();
 
     addRoute(route.withMiddleware(apolloDefaults()));

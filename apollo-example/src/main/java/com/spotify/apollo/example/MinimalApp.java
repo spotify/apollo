@@ -25,9 +25,9 @@ final class MinimalApp {
 
   static void init(Environment environment) {
     environment.routingEngine()
-        .registerRoute(Route.async("GET", "/beer", MinimalApp::beer))
-        .registerRoute(Route.async("POST", "/beer", MinimalApp::beer)) // don't care about payload
-        .registerRoute(Route.async("GET", "/flaky-beer", MinimalApp::beer)
+        .registerAutoRoute(Route.async("GET", "/beer", MinimalApp::beer))
+        .registerAutoRoute(Route.async("POST", "/beer", MinimalApp::beer)) // don't care about payload
+        .registerAutoRoute(Route.async("GET", "/flaky-beer", MinimalApp::beer)
                        .withMiddleware(flaky(.5f)));
   }
 

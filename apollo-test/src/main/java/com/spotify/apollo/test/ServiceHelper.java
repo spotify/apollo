@@ -98,7 +98,7 @@ import static com.google.common.base.Preconditions.checkState;
  *     // Implements resource "/endpoint" using someObject
  *     RouteProvider endpointResource = new EndpointResource(someObject);
  *     environment.routingEngine()
- *         .registerRoutes(endpointResource);
+ *         .registerAutoRoutes(endpointResource);
  *   }
  *
  *   {@literal @}Test

@@ -59,9 +59,9 @@ public class BlessedPathService implements AppInit {
     LOG.info("starting");
     environment.routingEngine()
         .registerSafeRoutes(routes())
-        .registerRoute(
+        .registerAutoRoute(
             Route.sync("GET", "/route2/<arg>", new MyHandler("Direct"))) // will use the apollo default serializer
-        .registerRoute(
+        .registerAutoRoute(
             Route.async("GET", "/async2/<arg>", new MyAsyncHandler("Direct")));
   }
 

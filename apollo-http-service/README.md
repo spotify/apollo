@@ -107,7 +107,7 @@ public final class Ping {
    */
   static void init(Environment environment) {
     environment.routingEngine()
-        .registerRoute(Route.sync("GET", "/ping", requestContext -> "pong"));
+        .registerAutoRoute(Route.sync("GET", "/ping", requestContext -> "pong"));
   }
 }
 ```

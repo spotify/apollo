@@ -43,7 +43,7 @@ public final class Small {
    */
   static void init(Environment environment) {
     environment.routingEngine()
-        .registerRoute(Route.sync("GET", "/", requestContext -> "hello world"));
+        .registerAutoRoute(Route.sync("GET", "/", requestContext -> "hello world"));
   }
 }
 ```

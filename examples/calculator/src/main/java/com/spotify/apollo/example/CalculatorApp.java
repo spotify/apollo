@@ -31,8 +31,8 @@ final class CalculatorApp {
     SyncHandler<Response<Integer>> addHandler = context -> add(context.request());
 
     environment.routingEngine()
-        .registerRoute(Route.with(exceptionHandler(), "GET", "/add", addHandler))
-        .registerRoute(Route.sync("GET", "/unsafeadd", addHandler));
+        .registerAutoRoute(Route.with(exceptionHandler(), "GET", "/add", addHandler))
+        .registerAutoRoute(Route.sync("GET", "/unsafeadd", addHandler));
   }
 
   /**

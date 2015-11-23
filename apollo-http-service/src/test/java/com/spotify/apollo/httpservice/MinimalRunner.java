@@ -40,7 +40,7 @@ final class MinimalRunner {
 
   public static void app(Environment env) {
     env.routingEngine()
-        .registerRoute(Route.sync("GET", "/", (requestContext) -> "Hello World"));
+        .registerAutoRoute(Route.sync("GET", "/", (requestContext) -> "Hello World"));
 
     env.closer()
         .register(() -> LOG.info("Goodbye World"));

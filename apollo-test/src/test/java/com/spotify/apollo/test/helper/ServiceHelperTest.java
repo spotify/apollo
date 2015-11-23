@@ -82,7 +82,7 @@ public class ServiceHelperTest {
         SomeApplication.create(environment, someService, closeCall);
 
     environment.routingEngine()
-        .registerRoutes(someApplication);
+        .registerAutoRoutes(someApplication);
   }
 
   @AfterClass
