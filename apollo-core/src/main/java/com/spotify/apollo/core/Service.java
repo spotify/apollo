@@ -52,8 +52,6 @@ public interface Service {
    * @return a new instance of this service that is up and running.
    * @throws ApolloHelpException   if the user wants to show command-line help and not start the
    *                               application.
-   * @throws ApolloCompatException if Apollo compatibility mode was requested but the command line
-   *                               was not in the Apollo format.
    * @throws ApolloCliException    if something else related to CLI parsing failed.
    * @throws java.io.IOException   if the application could not start for some other reason.
    */
@@ -70,8 +68,6 @@ public interface Service {
    * @return a new instance of this service that is up and running.
    * @throws ApolloHelpException   if the user wants to show command-line help and not start the
    *                               application.
-   * @throws ApolloCompatException if Apollo compatibility mode was requested but the command line
-   *                               was not in the Apollo format.
    * @throws ApolloCliException    if something else related to CLI parsing failed.
    * @throws java.io.IOException   if the application could not start for some other reason.
    */
@@ -87,8 +83,6 @@ public interface Service {
    * @return a new instance of this service that is up and running.
    * @throws ApolloHelpException   if the user wants to show command-line help and not start the
    *                               application.
-   * @throws ApolloCompatException if Apollo compatibility mode was requested but the command line
-   *                               was not in the Apollo format.
    * @throws ApolloCliException    if something else related to CLI parsing failed.
    * @throws java.io.IOException   if the application could not start for some other reason.
    */
