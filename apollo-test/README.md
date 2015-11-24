@@ -12,6 +12,8 @@ Include the maven dependency in your project pom.xml
   <scope>test</scope>
 </dependency>
 ```
+If you get MethodNotFound exceptions from Hamcrest move this dependency to the top. E.g. mockito and junit
+adds their own (older) versions of hamcrest to the classpath.
 
 
 # Introduction
