@@ -40,7 +40,7 @@ import static org.junit.Assert.fail;
 public class HttpServiceTest {
 
   // we need a static counter in order to be able to use the Class overload of
-  // StandaloneService.boot
+  // HttpService.boot
   static final AtomicInteger counter = new AtomicInteger();
 
   @Rule

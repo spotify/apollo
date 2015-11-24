@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 class LogAndExit implements Thread.UncaughtExceptionHandler {
 
-  // note: using StandaloneService as the class; that's more meaningful than LogAndExit.
+  // note: using HttpService as the class; that's more meaningful than LogAndExit.
   private static final Logger LOG = LoggerFactory.getLogger(HttpService.class);
 
   @Override

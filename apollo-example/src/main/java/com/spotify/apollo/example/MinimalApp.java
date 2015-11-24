@@ -8,8 +8,8 @@ import com.spotify.apollo.Status;
 import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Middleware;
 import com.spotify.apollo.route.Route;
+import com.spotify.apollo.httpservice.HttpService;
 import com.spotify.apollo.httpservice.LoadingException;
-import com.spotify.apollo.httpservice.StandaloneService;
 
 import java.util.concurrent.CompletionStage;
 
@@ -20,7 +20,7 @@ import static java.util.concurrent.CompletableFuture.completedFuture;
 final class MinimalApp {
 
   public static void main(String[] args) throws LoadingException {
-    StandaloneService.boot(MinimalApp::init, "test", args);
+    HttpService.boot(MinimalApp::init, "test", args);
   }
 
   static void init(Environment environment) {

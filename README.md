@@ -58,7 +58,7 @@ Apollo will be distributed as a set of Maven artifacts, which makes it easy to g
 public final class App {
 
     public static void main(String[] args) throws LoadingException {
-        StandaloneService.boot(App::init, "my-app", args);
+        HttpService.boot(App::init, "my-app", args);
     }
 
     static void init(Environment environment) {
