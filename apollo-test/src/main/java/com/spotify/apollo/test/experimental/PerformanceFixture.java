@@ -24,7 +24,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import com.spotify.apollo.test.StubClient;
-import com.spotify.apollo.test.ThreadExceptionHandler;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledExecutorService;

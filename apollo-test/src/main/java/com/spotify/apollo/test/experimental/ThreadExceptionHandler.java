@@ -17,12 +17,12 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.test;
+package com.spotify.apollo.test.experimental;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ThreadExceptionHandler implements Thread.UncaughtExceptionHandler {
+class ThreadExceptionHandler implements Thread.UncaughtExceptionHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThreadExceptionHandler.class);
 
