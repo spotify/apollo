@@ -50,8 +50,8 @@ import static java.util.stream.Collectors.toSet;
  *   com.spotify.apollo.route.VersionedRoute vr = com.spotify.apollo.route.VersionedRoute.of(route).removedIn(2);
  *
  *   environment.routingEngine()
- *      .registerSafeRoutes(versions.expand(Stream.of(vr)))
- *      .registerSafeRoutes(versions.expand(myResource.versionedRoutes()));
+ *      .registerRoutes(versions.expand(Stream.of(vr)))
+ *      .registerRoutes(versions.expand(myResource.versionedRoutes()));
  * }
  */
 public class Versions {

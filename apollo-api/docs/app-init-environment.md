@@ -38,7 +38,7 @@ public class DataService {
     environment.closer().register(cassandraClusterConnection);
 
     RouteProvider addressResource = new AddressResource(responseText);
-    environment.routingEngine().registerRoutes(addressResource);
+    environment.routingEngine().registerAutoRoutes(addressResource);
   }
 
   private static class AddressResource implements RouteProvider {

@@ -64,7 +64,7 @@ public class MetaApplicationTest {
 
   void create(Environment environment) {
     environment.routingEngine()
-        .registerRoutes(app);
+        .registerAutoRoutes(app);
   }
 
   @After

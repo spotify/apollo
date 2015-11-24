@@ -95,26 +95,26 @@ public interface Environment {
      * regarding when to return payloads and set Content-Length headers are respected.
      *
      * This method is convenient but loses type safety due to the way serialization is done. It may
-     * be better to use the {@link #registerSafeRoutes(Stream)} method instead, writing a
+     * be better to use the {@link #registerRoutes(Stream)} method instead, writing a
      * {@link Middleware} that does serialization in a type-safe way.
      *
      * @param routeProvider The {@link RouteProvider} to register.
      */
-    RoutingEngine registerRoutes(RouteProvider routeProvider);
+    RoutingEngine registerAutoRoutes(RouteProvider routeProvider);
 
     /**
      * Registers a {@link Route}.
      *
      * @param route The {@link Route} to register.
      */
-    RoutingEngine registerRoute(Route<? extends AsyncHandler<?>> route);
+    RoutingEngine registerAutoRoute(Route<? extends AsyncHandler<?>> route);
 
     /**
      * Registers routes. Apollo will not apply any further Middlewares to the routes.
      *
      * @param routes The {@link Stream} of {@link Route}s to register.
      */
-    RoutingEngine registerSafeRoutes(
+    RoutingEngine registerRoutes(
         Stream<? extends Route<? extends AsyncHandler<? extends Response<ByteString>>>> routes);
 
     /**
@@ -122,7 +122,7 @@ public interface Environment {
      *
      * @param route The {@link Route} to register.
      */
-    RoutingEngine registerSafeRoute(
+    RoutingEngine registerRoute(
         Route<? extends AsyncHandler<? extends Response<ByteString>>> route);
   }
 }

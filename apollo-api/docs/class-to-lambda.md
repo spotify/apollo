@@ -22,11 +22,11 @@ class ExampleApp implements AppInit {
 
   @Override
   public void create(Environment environment) {
-    // the use of Middleware::syncToAsync is necessary since registerRoute expects a
+    // the use of Middleware::syncToAsync is necessary since registerAutoRoute expects a
     // Route of an AsyncHandler<T> while all of our handlers are SyncHandler<T>
 
     environment.routingEngine()
-        .registerRoute(
+        .registerAutoRoute(
             Route.create("GET", "/ping", new EndpointHandler())
                 .withMiddleware(new CacheHeaderDecorator())
                 .withMiddleware(Middleware::syncToAsync));
@@ -82,7 +82,7 @@ class ExampleApp implements AppInit {
     // infer it in this situation
 
     environment.routingEngine()
-        .registerRoute(
+        .registerAutoRoute(
             Route.<SyncHandler<String>>create("GET", "/ping", requestContext -> "pong")
                 .withMiddleware(new CacheHeaderDecorator())
                 .withMiddleware(Middleware::syncToAsync));
@@ -104,7 +104,7 @@ class ExampleApp implements AppInit {
   @Override
   public void create(Environment environment) {
     environment.routingEngine()
-        .registerRoute(
+        .registerAutoRoute(
             Route.<SyncHandler<String>>create("GET", "/ping", requestContext -> "pong")
                 .withMiddleware(CacheHeaderHandler::new)
                 .withMiddleware(Middleware::syncToAsync));
@@ -140,7 +140,7 @@ class ExampleApp implements AppInit {
   @Override
   public void create(Environment environment) {
     environment.routingEngine()
-        .registerRoute(
+        .registerAutoRoute(
             Route.<SyncHandler<String>>create("GET", "/ping", requestContext -> "pong")
                 .withMiddleware(this::cacheMiddleware)
                 .withMiddleware(Middleware::syncToAsync));

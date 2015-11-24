@@ -43,11 +43,11 @@ public class RoutingEngineTest {
 
   @Test
   public void shouldCompile() throws Exception {
-    routingEngine.registerSafeRoute(Route.async("GET", "/foo", c -> foo()));
-    routingEngine.registerSafeRoute(Route.async("GET", "/bar", c -> bar()));
-    routingEngine.registerSafeRoute(route(c -> foo()));
-    routingEngine.registerSafeRoute(route(c -> bar()));
-    routingEngine.registerSafeRoutes(
+    routingEngine.registerRoute(Route.async("GET", "/foo", c -> foo()));
+    routingEngine.registerRoute(Route.async("GET", "/bar", c -> bar()));
+    routingEngine.registerRoute(route(c -> foo()));
+    routingEngine.registerRoute(route(c -> bar()));
+    routingEngine.registerRoutes(
         Stream.of(
             Route.async("GET", "/foo", c -> foo()),
             Route.async("GET", "/bar", c -> bar()),

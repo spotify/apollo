@@ -42,7 +42,7 @@ class MinimalApp {
 
   static void init(Environment environment) {
     environment.routingEngine()
-        .registerRoute(Route.future("GET", "/beer", (ctx) -> beer(ctx)));
+        .registerAutoRoute(Route.future("GET", "/beer", (ctx) -> beer(ctx)));
   }
 
   static CompletionStage<Response<String>> beer(RequestContext context) {

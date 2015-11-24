@@ -30,7 +30,7 @@ the string `"hello world"`:
 ```java
 public static void init(Environment environment) {
   environment.routingEngine()
-      .registerRoute(Route.sync("GET", "/", requestContext -> "hello world"));
+      .registerAutoRoute(Route.sync("GET", "/", requestContext -> "hello world"));
 }
 ```
 
@@ -63,7 +63,7 @@ public final class App {
 
     static void init(Environment environment) {
         environment.routingEngine()
-            .registerRoute(Route.sync("GET", "/", rc -> "hello world"));
+            .registerAutoRoute(Route.sync("GET", "/", rc -> "hello world"));
     }
  }
 ```

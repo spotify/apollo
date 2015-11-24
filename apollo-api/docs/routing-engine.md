@@ -10,8 +10,8 @@ register [`Route`](/apollo-api/src/main/java/com/spotify/apollo/route/Route.java
 ```java
 void init(Environment environment) {
   environment.routingEngine()
-      .registerRoute(Route.sync("GET", "/ping", requestContext -> "pong"))
-      .registerRoutes(new MyResource());
+      .registerAutoRoute(Route.sync("GET", "/ping", requestContext -> "pong"))
+      .registerAutoRoutes(new MyResource());
 }
 ```
 

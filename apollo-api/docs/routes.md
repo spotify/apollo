@@ -13,9 +13,9 @@ Since `RoutingEngine` expects routes of the type `Route<AsyncHandler<T>>`, both 
 `Route.async` return a `Route<AsyncHandler<T>>` and can thus be directly used for registering
 routes.
 
-A route added with `RoutingEngine.registerRoute(s)()`, or using the `Middlewares::autoSerialize` or
-`Middlewares::apolloDefaults` will serialize its response payload with the `AutoSerializer`.
-Routes added with `RoutingEngine.registerSafeRoutes()` must return `Response<ByteStream>`s, and
+A route added with `RoutingEngine.registerAutoRoute(s)()`, or using the `Middlewares::autoSerialize`
+or `Middlewares::apolloDefaults` will serialize its response payload with the `AutoSerializer`.
+Routes added with `RoutingEngine.registerRoutes()` must return `Response<ByteStream>`s, and
 no further processing will be done.
 
 ## Route handler reply types
@@ -60,7 +60,7 @@ static class BlogPost implements RouteProvider {
 public static void init(Environment environment) {
   // ...
   environment.routingEngine()
-      .registerRoutes(new BlogPost());
+      .registerAutoRoutes(new BlogPost());
 }
 ```
 

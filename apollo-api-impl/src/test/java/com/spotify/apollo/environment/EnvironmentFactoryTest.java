@@ -125,11 +125,11 @@ public class EnvironmentFactoryTest {
         Route.sync("GET", "/3", handler());
 
     environment.routingEngine()
-        .registerSafeRoute(route1)
-        .registerSafeRoute(route2);
+        .registerRoute(route1)
+        .registerRoute(route2);
 
     environment.routingEngine()
-        .registerSafeRoute(route3);
+        .registerRoute(route3);
 
     final Iterable<Object> objects = routingContext.endpointObjects();
     assertTrue(Iterables.contains(objects, route1));
@@ -148,13 +148,13 @@ public class EnvironmentFactoryTest {
         Route.sync("GET", "/f1", handler());
 
     environment.routingEngine()
-        .registerSafeRoute(route);
+        .registerRoute(route);
 
     final Iterable<Object> objects = routingContext.endpointObjects();
     assertTrue(Iterables.contains(objects, route));
 
     try {
-      environment.routingEngine().registerSafeRoute(route);
+      environment.routingEngine().registerRoute(route);
       fail("should throw");
     } catch (Exception e) {
       assertThat(e.getMessage(), containsString("already been initialized"));

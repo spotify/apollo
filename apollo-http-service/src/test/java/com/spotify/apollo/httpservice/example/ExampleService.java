@@ -43,7 +43,7 @@ public final class ExampleService {
 
   public static void init(Environment environment) {
     environment.routingEngine()
-        .registerRoute(Route.sync("GET", "/hello", c -> "hello world"));
+        .registerAutoRoute(Route.sync("GET", "/hello", c -> "hello world"));
     LOG.info("in app init {}", environment);
   }
 }
