@@ -1,4 +1,4 @@
-package com.spotify.apollo.example;
+package com.spotify.apollo.brewery;
 
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
