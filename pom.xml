@@ -10,6 +10,8 @@
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <description>Java libraries for writing composable microservices</description>
+
     <modules>
         <module>apollo-bom</module>
         <module>apollo-core</module>
@@ -408,10 +410,30 @@
             <id>ossrh</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
-
-        <site>
-            <id>spotify-apollo</id>
-            <url>http://spotify.github.io/apollo/maven</url>
-        </site>
     </distributionManagement>
+
+    <developers>
+        <developer>
+	    <id>pettermahlen</id>
+	    <email>petter@spotify.com</email>
+	    <name>Petter Måhlén</name>
+	</developer>
+	<developer>
+	    <id>rouzwawi</id>
+	    <email>rouz@spotify.com</email>
+	    <name>Rouzbeh Delavari</name>
+	</developer>
+	<developer>
+	    <id>zalenski</id>
+	    <email>zalenski@spotify.com</email>
+	    <name>Mattias de Zalenski</name>
+	</developer>
+    </developers>
+    <licenses>
+        <license>
+	    <name>The Apache Software License, Version 2.0</name>
+	    <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+	    <distribution>repo</distribution>
+	</license>
+    </licenses>
 </project>
