@@ -34,8 +34,8 @@
 
     <scm>
         <url>https://github.com/spotify/apollo</url>
-        <connection>scm:git:ssh://git@github.com:spotify/apollo.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:spotify/apollo.git</developerConnection>
+        <connection>scm:git:git@github.com:spotify/apollo.git</connection>
+        <developerConnection>scm:git:git@github.com:spotify/apollo.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
