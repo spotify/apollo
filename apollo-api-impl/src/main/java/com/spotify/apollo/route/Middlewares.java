@@ -98,8 +98,7 @@ public final class Middlewares {
    * Returns the default middlewares applied by Apollo to routes supplied by a {@link RouteProvider}.
    */
   public static Middleware<AsyncHandler<?>, AsyncHandler<Response<ByteString>>> apolloDefaults() {
-    return ((Middleware<AsyncHandler<?>, AsyncHandler<Response<ByteString>>>) Middlewares::autoSerialize)
-        .and(Middlewares::httpPayloadSemantics);
+    return serialize(new AutoSerializer()).and(Middlewares::httpPayloadSemantics);
   }
 
   private static Response<ByteString> applyHttpPayloadSemantics(
