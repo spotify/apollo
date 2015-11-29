@@ -42,11 +42,21 @@ abstract class ResponseImpl<T> implements Response<T> {
   @Override
   public Response<T> withHeader(String header, String value) {
     // Allow overriding values
-    final Map<String, String> headers = new LinkedHashMap<>();
-    headers.putAll(headers());
-    headers.put(header, value);
+    final Map<String, String> newHeaders = new LinkedHashMap<>();
+    newHeaders.putAll(headers());
+    newHeaders.put(header, value);
 
-    return createInternal(status(), ImmutableMap.copyOf(headers), payload());
+    return createInternal(status(), ImmutableMap.copyOf(newHeaders), payload());
+  }
+
+  @Override
+  public Response<T> withHeaders(Map<String, String> headers) {
+    // Allow overriding values
+    final Map<String, String> newHeaders = new LinkedHashMap<>();
+    newHeaders.putAll(headers());
+    newHeaders.putAll(headers);
+
+    return createInternal(status(), ImmutableMap.copyOf(newHeaders), payload());
   }
 
   @Override

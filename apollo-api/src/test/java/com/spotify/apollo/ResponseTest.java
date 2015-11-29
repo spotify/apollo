@@ -19,13 +19,43 @@
  */
 package com.spotify.apollo;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.junit.Test;
+
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
 public class ResponseTest {
+
+  @Test
+  public void allowsOverrideHeaderValues() {
+    Response<?> response = Response
+        .forStatus(Status.OK)
+        .withHeader("Content-Type", "application/json")
+        .withHeader("Content-Type", "application/protobuf");
+
+    assertEquals("application/protobuf", response.headers().get("Content-Type"));
+  }
+
+  @Test
+  public void allowsAddingMultipleHeaders() {
+    Map<String, String> headers = ImmutableMap.of(
+        "Content-Type", "application/protobuf",
+        "Content-Length", "123");
+
+    Response<?> response = Response
+        .forStatus(Status.OK)
+        .withHeader("Content-Type", "application/json")
+        .withHeaders(headers);
+
+    assertEquals("application/protobuf", response.headers().get("Content-Type"));
+    assertEquals("123", response.headers().get("Content-Length"));
+
+  }
 
   @Test
   public void shouldHaveSingletonOK() throws Exception {
@@ -64,15 +94,5 @@ public class ResponseTest {
     public StatusType withReasonPhrase(String reasonPhrase) {
       return this;
     }
-  }
-
-  @Test
-  public void allowsOverrideHeaderValues() {
-    Response<?> response = Response
-        .forStatus(Status.OK)
-        .withHeader("Content-Type", "application/json")
-        .withHeader("Content-Type", "application/protobuf");
-
-    assertEquals("application/protobuf", response.headers().get("Content-Type"));
   }
 }

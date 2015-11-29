@@ -58,6 +58,14 @@ public interface Response<T> {
   Response<T> withHeader(String header, String value);
 
   /**
+   * Creates a new {@link Response} based on this, but with additional headers.
+   *
+   * @param headers  Map of header name-values to add
+   * @return A response with the added headers
+   */
+  Response<T> withHeaders(Map<String, String> headers);
+
+  /**
    * Creates a new {@link Response} based on this, but with a different payload. Status code,
    * headers, etc., are copied over. To clear out the payload, one can pass in {@code null}.
    *
