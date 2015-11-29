@@ -27,7 +27,6 @@ import com.spotify.apollo.StatusType;
 import com.spotify.apollo.serialization.AutoSerializer;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 import okio.ByteString;
 
@@ -61,9 +60,8 @@ public final class Middlewares {
   public static AsyncHandler<Response<ByteString>> httpPayloadSemantics(
       AsyncHandler<Response<ByteString>> inner) {
 
-    return requestContext ->
-        inner.invoke(requestContext)
-            .thenApply(applyHttpPayloadSemantics(requestContext.request()));
+    return inner.flatMapSync(resp -> ctx -> applyHttpPayloadSemantics(ctx.request(), resp));
+
   }
 
   /**
@@ -76,10 +74,9 @@ public final class Middlewares {
   public static Middleware<AsyncHandler<?>, AsyncHandler<Response<?>>> replyContentType(
       String contentType) {
 
-    return inner -> requestContext ->
-        ensureResponse(inner)
-            .invoke(requestContext)
-            .thenApply(response -> response.withHeader(CONTENT_TYPE, contentType));
+    return inner -> inner
+        .map(Middlewares::ensureResponse)
+        .map(response -> response.withHeader(CONTENT_TYPE, contentType));
   }
 
   /**
@@ -92,10 +89,9 @@ public final class Middlewares {
   public static Middleware<AsyncHandler<?>, AsyncHandler<Response<ByteString>>> serialize(
       Serializer serializer) {
 
-    return inner -> requestContext ->
-        ensureResponse(inner)
-            .invoke(requestContext)
-            .thenApply(serializePayload(serializer, requestContext.request()));
+    return inner -> inner
+        .map(Middlewares::ensureResponse)
+        .flatMapSync(resp -> ctx -> serializePayload(serializer, ctx.request(), resp));
   }
 
   /**
@@ -106,30 +102,21 @@ public final class Middlewares {
         .and(Middlewares::httpPayloadSemantics);
   }
 
-  private static <T> AsyncHandler<Response<T>> ensureResponse(AsyncHandler<T> inner) {
-    return requestContext ->
-        inner.invoke(requestContext)
-            .thenApply(Middlewares::ensureResponse);
-  }
+  private static Response<ByteString> applyHttpPayloadSemantics(
+      Request request, Response<ByteString> response) {
+    Response<ByteString> result = response;
+    Optional<ByteString> payload = response.payload();
+    if (setContentLengthForStatus(response.status())) {
+      int payloadSize = payload.isPresent() ? payload.get().size() : 0;
+      result = result.withHeader("Content-Length", String.valueOf(payloadSize));
+    }
 
-  private static Function<Response<ByteString>, Response<ByteString>> applyHttpPayloadSemantics(
-      Request request) {
+    if (!setPayloadForMethod(request.method()) ||
+        !setPayloadForStatus(response.status())) {
+      result = result.withPayload(null);
+    }
 
-    return response -> {
-      Response<ByteString> result = response;
-      Optional<ByteString> payload = response.payload();
-      if (setContentLengthForStatus(response.status())) {
-        int payloadSize = payload.isPresent() ? payload.get().size() : 0;
-        result = result.withHeader("Content-Length", String.valueOf(payloadSize));
-      }
-
-      if (!setPayloadForMethod(request.method()) ||
-          !setPayloadForStatus(response.status())) {
-        result = result.withPayload(null);
-      }
-
-      return result;
-    };
+    return result;
   }
 
   // see http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.3
@@ -148,26 +135,24 @@ public final class Middlewares {
     return setPayloadForStatus(statusType);
   }
 
-  private static <T> Function<Response<T>, Response<ByteString>> serializePayload(
-      Serializer serializer, Request request) {
+  private static <T> Response<ByteString> serializePayload(
+      Serializer serializer, Request request, Response<T> response) {
 
-    return response -> {
-      if (!response.payload().isPresent()) {
-        // no payload, so this cast is safe to do
-        //noinspection unchecked
-        return (Response<ByteString>) response;
-      }
+    if (!response.payload().isPresent()) {
+      // no payload, so this cast is safe to do
+      //noinspection unchecked
+      return (Response<ByteString>) response;
+    }
 
-      final T payloadObject = response.payload().get();
-      final Serializer.Payload payload =
-          serializer.serialize(request, payloadObject);
+    final T payloadObject = response.payload().get();
+    final Serializer.Payload payload =
+        serializer.serialize(request, payloadObject);
 
-      if (payload.contentType().isPresent()) {
-        response = response.withHeader(CONTENT_TYPE, payload.contentType().get());
-      }
+    if (payload.contentType().isPresent()) {
+      response = response.withHeader(CONTENT_TYPE, payload.contentType().get());
+    }
 
-      return response.withPayload(payload.byteString());
-    };
+    return response.withPayload(payload.byteString());
   }
 
   private static <T> Response<T> ensureResponse(T t) {

@@ -59,9 +59,8 @@ import static org.mockito.Mockito.when;
 
 public class MiddlewaresTest {
 
-  @Mock
   AsyncHandler<Response<ByteString>> delegate;
-  @Mock
+
   AsyncHandler<Object> serializationDelegate;
 
   @Mock
@@ -89,8 +88,8 @@ public class MiddlewaresTest {
     when(requestContext.request()).thenReturn(request);
     when(request.method()).thenReturn("GET");
 
-    when(delegate.invoke(requestContext)).thenReturn(future);
-    when(serializationDelegate.invoke(requestContext)).thenReturn(serializationFuture);
+    delegate = requestContext -> future;
+    serializationDelegate = requestContext -> serializationFuture;
   }
 
   @Test
@@ -189,7 +188,7 @@ public class MiddlewaresTest {
 
     for (StatusType status : invalid) {
       CompletableFuture<Response<ByteString>> future = new CompletableFuture<>();
-      when(delegate.invoke(requestContext)).thenReturn(future);
+      delegate = requestContext -> future;
       future.complete(Response.of(status, ByteString.of((byte) 14, (byte) 19)));
 
       Response<ByteString> result = getResult(Middlewares.httpPayloadSemantics(delegate));
