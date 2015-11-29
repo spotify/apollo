@@ -304,6 +304,7 @@
                                 <exclude>**/AutoValue_*</exclude>
                                 <exclude>**/LoadedConfigBuilder*</exclude>
                                 <exclude>**/MetaInfoBuilder*</exclude>
+                                <exclude>**/QueryStringDecoder*</exclude>
                             </excludes>
                         </configuration>
                         <executions>
