@@ -21,6 +21,7 @@ package com.spotify.apollo;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -70,8 +71,24 @@ public interface Response<T> {
    * headers, etc., are copied over. To clear out the payload, one can pass in {@code null}.
    *
    * @param newPayload the new payload
+   * @return A response containing the new payload
    */
   <P> Response<P> withPayload(@Nullable P newPayload);
+
+  /**
+   * Maps the contained payload if it exists, otherwise does nothing except changing the type
+   * of the response.
+   *
+   * @param mapFunction  The function for mapping the payload
+   * @param <P>          The type of the mapped payload
+   * @return A response with a converted payload
+   */
+  default <P> Response<P> mapPayload(Function<? super T, ? extends P> mapFunction) {
+    //noinspection unchecked
+    return !payload().isPresent()
+        ? (Response<P>) this
+        : withPayload(mapFunction.apply(payload().get()));
+  }
 
   /**
    * Returns a typed 200 OK {@link Response}.
