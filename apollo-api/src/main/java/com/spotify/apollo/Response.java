@@ -91,6 +91,42 @@ public interface Response<T> {
   }
 
   /**
+   * Maps the contained payload if it exists, otherwise does nothing except changing the type
+   * of the response.
+   *
+   * The new response contents will be merged with this response using {@link #merge(Response)}.
+   *
+   * @param mapFunction  The function for mapping the payload
+   * @param <P>          The type of the mapped payload
+   * @return A response with a converted payload
+   */
+  default <P> Response<P> flatMapPayload(Function<? super T, ? extends Response<? extends P>> mapFunction) {
+    //noinspection unchecked
+    return !payload().isPresent()
+        ? (Response<P>) this
+        : merge(mapFunction.apply(payload().get()));
+  }
+
+  /**
+   * Merge another response with this response.
+   *
+   * The payload of the other response will override the payload in this response,
+   * even if not present, in which case it will reset the payload.
+   *
+   * Headers keys will be merged with headers from the other response taking precedence.
+   *
+   * The status of the other response will always be ignored.
+   *
+   * @param other  The other response to merge with this
+   * @param <P>    The type of the other response payload
+   * @return A merged response
+   */
+  default <P> Response<P> merge(Response<? extends P> other) {
+    return withPayload(other.payload().orElse(null))
+        .withHeaders(other.headers());
+  }
+
+  /**
    * Returns a typed 200 OK {@link Response}.
    *
    * @param <T>  The response payload type

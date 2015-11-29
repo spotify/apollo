@@ -58,10 +58,56 @@ public class ResponsePayloadMapTest {
   }
 
   @Theory
+  public void removePayloadIfNull(Response<String> input) throws Exception {
+    Response<Integer> intResponse = input.mapPayload(ignored -> null);
+
+    assertFalse(intResponse.payload().isPresent());
+  }
+
+  @Theory
   public void preserveStatusAndHeaderOnMap(Response<String> input) throws Exception {
     Response<Integer> intResponse = input.mapPayload(String::length);
 
     assertThat(intResponse.status(), is(Status.IM_A_TEAPOT));
     assertThat(intResponse.headers(), hasEntry("foo", "bar"));
+  }
+
+  @Theory
+  public void mapsPayloadOnFlatMap(Response<String> input) throws Exception {
+    Response<Integer> intResponse = input.flatMapPayload(
+        str -> Response.forPayload(str.length()));
+
+    if (input.payload().isPresent()) {
+      assertThat(intResponse.payload().get().intValue(), is(5));
+    } else {
+      assertFalse(intResponse.payload().isPresent());
+    }
+  }
+
+  @Theory
+  public void mergesHeadersOnFlatMap(Response<String> input) throws Exception {
+    Response<Integer> intResponse = input.flatMapPayload(
+        str -> Response.forPayload(str.length())
+            .withHeader("baz", str));
+
+    assertThat(intResponse.headers(), hasEntry("foo", "bar"));
+    if (input.payload().isPresent()) {
+      assertThat(intResponse.headers(), hasEntry("baz", "hello"));
+    }
+  }
+
+  @Theory
+  public void preservesStatusOnFlatMap(Response<String> input) throws Exception {
+    Response<Integer> intResponse = input.flatMapPayload(
+        ignored -> Response.forStatus(Status.GONE));
+
+    assertThat(intResponse.status(), is(Status.IM_A_TEAPOT));
+  }
+
+  @Theory
+  public void removePayloadIfNotSetOnFlatMap(Response<String> input) throws Exception {
+    Response<Integer> intResponse = input.flatMapPayload(ignored -> Response.ok());
+
+    assertFalse(intResponse.payload().isPresent());
   }
 }
