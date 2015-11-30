@@ -19,11 +19,15 @@
  */
 package com.spotify.apollo.route;
 
+import com.spotify.apollo.Environment.RoutingEngine;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 
+import java.util.function.Function;
+
 /**
- * Synchronous endpoint handler. Depending on the response type, Apollo will act differently.
+ * Synchronous endpoint handler.
+ *
  * Return a {@link Response} when you want to do things like modify response headers based on
  * results of service invocations or control the status code returned. Examples:
  *
@@ -47,12 +51,41 @@ import com.spotify.apollo.Response;
  *   }
  * </code>
  *
- * Any other return type will be serialized with the configured serializer and added as payload to
- * a response with status {@link com.spotify.apollo.Status#OK}.
+ * In order to construct a {@link Route} that can be registered with
+ * {@link RoutingEngine#registerRoute(Route)}, the return type of the handler must be a
+ * {@code Response<ByteString>}. This return type can be composed through your serialization
+ * functions using {@link #map(Function)} and {@link #flatMap(Function)}.
  *
- * @param <T>
+ * @param <T>  The return type of the handler
  */
 @FunctionalInterface
 public interface SyncHandler<T> {
   T invoke(RequestContext requestContext);
+
+  /**
+   * Create a new {@link SyncHandler} that will map the return value of
+   * {@link #invoke(RequestContext)} through the given map function.
+   *
+   * @param mapFunction  The mapping function
+   * @param <V>          The resulting handler type
+   * @return A new {@link SyncHandler} with a composed invoke method
+   */
+  default <V> SyncHandler<V> map(Function<? super T, ? extends V> mapFunction) {
+    return requestContext -> mapFunction.apply(invoke(requestContext));
+  }
+
+  /**
+   * Create a new {@link SyncHandler} that will map the return value of
+   * {@link #invoke(RequestContext)} through the given map function.
+   *
+   * The returned {@link SyncHandler} of the map function will execute with
+   * the same {@link RequestContext} as the current handler.
+   *
+   * @param mapFunction  The mapping function
+   * @param <V>          The resulting handler type
+   * @return A new {@link SyncHandler} with a composed invoke method
+   */
+  default <V> SyncHandler<V> flatMap(Function<? super T, ? extends SyncHandler<? extends V>> mapFunction) {
+    return requestContext -> mapFunction.apply(invoke(requestContext)).invoke(requestContext);
+  }
 }

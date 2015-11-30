@@ -19,13 +19,16 @@
  */
 package com.spotify.apollo.route;
 
+import com.spotify.apollo.Environment.RoutingEngine;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 
 import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
 
 /**
- * Asynchronous endpoint handler. Depending on the response type, Apollo will act differently.
+ * Asynchronous endpoint handler.
+ *
  * Return a stage with a {@link Response} value when you want to do things like modify response
  * headers based on results of service invocations or if you want to set the status code. Example:
  *
@@ -37,12 +40,56 @@ import java.util.concurrent.CompletionStage;
  *   }
  * </code>
  *
- * Any other return type will be serialized with the configured serializer and added as payload to
- * a response with status {@link com.spotify.apollo.Status#OK}.
+ * In order to construct a {@link Route} that can be registered with
+ * {@link RoutingEngine#registerRoute(Route)}, the return type of the handler must be a
+ * {@code Response<ByteString>}. This return type can be composed through your serialization
+ * functions using {@link #map(Function)} and {@link #flatMap(Function)}.
  *
- * @param <T>
+ * @param <T>  The return type of the handler
  */
 @FunctionalInterface
 public interface AsyncHandler<T> {
   CompletionStage<T> invoke(RequestContext requestContext);
+
+  /**
+   * Create a new {@link AsyncHandler} that will map the return value of
+   * {@link #invoke(RequestContext)} through the given map function.
+   *
+   * @param mapFunction  The mapping function
+   * @param <V>          The resulting handler type
+   * @return A new {@link AsyncHandler} with a composed invoke method
+   */
+  default <V> AsyncHandler<V> map(Function<? super T, ? extends V> mapFunction) {
+    return requestContext -> invoke(requestContext).thenApply(mapFunction);
+  }
+
+  /**
+   * Create a new {@link AsyncHandler} that will map the return value of
+   * {@link #invoke(RequestContext)} through the given map function.
+   *
+   * The returned {@link AsyncHandler} of the map function will execute with
+   * the same {@link RequestContext} as the current handler.
+   *
+   * @param mapFunction  The mapping function
+   * @param <V>          The resulting handler type
+   * @return A new {@link AsyncHandler} with a composed invoke method
+   */
+  default <V> AsyncHandler<V> flatMap(Function<? super T, ? extends AsyncHandler<? extends V>> mapFunction) {
+    //noinspection unchecked
+    return requestContext -> invoke(requestContext)
+        .thenCompose(t -> (CompletionStage<V>) mapFunction.apply(t).invoke(requestContext));
+  }
+
+  /**
+   * Synchronous version of {@link #flatMap(Function)}. Use this when you want to do
+   * synchronous maps of the handler return value.
+   *
+   * @param mapFunction  The mapping function
+   * @param <V>          The resulting handler type
+   * @return A new {@link AsyncHandler} with a composed invoke method
+   */
+  default <V> AsyncHandler<V> flatMapSync(Function<? super T, ? extends SyncHandler<? extends V>> mapFunction) {
+    return requestContext -> invoke(requestContext)
+        .thenApply(t -> mapFunction.apply(t).invoke(requestContext));
+  }
 }
