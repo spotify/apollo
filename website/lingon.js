@@ -19,7 +19,8 @@ var apolloVersion;
 
 try {
   apolloVersion = execSync("git describe --tag --abbrev=0");
-  lingon.global.apolloVersion = apolloVersion.toString().trim();
+  lingon.global.apolloVersion = apolloVersion.toString()
+        .trim().replace(/^v/, '');
 }catch(e){
   console.log("Unable to read Apollo version, no tag found in repo.");
   lingon.global.apolloVersion = "UNKNOWN";
