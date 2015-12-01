@@ -31,9 +31,6 @@ import okio.ByteString;
  * Request instances are immutable. However, requests can be built using
  * {@link #forUri(String, String)} methods, and headers and payload can
  * be added using {@link #withHeader(String, String)} and {@link #withPayload(ByteString)}.
- *
- * Note: The deprecated @Request annotation now lives in
- * {@link com.spotify.apollo.route.Request}.
  */
 public interface Request {
   /**
