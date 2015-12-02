@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 
 import com.spotify.apollo.Request;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,6 +57,18 @@ abstract class HttpRequest implements Request {
   @Override
   public Request withPayload(ByteString payload) {
     return create(method(), uri(), of(payload), service(), parameters(), headers());
+  }
+
+  @Override
+  public Request withHeaders(Map<String, String> additionalHeaders) {
+    Map<String, String> headers = new LinkedHashMap<>(headers());
+    headers.putAll(additionalHeaders);
+    return create(method(), uri(), payload(), service(), parameters(), headers);
+  }
+
+  @Override
+  public Request clearHeaders() {
+    return create(method(), uri(), payload(), service(), parameters(), ImmutableMap.of());
   }
 
   public static Request create(

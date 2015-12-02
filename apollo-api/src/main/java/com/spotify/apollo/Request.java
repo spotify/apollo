@@ -110,6 +110,23 @@ public interface Request {
   Request withHeader(String name, String value);
 
   /**
+   * Creates a new {@link Request} based on this, but with additional headers. If the current
+   * request has a header whose key is also included in the {@code additionalHeaders} map,
+   * then the new request will have the header value defined in the map.
+   *
+   * @param additionalHeaders map of headers to add
+   * @return A request with the added headers
+   */
+  Request withHeaders(Map<String, String> additionalHeaders);
+
+  /**
+   * Creates a new {@link Request} based on this, but with no header information.
+   *
+   * @return A request without headers
+   */
+  Request clearHeaders();
+
+  /**
    * Creates a new {@link Request} based on this, but with a different payload.
    *
    * @param payload the new payload

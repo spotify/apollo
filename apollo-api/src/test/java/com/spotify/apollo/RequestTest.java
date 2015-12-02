@@ -20,9 +20,11 @@
 package com.spotify.apollo;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import org.junit.Test;
 
+import java.util.Map;
 import java.util.Optional;
 
 import okio.ByteString;
@@ -111,5 +113,30 @@ public class RequestTest {
   @Test
   public void shouldAllowModifyingUri() throws Exception {
     assertThat(request("/foo").withUri("/fie").uri(), is("/fie"));
+  }
+
+  @Test
+  public void shouldMergeHeaders() throws Exception {
+    Map<String, String> newHeaders = ImmutableMap.of("newHeader", "value1", "newHeader2", "value2");
+
+    assertThat(requestWithHeader("/foo", "old", "value").withHeaders(newHeaders).headers(),
+               is(ImmutableMap.of("old", "value",
+                                  "newHeader", "value1",
+                                  "newHeader2", "value2")));
+  }
+
+  @Test
+  public void shouldReplaceExistingHeader() throws Exception {
+    Map<String, String> newHeaders = ImmutableMap.of("newHeader", "value1", "old", "value2");
+
+    assertThat(requestWithHeader("/foo", "old", "value").withHeaders(newHeaders).headers(),
+               is(ImmutableMap.of("old", "value2",
+                                  "newHeader", "value1")));
+  }
+
+  @Test
+  public void shouldClearHeaders() throws Exception {
+    assertThat(requestWithHeader("/foo", "old", "value").clearHeaders().headers(),
+               is(ImmutableMap.of()));
   }
 }
