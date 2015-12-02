@@ -58,8 +58,8 @@ abstract class RequestValue implements Request {
       Optional<ByteString> payload) {
     return new AutoValue_RequestValue(
         method, uri,
-        parameters,
-        headers,
+        ImmutableMap.copyOf(parameters),
+        ImmutableMap.copyOf(headers),
         service,
         payload);
   }

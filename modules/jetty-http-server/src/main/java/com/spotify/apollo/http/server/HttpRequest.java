@@ -78,6 +78,12 @@ abstract class HttpRequest implements Request {
       Optional<String> service,
       Map<String, List<String>> parameters,
       Map<String, String> headers) {
-    return new AutoValue_HttpRequest(method, uri, parameters, headers, service, payload);
+    return new AutoValue_HttpRequest(
+        method,
+        uri,
+        ImmutableMap.copyOf(parameters),
+        ImmutableMap.copyOf(headers),
+        service,
+        payload);
   }
 }
