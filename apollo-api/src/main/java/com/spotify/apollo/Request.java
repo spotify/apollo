@@ -31,9 +31,6 @@ import okio.ByteString;
  * Request instances are immutable. However, requests can be built using
  * {@link #forUri(String, String)} methods, and headers and payload can
  * be added using {@link #withHeader(String, String)} and {@link #withPayload(ByteString)}.
- *
- * Note: The deprecated @Request annotation now lives in
- * {@link com.spotify.apollo.route.Request}.
  */
 public interface Request {
   /**
@@ -90,6 +87,13 @@ public interface Request {
   Optional<ByteString> payload();
 
   /**
+   * Creates a new {@link Request} based on this, but with a different URI.
+   *
+   * @param uri the new uri
+   */
+  Request withUri(String uri);
+
+  /**
    * Creates a new {@link Request} based on this, but with a different calling service.
    *
    * @param service the new service
@@ -97,13 +101,30 @@ public interface Request {
   Request withService(String service);
 
   /**
-   * Creates a new {@link Response} based on this, but with an additional header.
+   * Creates a new {@link Request} based on this, but with an additional header.
    *
    * @param name  Header name to add
    * @param value  Header value
    * @return A request with the added header
    */
   Request withHeader(String name, String value);
+
+  /**
+   * Creates a new {@link Request} based on this, but with additional headers. If the current
+   * request has a header whose key is also included in the {@code additionalHeaders} map,
+   * then the new request will have the header value defined in the map.
+   *
+   * @param additionalHeaders map of headers to add
+   * @return A request with the added headers
+   */
+  Request withHeaders(Map<String, String> additionalHeaders);
+
+  /**
+   * Creates a new {@link Request} based on this, but with no header information.
+   *
+   * @return A request without headers
+   */
+  Request clearHeaders();
 
   /**
    * Creates a new {@link Request} based on this, but with a different payload.

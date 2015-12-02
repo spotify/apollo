@@ -20,6 +20,7 @@
 package com.spotify.apollo;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableMap;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,10 +58,15 @@ abstract class RequestValue implements Request {
       Optional<ByteString> payload) {
     return new AutoValue_RequestValue(
         method, uri,
-        parameters,
-        headers,
+        ImmutableMap.copyOf(parameters),
+        ImmutableMap.copyOf(headers),
         service,
         payload);
+  }
+
+  @Override
+  public Request withUri(String uri) {
+    return create(method(), uri, parameters(), headers(), service(), payload());
   }
 
   @Override
@@ -70,9 +76,19 @@ abstract class RequestValue implements Request {
 
   @Override
   public Request withHeader(String name, String value) {
+    return withHeaders(ImmutableMap.of(name, value));
+  }
+
+  @Override
+  public Request withHeaders(Map<String, String> additionalHeaders) {
     Map<String, String> headers = new LinkedHashMap<>(headers());
-    headers.put(name, value);
+    headers.putAll(additionalHeaders);
     return create(method(), uri(), parameters(), headers, service(), payload());
+  }
+
+  @Override
+  public Request clearHeaders() {
+    return create(method(), uri(), parameters(), emptyMap(), service(), payload());
   }
 
   @Override

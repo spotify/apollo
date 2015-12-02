@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 
 import com.spotify.apollo.Request;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,6 +35,11 @@ import static java.util.Optional.of;
 
 @AutoValue
 abstract class HttpRequest implements Request {
+
+  @Override
+  public Request withUri(String uri) {
+    return create(method(), uri, payload(), service(), parameters(), headers());
+  }
 
   @Override
   public Request withService(String service) {
@@ -53,6 +59,18 @@ abstract class HttpRequest implements Request {
     return create(method(), uri(), of(payload), service(), parameters(), headers());
   }
 
+  @Override
+  public Request withHeaders(Map<String, String> additionalHeaders) {
+    Map<String, String> headers = new LinkedHashMap<>(headers());
+    headers.putAll(additionalHeaders);
+    return create(method(), uri(), payload(), service(), parameters(), headers);
+  }
+
+  @Override
+  public Request clearHeaders() {
+    return create(method(), uri(), payload(), service(), parameters(), ImmutableMap.of());
+  }
+
   public static Request create(
       String method,
       String uri,
@@ -60,6 +78,12 @@ abstract class HttpRequest implements Request {
       Optional<String> service,
       Map<String, List<String>> parameters,
       Map<String, String> headers) {
-    return new AutoValue_HttpRequest(method, uri, parameters, headers, service, payload);
+    return new AutoValue_HttpRequest(
+        method,
+        uri,
+        ImmutableMap.copyOf(parameters),
+        ImmutableMap.copyOf(headers),
+        service,
+        payload);
   }
 }
