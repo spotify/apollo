@@ -36,6 +36,11 @@ import static java.util.Optional.of;
 abstract class HttpRequest implements Request {
 
   @Override
+  public Request withUri(String uri) {
+    return create(method(), uri, payload(), service(), parameters(), headers());
+  }
+
+  @Override
   public Request withService(String service) {
     return create(method(), uri(), payload(), of(service), parameters(), headers());
   }

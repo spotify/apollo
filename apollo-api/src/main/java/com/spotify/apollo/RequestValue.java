@@ -64,6 +64,11 @@ abstract class RequestValue implements Request {
   }
 
   @Override
+  public Request withUri(String uri) {
+    return create(method(), uri, parameters(), headers(), service(), payload());
+  }
+
+  @Override
   public Request withService(String service) {
     return create(method(), uri(), parameters(), headers(), of(service), payload());
   }

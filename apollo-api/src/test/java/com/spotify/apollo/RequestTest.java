@@ -107,4 +107,9 @@ public class RequestTest {
     assertThat(requestWithPayload("/foo", payload).payload(),
                is(Optional.of(payload)));
   }
+
+  @Test
+  public void shouldAllowModifyingUri() throws Exception {
+    assertThat(request("/foo").withUri("/fie").uri(), is("/fie"));
+  }
 }

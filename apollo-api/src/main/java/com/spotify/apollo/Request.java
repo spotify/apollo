@@ -87,6 +87,13 @@ public interface Request {
   Optional<ByteString> payload();
 
   /**
+   * Creates a new {@link Request} based on this, but with a different URI.
+   *
+   * @param uri the new uri
+   */
+  Request withUri(String uri);
+
+  /**
    * Creates a new {@link Request} based on this, but with a different calling service.
    *
    * @param service the new service
