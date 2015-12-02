@@ -19,6 +19,7 @@
  */
 package com.spotify.apollo.http.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 
 import com.spotify.apollo.Request;
@@ -69,6 +70,14 @@ class ApolloRequestHandler extends AbstractHandler {
       HttpServletRequest req,
       HttpServletResponse resp) throws IOException, ServletException {
 
+    final AsyncContext asyncContext = baseRequest.startAsync();
+    requestHandler.handle(new AsyncContextOngoingRequest(serverInfo, asApolloRequest(req), asyncContext));
+
+    baseRequest.setHandled(true);
+  }
+
+  @VisibleForTesting
+  Request asApolloRequest(HttpServletRequest req) throws IOException {
     final String uri = req.getRequestURI();
     final String method = req.getMethod();
     final int contentLength = req.getContentLength();
@@ -93,12 +102,7 @@ class ApolloRequestHandler extends AbstractHandler {
     final ImmutableMap<String, String> headers = headersBuilder.build();
     final ImmutableMap<String, List<String>> parameters = parametersBuilder.build();
 
-    Request request = HttpRequest.create(method, uri, payload, empty(), parameters, headers);
-
-    final AsyncContext asyncContext = baseRequest.startAsync();
-    requestHandler.handle(new AsyncContextOngoingRequest(serverInfo, request, asyncContext));
-
-    baseRequest.setHandled(true);
+    return HttpRequest.create(method, uri, payload, empty(), parameters, headers);
   }
 
   private ByteString readPayload(HttpServletRequest req, int contentLength) throws IOException {
