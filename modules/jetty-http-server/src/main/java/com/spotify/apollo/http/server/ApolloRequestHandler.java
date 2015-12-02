@@ -78,7 +78,8 @@ class ApolloRequestHandler extends AbstractHandler {
 
   @VisibleForTesting
   Request asApolloRequest(HttpServletRequest req) throws IOException {
-    final String uri = req.getRequestURI();
+    final String uri = req.getRequestURI() +
+                       (req.getQueryString() == null ? "" : "?" + req.getQueryString());
     final String method = req.getMethod();
     final int contentLength = req.getContentLength();
 
@@ -93,16 +94,16 @@ class ApolloRequestHandler extends AbstractHandler {
                 name, toStream(req.getHeaders(name)).collect(Collectors.joining(","))
             ));
 
-    final ImmutableMap.Builder<String, List<String>> parametersBuilder = ImmutableMap.builder();
-    req.getParameterMap().entrySet().stream()
-        .forEachOrdered(
-            parameter -> parametersBuilder.put(parameter.getKey(), asList(parameter.getValue()))
-        );
-
     final ImmutableMap<String, String> headers = headersBuilder.build();
-    final ImmutableMap<String, List<String>> parameters = parametersBuilder.build();
 
-    return HttpRequest.create(method, uri, payload, empty(), parameters, headers);
+    Request result = Request.forUri(uri, method)
+        .withHeaders(headers);
+
+    if (payload.isPresent()) {
+      result = result.withPayload(payload.get());
+    }
+
+    return result;
   }
 
   private ByteString readPayload(HttpServletRequest req, int contentLength) throws IOException {
