@@ -101,7 +101,7 @@ public interface Request {
   Request withService(String service);
 
   /**
-   * Creates a new {@link Response} based on this, but with an additional header.
+   * Creates a new {@link Request} based on this, but with an additional header.
    *
    * @param name  Header name to add
    * @param value  Header value
