@@ -55,7 +55,7 @@ version since you'll need it later in the build configuration.
 
 ```xml
 <properties>
-    <apollo.version>1.0.0-rc1</apollo.version>
+    <apollo.version>1.0.0</apollo.version>
 </properties>
 
 <dependencyManagement>
