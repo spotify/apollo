@@ -40,3 +40,7 @@ other more general one. An example of such an overlap is:
 
 Route 2 can match calls to `/foo/bar` too, thus making route 1 a special case of route 2. In this
 case, the `RoutingEngine` will route to the more specific routes before more general ones.
+
+## Path parameters
+
+Use `/foo/<arg:path>` to match a path parameter, that may include slashes.
