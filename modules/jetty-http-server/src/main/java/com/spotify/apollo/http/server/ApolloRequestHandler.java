@@ -19,6 +19,7 @@
  */
 package com.spotify.apollo.http.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 
 import com.spotify.apollo.Request;
@@ -69,7 +70,16 @@ class ApolloRequestHandler extends AbstractHandler {
       HttpServletRequest req,
       HttpServletResponse resp) throws IOException, ServletException {
 
-    final String uri = req.getRequestURI();
+    final AsyncContext asyncContext = baseRequest.startAsync();
+    requestHandler.handle(new AsyncContextOngoingRequest(serverInfo, asApolloRequest(req), asyncContext));
+
+    baseRequest.setHandled(true);
+  }
+
+  @VisibleForTesting
+  Request asApolloRequest(HttpServletRequest req) throws IOException {
+    final String uri = req.getRequestURI() +
+                       (req.getQueryString() == null ? "" : "?" + req.getQueryString());
     final String method = req.getMethod();
     final int contentLength = req.getContentLength();
 
@@ -84,21 +94,16 @@ class ApolloRequestHandler extends AbstractHandler {
                 name, toStream(req.getHeaders(name)).collect(Collectors.joining(","))
             ));
 
-    final ImmutableMap.Builder<String, List<String>> parametersBuilder = ImmutableMap.builder();
-    req.getParameterMap().entrySet().stream()
-        .forEachOrdered(
-            parameter -> parametersBuilder.put(parameter.getKey(), asList(parameter.getValue()))
-        );
-
     final ImmutableMap<String, String> headers = headersBuilder.build();
-    final ImmutableMap<String, List<String>> parameters = parametersBuilder.build();
 
-    Request request = HttpRequest.create(method, uri, payload, empty(), parameters, headers);
+    Request result = Request.forUri(uri, method)
+        .withHeaders(headers);
 
-    final AsyncContext asyncContext = baseRequest.startAsync();
-    requestHandler.handle(new AsyncContextOngoingRequest(serverInfo, request, asyncContext));
+    if (payload.isPresent()) {
+      result = result.withPayload(payload.get());
+    }
 
-    baseRequest.setHandled(true);
+    return result;
   }
 
   private ByteString readPayload(HttpServletRequest req, int contentLength) throws IOException {

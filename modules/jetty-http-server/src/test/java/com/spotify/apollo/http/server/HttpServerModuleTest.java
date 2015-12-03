@@ -105,7 +105,7 @@ public class HttpServerModuleTest {
 
       assertThat(testHandler.requests.size(), is(1));
       final com.spotify.apollo.Request apolloRequest = testHandler.requests.get(0).request();
-      assertThat(apolloRequest.uri(), is("/query"));
+      assertThat(apolloRequest.uri(), is("/query?a=foo&b=bar&b=baz"));
       assertThat(apolloRequest.parameter("a"), is(Optional.of("foo")));
       assertThat(apolloRequest.parameter("b"), is(Optional.of("bar")));
       assertThat(apolloRequest.parameters().get("b"), is(asList("bar", "baz")));
