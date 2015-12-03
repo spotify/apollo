@@ -73,3 +73,8 @@ public final class App {
 [Introduction Website](https://spotify.github.io/apollo)<br />
 [Maven site](https://spotify.github.io/apollo/maven)
 
+### Diagrams
+
+[![Apollo set-up](https://cdn.rawgit.com/spotify/apollo/master/website/source/set-up.svg)](website/source/set-up.svg)
+
+[![Apollo in runtime](https://cdn.rawgit.com/spotify/apollo/master/website/source/runtime.svg)](website/source/runtime.svg)
