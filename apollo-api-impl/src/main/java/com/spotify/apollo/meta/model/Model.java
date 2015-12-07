@@ -59,8 +59,6 @@ public interface Model {
     public String uri;
     public List<String> method;
     public String docstring;
-    public PayloadSchema requestPayloadSchema = new PayloadSchema();
-    public PayloadSchema replyPayloadSchema = new PayloadSchema();
     public List<QueryParameter> queryParameters;
   }
 
@@ -75,9 +73,5 @@ public interface Model {
     public QueryParameter(String name) {
       this.name = name;
     }
-  }
-
-  class PayloadSchema {
-    public String contentType;
   }
 }

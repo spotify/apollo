@@ -274,7 +274,5 @@ public class MetaApplicationTest {
     endpointGatherer.setUri("/foo-uri/bla");
     endpointGatherer.addMethod("GET");
     endpointGatherer.addQueryParameterName("q");
-    endpointGatherer.setRequestContentType("req-type");
-    endpointGatherer.setResponseContentType("res-type");
   }
 }
