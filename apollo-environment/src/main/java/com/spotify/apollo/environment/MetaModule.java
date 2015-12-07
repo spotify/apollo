@@ -32,10 +32,17 @@ import java.io.IOException;
 
 import javax.inject.Singleton;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Module for setting up service metadata collection objects.
  */
 class MetaModule extends AbstractModule {
+  private final String assemblyName;
+
+  MetaModule(String assemblyName) {
+    this.assemblyName = checkNotNull(assemblyName);
+  }
 
   @Override
   protected void configure() {
@@ -55,7 +62,7 @@ class MetaModule extends AbstractModule {
   private MetaInfoTracker metaInfoTracker(Config configNode, MetaDescriptor metaDescriptor) {
     return new MetaInfoTracker(
         metaDescriptor.descriptor(),
-        "apollo-standalone " + metaDescriptor.apolloVersion(), // FIXME: no 'standalone' here
+        assemblyName + metaDescriptor.apolloVersion(),
         configNode);
   }
 }

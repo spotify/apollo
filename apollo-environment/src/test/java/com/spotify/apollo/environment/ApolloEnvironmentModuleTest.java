@@ -242,4 +242,5 @@ public class ApolloEnvironmentModuleTest {
       envCallback.accept(environment);
     }
   }
+
 }

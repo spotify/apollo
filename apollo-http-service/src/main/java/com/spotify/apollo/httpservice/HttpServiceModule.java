@@ -45,7 +45,7 @@ class HttpServiceModule extends AbstractApolloModule {
   protected void configure() {
     bindAppInit();
 
-    install(ApolloEnvironmentModule.create());
+    install(ApolloEnvironmentModule.create("apollo-http"));
   }
 
   private void bindAppInit() {
