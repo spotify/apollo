@@ -22,6 +22,7 @@ package com.spotify.apollo;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import okio.ByteString;
 
@@ -87,6 +88,11 @@ public interface Request {
   Optional<ByteString> payload();
 
   /**
+   * The request ttl in ms
+   */
+  Optional<Long> ttl();
+
+  /**
    * Creates a new {@link Request} based on this, but with a different URI.
    *
    * @param uri the new uri
@@ -132,6 +138,21 @@ public interface Request {
    * @param payload the new payload
    */
   Request withPayload(ByteString payload);
+
+  /**
+   * Creates a new {@link Request} based on this, but with a different ttl in ms.
+   *
+   * @param ttl The ttl in ms
+   */
+  Request withTtl(long ttl);
+
+  /**
+   * Creates a new {@link Request} based on this, but with a different ttl in ms.
+   *
+   * @param ttl      The ttl
+   * @param timeUnit The timeunit of the ttl
+   */
+  Request withTtl(long ttl, TimeUnit timeUnit);
 
   /**
    * Creates a {@link Request} for the given uri and method.

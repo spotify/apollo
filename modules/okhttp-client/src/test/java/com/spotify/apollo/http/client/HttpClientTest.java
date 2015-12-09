@@ -22,6 +22,8 @@ package com.spotify.apollo.http.client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.StatusType;
+import com.squareup.okhttp.Call;
+import com.squareup.okhttp.OkHttpClient;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -32,6 +34,7 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import okio.ByteString;
 
@@ -41,6 +44,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -108,6 +116,59 @@ public class HttpClientTest {
                    hasEntry("Vary", "Content-Type, Accept")
                ));
     assertThat(response.payload(), is(Optional.of(ByteString.encodeUtf8("world"))));
+  }
+
+  @Test
+  public void testTimeout() throws Exception {
+    final OkHttpClient okHttpClient = mock(OkHttpClient.class);
+    final Call call = mock(Call.class);
+
+    when(okHttpClient.getReadTimeout()).thenReturn(10);
+    when(okHttpClient.clone()).thenReturn(okHttpClient);
+    when(okHttpClient.newCall(any(com.squareup.okhttp.Request.class))).thenReturn(call);
+
+    HttpClient client = new HttpClient(okHttpClient);
+
+    Request request = Request.forUri("http://test", "GET").withTtl(1, TimeUnit.SECONDS);
+    client.send(request, empty());
+
+    verify(call).enqueue(any(TransformingCallback.class));
+  }
+
+  @Test
+  public void testTimeoutNotSet() throws Exception {
+    final OkHttpClient okHttpClient = mock(OkHttpClient.class);
+    final Call call = mock(Call.class);
+
+    when(okHttpClient.getReadTimeout()).thenReturn(10);
+    when(okHttpClient.clone()).thenReturn(okHttpClient);
+    when(okHttpClient.newCall(any(com.squareup.okhttp.Request.class))).thenReturn(call);
+
+    HttpClient client = new HttpClient(okHttpClient);
+
+    Request request = Request.forUri("http://test", "GET");
+    client.send(request, empty());
+
+    verify(okHttpClient, never()).clone();
+    verify(call).enqueue(any(TransformingCallback.class));
+  }
+
+  @Test
+  public void testTimeoutSame() throws Exception {
+    final OkHttpClient okHttpClient = mock(OkHttpClient.class);
+    final Call call = mock(Call.class);
+
+    when(okHttpClient.getReadTimeout()).thenReturn(10);
+    when(okHttpClient.clone()).thenReturn(okHttpClient);
+    when(okHttpClient.newCall(any(com.squareup.okhttp.Request.class))).thenReturn(call);
+
+    HttpClient client = new HttpClient(okHttpClient);
+
+    Request request = Request.forUri("http://test", "GET").withTtl(10, TimeUnit.MILLISECONDS);
+    client.send(request, empty());
+
+    verify(okHttpClient, never()).clone();
+    verify(call).enqueue(any(TransformingCallback.class));
   }
 
   @Test

@@ -65,7 +65,14 @@ class HttpClient implements IncomingRequestAwareClient {
     final CompletableFuture<com.spotify.apollo.Response<ByteString>> result =
         new CompletableFuture<>();
 
-    client.newCall(request).enqueue(TransformingCallback.create(result));
+    //https://github.com/square/okhttp/wiki/Recipes#per-call-configuration
+    OkHttpClient finalClient = client;
+    if (apolloRequest.ttl().isPresent()
+        && client.getReadTimeout() != apolloRequest.ttl().get()) {
+      finalClient = client.clone();
+    }
+
+    finalClient.newCall(request).enqueue(TransformingCallback.create(result));
 
     return result;
   }
