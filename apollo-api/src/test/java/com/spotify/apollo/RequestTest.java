@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import okio.ByteString;
 
@@ -138,5 +139,20 @@ public class RequestTest {
   public void shouldClearHeaders() throws Exception {
     assertThat(requestWithHeader("/foo", "old", "value").clearHeaders().headers(),
                is(ImmutableMap.of()));
+  }
+
+  @Test
+  public void shouldNotHaveTTLByDefault() throws Exception {
+    assertThat(request("/foo").ttl(), is(Optional.empty()));
+  }
+
+  @Test
+  public void shouldSetTTL() throws Exception {
+    assertThat(request("/foo").withTtl(100).ttl().get(), is(100L));
+  }
+
+  @Test
+  public void shouldSetTTLWithUnit() throws Exception {
+    assertThat(request("/foo").withTtl(1, TimeUnit.SECONDS).ttl().get(), is(1000L));
   }
 }
