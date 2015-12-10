@@ -24,9 +24,9 @@ import com.google.common.collect.ImmutableMap;
 
 import org.junit.Test;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import okio.ByteString;
 
@@ -148,11 +148,11 @@ public class RequestTest {
 
   @Test
   public void shouldSetTTL() throws Exception {
-    assertThat(request("/foo").withTtl(100).ttl().get(), is(100L));
+    assertThat(request("/foo").withTtl(100).ttl().get(), is(Duration.ofMillis(100)));
   }
 
   @Test
   public void shouldSetTTLWithUnit() throws Exception {
-    assertThat(request("/foo").withTtl(1, TimeUnit.SECONDS).ttl().get(), is(1000L));
+    assertThat(request("/foo").withTtl(Duration.ofSeconds(1)).ttl().get(), is(Duration.ofSeconds(1)));
   }
 }

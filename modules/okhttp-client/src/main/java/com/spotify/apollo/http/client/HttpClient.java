@@ -28,6 +28,7 @@ import com.squareup.okhttp.RequestBody;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
 
 import okio.ByteString;
 
@@ -68,8 +69,9 @@ class HttpClient implements IncomingRequestAwareClient {
     //https://github.com/square/okhttp/wiki/Recipes#per-call-configuration
     OkHttpClient finalClient = client;
     if (apolloRequest.ttl().isPresent()
-        && client.getReadTimeout() != apolloRequest.ttl().get()) {
+        && client.getReadTimeout() != apolloRequest.ttl().get().toMillis()) {
       finalClient = client.clone();
+      finalClient.setReadTimeout(apolloRequest.ttl().get().toMillis(), TimeUnit.MILLISECONDS);
     }
 
     finalClient.newCall(request).enqueue(TransformingCallback.create(result));

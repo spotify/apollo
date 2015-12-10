@@ -22,11 +22,11 @@ package com.spotify.apollo;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableMap;
 
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import okio.ByteString;
 
@@ -57,7 +57,7 @@ abstract class RequestValue implements Request {
       Map<String, String> headers,
       Optional<String> service,
       Optional<ByteString> payload,
-      Optional<Long> ttl) {
+      Optional<Duration> ttl) {
     return new AutoValue_RequestValue(
         method, uri,
         ImmutableMap.copyOf(parameters),
@@ -101,12 +101,12 @@ abstract class RequestValue implements Request {
 
   @Override
   public Request withTtl(final long ttl) {
-    return create(method(), uri(), parameters(), headers(), service(), payload(), of(ttl));
+    return create(method(), uri(), parameters(), headers(), service(), payload(), of(Duration.ofMillis(ttl)));
   }
 
   @Override
-  public Request withTtl(final long ttl, final TimeUnit timeUnit) {
-    return create(method(), uri(), parameters(), headers(), service(), payload(), of(timeUnit.toMillis(ttl)));
+  public Request withTtl(final Duration duration) {
+    return create(method(), uri(), parameters(), headers(), service(), payload(), of(duration));
   }
 
   private static Map<String, List<String>> parseParameters(String uri) {

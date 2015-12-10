@@ -19,10 +19,10 @@
  */
 package com.spotify.apollo;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import okio.ByteString;
 
@@ -90,7 +90,7 @@ public interface Request {
   /**
    * The request ttl in ms
    */
-  Optional<Long> ttl();
+  Optional<Duration> ttl();
 
   /**
    * Creates a new {@link Request} based on this, but with a different URI.
@@ -149,10 +149,9 @@ public interface Request {
   /**
    * Creates a new {@link Request} based on this, but with a different ttl in ms.
    *
-   * @param ttl      The ttl
-   * @param timeUnit The timeunit of the ttl
+   * @param duration The duration, will be turned into ms
    */
-  Request withTtl(long ttl, TimeUnit timeUnit);
+  Request withTtl(final Duration duration);
 
   /**
    * Creates a {@link Request} for the given uri and method.
