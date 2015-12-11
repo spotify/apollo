@@ -147,12 +147,12 @@ public class RequestTest {
   }
 
   @Test
-  public void shouldSetTTL() throws Exception {
-    assertThat(request("/foo").withTtl(100).ttl().get(), is(Duration.ofMillis(100)));
+  public void shouldSetTtl() throws Exception {
+    assertThat(request("/foo").withTtl(Duration.ofSeconds(1)).ttl().get(), is(Duration.ofSeconds(1)));
   }
 
   @Test
-  public void shouldSetTTLWithUnit() throws Exception {
-    assertThat(request("/foo").withTtl(Duration.ofSeconds(1)).ttl().get(), is(Duration.ofSeconds(1)));
+  public void shouldSetTtlInMs() throws Exception {
+    assertThat(request("/foo").withTtl(100).ttl().get(), is(Duration.ofMillis(100)));
   }
 }

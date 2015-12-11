@@ -67,6 +67,8 @@ abstract class RequestValue implements Request {
         ttl);
   }
 
+  public abstract Optional<Duration> ttl();
+
   @Override
   public Request withUri(String uri) {
     return create(method(), uri, parameters(), headers(), service(), payload(), ttl());
@@ -97,11 +99,6 @@ abstract class RequestValue implements Request {
   @Override
   public Request withPayload(ByteString payload) {
     return create(method(), uri(), parameters(), headers(), service(), of(payload), ttl());
-  }
-
-  @Override
-  public Request withTtl(final long ttl) {
-    return create(method(), uri(), parameters(), headers(), service(), payload(), of(Duration.ofMillis(ttl)));
   }
 
   @Override

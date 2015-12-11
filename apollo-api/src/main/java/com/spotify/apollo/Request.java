@@ -90,7 +90,9 @@ public interface Request {
   /**
    * The request ttl in ms
    */
-  Optional<Duration> ttl();
+  default Optional<Duration> ttl() {
+    return Optional.empty();
+  }
 
   /**
    * Creates a new {@link Request} based on this, but with a different URI.
@@ -140,18 +142,22 @@ public interface Request {
   Request withPayload(ByteString payload);
 
   /**
-   * Creates a new {@link Request} based on this, but with a different ttl in ms.
+   * Creates a new {@link Request} based on this, but with a different ttl.
    *
-   * @param ttl The ttl in ms
+   * @param ttl The duration, will be turned into ms
    */
-  Request withTtl(long ttl);
+  default Request withTtl(final Duration ttl) {
+    throw new UnsupportedOperationException();
+  }
 
   /**
-   * Creates a new {@link Request} based on this, but with a different ttl in ms.
+   * Creates a new {@link Request} based on this, but with a different ttl in ms
    *
-   * @param duration The duration, will be turned into ms
+   * @param ttl The duration in ms
    */
-  Request withTtl(final Duration duration);
+  default Request withTtl(final int ttl) {
+    return withTtl(Duration.ofMillis(ttl));
+  }
 
   /**
    * Creates a {@link Request} for the given uri and method.
