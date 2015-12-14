@@ -67,6 +67,7 @@ abstract class RequestValue implements Request {
         ttl);
   }
 
+  @Override
   public abstract Optional<Duration> ttl();
 
   @Override

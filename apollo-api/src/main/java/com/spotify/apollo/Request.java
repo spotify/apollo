@@ -88,7 +88,7 @@ public interface Request {
   Optional<ByteString> payload();
 
   /**
-   * The request ttl in ms
+   * The request ttl.
    */
   default Optional<Duration> ttl() {
     return Optional.empty();
@@ -144,19 +144,10 @@ public interface Request {
   /**
    * Creates a new {@link Request} based on this, but with a different ttl.
    *
-   * @param ttl The duration, will be turned into ms
+   * @param ttl The duration
    */
   default Request withTtl(final Duration ttl) {
     throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Creates a new {@link Request} based on this, but with a different ttl in ms
-   *
-   * @param ttl The duration in ms
-   */
-  default Request withTtl(final int ttl) {
-    return withTtl(Duration.ofMillis(ttl));
   }
 
   /**

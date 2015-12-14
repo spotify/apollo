@@ -150,9 +150,4 @@ public class RequestTest {
   public void shouldSetTtl() throws Exception {
     assertThat(request("/foo").withTtl(Duration.ofSeconds(1)).ttl().get(), is(Duration.ofSeconds(1)));
   }
-
-  @Test
-  public void shouldSetTtlInMs() throws Exception {
-    assertThat(request("/foo").withTtl(100).ttl().get(), is(Duration.ofMillis(100)));
-  }
 }
