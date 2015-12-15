@@ -146,7 +146,7 @@ public interface Request {
    *
    * @param ttl The duration
    */
-  default Request withTtl(final Duration ttl) {
+  default Request withTtl(Duration ttl) {
     throw new UnsupportedOperationException();
   }
 
