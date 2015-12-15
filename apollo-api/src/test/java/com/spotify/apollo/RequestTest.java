@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 
 import org.junit.Test;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
@@ -138,5 +139,15 @@ public class RequestTest {
   public void shouldClearHeaders() throws Exception {
     assertThat(requestWithHeader("/foo", "old", "value").clearHeaders().headers(),
                is(ImmutableMap.of()));
+  }
+
+  @Test
+  public void shouldNotHaveTTLByDefault() throws Exception {
+    assertThat(request("/foo").ttl(), is(Optional.empty()));
+  }
+
+  @Test
+  public void shouldSetTtl() throws Exception {
+    assertThat(request("/foo").withTtl(Duration.ofSeconds(1)).ttl().get(), is(Duration.ofSeconds(1)));
   }
 }

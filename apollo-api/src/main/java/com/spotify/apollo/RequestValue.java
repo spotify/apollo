@@ -22,6 +22,7 @@ package com.spotify.apollo;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableMap;
 
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ abstract class RequestValue implements Request {
   }
 
   public static Request create(String uri, String method) {
-    return create(method, uri, parseParameters(uri), emptyMap(), empty(), empty());
+    return create(method, uri, parseParameters(uri), emptyMap(), empty(), empty(), empty());
   }
 
   private static Request create(
@@ -55,23 +56,28 @@ abstract class RequestValue implements Request {
       Map<String, List<String>> parameters,
       Map<String, String> headers,
       Optional<String> service,
-      Optional<ByteString> payload) {
+      Optional<ByteString> payload,
+      Optional<Duration> ttl) {
     return new AutoValue_RequestValue(
         method, uri,
         ImmutableMap.copyOf(parameters),
         ImmutableMap.copyOf(headers),
         service,
-        payload);
+        payload,
+        ttl);
   }
 
   @Override
+  public abstract Optional<Duration> ttl();
+
+  @Override
   public Request withUri(String uri) {
-    return create(method(), uri, parameters(), headers(), service(), payload());
+    return create(method(), uri, parameters(), headers(), service(), payload(), ttl());
   }
 
   @Override
   public Request withService(String service) {
-    return create(method(), uri(), parameters(), headers(), of(service), payload());
+    return create(method(), uri(), parameters(), headers(), of(service), payload(), ttl());
   }
 
   @Override
@@ -83,17 +89,22 @@ abstract class RequestValue implements Request {
   public Request withHeaders(Map<String, String> additionalHeaders) {
     Map<String, String> headers = new LinkedHashMap<>(headers());
     headers.putAll(additionalHeaders);
-    return create(method(), uri(), parameters(), headers, service(), payload());
+    return create(method(), uri(), parameters(), headers, service(), payload(), ttl());
   }
 
   @Override
   public Request clearHeaders() {
-    return create(method(), uri(), parameters(), emptyMap(), service(), payload());
+    return create(method(), uri(), parameters(), emptyMap(), service(), payload(), ttl());
   }
 
   @Override
   public Request withPayload(ByteString payload) {
-    return create(method(), uri(), parameters(), headers(), service(), of(payload));
+    return create(method(), uri(), parameters(), headers(), service(), of(payload), ttl());
+  }
+
+  @Override
+  public Request withTtl(final Duration duration) {
+    return create(method(), uri(), parameters(), headers(), service(), payload(), of(duration));
   }
 
   private static Map<String, List<String>> parseParameters(String uri) {

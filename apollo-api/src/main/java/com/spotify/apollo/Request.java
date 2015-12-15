@@ -19,6 +19,7 @@
  */
 package com.spotify.apollo;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -87,6 +88,13 @@ public interface Request {
   Optional<ByteString> payload();
 
   /**
+   * The request ttl.
+   */
+  default Optional<Duration> ttl() {
+    return Optional.empty();
+  }
+
+  /**
    * Creates a new {@link Request} based on this, but with a different URI.
    *
    * @param uri the new uri
@@ -132,6 +140,15 @@ public interface Request {
    * @param payload the new payload
    */
   Request withPayload(ByteString payload);
+
+  /**
+   * Creates a new {@link Request} based on this, but with a different ttl.
+   *
+   * @param ttl The duration
+   */
+  default Request withTtl(Duration ttl) {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Creates a {@link Request} for the given uri and method.

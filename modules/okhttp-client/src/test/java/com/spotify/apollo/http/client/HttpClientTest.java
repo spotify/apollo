@@ -26,12 +26,16 @@ import com.spotify.apollo.StatusType;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
+import java.net.SocketTimeoutException;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import okio.ByteString;
 
@@ -41,6 +45,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.fail;
+import static org.mockserver.model.HttpCallback.callback;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -108,6 +114,52 @@ public class HttpClientTest {
                    hasEntry("Vary", "Content-Type, Accept")
                ));
     assertThat(response.payload(), is(Optional.of(ByteString.encodeUtf8("world"))));
+  }
+
+  @Test
+  public void testTimeout() throws Exception {
+    mockServerClient.when(
+        request()
+        .withMethod("GET")
+        .withPath("/foo.php")
+    ).callback(
+        callback()
+        .withCallbackClass(SleepCallback.class.getCanonicalName())
+    );
+
+    String uri = format("http://localhost:%d/foo.php", mockServerRule.getHttpPort());
+    Request request = Request.forUri(uri, "GET");
+
+    Response<ByteString> response = HttpClient.create()
+        .send(request, empty())
+        .toCompletableFuture().get();
+
+    assertThat(response.status(), withCode(200));
+  }
+
+  @Test
+  public void testTimeoutFail() throws Exception {
+    mockServerClient.when(
+        request()
+            .withMethod("GET")
+            .withPath("/foo.php")
+    ).callback(
+        callback()
+            .withCallbackClass(SleepCallback.class.getCanonicalName())
+    );
+
+    String uri = format("http://localhost:%d/foo.php", mockServerRule.getHttpPort());
+    Request request = Request.forUri(uri, "GET").withTtl(Duration.ofSeconds(1));
+
+    try {
+      HttpClient.create()
+          .send(request, empty())
+          .toCompletableFuture().get();
+    } catch (InterruptedException e) {
+      fail();
+    } catch (ExecutionException e) {
+      assertThat(e.getCause().getCause(), IsInstanceOf.instanceOf(SocketTimeoutException.class));
+    }
   }
 
   @Test
