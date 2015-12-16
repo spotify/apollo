@@ -74,6 +74,11 @@ try (Service.Instance instance = service.start(args)) {
 }
 ```
 
+Apollo Core will look for a configuration file with the name
+`<service-name>.conf` on the classpath. `test.conf` in the example above.
+It is possible to overlay an explicit config file on top of the classpath
+resolved config by using the command line argument `--config <config-file>`.
+
 Apollo Core adds support for overriding configuration keys
 using `-D` command-line options.  For example, `-Ddomain=example.org`
 sets the `domain` config key to `example.org`.

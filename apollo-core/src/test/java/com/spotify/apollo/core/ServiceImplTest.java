@@ -45,8 +45,12 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class ServiceImplTest {
 
@@ -109,6 +113,18 @@ public class ServiceImplTest {
     try (Service.Instance instance = service
         .start(new String[]{}, ImmutableMap.of("APOLLO_A___B__C______D_____E__", "value"))) {
       assertThat(instance.getConfig().getString("a._b_c___d.__e_"), is("value"));
+    }
+  }
+
+  @Test
+  public void testOverlaysExplicitConfigFile() throws IOException {
+    Service service = ServiceImpl.builder("test").build();
+
+    try (Service.Instance instance = service.start("--config", "src/test/files/overlay.conf")) {
+      Config config = instance.getConfig();
+      assertThat(config.getString("bundled.value"), is("is loaded"));
+      assertThat(config.getString("bundled.shadowed"), is("overlayed"));
+      assertThat(config.getString("some.key"), is("has a value"));
     }
   }
 
