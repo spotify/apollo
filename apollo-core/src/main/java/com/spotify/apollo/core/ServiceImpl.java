@@ -49,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -320,6 +321,13 @@ class ServiceImpl implements Service {
             "Resets logging level to OFF.  Can be mixed with '-v'/'--verbose' or "
             + "'-c'/'--concise'.  Overrides config key '%s'.",
             CommonConfigKeys.LOGGING_VERBOSITY.getKey()));
+
+    final OptionSpec<String> configFile = parser.accepts(
+        "config",
+        "Load configuration from the specified file. The values from the file will be "
+        + "overlayed on top of any already loaded configuration.")
+        .withRequiredArg();
+
     final OptionSpec<String> unparsedOption =
         parser
             .nonOptions("Service-specific options that will be passed to the underlying service.");
@@ -404,6 +412,12 @@ class ServiceImpl implements Service {
           config,
           key, value,
           "Command-line configuration -D" + parts[0]);
+    }
+
+    if (parsed.has(configFile)) {
+      final String configFileValue = parsed.valueOf(configFile);
+      final Config overlayConfig = ConfigFactory.parseFile(new File(configFileValue));
+      config = overlayConfig.withFallback(config);
     }
 
     return config;
