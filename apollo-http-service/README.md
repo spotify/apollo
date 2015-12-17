@@ -2,8 +2,9 @@ Apollo HTTP Service
 ===================
 
 The `apollo-http-service` library is a small bundle of Apollo modules. It incorporates both
-[apollo-api](../apollo-api) and [apollo-core](../apollo-core) and ties them together with a http
-server and client to make a complete service.
+[apollo-api](../apollo-api) and [apollo-core](../apollo-core) and ties them together with the
+[jetty-http-server](../modules/jetty-http-server) and the [okhttp-client](../modules/okhttp-client)
+to make a complete service.
 
 Apollo HTTP Service gives you what you need to start your backend service. Here, for example, we
 tell `HttpService` to boot a service named `"ping"`, defined by the function `Ping::init`, and
@@ -15,9 +16,10 @@ public static void main(String[] args) throws LoadingException {
 }
 ```
 
-The [HttpService#boot](src/main/java/com/spotify/apollo/httpservice/HttpService.java)
-method is a good summary of the modules you get in the bundle. You can find documentation for each
-module in its respective [folder](../modules).
+The [HttpService](src/main/java/com/spotify/apollo/httpservice/HttpService.java)
+class is a good example of how `apollo-core` together with `apollo-api` and other modules come
+together to build a fully functional service. You can find documentation for each
+module in its respective directory under [/modules](../modules).
 
 Minimal project skeleton
 ========================
