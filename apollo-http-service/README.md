@@ -78,6 +78,8 @@ http.server.port = 8080
 http.server.port = ${?HTTP_PORT}
 ```
 
+For more information on how to manage configuration, see [Apollo Core](../apollo-core) and the [Typesafe Config](https://github.com/typesafehub/config) documentation.
+
 `./pom.xml`
 ```xml
 <project>
