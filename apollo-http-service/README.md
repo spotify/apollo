@@ -22,8 +22,6 @@ module in its respective [folder](../modules).
 Minimal project skeleton
 ========================
 
-### TODO include opensource cookiecutter skeleton?
-
 ```plain
 .
 ├── pom.xml
@@ -43,6 +41,7 @@ Minimal project skeleton
     <modelVersion>4.0.0</modelVersion>
 
     <name>Simple Ping Service</name>
+    <groupId>com.example</groupId>
     <artifactId>ping</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
