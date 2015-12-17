@@ -69,7 +69,7 @@ Minimal project skeleton
 </project>
 ```
 
-`./ping.conf`
+`./src/main/resources/ping.conf`
 ```
 # Configuration for http interface
 http.server.port = 8080
