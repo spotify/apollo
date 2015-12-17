@@ -114,6 +114,7 @@ For more information on how to manage configuration, see [Apollo Core](../apollo
    </dependencies>
 
    <build>
+       <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -165,8 +166,7 @@ For more information on how to manage configuration, see [Apollo Core](../apollo
 
 Compile and Run
 ===============
-TODO: TBW
 ```
 mvn package
-java -jar target/app.jar -Dhttp.server.port=8080
+java -jar target/ping.jar
 ```
