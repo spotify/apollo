@@ -113,6 +113,13 @@ For more information on how to manage configuration, see [Apollo Core](../apollo
             <groupId>com.spotify</groupId>
             <artifactId>apollo-http-service</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.3</version>
+            <scope>runtime</scope>
+        </dependency>
    </dependencies>
 
    <build>
@@ -165,6 +172,15 @@ For more information on how to manage configuration, see [Apollo Core](../apollo
     </build>
 </project>
 ```
+
+The Maven configuration is a bit lengthy so it deserves some more explanation:
+
+* We use a property named `mainClass` to refer to our main class. This will be used later.
+* Under the `dependencyManagement` we import all the Apollo artifact versions through the `apollo-bom` artifact. For more information about importing managed dependencies, see the [Maven documentation](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Importing_Dependencies).
+* We add `logback-classic` as a runtime dependency to get log output. Any [SLF4J](http://www.slf4j.org/) compatible logging implementation would do.
+* We configure the compiler plugin to target JDK 8.
+* We configure the `maven-dependency-plugin` to copy all runtime dependency jars into `${project.build.directory}/lib`. These will be referenced from the main artifact.
+* We configure `maven-jar-plugin` to add the classpath jars to the manifest, prefixed with `lib/` along with the `MainClass` entry to use our main class.
 
 Compile and Run
 ===============
