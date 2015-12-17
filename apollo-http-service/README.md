@@ -15,7 +15,7 @@ public static void main(String[] args) throws LoadingException {
 }
 ```
 
-The [HttpService#builder](src/main/java/com/spotify/apollo/httpservice/HttpService.java)
+The [HttpService#boot](src/main/java/com/spotify/apollo/httpservice/HttpService.java)
 method is a good summary of the modules you get in the bundle. You can find documentation for each
 module in its respective [folder](../modules).
 
