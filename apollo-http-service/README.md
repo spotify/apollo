@@ -2,8 +2,9 @@ Apollo HTTP Service
 ===================
 
 The `apollo-http-service` library is a small bundle of Apollo modules. It incorporates both
-[apollo-api](../apollo-api) and [apollo-core](../apollo-core) and ties them together with a http
-server and client to make a complete service.
+[apollo-api](../apollo-api) and [apollo-core](../apollo-core) and ties them together with the
+[jetty-http-server](../modules/jetty-http-server) and the [okhttp-client](../modules/okhttp-client)
+to make a complete service.
 
 Apollo HTTP Service gives you what you need to start your backend service. Here, for example, we
 tell `HttpService` to boot a service named `"ping"`, defined by the function `Ping::init`, and
@@ -15,14 +16,13 @@ public static void main(String[] args) throws LoadingException {
 }
 ```
 
-The [HttpService#builder](src/main/java/com/spotify/apollo/httpservice/HttpService.java)
-method is a good summary of the modules you get in the bundle. You can find documentation for each
-module in its respective [folder](../modules).
+The [HttpService](src/main/java/com/spotify/apollo/httpservice/HttpService.java)
+class is a good example of how `apollo-core` together with `apollo-api` and other modules come
+together to build a fully functional service. You can find documentation for each
+module in its respective directory under [/modules](../modules).
 
 Minimal project skeleton
 ========================
-
-### TODO include opensource cookiecutter skeleton?
 
 ```plain
 .
@@ -35,45 +35,6 @@ Minimal project skeleton
         │           └── Ping.java
         └── resources/
             └── ping.conf
-```
-
-`./pom.xml`
-```xml
-<project>
-    <modelVersion>4.0.0</modelVersion>
-
-    <name>Simple Ping Service</name>
-    <artifactId>ping</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.spotify</groupId>
-                <artifactId>apollo-bom</artifactId>
-                <version>1.0.0</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-   <dependencies>
-        <dependency>
-            <groupId>com.spotify</groupId>
-            <artifactId>apollo-http-service</artifactId>
-        </dependency>
-   </dependencies>
-
-   <!-- TODO: build runnable jar -->
-</project>
-```
-
-`./ping.conf`
-```
-# Configuration for http interface
-http.server.port = 8080
-http.server.port = ${?HTTP_PORT}
 ```
 
 `./src/main/java/com/example/Ping.java`
@@ -112,10 +73,124 @@ public final class Ping {
 }
 ```
 
+`./src/main/resources/ping.conf`
+```
+# Configuration for http interface
+http.server.port = 8080
+http.server.port = ${?HTTP_PORT}
+```
+
+For more information on how to manage configuration, see [Apollo Core](../apollo-core) and the [Typesafe Config](https://github.com/typesafehub/config) documentation.
+
+`./pom.xml`
+```xml
+<project>
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>Simple Ping Service</name>
+    <groupId>com.example</groupId>
+    <artifactId>ping</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <properties>
+        <mainClass>com.example.Ping</mainClass>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.spotify</groupId>
+                <artifactId>apollo-bom</artifactId>
+                <version>1.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+   <dependencies>
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>apollo-http-service</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.3</version>
+            <scope>runtime</scope>
+        </dependency>
+   </dependencies>
+
+   <build>
+       <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <compilerArgs>
+                        <compilerArg>-Xlint:all</compilerArg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <useBaseVersion>false</useBaseVersion>
+                    <overWriteReleases>false</overWriteReleases>
+                    <overWriteSnapshots>true</overWriteSnapshots>
+                    <includeScope>runtime</includeScope>
+                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                          <addClasspath>true</addClasspath>
+                          <classpathPrefix>lib/</classpathPrefix>
+                          <mainClass>${mainClass}</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+```
+
+The Maven configuration is a bit lengthy so it deserves some more explanation:
+
+* We use a property named `mainClass` to refer to our main class. This will be used later.
+* Under the `dependencyManagement` we import all the Apollo artifact versions through the `apollo-bom` artifact. For more information about importing managed dependencies, see the [Maven documentation](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Importing_Dependencies).
+* We add `logback-classic` as a runtime dependency to get log output. Any [SLF4J](http://www.slf4j.org/) compatible logging implementation would do.
+* We configure the compiler plugin to target JDK 8.
+* We configure the `maven-dependency-plugin` to copy all runtime dependency jars into `${project.build.directory}/lib`. These will be referenced from the main artifact.
+* We configure `maven-jar-plugin` to add the classpath jars to the manifest, prefixed with `lib/` along with the `MainClass` entry to use our main class.
+
 Compile and Run
 ===============
-TODO: TBW
 ```
 mvn package
-java -jar target/app.jar -Dhttp.server.port=8080
+java -jar target/ping.jar
+```
+
+Try a request with `curl`
+```
+$ curl http://localhost:8080/ping
+pong
 ```
