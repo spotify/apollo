@@ -26,16 +26,15 @@ import com.spotify.apollo.StatusType;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.hamcrest.core.IsInstanceOf;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
 import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 import okio.ByteString;
 
@@ -44,8 +43,8 @@ import static java.util.Optional.empty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.fail;
 import static org.mockserver.model.HttpCallback.callback;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -55,6 +54,11 @@ public class HttpClientTest {
   @Rule
   public final MockServerRule mockServerRule = new MockServerRule(this);
 
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
+
+  // this field gets set by the MockServerRule
+  @SuppressWarnings("unused")
   private MockServerClient mockServerClient;
 
   @Test
@@ -149,17 +153,12 @@ public class HttpClientTest {
     );
 
     String uri = format("http://localhost:%d/foo.php", mockServerRule.getHttpPort());
-    Request request = Request.forUri(uri, "GET").withTtl(Duration.ofSeconds(1));
+    Request request = Request.forUri(uri, "GET").withTtl(Duration.ofMillis(200));
 
-    try {
+    thrown.expect(hasCause(instanceOf(SocketTimeoutException.class)));
       HttpClient.create()
           .send(request, empty())
           .toCompletableFuture().get();
-    } catch (InterruptedException e) {
-      fail();
-    } catch (ExecutionException e) {
-      assertThat(e.getCause().getCause(), IsInstanceOf.instanceOf(SocketTimeoutException.class));
-    }
   }
 
   @Test
@@ -198,6 +197,26 @@ public class HttpClientTest {
       @Override
       protected void describeMismatchSafely(StatusType item, Description mismatchDescription) {
         mismatchDescription.appendText("the status code was ").appendValue(item.code());
+      }
+    };
+  }
+
+  private static Matcher<Throwable> hasCause(Matcher<Throwable> expected) {
+    return new TypeSafeMatcher<Throwable>() {
+      @Override
+      protected boolean matchesSafely(Throwable item) {
+        for (Throwable cause = item ; cause != null ; cause = cause.getCause()) {
+          if (expected.matches(cause)) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+
+      @Override
+      public void describeTo(Description description) {
+        description.appendText("with parent cause " + expected);
       }
     };
   }

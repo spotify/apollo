@@ -28,7 +28,7 @@ public class SleepCallback implements ExpectationCallback {
   @Override
   public HttpResponse handle(final HttpRequest httpRequest) {
     try {
-      Thread.sleep(2000);
+      Thread.sleep(1000);
     } catch (InterruptedException e) {
       return HttpResponse.response().withStatusCode(500);
     }
