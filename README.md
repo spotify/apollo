@@ -71,7 +71,7 @@ public final class App {
 ### Links
 
 [Introduction Website](https://spotify.github.io/apollo)<br />
-[Maven site](https://spotify.github.io/apollo/maven)
+[Maven site](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.spotify%22%20apollo*)
 
 ### Diagrams
 
