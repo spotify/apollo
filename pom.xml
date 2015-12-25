@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <name>Spotify Apollo Parent</name>
@@ -79,7 +81,7 @@
                             <id>enforce</id>
                             <configuration>
                                 <rules>
-                                    <requireUpperBoundDeps />
+                                    <requireUpperBoundDeps/>
                                 </rules>
                             </configuration>
                             <goals>
@@ -136,7 +138,7 @@
                     <configuration>
                         <show>private</show>
                         <failOnError>false</failOnError>
-			<additionalparam>-Xdoclint:none</additionalparam>
+                        <additionalparam>-Xdoclint:none</additionalparam>
                     </configuration>
                     <executions>
                         <execution>
@@ -288,6 +290,14 @@
                 <artifactId>maven-surefire-report-plugin</artifactId>
                 <version>2.19</version>
             </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.3</version>
+                <configuration>
+                    <failOnError>false</failOnError>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
+            </plugin>
         </plugins>
     </reporting>
 
@@ -400,12 +410,12 @@
             <id>release</id>
             <build>
                 <plugins>
-		    <plugin>
+                    <plugin>
                         <artifactId>maven-source-plugin</artifactId>
-		    </plugin>
-		    <plugin>
+                    </plugin>
+                    <plugin>
                         <artifactId>maven-javadoc-plugin</artifactId>
-		    </plugin>
+                    </plugin>
                     <plugin>
                         <!-- TODO: this plugin should probably be used outside of the 'release' profile -->
                         <groupId>org.sonatype.plugins</groupId>
@@ -442,30 +452,34 @@
             <id>ossrh</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
+        <site>
+            <id>spotify.github.io</id>
+            <url>file:./website/maven/</url>
+        </site>
     </distributionManagement>
 
     <developers>
         <developer>
-	    <id>pettermahlen</id>
-	    <email>petter@spotify.com</email>
-	    <name>Petter Måhlén</name>
-	</developer>
-	<developer>
-	    <id>rouzwawi</id>
-	    <email>rouz@spotify.com</email>
-	    <name>Rouzbeh Delavari</name>
-	</developer>
-	<developer>
-	    <id>zalenski</id>
-	    <email>zalenski@spotify.com</email>
-	    <name>Mattias de Zalenski</name>
-	</developer>
+            <id>pettermahlen</id>
+            <email>petter@spotify.com</email>
+            <name>Petter Måhlén</name>
+        </developer>
+        <developer>
+            <id>rouzwawi</id>
+            <email>rouz@spotify.com</email>
+            <name>Rouzbeh Delavari</name>
+        </developer>
+        <developer>
+            <id>zalenski</id>
+            <email>zalenski@spotify.com</email>
+            <name>Mattias de Zalenski</name>
+        </developer>
     </developers>
     <licenses>
         <license>
-	    <name>The Apache Software License, Version 2.0</name>
-	    <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-	    <distribution>repo</distribution>
-	</license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
     </licenses>
 </project>
