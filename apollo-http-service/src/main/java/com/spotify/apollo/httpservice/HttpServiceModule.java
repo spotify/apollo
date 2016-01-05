@@ -23,6 +23,7 @@ import com.spotify.apollo.AppInit;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.environment.ApolloEnvironment;
 import com.spotify.apollo.environment.ApolloEnvironmentModule;
+import com.spotify.apollo.meta.MetaModule;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.request.RequestHandler;
 
@@ -45,7 +46,8 @@ class HttpServiceModule extends AbstractApolloModule {
   protected void configure() {
     bindAppInit();
 
-    install(ApolloEnvironmentModule.create("apollo-http"));
+    install(ApolloEnvironmentModule.create());
+    install(new MetaModule("apollo-http"));
   }
 
   private void bindAppInit() {

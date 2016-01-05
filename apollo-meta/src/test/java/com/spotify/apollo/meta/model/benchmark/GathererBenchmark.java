@@ -21,10 +21,10 @@ package com.spotify.apollo.meta.model.benchmark;
 
 import com.google.common.collect.Sets;
 
-import com.spotify.apollo.meta.model.Model;
 import com.spotify.apollo.meta.model.Meta;
 import com.spotify.apollo.meta.model.MetaGatherer;
 import com.spotify.apollo.meta.model.MetaInfoBuilder;
+import com.spotify.apollo.meta.model.Model;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;

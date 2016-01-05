@@ -22,13 +22,13 @@ package com.spotify.apollo.meta;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.dispatch.Endpoint;
 import com.spotify.apollo.dispatch.EndpointInfo;
+import com.spotify.apollo.meta.model.MetaInfoBuilder;
 import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.route.Route;
 import com.spotify.apollo.meta.model.Meta;
 import com.spotify.apollo.meta.model.MetaGatherer;
 import com.spotify.apollo.meta.model.MetaGatherer.CallsGatherer;
 import com.spotify.apollo.meta.model.MetaGatherer.EndpointGatherer;
-import com.spotify.apollo.meta.model.MetaInfoBuilder;
 import com.spotify.apollo.meta.model.Model;
 import com.typesafe.config.Config;
 

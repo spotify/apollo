@@ -36,6 +36,7 @@ import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.ApolloConfig;
 import com.spotify.apollo.environment.ApolloEnvironmentModule;
 import com.spotify.apollo.http.client.HttpClientModule;
+import com.spotify.apollo.meta.MetaModule;
 import com.spotify.apollo.module.ApolloModule;
 import com.spotify.apollo.request.RequestHandler;
 import com.typesafe.config.Config;
@@ -475,6 +476,7 @@ public class ServiceHelper implements TestRule, Closeable {
         Service.Builder serviceBuilder = Services.usingName(serviceName)
             .usingModuleDiscovery(false)
             .withModule(ApolloEnvironmentModule.create())
+            .withModule(new MetaModule("service-helper"))
             .withModule(HttpClientModule.create())
             .withModule(
                 ForwardingStubClientModule

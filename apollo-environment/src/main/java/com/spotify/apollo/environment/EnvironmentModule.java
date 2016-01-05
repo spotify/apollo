@@ -29,8 +29,6 @@ import com.spotify.apollo.Client;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.EnvironmentFactory.RoutingContext;
-import com.spotify.apollo.meta.OutgoingCallsGatheringClient;
-import com.spotify.apollo.meta.MetaInfoTracker;
 import com.typesafe.config.Config;
 
 import java.util.Set;
@@ -52,17 +50,11 @@ class EnvironmentModule extends AbstractModule {
   @Singleton
   IncomingRequestAwareClient incomingRequestAwareClient(
       @Named(Services.INJECT_SERVICE_NAME) String serviceName,
-      Set<ClientDecorator> clientDecorators,
-      MetaInfoTracker metaInfoTracker) {
+      Set<ClientDecorator> clientDecorators) {
 
     final IncomingRequestAwareClient clientStack =
         foldDecorators(new NoopClient(), clientDecorators);
-    final IncomingRequestAwareClient serviceSettingClient
-        = new ServiceSettingClient(serviceName, clientStack);
-
-    return new OutgoingCallsGatheringClient(
-        metaInfoTracker.outgoingCallsGatherer(),
-        serviceSettingClient);
+    return new ServiceSettingClient(serviceName, clientStack);
   }
 
   @Provides

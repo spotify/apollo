@@ -28,6 +28,7 @@ import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.core.Services;
+import com.spotify.apollo.meta.MetaModule;
 import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.route.Route;
@@ -67,7 +68,8 @@ public class ApolloEnvironmentModuleTest {
   public void setUp() throws Exception {
     appModule = ApolloEnvironmentModule.create();
     service = Services.usingName("ping")
-        .withModule(appModule);
+        .withModule(appModule)
+        .withModule(new MetaModule("test"));
   }
 
   @Test

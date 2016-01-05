@@ -39,7 +39,6 @@ import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.RequestRunnableFactory;
 import com.spotify.apollo.route.ApplicationRouter;
 import com.spotify.apollo.route.Routers;
-import com.typesafe.config.Config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,31 +64,8 @@ public class ApolloEnvironmentModule extends AbstractApolloModule {
 
   private static final Logger LOG = LoggerFactory.getLogger(ApolloEnvironmentModule.class);
 
-  private final String assemblyName;
-
-
-  /**
-   * @deprecated specify the assembly name explicitly via {@link #create(String)} instead.
-   */
-  @Deprecated
-  public ApolloEnvironmentModule() {
-    assemblyName = "unspecified-apollo-assembly";
-  }
-
-  /**
-   * @deprecated specify the assembly name explicitly via {@link #create(String)} instead.
-   */
-  @Deprecated
   public static ApolloEnvironmentModule create() {
     return new ApolloEnvironmentModule();
-  }
-
-  private ApolloEnvironmentModule(String assemblyName) {
-    this.assemblyName = assemblyName;
-  }
-
-  public static ApolloEnvironmentModule create(String assemblyName) {
-    return new ApolloEnvironmentModule(assemblyName);
   }
 
   /**
@@ -112,7 +88,6 @@ public class ApolloEnvironmentModule extends AbstractApolloModule {
     bind(ApolloConfig.class).in(Singleton.class); // used by most sub-modules
     bind(ApolloEnvironment.class).to(ApolloEnvironmentImpl.class).in(Singleton.class);
 
-    install(new MetaModule(assemblyName));
     install(new EnvironmentModule());
   }
 
@@ -124,7 +99,6 @@ public class ApolloEnvironmentModule extends AbstractApolloModule {
   private static class ApolloEnvironmentImpl implements ApolloEnvironment {
 
     private final Closer closer;
-    private final Config configNode;
     private final ApolloConfig apolloConfig;
     private final Environment environment;
     private final IncomingRequestAwareClient incomingRequestAwareClient;
@@ -149,7 +123,6 @@ public class ApolloEnvironmentModule extends AbstractApolloModule {
     @Inject
     private ApolloEnvironmentImpl(
         Closer closer,
-        Config configNode,
         Environment environment,
         EnvironmentFactory.RoutingContext routingContext,
         IncomingRequestAwareClient incomingRequestAwareClient,
@@ -158,7 +131,6 @@ public class ApolloEnvironmentModule extends AbstractApolloModule {
         Set<EndpointRunnableFactoryDecorator> erfDecorators,
         ApolloConfig apolloConfig) {
       this.closer = closer;
-      this.configNode = configNode;
       this.environment = environment;
       this.routingContext = routingContext;
       this.incomingRequestAwareClient = incomingRequestAwareClient;
