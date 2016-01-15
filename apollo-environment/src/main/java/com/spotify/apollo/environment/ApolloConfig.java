@@ -58,6 +58,11 @@ public class ApolloConfig {
     return optionalBoolean(apolloNode, "logIncomingRequests").orElse(true);
   }
 
+  public boolean enableOutgoingRequestLogging() {
+    return optionalBoolean(apolloNode, "logOutgoingRequests").orElse(true);
+  }
+
+
   public boolean enableMetaApi() {
     return optionalBoolean(apolloNode, "metaApi").orElse(true);
   }
