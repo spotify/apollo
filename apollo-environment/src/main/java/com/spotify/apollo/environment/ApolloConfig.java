@@ -26,29 +26,31 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
+import static com.spotify.apollo.environment.ConfigUtil.either;
 import static com.spotify.apollo.environment.ConfigUtil.optionalBoolean;
 import static com.spotify.apollo.environment.ConfigUtil.optionalString;
-import static com.spotify.apollo.environment.ConfigUtil.either;
 
 /**
  * Configuration object for keys under the apollo keyspace
  */
 public class ApolloConfig {
 
+  private final Config root;
   private final Config apolloNode;
 
   @Inject
   public ApolloConfig(Config configNode) {
-    final Config root = Objects.requireNonNull(configNode);
+    root = Objects.requireNonNull(configNode);
 
     apolloNode = root.hasPath("apollo")
-        ? root.getConfig("apollo")
-        : ConfigFactory.empty();
+                 ? root.getConfig("apollo")
+                 : ConfigFactory.empty();
   }
 
   public String backend() {
-    return either(optionalString(apolloNode, "domain"),
-                  optionalString(apolloNode, "backend"))
+    return either(either(optionalString(apolloNode, "domain"),
+                         optionalString(apolloNode, "backend")),
+                  optionalString(root, "domain"))
         .orElse("");
   }
 
