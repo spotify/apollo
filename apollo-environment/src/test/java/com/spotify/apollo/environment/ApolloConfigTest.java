@@ -43,7 +43,7 @@ public class ApolloConfigTest {
   }
 
   @Test
-  public void testBackendApolloDefault() throws Exception {
+  public void testBackendDefault() throws Exception {
     final Config config = ConfigFactory.parseMap(ImmutableMap.of());
     final ApolloConfig sut = new ApolloConfig(config);
 
