@@ -62,7 +62,6 @@ public class ApolloConfig {
     return optionalBoolean(apolloNode, "logOutgoingRequests").orElse(true);
   }
 
-
   public boolean enableMetaApi() {
     return optionalBoolean(apolloNode, "metaApi").orElse(true);
   }

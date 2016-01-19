@@ -88,6 +88,24 @@ public class ApolloConfigTest {
   }
 
   @Test
+  public void testEnableOutgoingRequestLogging() throws Exception {
+    final Config config = ConfigFactory.parseMap(ImmutableMap.of(
+        "apollo.logOutgoingRequests", false
+    ));
+    final ApolloConfig sut = new ApolloConfig(config);
+
+    assertThat(sut.enableOutgoingRequestLogging(), is(false));
+  }
+
+  @Test
+  public void testEnableOutgoingRequestLoggingDefault() throws Exception {
+    final Config config = ConfigFactory.parseMap(ImmutableMap.of());
+    final ApolloConfig sut = new ApolloConfig(config);
+
+    assertThat(sut.enableOutgoingRequestLogging(), is(true));
+  }
+
+  @Test
   public void testEnableMetaApi() throws Exception {
     final Config config = ConfigFactory.parseMap(ImmutableMap.of(
         "apollo.metaApi", true
