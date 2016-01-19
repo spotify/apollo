@@ -17,6 +17,7 @@ key | type | required | note
 --- | --- | --- | ---
 `apollo.domain` | string | optional | eg., `example.org`
 `apollo.logIncomingRequests` | boolean | optional | default `true`
+`apollo.logOutgoingRequests` | boolean | optional | default `true`
 
 
 ## Example
