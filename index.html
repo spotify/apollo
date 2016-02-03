@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Apollo</title>
+    <meta name="description" content="Apollo">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta property="og:title" content="Apollo">
+    <meta property="og:description" content="Apollo">
+    <meta name="twitter:card" content="summary">
+    
+    <meta name="twitter:url" content="https://spotify.github.io/apollo">
+    
+    <meta name="twitter:title" content="Apollo">
+    <meta name="twitter:description" content="Apollo">
+    <meta name="twitter:site" content="@SpotifyEng">
+    <script src="https://use.typekit.net/acl2qta.js"></script>
+    <script type="text/javascript">try{Typekit.load({ async: true });}catch(e){}</script>
+
+    <!--[if IE]>
+    <link rel="shortcut icon" href="//d2c87l0yth4zbw.global.ssl.fastly.net/i/_global/favicon.ico">
+    <![endif]-->
+
+    <link rel="icon" href="//d2c87l0yth4zbw.global.ssl.fastly.net/i/_global/favicon.png">
+    <link rel="stylesheet" href="all.css">
+  </head>
+
+  <body>
+    <span id="forkongithub"><a href="https://github.com/spotify/apollo">Fork me on GitHub</a></span>
+    <main>
+      <article class="container">
+<h1>Spotify Apollo<br> Operations Manual</h1>
+
+<p class="small disclaimer">
+  A library for writing services that focuses on composability and simplicity, with high performance
+  using modern Java idioms and features.
+</p>
+
+<section>
+  <h1>General Description</h1>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h2>Apollo</h2>
+
+      <p>
+        Apollo is a set of Java libraries that we use at Spotify when
+        writing micro-services. Apollo includes features such as an
+        HTTP server and a URI routing system, making it trivial to
+        implement RESTful services.
+      </p>
+
+      <p>
+        Apollo has been used in production at Spotify for a long time.
+        As a part of the work to release version 1.0.0 we are moving the
+        development of Apollo in to the open.
+      </p>
+
+      <p>
+        Apollo has three main parts:
+      </p>
+
+      <ol>
+        <li>
+          <a href="https://github.com/spotify/apollo/tree/master/apollo-api">
+            apollo-api
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/spotify/apollo/tree/master/apollo-core">
+            apollo-core
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/spotify/apollo/tree/master/apollo-http-service">
+            apollo-http-service
+          </a>
+        </li>
+      </ol>
+    </div>
+
+    <div>
+      <h3>Apollo API</h3>
+
+      <p>
+        The apollo-api library defines the interfaces for your request routing
+        and request/reply handlers.
+      </p>
+
+      <h3>Apollo Core</h3>
+
+      <p>
+        The apollo-core library manages the lifecycle (loading,
+        starting, and stopping) of your service and defines a powerful module system for adding
+        functionality to an Apollo assembly. You do not usually
+        need to interact directly with apollo-core; think of it merely
+        as “plumbing.”
+      </p>
+
+      <h3>Apollo HTTP Service</h3>
+
+      <p>
+        The apollo-http-service library is a standardized assembly of
+        Apollo modules. It incorporates both apollo-api and
+        apollo-core and ties them together with several other useful
+        modules to get a standard api service using HTTP for incoming
+        and outgoing communication.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h1>Getting started</h1>
+
+  <p>
+    Apollo is distributed as a set of Maven artifacts, which makes it
+    easy to get started no matter the build tool; Maven, Ant + Ivy or
+    Gradle.  Below is a very simple but functional service &mdash;
+    more extensive examples are available
+    in <a href="https://github.com/spotify/apollo/tree/master/examples">the
+    GitHub repository</a>.
+  </p>
+
+
+  <fieldset>
+    <legend>Use the latest maven artifact</legend>
+
+    <pre><code class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">dependency</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">groupid</span>&gt;</span>com.spotify<span class="hljs-tag">&lt;/<span class="hljs-title">groupid</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">artifactid</span>&gt;</span>apollo-http-service<span class="hljs-tag">&lt;/<span class="hljs-title">artifactid</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">version</span>&gt;</span>1.0.3<span class="hljs-tag">&lt;/<span class="hljs-title">version</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">dependency</span>&gt;</span></code></pre>
+  </fieldset>
+
+
+  <fieldset>
+    <legend>Minimal Apollo Application</legend>
+
+    <pre><code class="java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> </span>{
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> LoadingException </span>{
+        HttpService.boot(App::init, <span class="hljs-string">"my-app"</span>, args);
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">init</span><span class="hljs-params">(Environment environment)</span> </span>{
+        environment.routingEngine()
+            .registerAutoRoute(Route.sync(<span class="hljs-string">"GET"</span>, <span class="hljs-string">"/"</span>, rc -&gt; <span class="hljs-string">"hello world"</span>));
+    }
+ }</code></pre>
+  </fieldset>
+
+  <p>
+    Find the <a href="http://spotify.github.io/apollo/maven/apidocs/">JavaDocs here</a>.
+  </p>
+</section>
+
+      </article>
+    </main>
+  </body>
+</html>

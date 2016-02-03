@@ -1,0 +1,7 @@
+com.spotify.apollo.dispatch
+com.spotify.apollo.environment
+com.spotify.apollo.meta
+com.spotify.apollo.meta.model
+com.spotify.apollo.meta.model.benchmark
+com.spotify.apollo.request
+com.spotify.apollo.route
