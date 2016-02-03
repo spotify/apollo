@@ -59,4 +59,25 @@ public interface OngoingRequest {
   void drop();
 
   boolean isExpired();
+
+  /**
+   * Get the arrival time of the incoming request in nanoseconds. Note that this is not
+   * unix epoch as the time is provided by {@link System#nanoTime()}. To get unix epoch
+   * time, do something like:
+   *
+   * <pre>
+   * {@code
+   * long processingTimeNanos = System.nanoTime() - requestContext.arrivalTimeNanos();
+   * long arrivalTimeUnixEpochMillis = System.currentTimeMillis() +
+   *                                   TimeUnit.NANOSECONDS.toMillis(processingTimeNanos);
+   * }
+   * </pre>
+   *
+   * @see System#nanoTime()
+   */
+  default long arrivalTimeNanos() {
+    // This is not a good default for real implementations. It is simply a catch-all
+    // default to not break existing implementations.
+    return System.nanoTime();
+  }
 }
