@@ -50,4 +50,21 @@ public interface RequestContext {
    * { "param" : "over", "param2": "the%32rainbow" }.
    */
   Map<String, String> pathArgs();
+
+  /**
+   * Get the arrival time of the incoming request in nanoseconds. Note that this is not
+   * unix epoch as the time is provided by {@link System#nanoTime()}. To get unix epoch
+   * time, do something like:
+   *
+   * <pre>
+   * {@code
+   * long processingTimeNanos = System.nanoTime() - requestContext.arrivalTimeNanos();
+   * long arrivalTimeUnixEpochMillis = System.currentTimeMillis() +
+   *                                   TimeUnit.NANOSECONDS.toMillis(processingTimeNanos);
+   * }
+   * </pre>
+   *
+   * @see System#nanoTime()
+   */
+  long arrivalTimeNanos();
 }

@@ -32,6 +32,11 @@ public abstract class RequestContexts implements RequestContext {
 
   public static RequestContext create(
       Request request, Client client, Map<String, String> pathArgs) {
-    return new AutoValue_RequestContexts(request, client, pathArgs);
+    return create(request, client, pathArgs, System.nanoTime());
+  }
+
+  public static RequestContext create(
+      Request request, Client client, Map<String, String> pathArgs, long arrivalTimeNanos) {
+    return new AutoValue_RequestContexts(request, client, pathArgs, arrivalTimeNanos);
   }
 }
