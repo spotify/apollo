@@ -39,4 +39,7 @@ public abstract class RequestContexts implements RequestContext {
       Request request, Client client, Map<String, String> pathArgs, long arrivalTimeNanos) {
     return new AutoValue_RequestContexts(request, client, pathArgs, arrivalTimeNanos);
   }
+
+  @Override
+  public abstract long arrivalTimeNanos();
 }
