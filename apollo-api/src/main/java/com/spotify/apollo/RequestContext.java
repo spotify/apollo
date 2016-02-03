@@ -67,7 +67,8 @@ public interface RequestContext {
    * @see System#nanoTime()
    */
   default long arrivalTimeNanos() {
-    // This is not a good default. It is simply a catch-all default to not break implementors of this interface.
+    // This is not a good default for real implementations. It is simply a catch-all
+    // default to not break existing implementations.
     return System.nanoTime();
   }
 }

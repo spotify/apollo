@@ -61,4 +61,9 @@ public abstract class ForwardingOngoingRequest implements OngoingRequest {
   public ServerInfo serverInfo() {
     return delegate.serverInfo();
   }
+
+  @Override
+  public long arrivalTimeNanos() {
+    return delegate.arrivalTimeNanos();
+  }
 }

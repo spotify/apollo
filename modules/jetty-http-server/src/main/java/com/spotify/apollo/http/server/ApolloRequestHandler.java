@@ -48,7 +48,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import okio.ByteString;
 
-import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -70,8 +69,10 @@ class ApolloRequestHandler extends AbstractHandler {
       HttpServletRequest req,
       HttpServletResponse resp) throws IOException, ServletException {
 
+    final long arrivalTimeNanos = System.nanoTime();
     final AsyncContext asyncContext = baseRequest.startAsync();
-    requestHandler.handle(new AsyncContextOngoingRequest(serverInfo, asApolloRequest(req), asyncContext));
+    requestHandler.handle(new AsyncContextOngoingRequest(
+        serverInfo, asApolloRequest(req), asyncContext, arrivalTimeNanos));
 
     baseRequest.setHandled(true);
   }
@@ -122,13 +123,16 @@ class ApolloRequestHandler extends AbstractHandler {
   static class AsyncContextOngoingRequest implements OngoingRequest {
 
     private final ServerInfo serverInfo;
+    private final long arrivalTimeNanos;
     private final Request request;
     private final AsyncContext asyncContext;
 
-    AsyncContextOngoingRequest(ServerInfo serverInfo, Request request, AsyncContext asyncContext) {
+    AsyncContextOngoingRequest(ServerInfo serverInfo, Request request, AsyncContext asyncContext,
+                               long arrivalTimeNanos) {
       this.serverInfo = serverInfo;
       this.request = requireNonNull(request);
       this.asyncContext = requireNonNull(asyncContext);
+      this.arrivalTimeNanos = arrivalTimeNanos;
     }
 
     @Override
@@ -170,6 +174,11 @@ class ApolloRequestHandler extends AbstractHandler {
     @Override
     public boolean isExpired() {
       return false;
+    }
+
+    @Override
+    public long arrivalTimeNanos() {
+      return arrivalTimeNanos;
     }
   }
 }
