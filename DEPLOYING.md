@@ -13,9 +13,9 @@ Once you've got that in place, you should be able to do deployment using the fol
 
 ```
 # deploy snapshot version
-mvn clean deploy
+mvn clean deploy # -Prelease to test signing
 
-# make and deploy a relase
+# make and deploy a release
 mvn release:clean release:prepare -Prelease
-mvn release:perform
+mvn release:perform -Prelease
 ```
