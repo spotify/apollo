@@ -67,6 +67,12 @@ version since you'll need it later in the build configuration.
             <type>pom</type>
             <scope>import</scope>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.3</version>
+        </dependency>
+
     </dependencies>
 </dependencyManagement>
 
