@@ -67,12 +67,6 @@ version since you'll need it later in the build configuration.
             <type>pom</type>
             <scope>import</scope>
         </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.1.3</version>
-        </dependency>
-
     </dependencies>
 </dependencyManagement>
 
@@ -80,6 +74,11 @@ version since you'll need it later in the build configuration.
     <dependency>
         <groupId>com.spotify</groupId>
         <artifactId>apollo-http-service</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.1.3</version>
     </dependency>
 </dependencies>
 ```
