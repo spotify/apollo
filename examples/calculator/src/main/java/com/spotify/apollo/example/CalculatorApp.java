@@ -23,7 +23,7 @@ import java.util.Optional;
  */
 final class CalculatorApp {
 
-  public static void main(String[] args) throws LoadingException {
+  public static void main(String... args) throws LoadingException {
     HttpService.boot(CalculatorApp::init, "calculator-service", args);
   }
 

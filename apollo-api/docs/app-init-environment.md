@@ -67,7 +67,7 @@ public class DataService {
   /**
    * The main entry point for the service, referencing init
    */
-  public static void main(String[] args) throws LoadingException {
+  public static void main(String... args) throws LoadingException {
     HttpService.boot(DataService::init, "ping", args);
   }
 }

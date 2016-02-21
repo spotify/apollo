@@ -31,7 +31,7 @@ public final class Small {
    * @param args  program arguments passed in from the command line
    * @throws LoadingException if anything goes wrong during the service boot sequence
    */
-  public static void main(String[] args) throws LoadingException {
+  public static void main(String... args) throws LoadingException {
     HttpService.boot(Small::init, "small", args);
   }
 

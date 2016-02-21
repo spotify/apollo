@@ -11,7 +11,7 @@ tell `HttpService` to boot a service named `"ping"`, defined by the function `Pi
 handle any command line arguments passed in through the `args` variable:
 
 ```java
-public static void main(String[] args) throws LoadingException {
+public static void main(String... args) throws LoadingException {
   HttpService.boot(Ping::init, "ping", args);
 }
 ```
@@ -56,7 +56,7 @@ public final class Ping {
    * @param args  program arguments passed in from the command line
    * @throws LoadingException if anything goes wrong during the service boot sequence
    */
-  public static void main(String[] args) throws LoadingException {
+  public static void main(String... args) throws LoadingException {
     HttpService.boot(Ping::init, "ping", args);
   }
 

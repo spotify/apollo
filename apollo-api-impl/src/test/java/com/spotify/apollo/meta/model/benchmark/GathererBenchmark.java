@@ -69,7 +69,7 @@ public class GathererBenchmark {
   Set<String> outgoingServices =
       Sets.newLinkedHashSet(Arrays.asList("metadata", "search", "suggest", "browse"));
 
-  public static void main(String[] args) throws IOException, RunnerException {
+  public static void main(String... args) throws IOException, RunnerException {
     Options opt = new OptionsBuilder()
         .include(GathererBenchmark.class.getSimpleName())
         .warmupIterations(5)

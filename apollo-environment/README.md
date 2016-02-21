@@ -23,7 +23,7 @@ key | type | required | note
 ## Example
 
 ```java
-public static void main(String[] args) {
+public static void main(String... args) {
   final Service service = Services.usingName("ping")
       .withModule(HttpServerModule.create())
       .withModule(ApolloEnvironmentModule.create())

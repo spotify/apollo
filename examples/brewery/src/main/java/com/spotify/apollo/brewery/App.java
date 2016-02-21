@@ -17,7 +17,7 @@ final class App {
 
   private static final Logger LOG = LoggerFactory.getLogger(App.class);
 
-  public static void main(String[] args) throws IOException, InterruptedException {
+  public static void main(String... args) throws IOException, InterruptedException {
     Service service = Services.usingName("test")
         .withModule(HttpServerModule.create())
         .withModule(HttpClientModule.create())

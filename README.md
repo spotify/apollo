@@ -57,7 +57,7 @@ Apollo will be distributed as a set of Maven artifacts, which makes it easy to g
 ```java
 public final class App {
 
-    public static void main(String[] args) throws LoadingException {
+    public static void main(String... args) throws LoadingException {
         HttpService.boot(App::init, "my-app", args);
     }
 
