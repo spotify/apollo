@@ -48,7 +48,7 @@ class MinimalApp {
   }
 
   static CompletionStage<Response<String>> beer(RequestContext context) {
-    Message breweryRequest = Request.forUri("http://brewery/order");
+    Request breweryRequest = Request.forUri("http://brewery/order");
     CompletionStage<Response<ByteString>> orderRequest = context.requestScopedClient()
         .send(breweryRequest);
 
