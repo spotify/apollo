@@ -109,7 +109,7 @@
 
     <pre><code class="java">public final class App {
 
-    public static void main(String[] args) throws LoadingException {
+    public static void main(String... args) throws LoadingException {
         HttpService.boot(App::init, "my-app", args);
     }
 

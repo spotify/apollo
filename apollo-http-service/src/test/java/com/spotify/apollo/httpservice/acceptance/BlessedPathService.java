@@ -50,7 +50,7 @@ public class BlessedPathService implements AppInit {
 
   private static final Logger LOG = LoggerFactory.getLogger(BlessedPathService.class);
 
-  public static void main(String[] args) throws LoadingException {
+  public static void main(String... args) throws LoadingException {
     HttpService.boot(new BlessedPathService(), "ping", "run", "cloud", "-v");
   }
 

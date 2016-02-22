@@ -19,7 +19,7 @@ import static java.util.concurrent.CompletableFuture.completedFuture;
 
 final class MinimalApp {
 
-  public static void main(String[] args) throws LoadingException {
+  public static void main(String... args) throws LoadingException {
     HttpService.boot(MinimalApp::init, "test", args);
   }
 

@@ -21,7 +21,7 @@ _todo_ implement all config keys
 This example shows how to start an http server using the HttpServerModule from apollo-core.
 
 ```java
-  public static void main(String[] args) throws IOException, InterruptedException {
+  public static void main(String... args) throws IOException, InterruptedException {
     Service service = Services.usingName("test")
         .withModule(HttpServerModule.create())
         .build();

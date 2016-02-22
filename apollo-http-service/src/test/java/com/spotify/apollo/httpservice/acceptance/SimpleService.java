@@ -37,7 +37,7 @@ class SimpleService implements AppInit, ServiceStepdefs.BootedApplication {
     return Optional.ofNullable(pod);
   }
 
-  public static void main(String[] args) throws LoadingException {
+  public static void main(String... args) throws LoadingException {
     HttpService.boot(new SimpleService(), "ping", "run", "pod", "-vv");
   }
 

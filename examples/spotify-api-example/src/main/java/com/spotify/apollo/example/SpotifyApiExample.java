@@ -17,7 +17,7 @@ import okio.ByteString;
  */
 final class SpotifyApiExample {
 
-  public static void main(String[] args) throws LoadingException {
+  public static void main(String... args) throws LoadingException {
     HttpService.boot(SpotifyApiExample::init, "spotify-api-example-service", args);
   }
 

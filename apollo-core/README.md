@@ -19,7 +19,7 @@ import java.io.IOException;
 
 public class App {
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String... args) throws IOException {
     Service service = Services.usingName("test").build();
     Services.run(service, args);
   }

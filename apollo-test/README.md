@@ -38,7 +38,7 @@ our application under test
 ```java
 class MinimalApp {
 
-  static void main(String[] args) throws LoadingException {
+  static void main(String... args) throws LoadingException {
     HttpService.boot(MinimalApp::init, "test", args);
   }
 

@@ -32,7 +32,7 @@ public final class ExampleService {
 
   private static final Logger LOG = LoggerFactory.getLogger(ExampleService.class);
 
-  public static void main(String[] args) throws LoadingException {
+  public static void main(String... args) throws LoadingException {
 
     final Service service = HttpService.usingAppInit(ExampleService::init, "ping")
         .build();

@@ -21,7 +21,7 @@ disable message posting, e.g. for local development.
 ## Example
 
 ```java
-public static void main(String[] args) throws IOException, InterruptedException {
+public static void main(String... args) throws IOException, InterruptedException {
   Service service = Services.usingName("test")
       .withModule(SlackModule.create())
       .build();
