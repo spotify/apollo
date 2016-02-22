@@ -53,7 +53,7 @@ class MinimalApp {
         .send(breweryRequest);
 
     return orderRequest.thenApply(orderResponse -> {
-      if (orderResponse.statusCode().statusCode() != Status.OK.statusCode()) {
+      if (orderResponse.status().code() != Status.OK.code()) {
         return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
       }
 
