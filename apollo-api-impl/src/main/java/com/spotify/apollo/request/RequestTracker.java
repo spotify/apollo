@@ -51,6 +51,8 @@ public class RequestTracker implements Closeable {
               .setNameFormat("apollo-request-reaper")
               .build());
 
+  private static final long REAPING_INTERVAL_MS = Long.getLong("com.spotify.apollo.request.reaping_interval_ms", 10);
+
   private final Set<OngoingRequest> outstanding = ConcurrentHashMap.newKeySet();
 
   private final ScheduledFuture<?> future;
@@ -58,7 +60,8 @@ public class RequestTracker implements Closeable {
   public RequestTracker() {
     // As the number of outstanding requests is relatively small, it is cheaper to simply
     // regularly iterate over all outstanding requests instead of scheduling callbacks.
-    this.future = TRACKER_EXECUTOR.scheduleWithFixedDelay(this::reap, 10, 10, TimeUnit.MILLISECONDS);
+    this.future = TRACKER_EXECUTOR.scheduleWithFixedDelay(
+        this::reap, REAPING_INTERVAL_MS, REAPING_INTERVAL_MS, TimeUnit.MILLISECONDS);
   }
 
   public void register(OngoingRequest request) {
