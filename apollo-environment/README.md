@@ -82,7 +82,7 @@ The decoration chain looks like:
 
 ### EndpointRunnableFactory
 
-1. [`TrackingEndpointRunnableFactory`](../apollo-api-impl/src/main/java/com/spotify/apollo/request/TrackingEndpointRunnableFactory.java)
+1. [`GatheringEndpointRunnableFactory`](../apollo-api-impl/src/main/java/com/spotify/apollo/request/GatheringEndpointRunnableFactory.java)
 1. [`[EndpointRunnableFactory]*`](../apollo-api-impl/src/main/java/com/spotify/apollo/request/EndpointRunnableFactory.java) <- [`Set<EndpointRunnableFactoryDecorator>`](../apollo-environment/src/main/java/com/spotify/apollo/environment/EndpointRunnableFactoryDecorator.java)
 1. [`EndpointInvocationHandler`](../apollo-api-impl/src/main/java/com/spotify/apollo/dispatch/EndpointInvocationHandler.java)
 

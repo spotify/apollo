@@ -37,7 +37,6 @@ import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.request.EndpointRunnableFactory;
 import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.RequestRunnableFactory;
-import com.spotify.apollo.request.RequestTracker;
 import com.spotify.apollo.route.ApplicationRouter;
 import com.spotify.apollo.route.Routers;
 import com.typesafe.config.Config;
@@ -53,7 +52,7 @@ import javax.inject.Singleton;
 import static com.spotify.apollo.request.Handlers.endpointRunnableFactory;
 import static com.spotify.apollo.request.Handlers.requestHandler;
 import static com.spotify.apollo.request.Handlers.requestRunnableFactory;
-import static com.spotify.apollo.request.Handlers.withTracking;
+import static com.spotify.apollo.request.Handlers.withGathering;
 
 /**
  * A module setting up implementations of Apollo API Framework components such as {@link
@@ -184,16 +183,14 @@ public class ApolloEnvironmentModule extends AbstractApolloModule {
       final EndpointRunnableFactory decoratedEndpointRunnableFactory =
           foldDecorators(baseEndpointRunnableFactory, erfDecorators);
 
-      final RequestTracker requestTracker = new RequestTracker();
       final RequestHandler requestHandler = requestHandler(
           decoratedRequestRunnableFactory,
-          withTracking(
+          withGathering(
               decoratedEndpointRunnableFactory,
-              metaInfoTracker.incomingCallsGatherer(),
-              requestTracker),
+              metaInfoTracker.incomingCallsGatherer()
+          ),
           incomingRequestAwareClient);
 
-      closer.register(requestTracker);
       closer.register(() -> LOG.info("Shutting down Apollo instance"));
 
       return requestHandler;

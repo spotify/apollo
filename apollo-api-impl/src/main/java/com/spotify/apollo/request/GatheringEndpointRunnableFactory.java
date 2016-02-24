@@ -24,22 +24,18 @@ import com.spotify.apollo.dispatch.Endpoint;
 import com.spotify.apollo.meta.IncomingCallsGatherer;
 
 /**
- * An {@link EndpointRunnableFactory} that collect statistics
+ * An {@link EndpointRunnableFactory} that gathers incoming calls.
  */
-@Deprecated
-class TrackingEndpointRunnableFactory implements EndpointRunnableFactory {
+class GatheringEndpointRunnableFactory implements EndpointRunnableFactory {
 
   private final EndpointRunnableFactory delegate;
   private final IncomingCallsGatherer incomingCallsGatherer;
-  private final RequestTracker requestTracker;
 
-  TrackingEndpointRunnableFactory(
+  GatheringEndpointRunnableFactory(
       EndpointRunnableFactory delegate,
-      IncomingCallsGatherer incomingCallsGatherer,
-      RequestTracker requestTracker) {
+      IncomingCallsGatherer incomingCallsGatherer) {
     this.delegate = delegate;
     this.incomingCallsGatherer = incomingCallsGatherer;
-    this.requestTracker = requestTracker;
   }
 
   public Runnable create(
@@ -49,9 +45,6 @@ class TrackingEndpointRunnableFactory implements EndpointRunnableFactory {
 
     incomingCallsGatherer.gatherIncomingCall(ongoingRequest, endpoint);
 
-    final OngoingRequest trackedRequest =
-        new TrackedOngoingRequestImpl(ongoingRequest, requestTracker);
-
-    return delegate.create(trackedRequest, requestContext, endpoint);
+    return delegate.create(ongoingRequest, requestContext, endpoint);
   }
 }
