@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.google.common.util.concurrent.Futures.getUnchecked;
 
+@Deprecated
 public class RequestTracker implements Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(RequestTracker.class);

@@ -23,6 +23,7 @@ import com.spotify.apollo.Response;
 
 import okio.ByteString;
 
+@Deprecated
 class TrackedOngoingRequestImpl extends ForwardingOngoingRequest {
 
   private final RequestTracker requestTracker;

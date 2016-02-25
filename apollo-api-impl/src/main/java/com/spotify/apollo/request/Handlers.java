@@ -54,6 +54,7 @@ public final class Handlers {
     return new EndpointInvocationHandler();
   }
 
+  @Deprecated
   public static EndpointRunnableFactory withTracking(
       EndpointRunnableFactory endpointRunnableFactory,
       IncomingCallsGatherer incomingCallsGatherer,
@@ -63,5 +64,13 @@ public final class Handlers {
         endpointRunnableFactory,
         incomingCallsGatherer,
         requestTracker);
+  }
+
+  public static EndpointRunnableFactory withGathering(
+      final EndpointRunnableFactory endpointRunnableFactory,
+      final IncomingCallsGatherer incomingCallsGatherer) {
+    return new GatheringEndpointRunnableFactory(
+        endpointRunnableFactory,
+        incomingCallsGatherer);
   }
 }
