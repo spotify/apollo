@@ -7,7 +7,7 @@
 
     <groupId>com.spotify</groupId>
     <artifactId>apollo-parent</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.4</version>
     <packaging>pom</packaging>
 
     <description>Java libraries for writing composable microservices</description>
@@ -38,7 +38,7 @@
         <url>https://github.com/spotify/apollo</url>
         <connection>scm:git:git@github.com:spotify/apollo.git</connection>
         <developerConnection>scm:git:git@github.com:spotify/apollo.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v1.0.4</tag>
     </scm>
 
     <build>
