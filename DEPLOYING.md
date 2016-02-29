@@ -19,3 +19,5 @@ mvn clean deploy # -Prelease to test signing
 mvn release:clean release:prepare -Prelease
 mvn release:perform -Prelease
 ```
+
+Then update https://github.com/spotify/apollo/releases with release notes!
