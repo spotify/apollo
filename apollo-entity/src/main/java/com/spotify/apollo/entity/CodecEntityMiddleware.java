@@ -92,39 +92,63 @@ class CodecEntityMiddleware implements EntityMiddleware {
   }
 
   @Override
-  public <E> Middleware<EntityHandler<E, ?>, SyncHandler<Response<ByteString>>>
+  public <E> Middleware<EntityHandler<E, E>, SyncHandler<Response<ByteString>>>
   direct(Class<? extends E> entityClass) {
+    return direct(entityClass, entityClass);
+  }
+
+  @Override
+  public <E, R> Middleware<EntityHandler<E, R>, SyncHandler<Response<ByteString>>>
+  direct(Class<? extends E> entityClass, Class<? extends R> entityResponseClass) {
     return inner ->
         deserialize(entityClass)
             .flatMap(r -> ctx -> mapPayload(r, inner.invoke(ctx)))
-            .map(serialize(entityClass));
+            .map(serialize(entityResponseClass));
   }
 
   @Override
-  public <E> Middleware<EntityResponseHandler<E, ?>, SyncHandler<Response<ByteString>>>
+  public <E> Middleware<EntityResponseHandler<E, E>, SyncHandler<Response<ByteString>>>
   response(Class<? extends E> entityClass) {
+    return response(entityClass, entityClass);
+  }
+
+  @Override
+  public <E, R> Middleware<EntityResponseHandler<E, R>, SyncHandler<Response<ByteString>>>
+  response(Class<? extends E> entityClass, Class<? extends R> entityResponseClass) {
     return inner ->
         deserialize(entityClass)
             .flatMap(r -> ctx -> flatMapPayload(r, inner.invoke(ctx)))
-            .map(serialize(entityClass));
+            .map(serialize(entityResponseClass));
   }
 
   @Override
-  public <E> Middleware<EntityAsyncHandler<E, ?>, AsyncHandler<Response<ByteString>>> asyncDirect(
-      Class<? extends E> entityClass) {
+  public <E> Middleware<EntityAsyncHandler<E, E>, AsyncHandler<Response<ByteString>>>
+  asyncDirect(Class<? extends E> entityClass) {
+    return asyncDirect(entityClass, entityClass);
+  }
+
+  @Override
+  public <E, R> Middleware<EntityAsyncHandler<E, R>, AsyncHandler<Response<ByteString>>>
+  asyncDirect(Class<? extends E> entityClass, Class<? extends R> entityResponseClass) {
     return inner ->
         Middleware.syncToAsync(deserialize(entityClass))
             .flatMap(r -> ctx -> asyncMapPayload(r, inner.invoke(ctx)))
-            .map(serialize(entityClass));
+            .map(serialize(entityResponseClass));
   }
 
   @Override
-  public <E> Middleware<EntityAsyncResponseHandler<E, ?>, AsyncHandler<Response<ByteString>>>
+  public <E> Middleware<EntityAsyncResponseHandler<E, E>, AsyncHandler<Response<ByteString>>>
   asyncResponse(Class<? extends E> entityClass) {
+    return asyncResponse(entityClass, entityClass);
+  }
+
+  @Override
+  public <E, R> Middleware<EntityAsyncResponseHandler<E, R>, AsyncHandler<Response<ByteString>>>
+  asyncResponse(Class<? extends E> entityClass, Class<? extends R> entityResponseClass) {
     return inner ->
         Middleware.syncToAsync(deserialize(entityClass))
             .flatMap(r -> ctx -> asyncFlatMapPayload(r, inner.invoke(ctx)))
-            .map(serialize(entityClass));
+            .map(serialize(entityResponseClass));
   }
 
   private <E> SyncHandler<Response<E>> deserialize(Class<? extends E> entityClass) {

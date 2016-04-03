@@ -316,10 +316,10 @@ public final class EntityMiddlewareTest {
 
     Stream<Route<AsyncHandler<Response<ByteString>>>> syncRoutes = Stream.of(
         Route.with(e.direct(Person.class), "POST", DIRECT, rc -> app::personDirect),
-        Route.with(e.direct(Person.class), "POST", DIRECT_O, rc -> app::personOther),
+        Route.with(e.direct(Person.class, Group.class), "POST", DIRECT_O, rc -> app::personOther),
         Route.with(e.response(Person.class), "POST", RESPONSE, rc -> app::personResponse),
-        Route.with(e.response(Person.class), "POST", RESPONSE_O, rx -> app::personOtherResponse),
-        Route.with(e.response(Person.class), "POST", RESPONSE_E, rx -> app::personEmptyResponse),
+        Route.with(e.response(Person.class, Group.class), "POST", RESPONSE_O, rc -> app::personOtherResponse),
+        Route.with(e.response(Person.class, Void.class), "POST", RESPONSE_E, rc -> app::personEmptyResponse),
         Route.with(e.serializerDirect(Person.class), "GET", GET_DIRECT, rc -> app.getPerson()),
         Route.with(e.serializerResponse(Person.class), "GET", GET_RESPONSE, rc -> app.getPersonResponse()),
         Route.with(e.serializerDirect(Unserializable.class), "GET", UNSERIALIZABLE, rc -> app.getUnserializable())
@@ -327,10 +327,10 @@ public final class EntityMiddlewareTest {
 
     Stream<Route<AsyncHandler<Response<ByteString>>>> asyncRoutes = Stream.of(
         Route.with(e.asyncDirect(Person.class), "POST", DIRECT + "-async", rc -> app::personAsync),
-        Route.with(e.asyncDirect(Person.class), "POST", DIRECT_O + "-async", rc -> app::personAsyncOther),
+        Route.with(e.asyncDirect(Person.class, Group.class), "POST", DIRECT_O + "-async", rc -> app::personAsyncOther),
         Route.with(e.asyncResponse(Person.class), "POST", RESPONSE + "-async", rc -> app::personAsyncResponse),
-        Route.with(e.asyncResponse(Person.class), "POST", RESPONSE_O + "-async", rc -> app::personAsyncOtherResponse),
-        Route.with(e.asyncResponse(Person.class), "POST", RESPONSE_E + "-async", rc -> app::personAsyncEmptyResponse),
+        Route.with(e.asyncResponse(Person.class, Group.class), "POST", RESPONSE_O + "-async", rc -> app::personAsyncOtherResponse),
+        Route.with(e.asyncResponse(Person.class, Void.class), "POST", RESPONSE_E + "-async", rc -> app::personAsyncEmptyResponse),
         Route.with(e.asyncSerializerDirect(Person.class), "GET", GET_DIRECT + "-async", rc -> app.getPersonAsync()),
         Route.with(e.asyncSerializerResponse(Person.class), "GET", GET_RESPONSE + "-async", rc -> app.getPersonResponseAsync()),
         Route.with(e.asyncSerializerDirect(Unserializable.class), "GET", UNSERIALIZABLE + "-async", rc -> app.getUnserializableAsync())

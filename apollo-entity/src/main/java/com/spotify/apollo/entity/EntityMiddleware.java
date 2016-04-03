@@ -51,17 +51,29 @@ public interface EntityMiddleware {
     return new CodecEntityMiddleware(new JacksonEntityCodec(objectMapper), contentType);
   }
 
-  <E> Middleware<EntityHandler<E, ?>, SyncHandler<Response<ByteString>>>
+  <E> Middleware<EntityHandler<E, E>, SyncHandler<Response<ByteString>>>
   direct(Class<? extends E> entityClass);
 
-  <E> Middleware<EntityResponseHandler<E, ?>, SyncHandler<Response<ByteString>>>
+  <E, R> Middleware<EntityHandler<E, R>, SyncHandler<Response<ByteString>>>
+  direct(Class<? extends E> entityClass, Class<? extends R> entityResponseClass);
+
+  <E> Middleware<EntityResponseHandler<E, E>, SyncHandler<Response<ByteString>>>
   response(Class<? extends E> entityClass);
 
-  <E> Middleware<EntityAsyncHandler<E, ?>, AsyncHandler<Response<ByteString>>>
+  <E, R> Middleware<EntityResponseHandler<E, R>, SyncHandler<Response<ByteString>>>
+  response(Class<? extends E> entityClass, Class<? extends R> entityResponseClass);
+
+  <E> Middleware<EntityAsyncHandler<E, E>, AsyncHandler<Response<ByteString>>>
   asyncDirect(Class<? extends E> entityClass);
 
-  <E> Middleware<EntityAsyncResponseHandler<E, ?>, AsyncHandler<Response<ByteString>>>
+  <E, R> Middleware<EntityAsyncHandler<E, R>, AsyncHandler<Response<ByteString>>>
+  asyncDirect(Class<? extends E> entityClass, Class<? extends R> entityResponseClass);
+
+  <E> Middleware<EntityAsyncResponseHandler<E, E>, AsyncHandler<Response<ByteString>>>
   asyncResponse(Class<? extends E> entityClass);
+
+  <E, R> Middleware<EntityAsyncResponseHandler<E, R>, AsyncHandler<Response<ByteString>>>
+  asyncResponse(Class<? extends E> entityClass, Class<? extends R> entityResponseClass);
 
   <R> Middleware<SyncHandler<R>, SyncHandler<Response<ByteString>>>
   serializerDirect(Class<? extends R> entityClass);
