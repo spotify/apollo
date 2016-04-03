@@ -29,10 +29,17 @@ import java.util.Objects;
  */
 class JacksonEntityCodec implements EntityCodec {
 
+  private static final String DEFAULT_CONTENT_TYPE = "application/json";
+
   private final ObjectMapper objectMapper;
 
   JacksonEntityCodec(ObjectMapper objectMapper) {
     this.objectMapper = Objects.requireNonNull(objectMapper);
+  }
+
+  @Override
+  public String defaultContentType() {
+    return DEFAULT_CONTENT_TYPE;
   }
 
   @Override

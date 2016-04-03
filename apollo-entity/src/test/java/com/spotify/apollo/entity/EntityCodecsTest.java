@@ -29,6 +29,8 @@ import com.spotify.apollo.test.ServiceHelper;
 
 import org.junit.Test;
 
+import java.io.IOException;
+
 import io.norberg.automatter.AutoMatter;
 import io.norberg.automatter.jackson.AutoMatterModule;
 import okio.ByteString;
@@ -44,7 +46,7 @@ import static com.spotify.apollo.test.unit.StatusTypeMatchers.withCode;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-public class JacksonEntityCodecTest {
+public class EntityCodecsTest {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
       .setPropertyNamingStrategy(CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES)
@@ -53,11 +55,14 @@ public class JacksonEntityCodecTest {
   private static final ByteString JSON = ByteString.encodeUtf8(
       "{\"naming_convention_used\":\"for this value\"}");
 
+  private static final ByteString ENTITY = ByteString.of(
+      new byte[] {0x45, 0X6e, 0X74, 0X69, 0X74, 0X79});
+
   @Test
-  public void testWithCustomMapper() throws Exception {
+  public void testWithCustomJacksonMapper() throws Exception {
     EntityMiddleware e = EntityMiddleware.jackson(OBJECT_MAPPER);
 
-    ServiceHelper service = ServiceHelper.create(app(e), "entity-test");
+    ServiceHelper service = ServiceHelper.create(entityApp(e), "entity-test");
     service.start();
 
     Response<ByteString> resp = await(service.request("GET", "/", JSON));
@@ -73,7 +78,7 @@ public class JacksonEntityCodecTest {
     EntityMiddleware e = EntityMiddleware.jackson(
         OBJECT_MAPPER, "application/vnd+spotify.test+json");
 
-    ServiceHelper service =ServiceHelper.create(app(e), "entity-test");
+    ServiceHelper service =ServiceHelper.create(entityApp(e), "entity-test");
     service.start();
 
     Response<ByteString> resp = await(service.request("GET", "/", JSON));
@@ -84,7 +89,38 @@ public class JacksonEntityCodecTest {
     service.close();
   }
 
-  private AppInit app(EntityMiddleware e) {
+  @Test
+  public void testWithCustomCodec() throws Exception {
+    EntityMiddleware e = EntityMiddleware.forCodec(new StringCodec());
+
+    ServiceHelper service = ServiceHelper.create(stringApp(e), "entity-test");
+    service.start();
+
+    Response<ByteString> resp = await(service.request("GET", "/", ENTITY));
+    assertThat(resp, hasStatus(withCode(Status.OK)));
+    assertThat(resp, hasHeader("Content-Type", equalTo("text/plain")));
+    assertThat(resp, hasPayload(asStr(equalTo("EntityMiddleware"))));
+
+    service.close();
+  }
+
+  @Test
+  public void testWithCustomCodecContentType() throws Exception {
+    EntityMiddleware e = EntityMiddleware.forCodec(
+        new StringCodec(), "text/vnd+spotify.test+plain");
+
+    ServiceHelper service =ServiceHelper.create(stringApp(e), "entity-test");
+    service.start();
+
+    Response<ByteString> resp = await(service.request("GET", "/", ENTITY));
+    assertThat(resp, hasStatus(withCode(Status.OK)));
+    assertThat(resp, hasHeader("Content-Type", equalTo("text/vnd+spotify.test+plain")));
+    assertThat(resp, hasPayload(asStr(equalTo("EntityMiddleware"))));
+
+    service.close();
+  }
+
+  AppInit entityApp(EntityMiddleware e) {
     return env -> env.routingEngine()
         .registerRoute(
             Route.with(e.direct(Entity.class), "GET", "/", rc -> this::endpoint)
@@ -98,8 +134,46 @@ public class JacksonEntityCodecTest {
         .build();
   }
 
+  AppInit stringApp(EntityMiddleware e) {
+    return env -> env.routingEngine()
+        .registerRoute(
+            Route.with(e.direct(String.class), "GET", "/", rc ->  this::stringEndpoint)
+                .withMiddleware(Middleware::syncToAsync));
+  }
+
+  String stringEndpoint(String entity) {
+    return entity + "Middleware";
+  }
+
   @AutoMatter
   interface Entity {
     String namingConventionUsed();
+  }
+
+  private static final class StringCodec implements EntityCodec {
+
+    @Override
+    public String defaultContentType() {
+      return "text/plain";
+    }
+
+    @Override
+    public <E> byte[] write(E entity, Class<? extends E> clazz) throws IOException {
+      if (!String.class.equals(clazz)) {
+        throw new UnsupportedOperationException("Can only encode strings");
+      }
+
+      return ((String) entity).getBytes();
+    }
+
+    @Override
+    public <E> E read(byte[] data, Class<? extends E> clazz) throws IOException {
+      if (!String.class.equals(clazz)) {
+        throw new UnsupportedOperationException("Can only encode strings");
+      }
+
+      //noinspection unchecked
+      return (E) new String(data);
+    }
   }
 }

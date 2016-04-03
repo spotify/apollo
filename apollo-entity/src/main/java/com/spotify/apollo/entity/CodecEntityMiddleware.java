@@ -50,13 +50,12 @@ class CodecEntityMiddleware implements EntityMiddleware {
   private static final Logger LOG = LoggerFactory.getLogger(CodecEntityMiddleware.class);
 
   private static final String CONTENT_TYPE = "Content-Type";
-  private static final String DEFAULT_CONTENT_TYPE = "application/json";
 
   private final EntityCodec codec;
   private final String contentType;
 
   CodecEntityMiddleware(EntityCodec codec) {
-    this(codec, DEFAULT_CONTENT_TYPE);
+    this(codec, codec.defaultContentType());
   }
 
   CodecEntityMiddleware(EntityCodec codec, String contentType) {

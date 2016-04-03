@@ -26,6 +26,8 @@ import java.io.IOException;
  */
 public interface EntityCodec {
 
+  String defaultContentType();
+
   <E> byte[] write(E entity, Class<? extends E> clazz) throws IOException;
 
   <E> E read(byte[] data, Class<? extends E> clazz) throws IOException;

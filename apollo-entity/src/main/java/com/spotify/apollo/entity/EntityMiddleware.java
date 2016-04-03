@@ -39,6 +39,10 @@ public interface EntityMiddleware {
     return new CodecEntityMiddleware(codec);
   }
 
+  static EntityMiddleware forCodec(EntityCodec codec, String contentType) {
+    return new CodecEntityMiddleware(codec, contentType);
+  }
+
   static EntityMiddleware jackson(ObjectMapper objectMapper) {
     return new CodecEntityMiddleware(new JacksonEntityCodec(objectMapper));
   }
