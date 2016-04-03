@@ -85,7 +85,7 @@ signatures.
 * `asyncResponse(E.class[, R.class])` middleware : `EntityAsyncResponseHandler<E, R>`
   - `CompletionStage<Response<R>> handler(E)`
 
-For all of the above, if the reply entity type `R` is omitted it will be set to the same as `E`.
+For all of the above, if the reply entity type `R.class` is omitted it will be set to the same as `E.class`.
 
 On top of these, there's also just a serializing middleware for handlers that do not take a
 request entity as an input.
@@ -98,6 +98,8 @@ request entity as an input.
  - `CompletionStage<R> handler()`
 * `asyncSerializerResponse(R.class)` middleware : `AsyncHandler<Response<R>>`
  - `CompletionStage<Response<R>> handler()`
+
+### Curried form
 
 All of the `Entity*Handler<E, R>` handler signatures are in curried form with a `RequestContext`
 as the first argument. This give you the flexibility to add more arguments to your handlers as you
