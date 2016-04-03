@@ -71,6 +71,11 @@
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
+                <artifactId>apollo-entity</artifactId>
+                <version>1.0.5-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.spotify</groupId>
                 <artifactId>apollo-http-service</artifactId>
                 <version>1.0.5-SNAPSHOT</version>
             </dependency>

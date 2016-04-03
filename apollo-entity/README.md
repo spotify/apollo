@@ -1,4 +1,5 @@
-# Apollo Entity
+Apollo Entity
+=============
 
 A set of Apollo Middleware for working with entity types in route handlers.
 
@@ -39,9 +40,11 @@ Add Maven dependency:
 <dependency>
     <groupId>com.spotify</groupId>
     <artifactId>apollo-entity</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.5</version>
 </dependency>
 ```
+
+_See the [project skeleton] docs for how to use a Maven BOM for dependency versions_
 
 Create your Jackson `ObjectMapper` and the [`EntityMiddleware`][1] factory:
 
@@ -124,3 +127,4 @@ See [`EntityTest`][2] for a complete list of route options and tests.
 
 [1]: src/main/java/com/spotify/apollo/entity/EntityMiddleware.java
 [2]: src/test/java/com/spotify/apollo/entity/EntityTest.java
+[project skeleton]: https://github.com/spotify/apollo/tree/master/apollo-http-service#minimal-project-skeleton
