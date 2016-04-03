@@ -39,8 +39,11 @@ import okio.ByteString;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 
 /**
- * A factory for creating middlewares that can be used to jackson the routes that deal directly
+ * A factory for creating middlewares that can be used to create routes that deal directly
  * with an api entity.
+ *
+ * A {@link EntityCodec} is used to define how to go between a {@link ByteString} and the
+ * entity type used in your route handlers.
  */
 class CodecEntityMiddleware implements EntityMiddleware {
 
