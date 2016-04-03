@@ -88,13 +88,13 @@ signatures.
 On top of these, there's also just a serializing middleware for handlers that do not take a
 request entity as an input.
 
-* `serializerDirect()` middleware : `SyncHandler<R>`
+* `serializerDirect(R.class)` middleware : `SyncHandler<R>`
  - `R handler()`
-* `serializerResponse()` middleware : `SyncHandler<Response<R>>`
+* `serializerResponse(R.class)` middleware : `SyncHandler<Response<R>>`
  - `Response<R> handler()`
-* `asyncSerializerDirect()` middleware : `AsyncHandler<R>`
+* `asyncSerializerDirect(R.class)` middleware : `AsyncHandler<R>`
  - `CompletionStage<R> handler()`
-* `asyncSerializerResponse()` middleware : `AsyncHandler<Response<R>>`
+* `asyncSerializerResponse(R.class)` middleware : `AsyncHandler<Response<R>>`
  - `CompletionStage<Response<R>> handler()`
 
 All of the `Entity*` handler signatures are in curried form with a `RequestContext` as the first
