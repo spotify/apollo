@@ -76,14 +76,16 @@ class MyApplication {
 The [`EntityMiddleware`][1] interface can create middlewares for several types of handler
 signatures.
 
-* `direct(E.class)` middleware : `EntityHandler<E, R>`
+* `direct(E.class[, R.class])` middleware : `EntityHandler<E, R>`
  - `R handler(E)`
-* `response(E.class)` middleware : `EntityResponseHandler<E, R>`
+* `response(E.class[, R.class])` middleware : `EntityResponseHandler<E, R>`
  - `Response<R> handler(E)`
-* `asyncDirect(E.class)` middleware : `EntityAsyncHandler<E, R>`
+* `asyncDirect(E.class[, R.class])` middleware : `EntityAsyncHandler<E, R>`
  - `CompletionStage<R> handler(E)`
-* `asyncResponse(E.class)` middleware : `EntityAsyncResponseHandler<E, R>`
+* `asyncResponse(E.class[, R.class])` middleware : `EntityAsyncResponseHandler<E, R>`
   - `CompletionStage<Response<R>> handler(E)`
+
+For all of the above, if the reply entity type `R` is omitted it will be set to the same as `E`.
 
 On top of these, there's also just a serializing middleware for handlers that do not take a
 request entity as an input.
@@ -97,9 +99,9 @@ request entity as an input.
 * `asyncSerializerResponse(R.class)` middleware : `AsyncHandler<Response<R>>`
  - `CompletionStage<Response<R>> handler()`
 
-All of the `Entity*` handler signatures are in curried form with a `RequestContext` as the first
-argument. This give you the flexibility to add more arguments to your handlers as you see fit,
-while also being easy to compose.
+All of the `Entity*Handler<E, R>` handler signatures are in curried form with a `RequestContext`
+as the first argument. This give you the flexibility to add more arguments to your handlers as you
+see fit, while also being easy to compose.
 
 ```java
 rc -> entity -> handler(entity, ...)
