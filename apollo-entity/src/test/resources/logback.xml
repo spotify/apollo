@@ -1,0 +1,11 @@
+<configuration debug="false">
+    <root level="INFO">
+        <appender class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+    </root>
+
+    <logger name="com.spotify.apollo.entity.CodecEntityMiddleware" level="OFF"/>
+</configuration>

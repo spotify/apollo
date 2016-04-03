@@ -22,6 +22,7 @@
         <module>apollo-route</module>
         <module>apollo-test</module>
         <module>apollo-extra</module>
+        <module>apollo-entity</module>
         <module>apollo-http-service</module>
 
         <module>modules/slack</module>
