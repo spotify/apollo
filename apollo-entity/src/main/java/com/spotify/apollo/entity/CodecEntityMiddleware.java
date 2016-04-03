@@ -112,7 +112,7 @@ class CodecEntityMiddleware implements EntityMiddleware {
       Class<? extends E> entityClass) {
     return inner ->
         Middleware.syncToAsync(deserialize(entityClass))
-            .flatMap(r -> ctx -> completedFuture(r).thenCompose(asyncInvoke(inner.invoke(ctx))))
+            .flatMap(r -> ctx -> asyncMapPayload(r, inner.invoke(ctx)))
             .map(serialize(entityClass));
   }
 
@@ -121,7 +121,7 @@ class CodecEntityMiddleware implements EntityMiddleware {
   asyncResponse(Class<? extends E> entityClass) {
     return inner ->
         Middleware.syncToAsync(deserialize(entityClass))
-            .flatMap(r -> ctx -> completedFuture(r).thenCompose(asyncMerge(inner.invoke(ctx))))
+            .flatMap(r -> ctx -> asyncFlatMapPayload(r, inner.invoke(ctx)))
             .map(serialize(entityClass));
   }
 
@@ -173,22 +173,6 @@ class CodecEntityMiddleware implements EntityMiddleware {
     };
   }
 
-  private <E, R> Function<Response<E>, CompletionStage<Response<R>>> asyncInvoke(
-      Function<? super E, ? extends CompletionStage<? extends R>> fn) {
-    //noinspection unchecked
-    return in -> in.payload().isPresent()
-        ? fn.apply(in.payload().get()).thenApply(in::withPayload)
-        : completedFuture((Response<R>) in);
-  }
-
-  private <E, R> Function<Response<E>, CompletionStage<Response<R>>> asyncMerge(
-      Function<? super E, ? extends CompletionStage<? extends Response<? extends R>>> fn) {
-    //noinspection unchecked
-    return in -> in.payload().isPresent()
-        ? fn.apply(in.payload().get()).thenApply(other -> (Response<R>) other.withHeaders(in.headers()))
-        : completedFuture((Response<R>) in);
-  }
-
   private <E> Response<E> ensureResponse(E response) {
     if (response instanceof Response) {
       //noinspection unchecked
@@ -199,28 +183,42 @@ class CodecEntityMiddleware implements EntityMiddleware {
   }
 
   private <E, R> Response<R> mapPayload(
-      Response<E> resp,
+      Response<E> in,
       Function<? super E, ? extends R> fn) {
-    final Optional<R> entityOpt = resp.payload().map(fn);
 
     //noinspection unchecked
-    return (entityOpt.isPresent())
-        ? resp.withPayload(entityOpt.get())
-        : (Response<R>) resp;
+    return (in.payload().map(fn).isPresent())
+        ? in.withPayload(in.payload().map(fn).get())
+        : (Response<R>) in;
   }
 
   private <E, R> Response<R> flatMapPayload(
-      Response<E> resp,
+      Response<E> in,
       Function<? super E, ? extends Response<? extends R>> fn) {
-    final Optional<E> entityOpt = resp.payload();
-
-    if (!entityOpt.isPresent()) {
-      //noinspection unchecked
-      return (Response<R>) resp;
-    }
 
     //noinspection unchecked
-    return (Response<R>) fn.apply(entityOpt.get())
-        .withHeaders(resp.headers());
+    return (in.payload().isPresent())
+        ? (Response<R>) fn.apply(in.payload().get()).withHeaders(in.headers())
+        : (Response<R>) in;
+  }
+
+  private <E, R> CompletionStage<Response<R>> asyncMapPayload(
+      Response<E> in,
+      Function<? super E, ? extends CompletionStage<? extends R>> fn) {
+
+    //noinspection unchecked
+    return (in.payload().isPresent())
+        ? fn.apply(in.payload().get()).thenApply(in::withPayload)
+        : completedFuture((Response<R>) in);
+  }
+
+  private <E, R> CompletionStage<Response<R>> asyncFlatMapPayload(
+      Response<E> in,
+      Function<? super E, ? extends CompletionStage<? extends Response<? extends R>>> fn) {
+
+    //noinspection unchecked
+    return (in.payload().isPresent())
+        ? fn.apply(in.payload().get()).thenApply(ret -> (Response<R>) ret.withHeaders(in.headers()))
+        : completedFuture((Response<R>) in);
   }
 }
