@@ -1,6 +1,8 @@
 Apollo HTTP Service
 ===================
 
+[![Maven Central](https://img.shields.io/maven-central/v/com.spotify/apollo-parent.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.spotify%22%20apollo*)
+
 The `apollo-http-service` library is a small bundle of Apollo modules. It incorporates both
 [apollo-api](../apollo-api) and [apollo-core](../apollo-core) and ties them together with the
 [jetty-http-server](../modules/jetty-http-server) and the [okhttp-client](../modules/okhttp-client)
@@ -82,6 +84,8 @@ http.server.port = ${?HTTP_PORT}
 
 For more information on how to manage configuration, see [Apollo Core](../apollo-core) and the [Typesafe Config](https://github.com/typesafehub/config) documentation.
 
+### Maven
+
 `./pom.xml`
 ```xml
 <project>
@@ -101,7 +105,7 @@ For more information on how to manage configuration, see [Apollo Core](../apollo
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-bom</artifactId>
-                <version>1.0.0</version>
+                <version>1.0.4</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

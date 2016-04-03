@@ -127,4 +127,4 @@ See [`EntityTest`][2] for a complete list of route options and tests.
 
 [1]: src/main/java/com/spotify/apollo/entity/EntityMiddleware.java
 [2]: src/test/java/com/spotify/apollo/entity/EntityTest.java
-[project skeleton]: https://github.com/spotify/apollo/tree/master/apollo-http-service#minimal-project-skeleton
+[project skeleton]: https://github.com/spotify/apollo/tree/master/apollo-http-service#maven
