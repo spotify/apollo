@@ -76,30 +76,38 @@ public interface EntityMiddleware {
   asyncResponse(Class<? extends E> entityClass, Class<? extends R> entityResponseClass);
 
   <R> Middleware<SyncHandler<R>, SyncHandler<Response<ByteString>>>
-  serializerDirect(Class<? extends R> entityClass);
+  serializerDirect(Class<? extends R> entityResponseClass);
 
   <R> Middleware<SyncHandler<Response<R>>, SyncHandler<Response<ByteString>>>
-  serializerResponse(Class<? extends R> entityClass);
+  serializerResponse(Class<? extends R> entityResponseClass);
 
   <R> Middleware<AsyncHandler<R>, AsyncHandler<Response<ByteString>>>
-  asyncSerializerDirect(Class<? extends R> entityClass);
+  asyncSerializerDirect(Class<? extends R> entityResponseClass);
 
   <R> Middleware<AsyncHandler<Response<R>>, AsyncHandler<Response<ByteString>>>
-  asyncSerializerResponse(Class<? extends R> entityClass);
+  asyncSerializerResponse(Class<? extends R> entityResponseClass);
 
   interface EntityHandler<E, R>
       extends SyncHandler<Function<? super E, ? extends R>> {
+
+    default EntityResponseHandler<E, R> asResponseHandler() {
+      return rc -> e -> invoke(rc).andThen(Response::forPayload).apply(e);
+    }
   }
 
   interface EntityResponseHandler<E, R>
-      extends SyncHandler<Function<? super E, ? extends Response<? extends R>>> {
+      extends SyncHandler<Function<? super E, ? extends Response<R>>> {
   }
 
   interface EntityAsyncHandler<E, R>
-      extends SyncHandler<Function<? super E, ? extends CompletionStage<? extends R>>> {
+      extends SyncHandler<Function<? super E, ? extends CompletionStage<R>>> {
+
+    default EntityAsyncResponseHandler<E, R> asResponseHandler() {
+      return rc -> e -> invoke(rc).andThen(s -> s.thenApply(Response::forPayload)).apply(e);
+    }
   }
 
   interface EntityAsyncResponseHandler<E, R>
-      extends SyncHandler<Function<? super E, ? extends CompletionStage<? extends Response<? extends R>>>> {
+      extends SyncHandler<Function<? super E, ? extends CompletionStage<Response<R>>>> {
   }
 }
