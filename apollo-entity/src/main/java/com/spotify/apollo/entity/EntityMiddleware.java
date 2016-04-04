@@ -43,11 +43,11 @@ public interface EntityMiddleware {
     return new CodecEntityMiddleware(codec, contentType);
   }
 
-  static EntityMiddleware jackson(ObjectMapper objectMapper) {
+  static EntityMiddleware forJackson(ObjectMapper objectMapper) {
     return new CodecEntityMiddleware(new JacksonEntityCodec(objectMapper));
   }
 
-  static EntityMiddleware jackson(ObjectMapper objectMapper, String contentType) {
+  static EntityMiddleware forJackson(ObjectMapper objectMapper, String contentType) {
     return new CodecEntityMiddleware(new JacksonEntityCodec(objectMapper), contentType);
   }
 

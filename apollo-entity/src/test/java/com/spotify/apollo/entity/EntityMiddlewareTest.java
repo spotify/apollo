@@ -312,7 +312,7 @@ public final class EntityMiddlewareTest {
    */
   static void init(Environment environment) {
     EntityMiddlewareTest app = new EntityMiddlewareTest();
-    EntityMiddleware e = EntityMiddleware.jackson(OBJECT_MAPPER);
+    EntityMiddleware e = EntityMiddleware.forJackson(OBJECT_MAPPER);
 
     Stream<Route<AsyncHandler<Response<ByteString>>>> syncRoutes = Stream.of(
         Route.with(e.direct(Person.class), "POST", DIRECT, rc -> app::personDirect),

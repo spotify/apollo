@@ -60,7 +60,7 @@ public class EntityCodecsTest {
 
   @Test
   public void testWithCustomJacksonMapper() throws Exception {
-    EntityMiddleware e = EntityMiddleware.jackson(OBJECT_MAPPER);
+    EntityMiddleware e = EntityMiddleware.forJackson(OBJECT_MAPPER);
 
     ServiceHelper service = ServiceHelper.create(entityApp(e), "entity-test");
     service.start();
@@ -75,7 +75,7 @@ public class EntityCodecsTest {
 
   @Test
   public void testWithCustomContentType() throws Exception {
-    EntityMiddleware e = EntityMiddleware.jackson(
+    EntityMiddleware e = EntityMiddleware.forJackson(
         OBJECT_MAPPER, "application/vnd+spotify.test+json");
 
     ServiceHelper service =ServiceHelper.create(entityApp(e), "entity-test");

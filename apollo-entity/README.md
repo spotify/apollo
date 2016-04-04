@@ -55,7 +55,7 @@ class MyApplication {
 
   static void init(Environment environment) {
     MyApplication app = new MyApplication();
-    EntityMiddleware entity = EntityMiddleware.jackson(OBJECT_MAPPER);
+    EntityMiddleware entity = EntityMiddleware.forJackson(OBJECT_MAPPER);
 
     Route<SyncHandler<Response<ByteString>>> route = Route.with(
         entity.direct(Person.class),
@@ -70,6 +70,10 @@ class MyApplication {
   }
 }
 ```
+
+[`EntityMiddleware`][1] also support custom codecs through the `forCodec(EntityCodec)` static
+constructor. An [`EntityCodec`][2] defines how to read and write entity types from the `ByteString`
+payloads that apollo handle natively.
 
 ## Handler signatures
 
@@ -127,8 +131,9 @@ rc -> this::handler
 
 ---
 
-See [`EntityTest`][2] for a complete list of route options and tests.
+See [`EntityMiddlewareTest`][3] for a complete list of route options and tests.
 
 [1]: src/main/java/com/spotify/apollo/entity/EntityMiddleware.java
-[2]: src/test/java/com/spotify/apollo/entity/EntityTest.java
+[2]: src/main/java/com/spotify/apollo/entity/EntityCodec.java
+[3]: src/test/java/com/spotify/apollo/entity/EntityMiddlewareTest.java
 [project skeleton]: https://github.com/spotify/apollo/tree/master/apollo-http-service#maven
