@@ -52,40 +52,40 @@ public interface EntityMiddleware {
   }
 
   <E> Middleware<EntityHandler<E, E>, SyncHandler<Response<ByteString>>>
-  direct(Class<? extends E> entityClass);
+  direct(Class<? extends E> requestEntityClass);
 
   <E, R> Middleware<EntityHandler<E, R>, SyncHandler<Response<ByteString>>>
-  direct(Class<? extends E> entityClass, Class<? extends R> entityResponseClass);
+  direct(Class<? extends E> requestEntityClass, Class<? extends R> responseEntityClass);
 
   <E> Middleware<EntityResponseHandler<E, E>, SyncHandler<Response<ByteString>>>
-  response(Class<? extends E> entityClass);
+  response(Class<? extends E> requestEntityClass);
 
   <E, R> Middleware<EntityResponseHandler<E, R>, SyncHandler<Response<ByteString>>>
-  response(Class<? extends E> entityClass, Class<? extends R> entityResponseClass);
+  response(Class<? extends E> requestEntityClass, Class<? extends R> responseEntityClass);
 
   <E> Middleware<EntityAsyncHandler<E, E>, AsyncHandler<Response<ByteString>>>
-  asyncDirect(Class<? extends E> entityClass);
+  asyncDirect(Class<? extends E> requestEntityClass);
 
   <E, R> Middleware<EntityAsyncHandler<E, R>, AsyncHandler<Response<ByteString>>>
-  asyncDirect(Class<? extends E> entityClass, Class<? extends R> entityResponseClass);
+  asyncDirect(Class<? extends E> requestEntityClass, Class<? extends R> responseEntityClass);
 
   <E> Middleware<EntityAsyncResponseHandler<E, E>, AsyncHandler<Response<ByteString>>>
-  asyncResponse(Class<? extends E> entityClass);
+  asyncResponse(Class<? extends E> requestEntityClass);
 
   <E, R> Middleware<EntityAsyncResponseHandler<E, R>, AsyncHandler<Response<ByteString>>>
-  asyncResponse(Class<? extends E> entityClass, Class<? extends R> entityResponseClass);
+  asyncResponse(Class<? extends E> requestEntityClass, Class<? extends R> responseEntityClass);
 
   <R> Middleware<SyncHandler<R>, SyncHandler<Response<ByteString>>>
-  serializerDirect(Class<? extends R> entityResponseClass);
+  serializerDirect(Class<? extends R> responseEntityClass);
 
   <R> Middleware<SyncHandler<Response<R>>, SyncHandler<Response<ByteString>>>
-  serializerResponse(Class<? extends R> entityResponseClass);
+  serializerResponse(Class<? extends R> responseEntityClass);
 
   <R> Middleware<AsyncHandler<R>, AsyncHandler<Response<ByteString>>>
-  asyncSerializerDirect(Class<? extends R> entityResponseClass);
+  asyncSerializerDirect(Class<? extends R> responseEntityClass);
 
   <R> Middleware<AsyncHandler<Response<R>>, AsyncHandler<Response<ByteString>>>
-  asyncSerializerResponse(Class<? extends R> entityResponseClass);
+  asyncSerializerResponse(Class<? extends R> responseEntityClass);
 
   interface EntityHandler<E, R>
       extends SyncHandler<Function<? super E, ? extends R>> {
