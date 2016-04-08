@@ -20,6 +20,7 @@
 package com.spotify.apollo.entity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Middleware;
@@ -87,27 +88,38 @@ public interface EntityMiddleware {
   <R> Middleware<AsyncHandler<Response<R>>, AsyncHandler<Response<ByteString>>>
   asyncSerializerResponse(Class<? extends R> responseEntityClass);
 
-  interface EntityHandler<E, R>
-      extends SyncHandler<Function<? super E, ? extends R>> {
+  /**
+   * A common handler interface for the various entity handlers. This embodies the curried form
+   * of the handlers so that the actual handler interfaces can have more readable definitions.
+   *
+   * @param <E>  The handler request entity type
+   * @param <R>  The handler response entity type
+   */
+  @FunctionalInterface
+  interface CurriedHandler<E, R>
+      extends Function<RequestContext, Function<? super E, ? extends R>> {
+  }
 
+  @FunctionalInterface
+  interface EntityHandler<E, R> extends CurriedHandler<E, R> {
     default EntityResponseHandler<E, R> asResponseHandler() {
-      return rc -> e -> invoke(rc).andThen(Response::forPayload).apply(e);
+      return rc -> e -> apply(rc).andThen(Response::forPayload).apply(e);
     }
   }
 
-  interface EntityResponseHandler<E, R>
-      extends SyncHandler<Function<? super E, ? extends Response<R>>> {
+  @FunctionalInterface
+  interface EntityResponseHandler<E, R> extends CurriedHandler<E, Response<R>> {
   }
 
-  interface EntityAsyncHandler<E, R>
-      extends SyncHandler<Function<? super E, ? extends CompletionStage<R>>> {
-
+  @FunctionalInterface
+  interface EntityAsyncHandler<E, R> extends CurriedHandler<E, CompletionStage<R>> {
     default EntityAsyncResponseHandler<E, R> asResponseHandler() {
-      return rc -> e -> invoke(rc).andThen(s -> s.thenApply(Response::forPayload)).apply(e);
+      return rc -> e -> apply(rc).andThen(s -> s.thenApply(Response::forPayload)).apply(e);
     }
   }
 
+  @FunctionalInterface
   interface EntityAsyncResponseHandler<E, R>
-      extends SyncHandler<Function<? super E, ? extends CompletionStage<Response<R>>>> {
+      extends CurriedHandler<E, CompletionStage<Response<R>>> {
   }
 }

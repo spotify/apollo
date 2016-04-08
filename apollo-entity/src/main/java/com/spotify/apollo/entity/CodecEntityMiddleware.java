@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 import javaslang.control.Either;
@@ -152,7 +151,7 @@ class CodecEntityMiddleware implements EntityMiddleware {
       Class<? extends E> entityClass) {
     //noinspection unchecked
     return rc -> deserialize(rc, entityClass)
-        .map(inner.invoke(rc))
+        .map(inner.apply(rc))
         .getOrElseGet(left -> (Response<R>) left);
   }
 
@@ -161,7 +160,7 @@ class CodecEntityMiddleware implements EntityMiddleware {
       Class<? extends E> entityClass) {
     //noinspection unchecked
     return rc -> deserialize(rc, entityClass)
-        .map(inner.invoke(rc))
+        .map(inner.apply(rc))
         .getOrElseGet(left -> completedFuture((Response<R>) left));
   }
 
