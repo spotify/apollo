@@ -105,7 +105,7 @@ For more information on how to manage configuration, see [Apollo Core](../apollo
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-bom</artifactId>
-                <version>1.0.4</version>
+                <version>1.1.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
