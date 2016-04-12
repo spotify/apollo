@@ -158,22 +158,22 @@ public class EntityCodecsTest {
     }
 
     @Override
-    public <E> byte[] write(E entity, Class<? extends E> clazz) throws IOException {
+    public <E> ByteString write(E entity, Class<? extends E> clazz) throws IOException {
       if (!String.class.equals(clazz)) {
         throw new UnsupportedOperationException("Can only encode strings");
       }
 
-      return ((String) entity).getBytes();
+      return ByteString.encodeUtf8((String) entity);
     }
 
     @Override
-    public <E> E read(byte[] data, Class<? extends E> clazz) throws IOException {
+    public <E> E read(ByteString data, Class<? extends E> clazz) throws IOException {
       if (!String.class.equals(clazz)) {
         throw new UnsupportedOperationException("Can only encode strings");
       }
 
       //noinspection unchecked
-      return (E) new String(data);
+      return (E) data.utf8();
     }
   }
 }

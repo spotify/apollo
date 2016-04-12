@@ -21,6 +21,8 @@ package com.spotify.apollo.entity;
 
 import java.io.IOException;
 
+import okio.ByteString;
+
 /**
  * Interface for serializing and de-serializing entity types.
  */
@@ -28,7 +30,7 @@ public interface EntityCodec {
 
   String defaultContentType();
 
-  <E> byte[] write(E entity, Class<? extends E> clazz) throws IOException;
+  <E> ByteString write(E entity, Class<? extends E> clazz) throws IOException;
 
-  <E> E read(byte[] data, Class<? extends E> clazz) throws IOException;
+  <E> E read(ByteString data, Class<? extends E> clazz) throws IOException;
 }

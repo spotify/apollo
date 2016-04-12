@@ -24,6 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Objects;
 
+import okio.ByteString;
+
 /**
  * Codec for writing and reading values using a Jackson {@link ObjectMapper}.
  */
@@ -43,12 +45,12 @@ class JacksonEntityCodec implements EntityCodec {
   }
 
   @Override
-  public <E> byte[] write(E entity, Class<? extends E> clazz) throws IOException {
-    return objectMapper.writeValueAsBytes(entity);
+  public <E> ByteString write(E entity, Class<? extends E> clazz) throws IOException {
+    return ByteString.of(objectMapper.writeValueAsBytes(entity));
   }
 
   @Override
-  public <E> E read(byte[] data, Class<? extends E> clazz) throws IOException {
-    return objectMapper.readValue(data, clazz);
+  public <E> E read(ByteString data, Class<? extends E> clazz) throws IOException {
+    return objectMapper.readValue(data.toByteArray(), clazz);
   }
 }

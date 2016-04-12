@@ -174,8 +174,7 @@ class CodecEntityMiddleware implements EntityMiddleware {
 
     final E entity;
     try {
-      final ByteString byteString = payloadOpt.get();
-      entity = codec.read(byteString.toByteArray(), entityClass);
+      entity = codec.read(payloadOpt.get(), entityClass);
     } catch (IOException e) {
       LOG.warn("error", e);
       return Either.left(Response.forStatus(
@@ -197,7 +196,7 @@ class CodecEntityMiddleware implements EntityMiddleware {
 
       final ByteString bytes;
       try {
-        bytes = ByteString.of(codec.write(entityOpt.get(), entityClass));
+        bytes = codec.write(entityOpt.get(), entityClass);
       } catch (IOException e) {
         LOG.error("error", e);
         return Response.forStatus(
