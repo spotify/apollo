@@ -29,14 +29,18 @@ import okio.ByteString;
 /**
  * Codec for writing and reading values using a Jackson {@link ObjectMapper}.
  */
-class JacksonEntityCodec implements EntityCodec {
+public class JacksonEntityCodec implements EntityCodec {
 
   private static final String DEFAULT_CONTENT_TYPE = "application/json";
 
   private final ObjectMapper objectMapper;
 
-  JacksonEntityCodec(ObjectMapper objectMapper) {
+  private JacksonEntityCodec(ObjectMapper objectMapper) {
     this.objectMapper = Objects.requireNonNull(objectMapper);
+  }
+
+  public static EntityCodec forMapper(ObjectMapper objectMapper) {
+    return new JacksonEntityCodec(objectMapper);
   }
 
   @Override

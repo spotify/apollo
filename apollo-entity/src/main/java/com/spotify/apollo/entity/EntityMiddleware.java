@@ -19,7 +19,6 @@
  */
 package com.spotify.apollo.entity;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.route.AsyncHandler;
@@ -42,14 +41,6 @@ public interface EntityMiddleware {
 
   static EntityMiddleware forCodec(EntityCodec codec, String contentType) {
     return new CodecEntityMiddleware(codec, contentType);
-  }
-
-  static EntityMiddleware forJackson(ObjectMapper objectMapper) {
-    return new CodecEntityMiddleware(new JacksonEntityCodec(objectMapper));
-  }
-
-  static EntityMiddleware forJackson(ObjectMapper objectMapper, String contentType) {
-    return new CodecEntityMiddleware(new JacksonEntityCodec(objectMapper), contentType);
   }
 
   <E> Middleware<EntityHandler<E, E>, SyncHandler<Response<ByteString>>>
