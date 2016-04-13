@@ -40,7 +40,7 @@ Add Maven dependency:
 <dependency>
     <groupId>com.spotify</groupId>
     <artifactId>apollo-entity</artifactId>
-    <version>1.0.5</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
