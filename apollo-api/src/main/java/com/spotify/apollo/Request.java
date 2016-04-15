@@ -72,9 +72,12 @@ public interface Request {
 
   /**
    * A header of the request message, or empty if no header with that name is found.
+   *
+   * Header names are case-insensitive. A lookup for {@code "User-Agent"} and {@code "user-agent"}
+   * will return the same header.
    */
   default Optional<String> header(String name) {
-    return Optional.ofNullable(headers().get(name));
+    return Optional.ofNullable(headers().get(name.toLowerCase()));
   }
 
   /**
@@ -111,6 +114,8 @@ public interface Request {
   /**
    * Creates a new {@link Request} based on this, but with an additional header.
    *
+   * Header names are case-insensitive.
+   *
    * @param name  Header name to add
    * @param value  Header value
    * @return A request with the added header
@@ -121,6 +126,8 @@ public interface Request {
    * Creates a new {@link Request} based on this, but with additional headers. If the current
    * request has a header whose key is also included in the {@code additionalHeaders} map,
    * then the new request will have the header value defined in the map.
+   *
+   * Header names are case-insensitive.
    *
    * @param additionalHeaders map of headers to add
    * @return A request with the added headers
