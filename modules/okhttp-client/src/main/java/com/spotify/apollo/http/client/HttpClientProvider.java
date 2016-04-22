@@ -19,23 +19,21 @@
  */
 package com.spotify.apollo.http.client;
 
-import com.spotify.apollo.environment.ClientDecorator;
-
 import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.squareup.okhttp.OkHttpClient;
 
-import javax.inject.Provider;
+class HttpClientProvider implements Provider<HttpClient> {
 
-class HttpClientDecoratorProvider implements Provider<ClientDecorator> {
-
-  private final HttpClient httpClient;
+  private final OkHttpClient okHttpClient;
 
   @Inject
-  HttpClientDecoratorProvider(final HttpClient httpClient) {
-    this.httpClient = httpClient;
+  HttpClientProvider(OkHttpClient okHttpClient) {
+    this.okHttpClient = okHttpClient;
   }
 
   @Override
-  public ClientDecorator get() {
-    return new HttpClientDecorator(httpClient);
+  public HttpClient get() {
+    return new HttpClient(okHttpClient);
   }
 }

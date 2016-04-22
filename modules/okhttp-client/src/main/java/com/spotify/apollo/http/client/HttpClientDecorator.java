@@ -24,17 +24,14 @@ import com.spotify.apollo.environment.IncomingRequestAwareClient;
 
 class HttpClientDecorator implements ClientDecorator {
 
-  private static final HttpClientDecorator INSTANCE = new HttpClientDecorator();
+  private final HttpClient httpClient;
 
-  HttpClientDecorator() {
-  }
-
-  public static HttpClientDecorator create() {
-    return INSTANCE;
+  HttpClientDecorator(HttpClient httpClient) {
+    this.httpClient = httpClient;
   }
 
   @Override
   public IncomingRequestAwareClient apply(IncomingRequestAwareClient baseClient) {
-    return ForwardingHttpClient.create(baseClient, HttpClient.create());
+    return ForwardingHttpClient.create(baseClient, this.httpClient);
   }
 }

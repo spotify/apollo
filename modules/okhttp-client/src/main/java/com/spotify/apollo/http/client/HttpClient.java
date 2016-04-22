@@ -20,6 +20,8 @@
 package com.spotify.apollo.http.client;
 
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
+
+import com.google.inject.Inject;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -38,11 +40,18 @@ class HttpClient implements IncomingRequestAwareClient {
 
   private final OkHttpClient client;
 
+  @Inject
   HttpClient(OkHttpClient client) {
     this.client = client;
   }
 
+  @Deprecated
+  /** @deprecated use {@link #createDefault()} instead. */
   public static HttpClient create() {
+    return createDefault();
+  }
+
+  public static HttpClient createDefault() {
     return new HttpClient(new OkHttpClient());
   }
 
