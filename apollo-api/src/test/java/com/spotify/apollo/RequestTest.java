@@ -118,27 +118,27 @@ public class RequestTest {
 
   @Test
   public void shouldMergeHeaders() throws Exception {
-    Map<String, String> newHeaders = ImmutableMap.of("newHeader", "value1", "newHeader2", "value2");
+    Map<String, String> newHeaders = ImmutableMap.of("newheader", "value1", "newheader2", "value2");
 
     assertThat(requestWithHeader("/foo", "old", "value").withHeaders(newHeaders).headers(),
-               is(ImmutableMap.of("old", "value",
-                                  "newHeader", "value1",
-                                  "newHeader2", "value2")));
+               is(Headers.of(ImmutableMap.of("old", "value",
+                                             "newheader", "value1",
+                                             "newheader2", "value2"))));
   }
 
   @Test
   public void shouldReplaceExistingHeader() throws Exception {
-    Map<String, String> newHeaders = ImmutableMap.of("newHeader", "value1", "old", "value2");
+    Map<String, String> newHeaders = ImmutableMap.of("newheader", "value1", "old", "value2");
 
     assertThat(requestWithHeader("/foo", "old", "value").withHeaders(newHeaders).headers(),
-               is(ImmutableMap.of("old", "value2",
-                                  "newHeader", "value1")));
+               is(Headers.of(ImmutableMap.of("old", "value2",
+                                             "newheader", "value1"))));
   }
 
   @Test
   public void shouldClearHeaders() throws Exception {
     assertThat(requestWithHeader("/foo", "old", "value").clearHeaders().headers(),
-               is(ImmutableMap.of()));
+               is(Headers.EMPTY));
   }
 
   @Test

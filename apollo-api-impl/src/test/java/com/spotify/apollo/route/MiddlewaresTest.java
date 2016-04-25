@@ -168,8 +168,7 @@ public class MiddlewaresTest {
   public void httpShouldSetContentLengthFor200() throws Exception {
     future.complete(Response.of(Status.OK, ByteString.of((byte) 14, (byte) 19)));
 
-    String header = getResult(Middlewares.httpPayloadSemantics(delegate)).headers().get(
-        "Content-Length");
+    String header = getResult(Middlewares.httpPayloadSemantics(delegate)).headers().get("Content-Length").get();
     assertThat(Integer.parseInt(header), equalTo(2));
   }
 
@@ -192,9 +191,9 @@ public class MiddlewaresTest {
       future.complete(Response.of(status, ByteString.of((byte) 14, (byte) 19)));
 
       Response<ByteString> result = getResult(Middlewares.httpPayloadSemantics(delegate));
-      String header = result.headers().get("Content-Length");
+      Optional<String> header = result.headers().get("Content-Length");
 
-      assertThat("no content-length for " + status, header, is(nullValue()));
+      assertThat("no content-length for " + status, header, is(Optional.empty()));
       assertThat("no payload for " + status, result.payload(), is(Optional.<ByteString>empty()));
     }
   }
@@ -205,7 +204,7 @@ public class MiddlewaresTest {
     future.complete(Response.of(Status.OK, ByteString.of((byte) 14, (byte) 19)));
 
     String header = getResult(Middlewares.httpPayloadSemantics(delegate)).headers().get(
-        "Content-Length");
+        "Content-Length").get();
     assertThat(Integer.parseInt(header), equalTo(2));
   }
 
@@ -225,7 +224,8 @@ public class MiddlewaresTest {
     String contentType = getResult(Middlewares.replyContentType("text/plain")
                                        .apply(serializationDelegate()))
         .headers()
-        .get("Content-Type");
+        .get("Content-Type")
+        .get();
 
     assertThat(contentType, equalTo("text/plain"));
   }
@@ -237,7 +237,8 @@ public class MiddlewaresTest {
     String contentType =
         getResult(Middlewares.replyContentType("text/plain").apply(serializationDelegate()))
             .headers()
-            .get("Content-Type");
+            .get("Content-Type")
+        .get();
 
     assertThat(contentType, equalTo("text/plain"));
   }
@@ -279,7 +280,7 @@ public class MiddlewaresTest {
 
     assertThat(getResult(Middlewares.serialize(serializer).apply(serializationDelegate)).headers()
                    .get("X-Foo"),
-               equalTo("Fie"));
+               is(Optional.of("Fie")));
   }
 
   @Test
@@ -306,7 +307,7 @@ public class MiddlewaresTest {
     serializationFuture.complete(response);
 
     String contentType = getResult(Middlewares.serialize(serializer).apply(serializationDelegate))
-        .headers().get("Content-Type");
+        .headers().get("Content-Type").get();
 
     assertThat(contentType, equalTo("coool stuff"));
   }
@@ -320,10 +321,10 @@ public class MiddlewaresTest {
 
     serializationFuture.complete(response);
 
-    String contentType = getResult(Middlewares.serialize(serializer).apply(serializationDelegate))
+    Optional<String> contentType =  getResult(Middlewares.serialize(serializer).apply(serializationDelegate))
         .headers().get("Content-Type");
 
-    assertThat(contentType, is(nullValue()));
+    assertThat(contentType, is(Optional.empty()));
   }
 
   @Test

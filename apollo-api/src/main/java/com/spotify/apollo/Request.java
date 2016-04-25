@@ -32,6 +32,9 @@ import okio.ByteString;
  * Request instances are immutable. However, requests can be built using
  * {@link #forUri(String, String)} methods, and headers and payload can
  * be added using {@link #withHeader(String, String)} and {@link #withPayload(ByteString)}.
+ *
+ * Header names will be turned into lower case by all methods in this class; if performance is
+ * important, use lower-case header names from the outset.
  */
 public interface Request {
   /**
@@ -55,6 +58,9 @@ public interface Request {
    * A uri query parameter of the request message, or empty if no parameter with that name is found.
    * Returns the first query parameter value if it is repeated. Use {@link #parameters()} to get
    * all repeated values.
+   *
+   * The parameter name comparison is case sensitive, so if the url contains a parameter 'foo=bar'
+   * and no parameter 'Foo', a call to 'parameter("Foo")' will return {@link Optional#empty()}.
    */
   default Optional<String> parameter(String parameter) {
     List<String> values = parameters().get(parameter);
@@ -68,13 +74,14 @@ public interface Request {
   /**
    * The headers of the request message.
    */
-  Map<String, String> headers();
+  Headers headers();
 
   /**
-   * A header of the request message, or empty if no header with that name is found.
+   * A header of the request message, or empty if no header with that name is found. See
+   * {@link Headers#get(String)} for a definition of header name case semantics.
    */
   default Optional<String> header(String name) {
-    return Optional.ofNullable(headers().get(name));
+    return headers().get(name);
   }
 
   /**
@@ -109,7 +116,9 @@ public interface Request {
   Request withService(String service);
 
   /**
-   * Creates a new {@link Request} based on this, but with an additional header.
+   * Creates a new {@link Request} based on this, but with an additional header. Has the same
+   * semantics as {@link com.spotify.apollo.Headers.Builder#set(String, String)} regarding
+   * header name case.
    *
    * @param name  Header name to add
    * @param value  Header value
@@ -121,6 +130,9 @@ public interface Request {
    * Creates a new {@link Request} based on this, but with additional headers. If the current
    * request has a header whose key is also included in the {@code additionalHeaders} map,
    * then the new request will have the header value defined in the map.
+   *
+   * Has the same semantics regarding header name case as
+   * {@link com.spotify.apollo.Headers.Builder#setAll(Map)}.
    *
    * @param additionalHeaders map of headers to add
    * @return A request with the added headers

@@ -27,9 +27,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.util.Optional;
+
 import okio.ByteString;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class HtmlSerializerMiddlewaresTest {
 
@@ -81,7 +85,7 @@ public class HtmlSerializerMiddlewaresTest {
 
   private void checkContentTypeAndBody(final Response<ByteString> response) {
     assertEquals("<html>yo</html>\n", response.payload().get().utf8());
-    assertEquals("text/html; charset=UTF8", response.headers().get("Content-Type"));
+    assertThat(response.headers().get("Content-Type"), is(Optional.of("text/html; charset=UTF8")));
   }
 
 }

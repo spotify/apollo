@@ -39,6 +39,7 @@ import org.junit.rules.ExpectedException;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
@@ -82,7 +83,7 @@ public class StubClientTest {
     return getResponse(uri).thenApply(r -> r.payload().get().utf8());
   }
 
-  public CompletionStage<Response<ByteString>> getResponseFromPing() {
+  private CompletionStage<Response<ByteString>> getResponseFromPing() {
     return getResponse("http://ping");
   }
 
@@ -257,7 +258,7 @@ public class StubClientTest {
         .to("http://ping");
 
     Response reply = getResponse("http://ping").toCompletableFuture().get();
-    assertThat(reply.headers().get("foo"), equalTo("bar"));
+    assertThat(reply.headers().get("foo"), is(Optional.of("bar")));
   }
 
   @Test
