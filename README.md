@@ -2,7 +2,7 @@ Apollo
 ======
 
 [![Circle Status](https://circleci.com/gh/spotify/apollo.svg?style=shield&circle-token=5a9eb086ae3cec87e62fc8b6cdeb783cb318e3b9)](https://circleci.com/gh/spotify/apollo)
-[![Codecov](https://img.shields.io/codecov/c/github/spotify/apollo.svg)]
+[![Codecov](https://img.shields.io/codecov/c/github/spotify/apollo.svg)
 [![Maven Central](https://img.shields.io/maven-central/v/com.spotify/apollo-parent.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.spotify%22%20apollo*)
 [![License](https://img.shields.io/github/license/spotify/apollo.svg)](LICENSE.txt)
 
