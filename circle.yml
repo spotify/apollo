@@ -12,9 +12,14 @@ test:
   override:
     - mvn -Pcoverage -Pmissinglink verify
   post:
-    - mvn org.eluder.coveralls:coveralls-maven-plugin:report -Dcoveralls.token=$COVERALLS_TOKEN
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+
+deployment:
+  codecov:
+    branch: /.*/
+    commands:
+      - bash <(curl -s https://codecov.io/bash)
 
 #deployment:
 #  production:
