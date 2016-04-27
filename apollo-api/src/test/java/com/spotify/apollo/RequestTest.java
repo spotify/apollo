@@ -122,8 +122,8 @@ public class RequestTest {
 
     assertThat(requestWithHeader("/foo", "old", "value").withHeaders(newHeaders).headers(),
                is(ImmutableMap.of("old", "value",
-                                  "newHeader", "value1",
-                                  "newHeader2", "value2")));
+                                  "newheader", "value1",
+                                  "newheader2", "value2")));
   }
 
   @Test
@@ -132,7 +132,32 @@ public class RequestTest {
 
     assertThat(requestWithHeader("/foo", "old", "value").withHeaders(newHeaders).headers(),
                is(ImmutableMap.of("old", "value2",
-                                  "newHeader", "value1")));
+                                  "newheader", "value1")));
+  }
+
+  @Test
+  public void shouldTreatHeadersCaseInsensitivelyOnLookup() throws Exception {
+    Request request = Request.forUri("/foo")
+        .withHeader("User-Agent", "value");
+
+    assertThat(request.header("User-Agent"), is(Optional.of("value")));
+  }
+
+  @Test
+  public void shouldTreatHeadersCaseInsensitively() throws Exception {
+    Map<String, String> newHeaders = ImmutableMap.of(
+        "Accept", "application/json",
+        "raNdoM", "blabla");
+
+    Request request = Request.forUri("/foo")
+        .withHeader("User-Agent", "value")
+        .withHeaders(newHeaders);
+
+    assertThat(request.headers(),
+               is(ImmutableMap.of(
+                   "user-agent", "value",
+                   "accept", "application/json",
+                   "random", "blabla")));
   }
 
   @Test

@@ -88,7 +88,9 @@ abstract class RequestValue implements Request {
   @Override
   public Request withHeaders(Map<String, String> additionalHeaders) {
     Map<String, String> headers = new LinkedHashMap<>(headers());
-    headers.putAll(additionalHeaders);
+    for (Map.Entry<String, String> header : additionalHeaders.entrySet()) {
+      headers.put(header.getKey().toLowerCase(), header.getValue());
+    }
     return create(method(), uri(), parameters(), headers, service(), payload(), ttl());
   }
 
