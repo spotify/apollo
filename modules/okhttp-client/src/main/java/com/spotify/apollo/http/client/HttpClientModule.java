@@ -38,7 +38,7 @@ public class HttpClientModule extends AbstractApolloModule {
   @Override
   protected void configure() {
     Multibinder.newSetBinder(binder(), ClientDecorator.class)
-        .addBinding().toProvider(HttpClientDecoratorProvider.class);
+        .addBinding().to(HttpClientDecorator.class);
 
     bind(HttpClient.class);
     bind(OkHttpClient.class).toProvider(OkHttpClientProvider.class);
