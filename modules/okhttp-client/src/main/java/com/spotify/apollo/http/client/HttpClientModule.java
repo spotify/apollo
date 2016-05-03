@@ -28,7 +28,7 @@ import com.squareup.okhttp.OkHttpClient;
 
 public class HttpClientModule extends AbstractApolloModule {
 
-  HttpClientModule() {
+  private HttpClientModule() {
   }
 
   public static ApolloModule create() {
@@ -40,7 +40,7 @@ public class HttpClientModule extends AbstractApolloModule {
     Multibinder.newSetBinder(binder(), ClientDecorator.class)
         .addBinding().toProvider(HttpClientDecoratorProvider.class);
 
-    bind(HttpClient.class).toProvider(HttpClientProvider.class);
+    bind(HttpClient.class);
     bind(OkHttpClient.class).toProvider(OkHttpClientProvider.class);
   }
 

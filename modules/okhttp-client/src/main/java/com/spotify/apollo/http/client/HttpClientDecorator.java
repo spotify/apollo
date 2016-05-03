@@ -22,10 +22,13 @@ package com.spotify.apollo.http.client;
 import com.spotify.apollo.environment.ClientDecorator;
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
 
+import javax.inject.Inject;
+
 class HttpClientDecorator implements ClientDecorator {
 
   private final HttpClient httpClient;
 
+  @Inject
   HttpClientDecorator(HttpClient httpClient) {
     this.httpClient = httpClient;
   }
