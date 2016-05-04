@@ -22,19 +22,19 @@ package com.spotify.apollo.http.client;
 import com.spotify.apollo.environment.ClientDecorator;
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
 
+import javax.inject.Inject;
+
 class HttpClientDecorator implements ClientDecorator {
 
-  private static final HttpClientDecorator INSTANCE = new HttpClientDecorator();
+  private final HttpClient httpClient;
 
-  HttpClientDecorator() {
-  }
-
-  public static HttpClientDecorator create() {
-    return INSTANCE;
+  @Inject
+  HttpClientDecorator(HttpClient httpClient) {
+    this.httpClient = httpClient;
   }
 
   @Override
   public IncomingRequestAwareClient apply(IncomingRequestAwareClient baseClient) {
-    return ForwardingHttpClient.create(baseClient, HttpClient.create());
+    return ForwardingHttpClient.create(baseClient, this.httpClient);
   }
 }

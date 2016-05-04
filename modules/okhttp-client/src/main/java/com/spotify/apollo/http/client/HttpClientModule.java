@@ -19,15 +19,16 @@
  */
 package com.spotify.apollo.http.client;
 
-import com.google.inject.multibindings.Multibinder;
-
 import com.spotify.apollo.environment.ClientDecorator;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.module.ApolloModule;
 
+import com.google.inject.multibindings.Multibinder;
+import com.squareup.okhttp.OkHttpClient;
+
 public class HttpClientModule extends AbstractApolloModule {
 
-  HttpClientModule() {
+  private HttpClientModule() {
   }
 
   public static ApolloModule create() {
@@ -37,7 +38,10 @@ public class HttpClientModule extends AbstractApolloModule {
   @Override
   protected void configure() {
     Multibinder.newSetBinder(binder(), ClientDecorator.class)
-        .addBinding().toProvider(HttpClientDecoratorProvider.class);
+        .addBinding().to(HttpClientDecorator.class);
+
+    bind(HttpClient.class);
+    bind(OkHttpClient.class).toProvider(OkHttpClientProvider.class);
   }
 
   @Override
