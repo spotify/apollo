@@ -47,12 +47,15 @@ class HttpClient implements IncomingRequestAwareClient {
   }
 
   @Deprecated
-  /** @deprecated use {@link #createDefault()} instead. */
+  /** @deprecated use {@link #createUnconfigured()} instead. */
   public static HttpClient create() {
-    return createDefault();
+    return createUnconfigured();
   }
 
-  public static HttpClient createDefault() {
+  /**
+   * @return a HttpClient with the default configuration settings.
+   */
+  public static HttpClient createUnconfigured() {
     return new HttpClient(new OkHttpClient());
   }
 
