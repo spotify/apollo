@@ -76,7 +76,7 @@ public class HttpClientTest {
 
     String uri = format("http://localhost:%d/foo.php?bar=baz&qur=quz", mockServerRule.getHttpPort());
     Request request = Request.forUri(uri, "GET");
-    Response<ByteString> response = HttpClient.createDefault()
+    Response<ByteString> response = HttpClient.createUnconfigured()
         .send(request, empty())
         .toCompletableFuture().get();
 
@@ -108,7 +108,7 @@ public class HttpClientTest {
         .withHeader("Content-Type", "application/x-spotify-greeting")
         .withPayload(ByteString.encodeUtf8("hello"));
 
-    Response<ByteString> response = HttpClient.createDefault()
+    Response<ByteString> response = HttpClient.createUnconfigured()
         .send(request, empty())
         .toCompletableFuture().get();
 
@@ -134,7 +134,7 @@ public class HttpClientTest {
     String uri = format("http://localhost:%d/foo.php", mockServerRule.getHttpPort());
     Request request = Request.forUri(uri, "GET");
 
-    Response<ByteString> response = HttpClient.createDefault()
+    Response<ByteString> response = HttpClient.createUnconfigured()
         .send(request, empty())
         .toCompletableFuture().get();
 
@@ -156,7 +156,7 @@ public class HttpClientTest {
     Request request = Request.forUri(uri, "GET").withTtl(Duration.ofMillis(200));
 
     thrown.expect(hasCause(instanceOf(SocketTimeoutException.class)));
-      HttpClient.createDefault()
+      HttpClient.createUnconfigured()
           .send(request, empty())
           .toCompletableFuture().get();
   }
@@ -174,7 +174,7 @@ public class HttpClientTest {
 
     String uri = format("http://localhost:%d/foo.php", mockServerRule.getHttpPort());
     Request request = Request.forUri(uri, "GET");
-    final Response<ByteString> response = HttpClient.createDefault()
+    final Response<ByteString> response = HttpClient.createUnconfigured()
         .send(request, empty())
         .toCompletableFuture().get();
 
