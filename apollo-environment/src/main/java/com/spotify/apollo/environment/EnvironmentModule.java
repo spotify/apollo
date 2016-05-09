@@ -23,6 +23,8 @@ import com.google.common.io.Closer;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.OptionalBinder;
 import com.google.inject.name.Named;
 
 import com.spotify.apollo.Client;
@@ -31,6 +33,11 @@ import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.EnvironmentFactory.RoutingContext;
 import com.typesafe.config.Config;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Singleton;
@@ -45,15 +52,20 @@ import static com.spotify.apollo.environment.ApolloEnvironmentModule.foldDecorat
  *   {@link Environment}
  */
 class EnvironmentModule extends AbstractModule {
-
   @Provides
   @Singleton
   IncomingRequestAwareClient incomingRequestAwareClient(
       @Named(Services.INJECT_SERVICE_NAME) String serviceName,
-      Set<ClientDecorator> clientDecorators) {
+      Set<ClientDecorator> clientDecorators,
+      @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+          Optional<Comparator<ClientDecorator>> clientDecoratorComparator) {
+
+    List<ClientDecorator> sortedDecorators = new ArrayList<>(clientDecorators);
+    clientDecoratorComparator
+        .ifPresent(comparator -> Collections.sort(sortedDecorators, comparator));
 
     final IncomingRequestAwareClient clientStack =
-        foldDecorators(new NoopClient(), clientDecorators);
+        foldDecorators(new NoopClient(), sortedDecorators);
     return new ServiceSettingClient(serviceName, clientStack);
   }
 
@@ -91,6 +103,6 @@ class EnvironmentModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    // all binding are set up with @Provides annotated methods
+    OptionalBinder.newOptionalBinder(binder(), new TypeLiteral<Comparator<ClientDecorator>>() {});
   }
 }
