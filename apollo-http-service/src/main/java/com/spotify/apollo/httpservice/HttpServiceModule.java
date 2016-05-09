@@ -19,13 +19,22 @@
  */
 package com.spotify.apollo.httpservice;
 
+import com.google.inject.TypeLiteral;
+
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.environment.ApolloEnvironment;
 import com.spotify.apollo.environment.ApolloEnvironmentModule;
+import com.spotify.apollo.environment.ClientDecorator;
+import com.spotify.apollo.environment.ListClientDecoratorComparator;
 import com.spotify.apollo.meta.MetaModule;
+import com.spotify.apollo.meta.OutgoingCallsDecorator;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.request.RequestHandler;
+
+import java.util.Comparator;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Used to gather dependencies from other modules into {@link HttpService}
@@ -45,6 +54,7 @@ class HttpServiceModule extends AbstractApolloModule {
   @Override
   protected void configure() {
     bindAppInit();
+    bindClientDecoratorComparator();
 
     install(ApolloEnvironmentModule.create());
     install(new MetaModule("apollo-http"));
@@ -52,6 +62,13 @@ class HttpServiceModule extends AbstractApolloModule {
 
   private void bindAppInit() {
     bind(Initializer.class).toInstance(env -> env.initialize(appInit));
+  }
+
+  private void bindClientDecoratorComparator() {
+    // ensure that clients track outgoing calls first in the chain
+    bind(new TypeLiteral<Comparator<ClientDecorator>>() { })
+        .toInstance(new ListClientDecoratorComparator(singletonList(OutgoingCallsDecorator.class))
+    );
   }
 
   static RequestHandler requestHandler(Service.Instance instance) {
