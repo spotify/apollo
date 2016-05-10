@@ -480,7 +480,8 @@ public class ServiceHelper implements TestRule, Closeable {
             .withModule(HttpClientModule.create())
             .withModule(
                 ForwardingStubClientModule
-                    .create(forwardNonStubbedRequests, stubClient.asRequestAwareClient()));
+                    .create(forwardNonStubbedRequests, stubClient.asRequestAwareClient()))
+            .withModule(new ServiceHelperClientDecoratorOrdering());
 
         for (ApolloModule module : additionalModules) {
           serviceBuilder = serviceBuilder.withModule(module);

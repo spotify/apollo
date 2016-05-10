@@ -27,6 +27,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.multibindings.Multibinder;
 
+import com.spotify.apollo.Request;
 import com.spotify.apollo.core.Services;
 import com.typesafe.config.Config;
 
@@ -37,7 +38,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Named;
 
@@ -54,23 +57,27 @@ public class EnvironmentModuleTest {
   }
 
   @Test
-  public void shouldSortClientDecoratorsIfComparatorProvided() {
+  public void shouldSortClientDecoratorsIfComparatorProvided() throws Exception {
     Injector injector = Guice.createInjector(
         new EnvironmentModule(), new ComparatorModule(), new ModuleDeps());
 
     // next line will throw an exception if dependencies missing
     IncomingRequestAwareClient client = injector.getInstance(IncomingRequestAwareClient.class);
 
+    client.send(Request.forUri("fie"), Optional.empty()).toCompletableFuture().get();
+
     assertThat(decoratorNames, equalTo(Arrays.asList("A", "B", "C", "D", "E")));
   }
 
   @Test
-  public void shouldWorkWithNoComparatorProvided() {
+  public void shouldWorkWithNoComparatorProvided() throws Exception {
     Injector injector = Guice.createInjector(
         new EnvironmentModule(), new ModuleDeps());
 
     // next line will throw an exception if dependencies missing
     IncomingRequestAwareClient client = injector.getInstance(IncomingRequestAwareClient.class);
+
+    client.send(Request.forUri("fie"), Optional.empty()).toCompletableFuture().get();
 
     Set<String> unorderedDecoratorNames = ImmutableSet.copyOf(decoratorNames);
 
@@ -138,9 +145,16 @@ public class EnvironmentModuleTest {
   private abstract class IdentityClientDecorator implements ClientDecorator {
     @Override
     public IncomingRequestAwareClient apply(IncomingRequestAwareClient incomingRequestAwareClient) {
-      decoratorNames.add(getClass().getSimpleName());
 
-      return incomingRequestAwareClient;
+      return ((request, incoming) -> {
+        decoratorNames.add(getClass().getSimpleName());
+
+        if (incomingRequestAwareClient instanceof NoopClient) {
+          return CompletableFuture.completedFuture(null);
+        }
+
+        return incomingRequestAwareClient.send(request, incoming);
+      });
     }
   }
 

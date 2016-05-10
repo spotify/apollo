@@ -22,7 +22,10 @@ package com.spotify.apollo.httpservice.acceptance;
 import com.google.common.base.Splitter;
 
 import com.spotify.apollo.AppInit;
+import com.spotify.apollo.Request;
+import com.spotify.apollo.Response;
 import com.spotify.apollo.test.ServiceHelper;
+import com.spotify.apollo.test.response.ResponseWithDelay;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +35,12 @@ import java.util.Optional;
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
+import okio.ByteString;
 
 import static com.google.common.collect.Iterables.toArray;
+import static com.spotify.apollo.test.unit.RequestMatchers.uri;
+import static org.apache.commons.lang.StringUtils.reverse;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -92,7 +99,8 @@ public class ServiceStepdefs {
     serviceHelper = ServiceHelper.create(service, serviceName)
         .args(allArgs)
         .domain(pod)
-        .forwardingNonStubbedRequests(false);
+        .forwardingNonStubbedRequests(false)
+        .conf("reverser.address", AcceptanceIT.REVERSER_ADDRESS);
 
     serviceHelper.start();
   }
@@ -110,6 +118,13 @@ public class ServiceStepdefs {
     bootedApplication = null;
   }
 
+  @And("^a running reverser service$")
+  public void aRunningReverserService() throws Throwable {
+    serviceHelper.stubClient()
+        .respond(request -> ResponseWithDelay.forResponse(Response.forPayload(reverseArg(request))))
+        .to(uri(startsWith(AcceptanceIT.REVERSER_ADDRESS)));
+  }
+
   interface BootedApplication {
     Optional<String> pod();
   }
@@ -118,4 +133,7 @@ public class ServiceStepdefs {
     return " -Dhttp.server.port=" + port;
   }
 
+  private ByteString reverseArg(Request request) {
+    return ByteString.encodeUtf8(reverse(request.parameter("arg").orElse("no arg!!")));
+  }
 }

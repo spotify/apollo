@@ -61,8 +61,9 @@ class EnvironmentModule extends AbstractModule {
           Optional<Comparator<ClientDecorator>> clientDecoratorComparator) {
 
     List<ClientDecorator> sortedDecorators = new ArrayList<>(clientDecorators);
+    // '.reversed', since when folding, we're applying the decorators from right to left.
     clientDecoratorComparator
-        .ifPresent(comparator -> Collections.sort(sortedDecorators, comparator));
+        .ifPresent(comparator -> Collections.sort(sortedDecorators, comparator.reversed()));
 
     final IncomingRequestAwareClient clientStack =
         foldDecorators(new NoopClient(), sortedDecorators);
