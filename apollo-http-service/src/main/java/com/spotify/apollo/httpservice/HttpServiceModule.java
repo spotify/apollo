@@ -26,9 +26,8 @@ import com.spotify.apollo.core.Service;
 import com.spotify.apollo.environment.ApolloEnvironment;
 import com.spotify.apollo.environment.ApolloEnvironmentModule;
 import com.spotify.apollo.environment.ClientDecorator;
-import com.spotify.apollo.environment.ListClientDecoratorComparator;
+import com.spotify.apollo.environment.ListBasedComparator;
 import com.spotify.apollo.meta.MetaModule;
-import com.spotify.apollo.meta.OutgoingCallsDecorator;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.request.RequestHandler;
 
@@ -66,8 +65,8 @@ class HttpServiceModule extends AbstractApolloModule {
 
   private void bindClientDecoratorComparator() {
     // ensure that clients track outgoing calls first in the chain
-    bind(new TypeLiteral<Comparator<ClientDecorator>>() { })
-        .toInstance(new ListClientDecoratorComparator(singletonList(OutgoingCallsDecorator.class))
+    bind(new TypeLiteral<Comparator<ClientDecorator.Id>>() { })
+        .toInstance(new ListBasedComparator(singletonList(MetaModule.OUTGOING_CALLS))
     );
   }
 

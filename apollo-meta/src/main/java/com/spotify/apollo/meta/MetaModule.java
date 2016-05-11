@@ -25,6 +25,7 @@ import com.google.inject.name.Named;
 
 import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.ClientDecorator;
+import com.spotify.apollo.environment.ClientDecorator.Id;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.typesafe.config.Config;
 
@@ -38,6 +39,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Module for setting up service metadata collection objects.
  */
 public class MetaModule extends AbstractApolloModule {
+
+  public static final Id OUTGOING_CALLS = Id.of(MetaModule.class, "Outgoing calls decorator");
+
   private final String assemblyName;
 
   public MetaModule(String assemblyName) {

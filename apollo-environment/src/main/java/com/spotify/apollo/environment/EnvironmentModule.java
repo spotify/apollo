@@ -34,11 +34,11 @@ import com.spotify.apollo.environment.EnvironmentFactory.RoutingContext;
 import com.typesafe.config.Config;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Singleton;
 
@@ -58,16 +58,26 @@ class EnvironmentModule extends AbstractModule {
       @Named(Services.INJECT_SERVICE_NAME) String serviceName,
       Set<ClientDecorator> clientDecorators,
       @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-          Optional<Comparator<ClientDecorator>> clientDecoratorComparator) {
+          Optional<Comparator<ClientDecorator.Id>> clientDecoratorComparator) {
 
-    List<ClientDecorator> sortedDecorators = new ArrayList<>(clientDecorators);
-    // '.reversed', since when folding, we're applying the decorators from right to left.
-    clientDecoratorComparator
-        .ifPresent(comparator -> Collections.sort(sortedDecorators, comparator.reversed()));
+    List<ClientDecorator> sortedDecorators = clientDecoratorComparator
+        .map(comparator -> sort(clientDecorators, comparator))
+        .orElse(new ArrayList<>(clientDecorators));
 
-    final IncomingRequestAwareClient clientStack =
-        foldDecorators(new NoopClient(), sortedDecorators);
+    IncomingRequestAwareClient clientStack = foldDecorators(new NoopClient(), sortedDecorators);
     return new ServiceSettingClient(serviceName, clientStack);
+  }
+
+  private List<ClientDecorator> sort(Set<ClientDecorator> clientDecorators,
+                                     Comparator<ClientDecorator.Id> comparator) {
+
+    // '.reversed', since when folding, the first decorator will be the innermost one. we want to
+    // ensure that the first decorator according to the comparator is the outermost one.
+    Comparator<ClientDecorator.Id> reversed = comparator.reversed();
+
+    return clientDecorators.stream()
+        .sorted((left, right) -> reversed.compare(left.id(), right.id()))
+        .collect(Collectors.toList());
   }
 
   @Provides
@@ -104,6 +114,6 @@ class EnvironmentModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    OptionalBinder.newOptionalBinder(binder(), new TypeLiteral<Comparator<ClientDecorator>>() {});
+    OptionalBinder.newOptionalBinder(binder(), new TypeLiteral<Comparator<ClientDecorator.Id>>() {});
   }
 }

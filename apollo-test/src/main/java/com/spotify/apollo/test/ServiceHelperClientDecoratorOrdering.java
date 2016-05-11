@@ -22,12 +22,14 @@ package com.spotify.apollo.test;
 import com.google.inject.TypeLiteral;
 
 import com.spotify.apollo.environment.ClientDecorator;
-import com.spotify.apollo.environment.ListClientDecoratorComparator;
-import com.spotify.apollo.meta.OutgoingCallsDecorator;
+import com.spotify.apollo.environment.ListBasedComparator;
 import com.spotify.apollo.module.AbstractApolloModule;
 
 import java.util.Arrays;
 import java.util.Comparator;
+
+import static com.spotify.apollo.meta.MetaModule.OUTGOING_CALLS;
+import static com.spotify.apollo.test.ForwardingStubClientModule.STUB_CLIENT;
 
 /**
  * Ensures that client decorators are ordered correctly.
@@ -41,9 +43,8 @@ public class ServiceHelperClientDecoratorOrdering extends AbstractApolloModule {
 
   private void bindClientDecoratorComparator() {
     // ensure that clients track outgoing calls first in the chain, and then apply the stub client
-    bind(new TypeLiteral<Comparator<ClientDecorator>>() { })
-        .toInstance(new ListClientDecoratorComparator(Arrays.asList(OutgoingCallsDecorator.class, ForwardingStubClientModule.class))
-        );
+    bind(new TypeLiteral<Comparator<ClientDecorator.Id>>() { })
+        .toInstance(new ListBasedComparator(Arrays.asList(OUTGOING_CALLS, STUB_CLIENT)));
   }
 
   @Override

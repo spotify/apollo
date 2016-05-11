@@ -21,6 +21,8 @@ package com.spotify.apollo.environment;
 
 import com.google.common.collect.ImmutableList;
 
+import com.spotify.apollo.environment.ClientDecorator.Id;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,23 +31,27 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
 
-public class ListClientDecoratorComparatorTest {
+public class ListBasedComparatorTest {
 
-  private ListClientDecoratorComparator comparator;
+  private ListBasedComparator comparator;
 
-  private Decorator a;
-  private Decorator b;
-  private Decorator c;
-  private Decorator d;
+  private Id a;
+  private Id b;
+  private Id c;
+  private Id d;
 
   @Before
   public void setUp() throws Exception {
-    comparator = new ListClientDecoratorComparator(ImmutableList.of(C.class, B.class));
+    comparator = new ListBasedComparator(ImmutableList.of(id("C"), id("B")));
 
-    a = new A();
-    b = new B();
-    c = new C();
-    d = new D();
+    a = id("A");
+    b = id("B");
+    c = id("C");
+    d = id("D");
+  }
+
+  private Id id(String id) {
+    return Id.of(ListBasedComparatorTest.class, id);
   }
 
   @Test
@@ -71,18 +77,4 @@ public class ListClientDecoratorComparatorTest {
     assertThat(comparator.compare(b, b), equalTo(0));
     assertThat(comparator.compare(c, c), equalTo(0));
   }
-
-  private static class A extends Decorator { }
-  private static class B extends Decorator { }
-  private static class C extends Decorator { }
-  private static class D extends Decorator { }
-
-  static class Decorator implements ClientDecorator {
-
-    @Override
-    public IncomingRequestAwareClient apply(IncomingRequestAwareClient incomingRequestAwareClient) {
-      return incomingRequestAwareClient;
-    }
-  }
-
 }

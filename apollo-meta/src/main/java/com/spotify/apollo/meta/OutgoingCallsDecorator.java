@@ -33,4 +33,9 @@ public class OutgoingCallsDecorator implements ClientDecorator {
   public IncomingRequestAwareClient apply(IncomingRequestAwareClient incomingRequestAwareClient) {
     return new OutgoingCallsGatheringClient(callsGatherer, incomingRequestAwareClient);
   }
+
+  @Override
+  public Id id() {
+    return MetaModule.OUTGOING_CALLS;
+  }
 }

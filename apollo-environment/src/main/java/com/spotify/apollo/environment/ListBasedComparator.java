@@ -25,26 +25,26 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Compares client decorators based on a list of known classes. Client decorators of a known class
- * are smaller than unknown ones. When two client decorators that both are of known classes are
+ * Compares client decorators based on a list of known ids. Known client decorators
+ * are smaller than unknown ones. When two client decorators that both are known are
  * compared, then the one that comes first in the list is the smallest.
  */
-public class ListClientDecoratorComparator implements Comparator<ClientDecorator> {
+public class ListBasedComparator implements Comparator<ClientDecorator.Id> {
 
   private static final int EQUAL = 0;
   private static final int LEFT_SMALLER = -1;
   private static final int RIGHT_SMALLER = 1;
 
-  private final List<Class<? extends ClientDecorator>> knownClasses;
+  private final List<ClientDecorator.Id> specifiedIds;
 
-  public ListClientDecoratorComparator(List<Class<? extends ClientDecorator>> knownClasses) {
-    this.knownClasses = knownClasses;
+  public ListBasedComparator(List<ClientDecorator.Id> specifiedIds) {
+    this.specifiedIds = specifiedIds;
   }
 
   @Override
-  public int compare(ClientDecorator left, ClientDecorator right) {
-    int leftIndex = knownClasses.indexOf(left.getClass());
-    int rightIndex = knownClasses.indexOf(right.getClass());
+  public int compare(ClientDecorator.Id left, ClientDecorator.Id right) {
+    int leftIndex = specifiedIds.indexOf(left);
+    int rightIndex = specifiedIds.indexOf(right);
 
     if (unknown(leftIndex) && unknown(rightIndex)) {
       return EQUAL;

@@ -49,7 +49,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 public class EnvironmentModuleTest {
-  List<String> decoratorNames;
+  private List<String> decoratorNames;
 
   @Before
   public void setUp() throws Exception {
@@ -126,8 +126,8 @@ public class EnvironmentModuleTest {
   private class ComparatorModule extends AbstractModule {
 
     @Provides
-    Comparator<ClientDecorator> clientDecoratorComparator() {
-      return (left, right) -> left.getClass().toString().compareTo(right.getClass().toString());
+    Comparator<ClientDecorator.Id> clientDecoratorComparator() {
+      return (left, right) -> left.id().compareTo(right.id());
     }
 
     @Override
@@ -156,6 +156,10 @@ public class EnvironmentModuleTest {
         return incomingRequestAwareClient.send(request, incoming);
       });
     }
-  }
 
+    @Override
+    public Id id() {
+      return Id.of(IdentityClientDecorator.class, getClass().getSimpleName());
+    }
+  }
 }

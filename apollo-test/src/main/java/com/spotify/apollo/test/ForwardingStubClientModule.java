@@ -29,6 +29,8 @@ import com.spotify.apollo.module.ApolloModule;
 class ForwardingStubClientModule extends AbstractApolloModule
     implements ClientDecorator {
 
+  public static final Id STUB_CLIENT = Id.of(ForwardingStubClientModule.class, "StubClient");
+
   private final boolean forward;
   private final IncomingRequestAwareClient stubClient;
 
@@ -55,5 +57,10 @@ class ForwardingStubClientModule extends AbstractApolloModule
   @Override
   public IncomingRequestAwareClient apply(IncomingRequestAwareClient client) {
     return forward ? new FallbackClient(stubClient, client) : stubClient;
+  }
+
+  @Override
+  public Id id() {
+    return STUB_CLIENT;
   }
 }
