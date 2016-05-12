@@ -19,7 +19,6 @@
  */
 package com.spotify.apollo.environment;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Closer;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -36,10 +35,8 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Named;
@@ -59,7 +56,7 @@ public class EnvironmentModuleTest {
   @Test
   public void shouldSortClientDecoratorsIfComparatorProvided() throws Exception {
     Injector injector = Guice.createInjector(
-        new EnvironmentModule(), new ComparatorModule(), new ModuleDeps());
+        EnvironmentModule.create((left, right) -> left.id().compareTo(right.id())), new ModuleDeps());
 
     // next line will throw an exception if dependencies missing
     IncomingRequestAwareClient client = injector.getInstance(IncomingRequestAwareClient.class);
@@ -68,22 +65,6 @@ public class EnvironmentModuleTest {
 
     assertThat(decoratorNames, equalTo(Arrays.asList("A", "B", "C", "D", "E")));
   }
-
-  @Test
-  public void shouldWorkWithNoComparatorProvided() throws Exception {
-    Injector injector = Guice.createInjector(
-        new EnvironmentModule(), new ModuleDeps());
-
-    // next line will throw an exception if dependencies missing
-    IncomingRequestAwareClient client = injector.getInstance(IncomingRequestAwareClient.class);
-
-    client.send(Request.forUri("fie"), Optional.empty()).toCompletableFuture().get();
-
-    Set<String> unorderedDecoratorNames = ImmutableSet.copyOf(decoratorNames);
-
-    assertThat(unorderedDecoratorNames, equalTo(ImmutableSet.of("A", "B", "C", "D", "E")));
-  }
-
 
   private class ModuleDeps extends AbstractModule {
 
@@ -120,19 +101,6 @@ public class EnvironmentModuleTest {
     @Provides
     Closer closer() {
       return mock(Closer.class);
-    }
-  }
-
-  private class ComparatorModule extends AbstractModule {
-
-    @Provides
-    Comparator<ClientDecorator.Id> clientDecoratorComparator() {
-      return (left, right) -> left.id().compareTo(right.id());
-    }
-
-    @Override
-    protected void configure() {
-
     }
   }
 

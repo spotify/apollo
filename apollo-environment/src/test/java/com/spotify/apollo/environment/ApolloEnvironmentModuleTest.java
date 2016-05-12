@@ -66,7 +66,7 @@ public class ApolloEnvironmentModuleTest {
 
   @Before
   public void setUp() throws Exception {
-    appModule = ApolloEnvironmentModule.create();
+    appModule = ApolloEnvironmentModule.create((l, r) -> 0);
     service = Services.usingName("ping")
         .withModule(appModule)
         .withModule(MetaModule.create("test"));

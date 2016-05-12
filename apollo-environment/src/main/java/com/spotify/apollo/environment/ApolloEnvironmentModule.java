@@ -43,6 +43,7 @@ import com.spotify.apollo.route.Routers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Comparator;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -64,8 +65,14 @@ public class ApolloEnvironmentModule extends AbstractApolloModule {
 
   private static final Logger LOG = LoggerFactory.getLogger(ApolloEnvironmentModule.class);
 
-  public static ApolloEnvironmentModule create() {
-    return new ApolloEnvironmentModule();
+  private final Comparator<ClientDecorator.Id> clientDecoratorComparator;
+
+  private ApolloEnvironmentModule(Comparator<ClientDecorator.Id> clientDecoratorComparator) {
+    this.clientDecoratorComparator = clientDecoratorComparator;
+  }
+
+  public static ApolloEnvironmentModule create(Comparator<ClientDecorator.Id> clientDecoratorComparator) {
+    return new ApolloEnvironmentModule(clientDecoratorComparator);
   }
 
   /**
@@ -88,7 +95,7 @@ public class ApolloEnvironmentModule extends AbstractApolloModule {
     bind(ApolloConfig.class).in(Singleton.class); // used by most sub-modules
     bind(ApolloEnvironment.class).to(ApolloEnvironmentImpl.class).in(Singleton.class);
 
-    install(new EnvironmentModule());
+    install(EnvironmentModule.create(clientDecoratorComparator));
   }
 
   @Override

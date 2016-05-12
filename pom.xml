@@ -207,6 +207,8 @@
                     <artifactId>japicmp-maven-plugin</artifactId>
                     <version>0.6.1</version>
                     <configuration>
+                        <!-- TODO: enable with 2.0! -->
+                        <skip>true</skip>
                         <oldVersion>
                             <dependency>
                                 <groupId>com.spotify</groupId>

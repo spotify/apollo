@@ -53,21 +53,13 @@ class HttpServiceModule extends AbstractApolloModule {
   @Override
   protected void configure() {
     bindAppInit();
-    bindClientDecoratorComparator();
 
-    install(ApolloEnvironmentModule.create());
+    install(ApolloEnvironmentModule.create(new ListBasedComparator(singletonList(MetaModule.OUTGOING_CALLS))));
     install(MetaModule.create("apollo-http"));
   }
 
   private void bindAppInit() {
     bind(Initializer.class).toInstance(env -> env.initialize(appInit));
-  }
-
-  private void bindClientDecoratorComparator() {
-    // ensure that clients track outgoing calls first in the chain
-    bind(new TypeLiteral<Comparator<ClientDecorator.Id>>() { })
-        .toInstance(new ListBasedComparator(singletonList(MetaModule.OUTGOING_CALLS))
-    );
   }
 
   static RequestHandler requestHandler(Service.Instance instance) {

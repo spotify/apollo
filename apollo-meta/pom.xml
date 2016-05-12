@@ -101,10 +101,6 @@
             <plugin>
                 <groupId>com.github.siom79.japicmp</groupId>
                 <artifactId>japicmp-maven-plugin</artifactId>
-                <configuration>
-                    <!-- TODO: enable with 2.0! -->
-                    <skip>true</skip>
-                </configuration>
             </plugin>
         </plugins>
     </build>
