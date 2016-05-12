@@ -476,7 +476,7 @@ public class ServiceHelper implements TestRule, Closeable {
         Service.Builder serviceBuilder = Services.usingName(serviceName)
             .usingModuleDiscovery(false)
             .withModule(ApolloEnvironmentModule.create())
-            .withModule(new MetaModule("service-helper"))
+            .withModule(MetaModule.create("service-helper"))
             .withModule(HttpClientModule.create())
             .withModule(
                 ForwardingStubClientModule

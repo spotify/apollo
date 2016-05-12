@@ -44,7 +44,7 @@ public class MetaModule extends AbstractApolloModule {
 
   private final String assemblyName;
 
-  public MetaModule(String assemblyName) {
+  private MetaModule(String assemblyName) {
     this.assemblyName = checkNotNull(assemblyName);
   }
 
@@ -81,5 +81,9 @@ public class MetaModule extends AbstractApolloModule {
   @Override
   public String getId() {
     return "meta";
+  }
+
+  public static MetaModule create(String assemblyName) {
+    return new MetaModule(assemblyName);
   }
 }

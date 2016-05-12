@@ -56,7 +56,7 @@ class HttpServiceModule extends AbstractApolloModule {
     bindClientDecoratorComparator();
 
     install(ApolloEnvironmentModule.create());
-    install(new MetaModule("apollo-http"));
+    install(MetaModule.create("apollo-http"));
   }
 
   private void bindAppInit() {

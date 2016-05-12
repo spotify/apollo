@@ -69,7 +69,7 @@ public class ApolloEnvironmentModuleTest {
     appModule = ApolloEnvironmentModule.create();
     service = Services.usingName("ping")
         .withModule(appModule)
-        .withModule(new MetaModule("test"));
+        .withModule(MetaModule.create("test"));
   }
 
   @Test
