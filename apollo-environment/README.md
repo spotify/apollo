@@ -74,9 +74,12 @@ The order of the decoration chain be optionally be determined by configuring a
 `Comparator<ClientDecorator.Id>`. The `EnvironmentModule` will always add a
 [`ServiceSettingClient`](../apollo-environment/src/main/java/com/spotify/apollo/environment/ServiceSettingClient.java)
 as the outermost/first decorator, and the innermost/last decorator will
-be a [`NoopClient`](../apollo-environment/src/main/java/com/spotify/apollo/environment/NoopClient.java).
+always be a [`NoopClient`](../apollo-environment/src/main/java/com/spotify/apollo/environment/NoopClient.java).
 
-See [`ServiceHelperClientDecoratorOrdering`](../apollo-test/src/main/java/com/spotify/apollo/test/ServiceHelperClientDecoratorOrdering.java)
+An easy way to define a comparator controlling the ordering between `ClientDecorator`s is to use a 
+[`ClientDecoratorOrder`](../apollo-environment/src/main/java/com/spotify/apollo/environment/ClientDecoratorOrder.java). 
+
+See [`ServiceHelper.start()`](../apollo-test/src/main/java/com/spotify/apollo/test/ServiceHelper.java)
 for an example of how you could configure an ordering of client decorators.
 
 ### RequestRunnableFactory

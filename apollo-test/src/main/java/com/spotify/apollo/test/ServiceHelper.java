@@ -35,7 +35,6 @@ import com.spotify.apollo.core.Service;
 import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.ApolloConfig;
 import com.spotify.apollo.environment.ApolloEnvironmentModule;
-import com.spotify.apollo.environment.ListBasedComparator;
 import com.spotify.apollo.http.client.HttpClientModule;
 import com.spotify.apollo.meta.MetaModule;
 import com.spotify.apollo.module.ApolloModule;
@@ -69,6 +68,8 @@ import java.util.regex.Pattern;
 import okio.ByteString;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.spotify.apollo.environment.ClientDecoratorOrder.beginWith;
+import static com.spotify.apollo.http.client.HttpClientModule.HTTP_CLIENT;
 import static com.spotify.apollo.meta.MetaModule.OUTGOING_CALLS;
 import static com.spotify.apollo.test.ForwardingStubClientModule.STUB_CLIENT;
 
@@ -478,7 +479,9 @@ public class ServiceHelper implements TestRule, Closeable {
       try {
         Service.Builder serviceBuilder = Services.usingName(serviceName)
             .usingModuleDiscovery(false)
-            .withModule(ApolloEnvironmentModule.create(new ListBasedComparator(Arrays.asList(OUTGOING_CALLS, STUB_CLIENT))))
+            .withModule(
+                ApolloEnvironmentModule.create(beginWith(OUTGOING_CALLS, STUB_CLIENT)
+                                                   .endWith(HTTP_CLIENT)))
             .withModule(MetaModule.create("service-helper"))
             .withModule(HttpClientModule.create())
             .withModule(

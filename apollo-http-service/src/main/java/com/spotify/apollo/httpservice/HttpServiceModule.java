@@ -19,21 +19,14 @@
  */
 package com.spotify.apollo.httpservice;
 
-import com.google.inject.TypeLiteral;
-
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.environment.ApolloEnvironment;
 import com.spotify.apollo.environment.ApolloEnvironmentModule;
-import com.spotify.apollo.environment.ClientDecorator;
-import com.spotify.apollo.environment.ListBasedComparator;
+import com.spotify.apollo.environment.ClientDecoratorOrder;
 import com.spotify.apollo.meta.MetaModule;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.request.RequestHandler;
-
-import java.util.Comparator;
-
-import static java.util.Collections.singletonList;
 
 /**
  * Used to gather dependencies from other modules into {@link HttpService}
@@ -54,7 +47,7 @@ class HttpServiceModule extends AbstractApolloModule {
   protected void configure() {
     bindAppInit();
 
-    install(ApolloEnvironmentModule.create(new ListBasedComparator(singletonList(MetaModule.OUTGOING_CALLS))));
+    install(ApolloEnvironmentModule.create(ClientDecoratorOrder.beginWith(MetaModule.OUTGOING_CALLS)));
     install(MetaModule.create("apollo-http"));
   }
 

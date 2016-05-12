@@ -19,39 +19,52 @@
  */
 package com.spotify.apollo.environment;
 
-import com.google.common.collect.ImmutableList;
-
 import com.spotify.apollo.environment.ClientDecorator.Id;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
 
-public class ListBasedComparatorTest {
+public class ClientDecoratorOrderTest {
 
-  private ListBasedComparator comparator;
+  private ClientDecoratorOrder comparator;
 
   private Id a;
   private Id b;
   private Id c;
   private Id d;
+  private Id e;
+  private Id f;
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   @Before
   public void setUp() throws Exception {
-    comparator = new ListBasedComparator(ImmutableList.of(id("C"), id("B")));
+    comparator = ClientDecoratorOrder.beginWith(id("C"), id("B")).endWith(id("F"), id("E"));
 
     a = id("A");
     b = id("B");
     c = id("C");
     d = id("D");
+    e = id("E");
+    f = id("F");
   }
 
   private Id id(String id) {
-    return Id.of(ListBasedComparatorTest.class, id);
+    return Id.of(ClientDecoratorOrderTest.class, id);
+  }
+
+  @Test
+  public void shouldConsiderTwoBeginningBasedOnListOrder() throws Exception {
+    assertThat(comparator.compare(b, c), greaterThan(0));
+    assertThat(comparator.compare(c, b), lessThan(0));
   }
 
   @Test
@@ -67,14 +80,36 @@ public class ListBasedComparatorTest {
   }
 
   @Test
-  public void shouldConsiderTwoKnownBasedOnListOrder() throws Exception {
-    assertThat(comparator.compare(b, c), greaterThan(0));
-    assertThat(comparator.compare(c, b), lessThan(0));
-  }
-
-  @Test
   public void shouldConsiderTwoEqualAsEqual() throws Exception {
     assertThat(comparator.compare(b, b), equalTo(0));
     assertThat(comparator.compare(c, c), equalTo(0));
+  }
+
+  @Test
+  public void shouldConsiderEndingAsAfterBeginning() throws Exception {
+    assertThat(comparator.compare(b, f), lessThan(0));
+    assertThat(comparator.compare(f, b), greaterThan(0));
+  }
+
+  @Test
+  public void shouldConsiderEndingAsAfterUnknown() throws Exception {
+    assertThat(comparator.compare(a, f), lessThan(0));
+    assertThat(comparator.compare(f, a), greaterThan(0));
+  }
+
+  @Test
+  public void shouldConsiderTwoEndingBasedOnOrder() throws Exception {
+    assertThat(comparator.compare(e, f), greaterThan(0));
+    assertThat(comparator.compare(f, e), lessThan(0));
+  }
+
+  @Test
+  public void shouldValidateThatAnIdIsntDuplicated() throws Exception {
+    comparator = ClientDecoratorOrder.beginWith(Id.of(getClass(), "floopity"));
+
+    thrown.expect(IllegalArgumentException.class);
+    thrown.expectMessage("floopity");
+
+    comparator.endWith(Id.of(getClass(), "floopity"));
   }
 }
