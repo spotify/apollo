@@ -66,7 +66,7 @@ public class MetaModule extends AbstractApolloModule {
   @Provides
   @Singleton
   private MetaInfoTracker metaInfoTracker(Config configNode, MetaDescriptor metaDescriptor) {
-    return new MetaInfoTracker(
+    return new MetaInfoTrackerImpl(
         metaDescriptor.descriptor(),
         assemblyName + metaDescriptor.apolloVersion(),
         configNode);
