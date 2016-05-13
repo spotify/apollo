@@ -1,8 +1,8 @@
 /*
  * -\-\-
- * Spotify Apollo HTTP Service
+ * Spotify Apollo Metadata
  * --
- * Copyright (C) 2013 - 2015 Spotify AB
+ * Copyright (C) 2013 - 2016 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,23 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.httpservice.acceptance;
+package com.spotify.apollo.meta;
 
-import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.spotify.apollo.dispatch.Endpoint;
+import com.spotify.apollo.meta.model.MetaGatherer;
 
-import cucumber.api.junit.Cucumber;
+import java.util.List;
 
-@RunWith(Cucumber.class)
-public class AcceptanceIT {
+/**
+ * Defines the contract for tracking metadata about an apollo application.
+ */
+public interface MetaInfoTracker {
 
-  private static final Logger log = LoggerFactory.getLogger(AcceptanceIT.class);
+  MetaGatherer getGatherer();
 
-  static final String REVERSER_ADDRESS = "http://reverser";
+  <E extends Endpoint> void gatherEndpoints(List<E> endpoints);
 
-  @BeforeClass
-  public static synchronized void start() throws Exception {
-    log.info("AcceptanceIT start()");
-  }
+  IncomingCallsGatherer incomingCallsGatherer();
+
+  OutgoingCallsGatherer outgoingCallsGatherer();
 }

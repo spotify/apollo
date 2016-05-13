@@ -29,15 +29,17 @@ import com.spotify.apollo.Client;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.EnvironmentFactory.RoutingContext;
-import com.spotify.apollo.meta.OutgoingCallsGatheringClient;
-import com.spotify.apollo.meta.MetaInfoTracker;
 import com.typesafe.config.Config;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Singleton;
 
 import static com.spotify.apollo.environment.ApolloEnvironmentModule.foldDecorators;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Module supplying:
@@ -46,23 +48,36 @@ import static com.spotify.apollo.environment.ApolloEnvironmentModule.foldDecorat
  *   {@link RoutingContext},
  *   {@link Environment}
  */
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 class EnvironmentModule extends AbstractModule {
+
+  private final Comparator<ClientDecorator.Id> clientDecoratorComparator;
+
+  private EnvironmentModule(Comparator<ClientDecorator.Id> clientDecoratorComparator) {
+    this.clientDecoratorComparator = requireNonNull(clientDecoratorComparator);
+  }
+
 
   @Provides
   @Singleton
   IncomingRequestAwareClient incomingRequestAwareClient(
       @Named(Services.INJECT_SERVICE_NAME) String serviceName,
-      Set<ClientDecorator> clientDecorators,
-      MetaInfoTracker metaInfoTracker) {
+      Set<ClientDecorator> clientDecorators) {
 
-    final IncomingRequestAwareClient clientStack =
-        foldDecorators(new NoopClient(), clientDecorators);
-    final IncomingRequestAwareClient serviceSettingClient
-        = new ServiceSettingClient(serviceName, clientStack);
+    IncomingRequestAwareClient clientStack = foldDecorators(new NoopClient(),
+                                                            sort(clientDecorators, clientDecoratorComparator));
+    return new ServiceSettingClient(serviceName, clientStack);
+  }
 
-    return new OutgoingCallsGatheringClient(
-        metaInfoTracker.outgoingCallsGatherer(),
-        serviceSettingClient);
+  private List<ClientDecorator> sort(Set<ClientDecorator> clientDecorators,
+                                     Comparator<ClientDecorator.Id> comparator) {
+    // '.reversed', since when folding, the first decorator will be the innermost one. we want to
+    // ensure that the first decorator according to the comparator is the outermost one.
+    Comparator<ClientDecorator.Id> reversed = comparator.reversed();
+
+    return clientDecorators.stream()
+        .sorted((left, right) -> reversed.compare(left.id(), right.id()))
+        .collect(Collectors.toList());
   }
 
   @Provides
@@ -97,8 +112,12 @@ class EnvironmentModule extends AbstractModule {
     return environmentFactory.create(serviceName, routingContext);
   }
 
+  public static EnvironmentModule create(Comparator<ClientDecorator.Id> clientDecoratorComparator) {
+    return new EnvironmentModule(clientDecoratorComparator);
+  }
+
   @Override
   protected void configure() {
-    // all binding are set up with @Provides annotated methods
+
   }
 }

@@ -21,10 +21,10 @@ package com.spotify.apollo.meta;
 
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.meta.model.MetaInfoBuilder;
 import com.spotify.apollo.test.ServiceHelper;
 import com.spotify.apollo.meta.model.Meta;
 import com.spotify.apollo.meta.model.MetaGatherer;
-import com.spotify.apollo.meta.model.MetaInfoBuilder;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -274,7 +274,5 @@ public class MetaApplicationTest {
     endpointGatherer.setUri("/foo-uri/bla");
     endpointGatherer.addMethod("GET");
     endpointGatherer.addQueryParameterName("q");
-    endpointGatherer.setRequestContentType("req-type");
-    endpointGatherer.setResponseContentType("res-type");
   }
 }

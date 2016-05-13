@@ -1,8 +1,8 @@
 /*
  * -\-\-
- * Spotify Apollo okhttp Client Module
+ * Spotify Apollo API Environment
  * --
- * Copyright (C) 2013 - 2015 Spotify AB
+ * Copyright (C) 2013 - 2016 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,29 +17,25 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.http.client;
+package com.spotify.apollo.meta;
 
 import com.spotify.apollo.environment.ClientDecorator;
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
 
-import javax.inject.Inject;
+public class OutgoingCallsDecorator implements ClientDecorator {
+  private final OutgoingCallsGatherer callsGatherer;
 
-class HttpClientDecorator implements ClientDecorator {
-
-  private final HttpClient httpClient;
-
-  @Inject
-  HttpClientDecorator(HttpClient httpClient) {
-    this.httpClient = httpClient;
+  public OutgoingCallsDecorator(OutgoingCallsGatherer callsGatherer) {
+    this.callsGatherer = callsGatherer;
   }
 
   @Override
-  public IncomingRequestAwareClient apply(IncomingRequestAwareClient baseClient) {
-    return ForwardingHttpClient.create(baseClient, this.httpClient);
+  public IncomingRequestAwareClient apply(IncomingRequestAwareClient incomingRequestAwareClient) {
+    return new OutgoingCallsGatheringClient(callsGatherer, incomingRequestAwareClient);
   }
 
   @Override
   public Id id() {
-    return HttpClientModule.HTTP_CLIENT;
+    return MetaModule.OUTGOING_CALLS;
   }
 }

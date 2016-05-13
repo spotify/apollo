@@ -74,16 +74,6 @@ class EndpointInfoGatherer implements MetaGatherer.EndpointGatherer {
   }
 
   @Override
-  public void setRequestContentType(String contentType) {
-    endpointInfo.requestPayloadSchema.contentType = contentType;
-  }
-
-  @Override
-  public void setResponseContentType(String contentType) {
-    endpointInfo.replyPayloadSchema.contentType = contentType;
-  }
-
-  @Override
   public void setDocstring(String docstring) {
     endpointInfo.docstring = docstring;
   }

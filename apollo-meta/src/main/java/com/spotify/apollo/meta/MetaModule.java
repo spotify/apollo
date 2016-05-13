@@ -17,28 +17,41 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.environment;
+package com.spotify.apollo.meta;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Named;
 
 import com.spotify.apollo.core.Services;
-import com.spotify.apollo.meta.MetaDescriptor;
-import com.spotify.apollo.meta.MetaInfoTracker;
+import com.spotify.apollo.environment.ClientDecorator;
+import com.spotify.apollo.environment.ClientDecorator.Id;
+import com.spotify.apollo.module.AbstractApolloModule;
 import com.typesafe.config.Config;
 
 import java.io.IOException;
 
 import javax.inject.Singleton;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Module for setting up service metadata collection objects.
  */
-class MetaModule extends AbstractModule {
+public class MetaModule extends AbstractApolloModule {
+
+  public static final Id OUTGOING_CALLS = Id.of(MetaModule.class, "Outgoing calls decorator");
+
+  private final String assemblyName;
+
+  private MetaModule(String assemblyName) {
+    this.assemblyName = checkNotNull(assemblyName);
+  }
 
   @Override
   protected void configure() {
+    Multibinder.newSetBinder(binder(), ClientDecorator.class)
+        .addBinding().to(OutgoingCallsDecorator.class);
   }
 
   @Provides
@@ -53,9 +66,24 @@ class MetaModule extends AbstractModule {
   @Provides
   @Singleton
   private MetaInfoTracker metaInfoTracker(Config configNode, MetaDescriptor metaDescriptor) {
-    return new MetaInfoTracker(
+    return new MetaInfoTrackerImpl(
         metaDescriptor.descriptor(),
-        "apollo-standalone " + metaDescriptor.apolloVersion(), // FIXME: no 'standalone' here
+        assemblyName + metaDescriptor.apolloVersion(),
         configNode);
+  }
+
+  @Provides
+  @Singleton
+  private OutgoingCallsDecorator outgoingCallsDecorator(MetaInfoTracker metaInfoTracker) {
+    return new OutgoingCallsDecorator(metaInfoTracker.outgoingCallsGatherer());
+  }
+
+  @Override
+  public String getId() {
+    return "meta";
+  }
+
+  public static MetaModule create(String assemblyName) {
+    return new MetaModule(assemblyName);
   }
 }
