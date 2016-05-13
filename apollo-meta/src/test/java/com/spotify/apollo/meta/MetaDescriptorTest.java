@@ -32,6 +32,6 @@ public class MetaDescriptorTest {
   public void testLoadApolloVersion() throws Exception {
     ClassLoader classLoader = ClassLoader.getSystemClassLoader();
     String version = MetaDescriptor.loadApolloVersion(classLoader);
-    assertTrue(version.startsWith("1.1"));
+    assertTrue(version.startsWith("2.0"));
   }
 }
