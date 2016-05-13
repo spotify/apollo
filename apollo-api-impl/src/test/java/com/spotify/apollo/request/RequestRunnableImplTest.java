@@ -19,6 +19,7 @@
  */
 package com.spotify.apollo.request;
 
+import com.spotify.apollo.Headers;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
@@ -109,7 +110,7 @@ public class RequestRunnableImplTest {
     verify(ongoingRequest).reply(responseArgumentCaptor.capture());
     Response<ByteString> reply = responseArgumentCaptor.getValue();
     assertEquals(reply.status(), Status.METHOD_NOT_ALLOWED);
-    assertEquals(reply.headers(), Collections.singletonMap("Allow", "OPTIONS, POST"));
+    assertEquals(reply.headers(), Headers.of(Collections.singletonMap("Allow", "OPTIONS, POST")));
   }
 
   @Test
@@ -124,7 +125,8 @@ public class RequestRunnableImplTest {
     verify(ongoingRequest).reply(responseArgumentCaptor.capture());
     Response<ByteString> response = responseArgumentCaptor.getValue();
     assertThat(response.status(), is(Status.NO_CONTENT));
-    assertThat(response.headers(), is(Collections.singletonMap("Allow", "OPTIONS, POST")));
+    assertThat(response.headers(),
+               is(Headers.of(Collections.singletonMap("Allow", "OPTIONS, POST"))));
   }
 
   @Test

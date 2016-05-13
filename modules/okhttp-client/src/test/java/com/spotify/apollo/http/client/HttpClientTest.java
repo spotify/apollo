@@ -113,9 +113,9 @@ public class HttpClientTest {
         .toCompletableFuture().get();
 
     assertThat(response.status(), withCode(200));
-    assertThat(response.headers(), allOf(
-                   hasEntry("Content-Type", "application/x-spotify-location"),
-                   hasEntry("Vary", "Content-Type, Accept")
+    assertThat(response.headers().asMap(), allOf(
+                   hasEntry("content-type", "application/x-spotify-location"),
+                   hasEntry("vary", "Content-Type, Accept")
                ));
     assertThat(response.payload(), is(Optional.of(ByteString.encodeUtf8("world"))));
   }

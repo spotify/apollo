@@ -25,6 +25,7 @@ import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 
 import java.io.File;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -101,7 +102,7 @@ public class RequestStepdefs {
   public void the_response_has_a_header_with_value(String headerName, String expectedValue) throws Throwable {
     Response<ByteString> response = getResponseFuture();
 
-    assertThat(response.headers().get(headerName), equalTo(expectedValue));
+    assertThat(response.headers().get(headerName), equalTo(Optional.of(expectedValue)));
   }
 
   @And("^the reason phrase is \"([^\"]*)\"$")

@@ -152,7 +152,7 @@ class ApolloRequestHandler extends AbstractHandler {
       final StatusType status = response.status();
       httpResponse.setStatus(status.code(), status.reasonPhrase());
 
-      response.headers().forEach(httpResponse::addHeader);
+      response.headers().asMap().forEach(httpResponse::addHeader);
 
       try {
         final Optional<ByteString> payload = response.payload();
