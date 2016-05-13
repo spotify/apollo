@@ -20,6 +20,7 @@
 package com.spotify.apollo.httpservice.acceptance;
 
 import com.spotify.apollo.AppInit;
+import com.spotify.apollo.Client;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.route.Route;
@@ -27,10 +28,14 @@ import com.spotify.apollo.httpservice.LoadingException;
 import com.spotify.apollo.httpservice.HttpService;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+
+import okio.ByteString;
 
 class SimpleService implements AppInit, ServiceStepdefs.BootedApplication {
 
   private String pod;
+  private String reverserAddress;
 
   @Override
   public Optional<String> pod() {
@@ -45,6 +50,8 @@ class SimpleService implements AppInit, ServiceStepdefs.BootedApplication {
   public void create(Environment environment) {
     pod = environment.domain();
 
+    reverserAddress = environment.config().getString("reverser.address");
+
     environment.routingEngine()
         .registerAutoRoute(
             Route.sync("GET", "/greet/<arg>",
@@ -54,8 +61,22 @@ class SimpleService implements AppInit, ServiceStepdefs.BootedApplication {
                     "Pod, (domain from the app environment) and" +
                     " the call argument are baked into a free-form string."))
         .registerAutoRoute(
+            Route.sync("GET", "/reverse/<arg>",
+                       context -> reverse(context.requestScopedClient(), context.pathArgs().get("arg"))))
+        .registerAutoRoute(
             Route.sync("GET", "/uriencodingtest/<parameter>",
                         context -> testUri(context.pathArgs().get("parameter"))));
+  }
+
+  private String reverse(Client client, String input) {
+    try {
+      return client.send(Request.forUri(reverserAddress + "/" + input))
+          .toCompletableFuture().get()
+          .payload().map(ByteString::utf8)
+          .orElse("nooo, where's my payload??");
+    } catch (InterruptedException | ExecutionException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public String handle(Request request, String arg) {

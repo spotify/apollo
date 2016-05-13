@@ -1,8 +1,8 @@
 /*
  * -\-\-
- * Spotify Apollo okhttp Client Module
+ * Spotify Apollo Metadata
  * --
- * Copyright (C) 2013 - 2015 Spotify AB
+ * Copyright (C) 2013 - 2016 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,23 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.http.client;
+package com.spotify.apollo.meta;
 
-import com.spotify.apollo.environment.ClientDecorator;
+import com.spotify.apollo.dispatch.Endpoint;
+import com.spotify.apollo.meta.model.MetaGatherer;
 
-import javax.inject.Provider;
+import java.util.List;
 
-class HttpClientDecoratorProvider implements Provider<ClientDecorator> {
+/**
+ * Defines the contract for tracking metadata about an apollo application.
+ */
+public interface MetaInfoTracker {
 
-  @Override
-  public ClientDecorator get() {
-    return HttpClientDecorator.create();
-  }
+  MetaGatherer getGatherer();
+
+  <E extends Endpoint> void gatherEndpoints(List<E> endpoints);
+
+  IncomingCallsGatherer incomingCallsGatherer();
+
+  OutgoingCallsGatherer outgoingCallsGatherer();
 }

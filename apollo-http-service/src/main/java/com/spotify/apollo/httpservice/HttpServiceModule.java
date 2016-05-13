@@ -23,8 +23,13 @@ import com.spotify.apollo.AppInit;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.environment.ApolloEnvironment;
 import com.spotify.apollo.environment.ApolloEnvironmentModule;
+import com.spotify.apollo.meta.MetaModule;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.request.RequestHandler;
+
+import static com.spotify.apollo.environment.ClientDecoratorOrder.beginWith;
+import static com.spotify.apollo.http.client.HttpClientModule.HTTP_CLIENT;
+import static com.spotify.apollo.meta.MetaModule.OUTGOING_CALLS;
 
 /**
  * Used to gather dependencies from other modules into {@link HttpService}
@@ -45,7 +50,8 @@ class HttpServiceModule extends AbstractApolloModule {
   protected void configure() {
     bindAppInit();
 
-    install(ApolloEnvironmentModule.create());
+    install(ApolloEnvironmentModule.create(beginWith(OUTGOING_CALLS).endWith(HTTP_CLIENT)));
+    install(MetaModule.create("apollo-http"));
   }
 
   private void bindAppInit() {

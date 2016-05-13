@@ -22,13 +22,13 @@ package com.spotify.apollo.meta;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.dispatch.Endpoint;
 import com.spotify.apollo.dispatch.EndpointInfo;
+import com.spotify.apollo.meta.model.MetaInfoBuilder;
 import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.route.Route;
 import com.spotify.apollo.meta.model.Meta;
 import com.spotify.apollo.meta.model.MetaGatherer;
 import com.spotify.apollo.meta.model.MetaGatherer.CallsGatherer;
 import com.spotify.apollo.meta.model.MetaGatherer.EndpointGatherer;
-import com.spotify.apollo.meta.model.MetaInfoBuilder;
 import com.spotify.apollo.meta.model.Model;
 import com.typesafe.config.Config;
 
@@ -37,11 +37,11 @@ import java.util.Optional;
 
 import static java.util.Collections.singletonList;
 
-public class MetaInfoTracker {
+class MetaInfoTrackerImpl implements MetaInfoTracker {
 
   private final MetaGatherer gatherer;
 
-  public MetaInfoTracker(
+  MetaInfoTrackerImpl(
       Descriptor descriptor,
       String containerVersion,
       Config configNode) {
@@ -53,10 +53,12 @@ public class MetaInfoTracker {
     gatherer = Meta.createGatherer(metaInfo, configNode);
   }
 
+  @Override
   public MetaGatherer getGatherer() {
     return gatherer;
   }
 
+  @Override
   public <E extends Endpoint> void gatherEndpoints(List<E> endpoints) {
     CallsGatherer callsGatherer = gatherer.getServiceCallsGatherer();
     for (E endpoint : endpoints) {
@@ -108,6 +110,7 @@ public class MetaInfoTracker {
 
   private final IncomingGatherer incomingGatherer = new IncomingGatherer();
 
+  @Override
   public IncomingCallsGatherer incomingCallsGatherer() {
     return incomingGatherer;
   }
@@ -125,6 +128,7 @@ public class MetaInfoTracker {
 
   private OutgoingGatherer outgoingGatherer = new OutgoingGatherer();
 
+  @Override
   public OutgoingCallsGatherer outgoingCallsGatherer() {
     return outgoingGatherer;
   }

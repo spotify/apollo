@@ -19,6 +19,7 @@
         <module>apollo-api</module>
         <module>apollo-api-impl</module>
         <module>apollo-environment</module>
+        <module>apollo-meta</module>
         <module>apollo-route</module>
         <module>apollo-test</module>
         <module>apollo-extra</module>

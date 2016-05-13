@@ -31,6 +31,8 @@ public class AcceptanceIT {
 
   private static final Logger log = LoggerFactory.getLogger(AcceptanceIT.class);
 
+  static final String REVERSER_ADDRESS = "http://reverser";
+
   @BeforeClass
   public static synchronized void start() throws Exception {
     log.info("AcceptanceIT start()");

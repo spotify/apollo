@@ -19,6 +19,8 @@
  */
 package com.spotify.apollo.environment;
 
+import com.google.auto.value.AutoValue;
+
 import java.util.function.UnaryOperator;
 
 /**
@@ -27,4 +29,27 @@ import java.util.function.UnaryOperator;
 public interface ClientDecorator
     extends UnaryOperator<IncomingRequestAwareClient> {
 
+  default Id id() {
+    return Id.UNKNOWN;
+  }
+
+  /**
+   * Identifier for a function performed by a client decorator; used to decouple client decorator
+   * roles from their implementing classes.
+   */
+  @AutoValue
+  abstract class Id {
+    static final Id UNKNOWN = Id.of(ClientDecorator.class, "UNKNOWN");
+
+    /**
+     * For namespacing, to allow choosing good names without risking conflicts with names defined
+     * elsewhere.
+     */
+    public abstract Class<?> definingClass();
+    public abstract String id();
+
+    public static Id of(Class<?> definingClass, String id) {
+      return new AutoValue_ClientDecorator_Id(definingClass, id);
+    }
+  }
 }

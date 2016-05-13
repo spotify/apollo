@@ -21,6 +21,9 @@ package com.spotify.apollo.meta.model;
 
 import java.util.List;
 
+/**
+ * Internal interface; don't implement this outside of apollo core.
+ */
 public interface MetaGatherer {
 
   // READ
@@ -39,8 +42,6 @@ public interface MetaGatherer {
     void setUri(String uri);
     void setMethods(List<String> methods);
     void addMethod(String method);
-    void setRequestContentType(String contentType);
-    void setResponseContentType(String contentType);
     void setDocstring(String docstring);
     void addQueryParameterName(String name);
   }

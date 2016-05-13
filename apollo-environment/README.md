@@ -11,6 +11,10 @@ The main module is `ApolloEnvironmentModule` providing an `ApolloEnvironment` in
 used to initialize an `AppInit` instance, returning a `RequestHandler` to be used with any
 server module (for example the [`jetty-http-server`](../modules/jetty-http-server)).
 
+This component contains several low-level hooks that allow you to modify
+the core behaviours of Apollo. They are intended as back doors for the 
+special cases where the main APIs aren't powerful enough.
+
 ## Configuration
 
 key | type | required | note
@@ -66,13 +70,17 @@ is that it does not come with any protocol support out of the box. Instead, supp
 different protocols should be added by modules. These modules do so by injecting themselves
 into the [`IncomingRequestAwareClient`](../apollo-api-impl/src/main/java/com/spotify/apollo/environment/IncomingRequestAwareClient.java) decoration chain.
 
-The decoration chain looks like:
+The order of the decoration chain be optionally be determined by configuring a
+`Comparator<ClientDecorator.Id>`. The `EnvironmentModule` will always add a
+[`ServiceSettingClient`](../apollo-environment/src/main/java/com/spotify/apollo/environment/ServiceSettingClient.java)
+as the outermost/first decorator, and the innermost/last decorator will
+always be a [`NoopClient`](../apollo-environment/src/main/java/com/spotify/apollo/environment/NoopClient.java).
 
-1. [`OutgoingCallsGatheringClient`](../apollo-api-impl/src/main/java/com/spotify/apollo/meta/OutgoingCallsGatheringClient.java)
-1. [`ServiceSettingClient`](../apollo-environment/src/main/java/com/spotify/apollo/environment/ServiceSettingClient.java)
-1. [`[IncomingRequestAwareClient]*`](../apollo-api-impl/src/main/java/com/spotify/apollo/environment/IncomingRequestAwareClient.java) <- [`Set<ClientDecorator>`](../apollo-api-impl/src/main/java/com/spotify/apollo/environment/ClientDecorator.java)
-1. [`NoopClient`](../apollo-environment/src/main/java/com/spotify/apollo/environment/NoopClient.java)
+An easy way to define a comparator controlling the ordering between `ClientDecorator`s is to use a 
+[`ClientDecoratorOrder`](../apollo-environment/src/main/java/com/spotify/apollo/environment/ClientDecoratorOrder.java). 
 
+See [`ServiceHelper.start()`](../apollo-test/src/main/java/com/spotify/apollo/test/ServiceHelper.java)
+for an example of how you could configure an ordering of client decorators.
 
 ### RequestRunnableFactory
 

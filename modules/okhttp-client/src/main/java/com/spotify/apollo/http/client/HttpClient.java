@@ -20,6 +20,7 @@
 package com.spotify.apollo.http.client;
 
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
+
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -30,6 +31,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import okio.ByteString;
 
 class HttpClient implements IncomingRequestAwareClient {
@@ -38,11 +41,21 @@ class HttpClient implements IncomingRequestAwareClient {
 
   private final OkHttpClient client;
 
+  @Inject
   HttpClient(OkHttpClient client) {
     this.client = client;
   }
 
+  @Deprecated
+  /** @deprecated use {@link #createUnconfigured()} instead. */
   public static HttpClient create() {
+    return createUnconfigured();
+  }
+
+  /**
+   * @return a HttpClient with the default configuration settings.
+   */
+  public static HttpClient createUnconfigured() {
     return new HttpClient(new OkHttpClient());
   }
 
