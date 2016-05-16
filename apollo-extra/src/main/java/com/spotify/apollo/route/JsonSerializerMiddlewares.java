@@ -43,6 +43,17 @@ public class JsonSerializerMiddlewares {
     }
   }
 
+  private static <T> Response<ByteString> serialize(ObjectWriter objectWriter, Response<T> response){
+    if(!response.payload().isPresent()){
+      // Same as in com.spotify.apollo.route.Middlewares.serializePayload()
+      // no payload, so this cast is safe to do
+      //noinspection unchecked
+      return (Response<ByteString>) response;
+    } else {
+      return response.withPayload(serialize(objectWriter, response.payload().get()));
+    }
+  }
+
   /**
    * Middleware that serializes the result of the inner handler using the supplied
    * {@link ObjectWriter}, and sets the Content-Type header to application/json.
@@ -64,8 +75,7 @@ public class JsonSerializerMiddlewares {
   jsonSerializeResponse(ObjectWriter objectWriter) {
    return handler ->
        requestContext -> handler.invoke(requestContext)
-           .thenApply(response -> response
-               .withPayload(serialize(objectWriter, response.payload().orElse(null)))
+           .thenApply(response -> serialize(objectWriter, response)
                .withHeader(CONTENT_TYPE, JSON));
   }
 
