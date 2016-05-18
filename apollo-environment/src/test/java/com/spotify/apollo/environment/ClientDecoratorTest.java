@@ -25,6 +25,7 @@ import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.core.Services;
+import com.spotify.apollo.meta.MetaModule;
 import com.spotify.apollo.module.AbstractApolloModule;
 
 import org.junit.Before;
@@ -53,7 +54,8 @@ public class ClientDecoratorTest {
 
     service = Services.usingName("ping")
         .withModule(new DecoratingModule(clientDecorator))
-        .withModule(ApolloEnvironmentModule.create());
+        .withModule(ApolloEnvironmentModule.create((l, r) -> 0))
+        .withModule(MetaModule.create("floop"));
   }
 
   @Test

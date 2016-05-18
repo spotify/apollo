@@ -19,11 +19,13 @@
  */
 package com.spotify.apollo.httpservice.acceptance;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
-import com.spotify.apollo.Status;
 
 import java.io.File;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -33,6 +35,8 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import okio.ByteString;
 
+import static com.spotify.apollo.Status.OK;
+import static com.spotify.apollo.test.unit.ResponseMatchers.hasStatus;
 import static com.spotify.apollo.test.unit.StatusTypeMatchers.withCode;
 import static com.spotify.apollo.test.unit.StatusTypeMatchers.withReasonPhrase;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -45,11 +49,12 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class RequestStepdefs {
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   CompletionStage<Response<ByteString>> responseFuture;
 
-  @When("^sending a request to \"([^\"]*)\" on \"([^\"]*)\"$")
-  public void sending_a_request_to(String uri, String endpoint) throws Throwable {
+  @When("^sending a request to \"([^\"]*)\"$")
+  public void sending_a_request_to(String uri) throws Throwable {
     Request request = Request.forUri(uri);
 
     responseFuture = ServiceStepdefs.serviceHelper.request(request);
@@ -58,7 +63,7 @@ public class RequestStepdefs {
   @Then("^the response is \"([^\"]*)\"$")
   public void the_response_is(String expected) throws Throwable {
     Response<ByteString> response = getResponseFuture();
-    assertThat(response.status(), withCode(Status.OK));
+    assertThat(response.status(), withCode(OK));
 
     String actual = response.payload().get().utf8();
 
@@ -97,7 +102,7 @@ public class RequestStepdefs {
   public void the_response_has_a_header_with_value(String headerName, String expectedValue) throws Throwable {
     Response<ByteString> response = getResponseFuture();
 
-    assertThat(response.headers().get(headerName), equalTo(expectedValue));
+    assertThat(response.headers().get(headerName), equalTo(Optional.of(expectedValue)));
   }
 
   @And("^the reason phrase is \"([^\"]*)\"$")
@@ -112,5 +117,38 @@ public class RequestStepdefs {
     ServiceStepdefs.serviceHelper.stubClient()
         .respond(Response.forPayload(encodeUtf8(responsePayload)))
         .to(remoteUri);
+  }
+
+  @And("^a request to \"([^\"]*)\" from \"([^\"]*)\" has been completed$")
+  public void aRequestToFromHasBeenCompleted(String uri, String callingService) throws Throwable {
+    Request request = Request.forUri(uri).withService(callingService);
+
+    assertThat(ServiceStepdefs.serviceHelper.request(request).toCompletableFuture().get(),
+               hasStatus(withCode(OK)));
+  }
+
+  @Then("^the response contains a call to the reverser service$")
+  public void theResponseContainsACallToTheReverserService() throws Throwable {
+    Response<ByteString> response = getResponseFuture();
+
+    assertThat(response, hasStatus(withCode(OK)));
+
+    JsonNode jsonNode = OBJECT_MAPPER.readTree(response.payload().get().utf8());
+    JsonNode outgoingCallsNode = jsonNode.get("result").get("outgoing");
+
+    assertThat(outgoingCallsNode.has(AcceptanceIT.REVERSER_ADDRESS.substring("http://".length())),
+               is(true));
+  }
+
+  @Then("^the response contains a call from \"([^\"]*)\"$")
+  public void theResponseContainsACallFrom(String callingService) throws Throwable {
+    Response<ByteString> response = getResponseFuture();
+
+    assertThat(response, hasStatus(withCode(OK)));
+
+    JsonNode jsonNode = OBJECT_MAPPER.readTree(response.payload().get().utf8());
+    JsonNode incomingCallsNode = jsonNode.get("result").get("incoming");
+
+    assertThat(incomingCallsNode.has(callingService), is(true));
   }
 }

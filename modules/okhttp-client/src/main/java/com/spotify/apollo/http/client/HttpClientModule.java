@@ -20,6 +20,7 @@
 package com.spotify.apollo.http.client;
 
 import com.spotify.apollo.environment.ClientDecorator;
+import com.spotify.apollo.environment.ClientDecorator.Id;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.module.ApolloModule;
 
@@ -27,6 +28,8 @@ import com.google.inject.multibindings.Multibinder;
 import com.squareup.okhttp.OkHttpClient;
 
 public class HttpClientModule extends AbstractApolloModule {
+
+  public static final Id HTTP_CLIENT = Id.of(HttpClientModule.class, "HTTP client");
 
   private HttpClientModule() {
   }

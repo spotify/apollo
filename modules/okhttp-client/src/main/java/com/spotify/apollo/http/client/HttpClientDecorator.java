@@ -37,4 +37,9 @@ class HttpClientDecorator implements ClientDecorator {
   public IncomingRequestAwareClient apply(IncomingRequestAwareClient baseClient) {
     return ForwardingHttpClient.create(baseClient, this.httpClient);
   }
+
+  @Override
+  public Id id() {
+    return HttpClientModule.HTTP_CLIENT;
+  }
 }

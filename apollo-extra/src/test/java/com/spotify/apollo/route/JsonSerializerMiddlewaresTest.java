@@ -26,11 +26,12 @@ import com.spotify.apollo.Status;
 
 import org.junit.Test;
 
-import okio.ByteString;
-
 import java.util.Optional;
 
+import okio.ByteString;
+
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 public class JsonSerializerMiddlewaresTest {
@@ -46,7 +47,8 @@ public class JsonSerializerMiddlewaresTest {
   }
 
   private static void checkContentType(Response<ByteString> response) {
-    assertThat(response.headers().get("Content-Type"), equalTo("application/json; charset=UTF8"));
+    assertThat(response.headers().get("Content-Type"),
+               is(Optional.of("application/json; charset=UTF8")));
   }
 
   @Test

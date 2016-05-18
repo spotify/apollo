@@ -16,6 +16,10 @@ There are three main libraries in Apollo:
 * [apollo-api](apollo-api)
 * [apollo-core](apollo-core)
 
+If you need to solve a problem where the main APIs aren't powerful enough, 
+[apollo-environment](apollo-environment) provides more hooks, allowing you to modify
+the core behaviours of Apollo.
+
 ### Apollo HTTP Service
 The [apollo-http-service](apollo-http-service) library is a standardized assembly of Apollo
 modules. It incorporates both apollo-api and apollo-core and ties them together with other

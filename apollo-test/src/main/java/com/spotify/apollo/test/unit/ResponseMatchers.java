@@ -46,7 +46,7 @@ public final class ResponseMatchers {
     return new TypeSafeMatcher<Response<T>>() {
       @Override
       protected boolean matchesSafely(Response<T> item) {
-        return item.headers().isEmpty();
+        return item.headers().asMap().isEmpty();
       }
 
       @Override
@@ -74,7 +74,7 @@ public final class ResponseMatchers {
 
       @Override
       protected String featureValueOf(Response<T> actual) {
-        return actual.headers().get(header);
+        return actual.headers().get(header).orElse("Optional.empty()");
       }
     };
   }
@@ -88,7 +88,7 @@ public final class ResponseMatchers {
     return new TypeSafeMatcher<Response<T>>() {
       @Override
       protected boolean matchesSafely(Response<T> item) {
-        return item.headers().get(header) == null;
+        return !item.headers().get(header).isPresent();
       }
 
       @Override

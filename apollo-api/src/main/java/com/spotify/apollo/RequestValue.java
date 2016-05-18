@@ -30,7 +30,6 @@ import java.util.Optional;
 
 import okio.ByteString;
 
-import static java.util.Collections.emptyMap;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
@@ -47,21 +46,21 @@ abstract class RequestValue implements Request {
   }
 
   public static Request create(String uri, String method) {
-    return create(method, uri, parseParameters(uri), emptyMap(), empty(), empty(), empty());
+    return create(method, uri, parseParameters(uri), Headers.EMPTY, empty(), empty(), empty());
   }
 
   private static Request create(
       String method,
       String uri,
       Map<String, List<String>> parameters,
-      Map<String, String> headers,
+      Headers headers,
       Optional<String> service,
       Optional<ByteString> payload,
       Optional<Duration> ttl) {
     return new AutoValue_RequestValue(
         method, uri,
         ImmutableMap.copyOf(parameters),
-        ImmutableMap.copyOf(headers),
+        headers,
         service,
         payload,
         ttl);
@@ -87,14 +86,16 @@ abstract class RequestValue implements Request {
 
   @Override
   public Request withHeaders(Map<String, String> additionalHeaders) {
-    Map<String, String> headers = new LinkedHashMap<>(headers());
-    headers.putAll(additionalHeaders);
-    return create(method(), uri(), parameters(), headers, service(), payload(), ttl());
+    LinkedHashMap<String, String> newHeaders = new LinkedHashMap<>(headers().asMap());
+
+    newHeaders.putAll(additionalHeaders);
+
+    return create(method(), uri(), parameters(), Headers.of(newHeaders), service(), payload(), ttl());
   }
 
   @Override
   public Request clearHeaders() {
-    return create(method(), uri(), parameters(), emptyMap(), service(), payload(), ttl());
+    return create(method(), uri(), parameters(), Headers.EMPTY, service(), payload(), ttl());
   }
 
   @Override

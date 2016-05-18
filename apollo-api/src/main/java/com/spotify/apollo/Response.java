@@ -28,8 +28,8 @@ import javax.annotation.Nullable;
  * Defines the data Apollo needs to construct and send a response to an incoming request.
  *
  * Response instances are immutable. However, headers can be added using
- * {@link #withHeader(String, String)}. These will create new copies of the
- * {@link Response} object.
+ * {@link #withHeader(String, String)} and {@link #withHeaders(Map)} methods, and a payload set via
+ * {@link #withPayload(Object)}. These methods will create new copies of the {@link Response} object.
  */
 public interface Response<T> {
 
@@ -41,7 +41,7 @@ public interface Response<T> {
   /**
    * The response headers.
    */
-  Map<String, String> headers();
+  Headers headers();
 
   /**
    * The single payload of the response.

@@ -7,7 +7,7 @@
 
     <groupId>com.spotify</groupId>
     <artifactId>apollo-parent</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>Java libraries for writing composable microservices</description>
@@ -19,6 +19,7 @@
         <module>apollo-api</module>
         <module>apollo-api-impl</module>
         <module>apollo-environment</module>
+        <module>apollo-meta</module>
         <module>apollo-route</module>
         <module>apollo-test</module>
         <module>apollo-extra</module>
@@ -204,13 +205,15 @@
                 <plugin>
                     <groupId>com.github.siom79.japicmp</groupId>
                     <artifactId>japicmp-maven-plugin</artifactId>
-                    <version>0.6.1</version>
+                    <version>0.7.2</version>
                     <configuration>
+                        <!-- TODO: re-enable once 2.0.0. is out -->
+                        <skip>true</skip>
                         <oldVersion>
                             <dependency>
                                 <groupId>com.spotify</groupId>
                                 <artifactId>${project.artifactId}</artifactId>
-                                <version>1.0.0</version>
+                                <version>2.0.0</version>
                             </dependency>
                         </oldVersion>
                         <newVersion>

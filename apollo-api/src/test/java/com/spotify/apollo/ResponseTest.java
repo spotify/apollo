@@ -24,10 +24,13 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.Optional;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 
 public class ResponseTest {
 
@@ -38,7 +41,7 @@ public class ResponseTest {
         .withHeader("Content-Type", "application/json")
         .withHeader("Content-Type", "application/protobuf");
 
-    assertEquals("application/protobuf", response.headers().get("Content-Type"));
+    assertThat(response.headers().get("Content-Type"), is(Optional.of("application/protobuf")));
   }
 
   @Test
@@ -52,9 +55,8 @@ public class ResponseTest {
         .withHeader("Content-Type", "application/json")
         .withHeaders(headers);
 
-    assertEquals("application/protobuf", response.headers().get("Content-Type"));
-    assertEquals("123", response.headers().get("Content-Length"));
-
+    assertThat(response.headers().get("Content-Type"), is(Optional.of("application/protobuf")));
+    assertThat(response.headers().get("Content-Length"), is(Optional.of("123")));
   }
 
   @Test

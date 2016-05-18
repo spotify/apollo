@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.spotify</groupId>
         <artifactId>apollo-parent</artifactId>
-        <version>1.1.0-SNAPSHOT</version>
+        <version>2.0.0-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
 
@@ -18,7 +18,7 @@
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-bom</artifactId>
-                <version>1.1.0-SNAPSHOT</version>
+                <version>2.0.0-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -33,6 +33,10 @@
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>apollo-api-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>apollo-meta</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.inject.extensions</groupId>
@@ -52,6 +56,11 @@
         <dependency>
             <groupId>io.norberg</groupId>
             <artifactId>auto-matter</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.auto.value</groupId>
+            <artifactId>auto-value</artifactId>
             <scope>provided</scope>
         </dependency>
 

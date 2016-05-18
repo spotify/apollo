@@ -20,9 +20,7 @@
 package com.spotify.apollo;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableMap;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -41,22 +39,20 @@ abstract class ResponseImpl<T> implements Response<T> {
 
   @Override
   public Response<T> withHeader(String header, String value) {
-    // Allow overriding values
-    final Map<String, String> newHeaders = new LinkedHashMap<>();
-    newHeaders.putAll(headers());
+    LinkedHashMap<String, String> newHeaders = new LinkedHashMap<>(headers().asMap());
+
     newHeaders.put(header, value);
 
-    return createInternal(status(), ImmutableMap.copyOf(newHeaders), payload());
+    return createInternal(status(), Headers.of(newHeaders), payload());
   }
 
   @Override
   public Response<T> withHeaders(Map<String, String> headers) {
-    // Allow overriding values
-    final Map<String, String> newHeaders = new LinkedHashMap<>();
-    newHeaders.putAll(headers());
+    LinkedHashMap<String, String> newHeaders = new LinkedHashMap<>(headers().asMap());
+
     newHeaders.putAll(headers);
 
-    return createInternal(status(), ImmutableMap.copyOf(newHeaders), payload());
+    return createInternal(status(), Headers.of(newHeaders), payload());
   }
 
   @Override
@@ -85,13 +81,13 @@ abstract class ResponseImpl<T> implements Response<T> {
   private static <T> Response<T> createInternal(StatusType statusCode, Optional<T> payload) {
     return createInternal(
         statusCode,
-        Collections.emptyMap(),
+        Headers.EMPTY,
         payload);
   }
 
   private static <T> Response<T> createInternal(
       StatusType statusCode,
-      Map<String, String> headers,
+      Headers headers,
       Optional<T> payload) {
     return new AutoValue_ResponseImpl<>(
         statusCode,

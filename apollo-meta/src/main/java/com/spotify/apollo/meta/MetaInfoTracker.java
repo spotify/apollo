@@ -1,8 +1,8 @@
 /*
  * -\-\-
- * Spotify Apollo API Implementations
+ * Spotify Apollo Metadata
  * --
- * Copyright (C) 2013 - 2015 Spotify AB
+ * Copyright (C) 2013 - 2016 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,21 @@
  */
 package com.spotify.apollo.meta;
 
-import org.junit.Test;
+import com.spotify.apollo.dispatch.Endpoint;
+import com.spotify.apollo.meta.model.MetaGatherer;
 
-import static org.junit.Assert.assertTrue;
-/*
- * Copyright (c) 2015 Spotify AB
+import java.util.List;
+
+/**
+ * Defines the contract for tracking metadata about an apollo application.
  */
+public interface MetaInfoTracker {
 
-public class MetaDescriptorTest {
+  MetaGatherer getGatherer();
 
-  @Test
-  public void testLoadApolloVersion() throws Exception {
-    ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-    String version = MetaDescriptor.loadApolloVersion(classLoader);
-    assertTrue(version.startsWith("1.1"));
-  }
+  <E extends Endpoint> void gatherEndpoints(List<E> endpoints);
+
+  IncomingCallsGatherer incomingCallsGatherer();
+
+  OutgoingCallsGatherer outgoingCallsGatherer();
 }
