@@ -77,16 +77,24 @@ public class RuleRouter<T> implements ApplicationRouter<T> {
     return Optional.of(new RuleMatch<T>(rule, pathArgs.build()));
   }
 
-  private String readParameterValue(Router.Result<Rule<T>> result, int i) {
+  private String readParameterValue(Router.Result<Rule<T>> result, int i)
+      throws InvalidUriException {
     switch (result.paramType(i)) {
       case SEGMENT:
-        return result.paramValueDecoded(i).toString();
+        CharSequence decoded = result.paramValueDecoded(i);
+
+        if (decoded == null) {
+          LOG.warn("Unable to decode parameter {} with raw value {}", result.paramName(i), result.paramValue(i));
+          throw new InvalidUriException();
+        }
+
+        return decoded.toString();
       case PATH:
         return result.paramValue(i).toString();
       default:
         LOG.error("Unknown rut parameter type {}, URI-decoding parameter value (raw {}, decoded {})",
                   result.paramType(i), result.paramValue(i), result.paramValueDecoded(i));
-        return result.paramValueDecoded(i).toString();
+        return result.paramValueDecoded(i) == null ? "null" : result.paramValueDecoded(i).toString();
     }
   }
 

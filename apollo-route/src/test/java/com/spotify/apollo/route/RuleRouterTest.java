@@ -327,6 +327,26 @@ public class RuleRouterTest {
     assertThat(router.getRuleTargets(), equalTo(Lists.transform(rules, rule -> rule.getTarget())));
   }
 
+  @Test
+  public void shouldThrowInvalidUriExceptionForBadParameterEncoding() throws Exception {
+    Rule<Integer> rule = Rule.fromUri("/bar/<baz>", "GET", TARGET);
+    final RuleRouter<Integer> router = RuleRouter.of(ImmutableList.of(rule));
+    final Request message = Request.forUri("/bar/c%F6", "GET");
+
+    thrown.expect(InvalidUriException.class);
+    router.match(message);
+  }
+
+  @Test
+  public void shouldThrowInvalidUriExceptionForBadPlaylistMosaicUri() throws Exception {
+    Rule<Integer> rule = Rule.fromUri("/user/<baz>/playlist/<boo>", "GET", TARGET);
+    final RuleRouter<Integer> router = RuleRouter.of(ImmutableList.of(rule));
+    final Request message = Request.forUri("/user/%c3%a8hYh%ae%8d%c9%21%d4A%c4%bd8+7/playlist/56S6B5rXio3Q2MQltr7ZJk", "GET");
+
+    thrown.expect(InvalidUriException.class);
+    router.match(message);
+  }
+
   /**
    * Build a router with a single rule and route a message with it.
    */
