@@ -28,6 +28,8 @@ import org.junit.Test;
 
 import okio.ByteString;
 
+import java.util.Optional;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
@@ -40,6 +42,10 @@ public class JsonSerializerMiddlewaresTest {
 
   private static void checkPayloadAndContentType(Response<ByteString> response) {
     assertThat(response.payload().get().utf8(), equalTo("{\"x\":3}"));
+    checkContentType(response);
+  }
+
+  private static void checkContentType(Response<ByteString> response) {
     assertThat(response.headers().get("Content-Type"), equalTo("application/json; charset=UTF8"));
   }
 
@@ -62,6 +68,19 @@ public class JsonSerializerMiddlewaresTest {
         .handler().invoke(null).toCompletableFuture().get();
 
     checkPayloadAndContentType(response);
+    assertThat(response.status(), equalTo(Status.CONFLICT));
+  }
+
+  @Test
+  public void shouldJsonSerializeEmptyResponse() throws Exception {
+    Response<ByteString> response =
+        Route.sync("GET", "/foo",
+                   rq -> Response.forStatus(Status.CONFLICT))
+        .withMiddleware(JsonSerializerMiddlewares.jsonSerializeResponse(WRITER))
+        .handler().invoke(null).toCompletableFuture().get();
+
+    checkContentType(response);
+    assertThat(response.payload(), equalTo(Optional.empty()));
     assertThat(response.status(), equalTo(Status.CONFLICT));
   }
 
