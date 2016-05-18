@@ -106,7 +106,7 @@ public class MinimalAppTest {
     CompletionStage<Response<ByteString>> replyFuture = serviceHelper.request("GET", "/beer");
 
     StatusType statusCode = replyFuture.toCompletableFuture().get().getStatusCode();
-    assertThat(statusCode.statusCode(), is(Status.INTERNAL_SERVER_ERROR.statusCode()));
+    assertThat(statusCode.status(), is(Status.INTERNAL_SERVER_ERROR));
   }
 }
 ```
