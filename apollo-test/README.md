@@ -78,6 +78,9 @@ An example how tests that call this endpoint and mock the `brewery` calls would 
 test library.
 
 ```java
+import static com.spotify.apollo.test.unit.ResponseMatchers.hasStatus;
+import static com.spotify.apollo.test.unit.StatusTypeMatchers.withCode;
+
 public class MinimalAppTest {
 
   private static final String BREWERY_ORDER_URI = "http://brewery/order";
@@ -105,8 +108,8 @@ public class MinimalAppTest {
 
     CompletionStage<Response<ByteString>> replyFuture = serviceHelper.request("GET", "/beer");
 
-    StatusType statusCode = replyFuture.toCompletableFuture().get().getStatusCode();
-    assertThat(statusCode.statusCode(), is(Status.INTERNAL_SERVER_ERROR.statusCode()));
+    Response<ByteString> response = replyFuture.toCompletableFuture().get();
+    assertThat(response, hasStatus(withCode(Status.INTERNAL_SERVER_ERROR)));
   }
 }
 ```
