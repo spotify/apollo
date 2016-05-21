@@ -38,7 +38,6 @@ import java.io.Closeable;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -50,20 +49,24 @@ import javax.annotation.Nullable;
 
 import okio.ByteString;
 
-import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.stream.Collectors.toList;
 
 /**
  * A stub (http://www.martinfowler.com/articles/mocksArentStubs.html) client that allows you to
  * preconfigure responses to certain messages, as well as verify whether expected messages are sent.
- * When evaluating how to respond, request/response mapping rules are evaluated in the order they
- * were added. Use the {@link #clear()} method to clear previous request/response mappings.
+ * When evaluating how to respond, request/response mapping rules are evaluated in reverse order of
+ * when they were added, allowing the 'latest' decision to override previous ones. Note that this
+ * doesn't hold when using the deprecated {@link #respond(ResponseSource)} and
+ * {@link #respond(Response)} methods to map responses to incoming requests - for those methods,
+ * matchers are applied in the same order as they are added.
+ *
+ * Use the {@link #clear()} method to clear previous request/response mappings.
  */
 public class StubClient implements Client, Closeable {
 
   private final boolean ownExecutor;
   private final ScheduledExecutorService executor;
-  private final Map<Matcher<Request>, ResponseSource> mappings = newLinkedHashMap();
+  private final LinkedList<MatcherResponseSourcePair> mappings = new LinkedList<>();
   private final List<RequestResponsePair> requestsAndResponses;
 
   public StubClient() {
@@ -111,7 +114,15 @@ public class StubClient implements Client, Closeable {
    * be invoked for each request that matches the supplied Matcher.
    */
   private void mapRequestToResponses(Matcher<Request> requestMatcher, ResponseSource responses) {
-    mappings.put(requestMatcher, responses);
+    mappings.add(MatcherResponseSourcePair.create(requestMatcher, responses));
+  }
+
+  /**
+   * Adds the supplied matcher first in the list of matchers to consider when mapping requests
+   * to responses.
+   */
+  private void addMatcherFirst(Matcher<Request> requestMatcher, ResponseSource responses) {
+    mappings.addFirst(MatcherResponseSourcePair.create(requestMatcher, responses));
   }
 
   @Override
@@ -133,9 +144,9 @@ public class StubClient implements Client, Closeable {
    * @return a response source for this request, or null if none was found.
    */
   private ResponseSource responseSource(Request request) {
-    for (Map.Entry<Matcher<Request>, ResponseSource> entry : mappings.entrySet()) {
-      if (entry.getKey().matches(request)) {
-        return entry.getValue();
+    for (MatcherResponseSourcePair entry : mappings) {
+      if (entry.requestMatcher().matches(request)) {
+        return entry.responseSource();
       }
     }
     return null;
@@ -193,7 +204,12 @@ public class StubClient implements Client, Closeable {
    * Configure a constant (i.e., all matching requests will always result in the same response)
    * response for some request. The returned builder allows configuration of payload (default
    * no payload) and delay before the response is sent (default 0).
+   *
+   * When using this method to define request to response mappings, the mappings will be evaluated
+   * in the order which they were added.
+   * @deprecated in favour of {@link #when(Matcher)} or {@link #when(String)}.
    */
+  @Deprecated
   public StubbedResponseBuilder respond(Response<ByteString> response) {
     return new StubbedResponseBuilder(ResponseWithDelay.forResponse(response));
   }
@@ -202,9 +218,37 @@ public class StubClient implements Client, Closeable {
    * Configure a response source for matching requests. Each time a request is sent that matches
    * the to-be-specified criteria, the supplied ResponseSource will be invoked and its result
    * returned as a response.
+   *
+   * When using this method to define request to response mappings, the mappings will be evaluated
+   * in the order which they were added.
+   * @deprecated in favour of {@link #when(Matcher)} or {@link #when(String)}.
    */
+  @Deprecated
   public StubbedResponseBuilder respond(ResponseSource responseSource) {
     return new StubbedResponseBuilder(responseSource);
+  }
+
+  /**
+   * Configure a response source for matching requests. Each time a request is sent to the specified
+   * URI (irrespective of the method used), the to-be-specified Response or ResponseSource will be
+   * used.
+   *
+   * Request to response mappings defined using this method will be applied in reverse order of
+   * addition, meaning that you can override previous choices in test code.
+   */
+  public WhenResponseBuilder when(String uri) {
+    return new WhenResponseBuilder(strictUriMatcher(uri));
+  }
+
+  /**
+   * Configure a response source for matching requests. Each time a request is sent that matches
+   * the supplied matcher, the to-be-specified Response or ResponseSource will be used.
+   *
+   * Request to response mappings defined using this method will be applied in reverse order of
+   * addition, meaning that you can override previous choices in test code.
+   */
+  public WhenResponseBuilder when(Matcher<Request> requestMatcher) {
+    return new WhenResponseBuilder(requestMatcher);
   }
 
   public static final class NoMatchingResponseFoundException extends Exception {
@@ -275,13 +319,48 @@ public class StubClient implements Client, Closeable {
 
   }
 
+
+  public class WhenResponseBuilder {
+
+    private final Matcher<Request> requestMatcher;
+
+    public WhenResponseBuilder(Matcher<Request> requestMatcher) {
+      this.requestMatcher = Objects.requireNonNull(requestMatcher);
+    }
+
+    /**
+     * Immediately respond with the supplied response to any matching request.
+     */
+    public void respond(Response<ByteString> response) {
+      addMatcherFirst(requestMatcher, Responses.constant(ResponseWithDelay.forResponse(response)));
+    }
+
+    /**
+     * Respond with responses and delays supplied by the provided ResponseSource to any matching
+     * request.
+     */
+    public void respond(ResponseSource responseSource) {
+      addMatcherFirst(requestMatcher, responseSource);
+    }
+  }
+
   @AutoValue
-  public static abstract class RequestResponsePair {
+  static abstract class RequestResponsePair {
     public abstract Request request();
     public abstract Response<ByteString> response();
 
     public static RequestResponsePair create(Request request, Response<ByteString> response) {
       return new AutoValue_StubClient_RequestResponsePair(request, response);
+    }
+  }
+
+  @AutoValue
+  static abstract class MatcherResponseSourcePair {
+    public abstract Matcher<Request> requestMatcher();
+    public abstract ResponseSource responseSource();
+
+    public static MatcherResponseSourcePair create(Matcher<Request> requestMatcher, ResponseSource responseSource) {
+      return new AutoValue_StubClient_MatcherResponseSourcePair(requestMatcher, responseSource);
     }
   }
 }
