@@ -21,7 +21,6 @@ package com.spotify.apollo.core;
 
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Ordering;
@@ -56,9 +55,9 @@ import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import joptsimple.BuiltinHelpFormatter;
 import joptsimple.OptionException;
@@ -88,7 +87,7 @@ class ServiceImpl implements Service {
   private final boolean shutdownInterrupt;
   private final boolean cliHelp;
 
-  ServiceImpl(
+  private ServiceImpl(
       String serviceName, ImmutableSet<ApolloModule> modules, String envVarPrefix,
       long watchdogTimeout, TimeUnit watchdogTimeoutUnit, Runtime runtime,
       boolean moduleDiscovery, boolean shutdownInterrupt, boolean cliHelp) {
@@ -168,7 +167,7 @@ class ServiceImpl implements Service {
     }
   }
 
-  Config addEnvOverrides(Map<String, String> env, Config config) {
+  private Config addEnvOverrides(Map<String, String> env, Config config) {
     for (Map.Entry<String, String> var : env.entrySet()) {
       String envKey = var.getKey();
       if (envKey.startsWith(envVarPrefix + "_")) {
@@ -185,17 +184,18 @@ class ServiceImpl implements Service {
     return config;
   }
 
-  InstanceImpl initInstance(
+  private InstanceImpl initInstance(
       CoreModule coreModule,
       Set<ApolloModule> modules,
       Closer closer,
       CountDownLatch shutdownRequested,
       CountDownLatch stopped) {
-    List<ApolloModule> modulesSortedOnPriority = FluentIterable.from(modules)
-        .toSortedList(
-            Ordering.natural()
-                .reverse()
-                .onResultOf(ModulePriorityOrdering.INSTANCE));
+    List<ApolloModule> modulesSortedOnPriority = modules.stream()
+        .sorted(Ordering.natural()
+                    .reverse()
+                    .onResultOf(
+                        ModulePriorityOrdering.INSTANCE))
+        .collect(Collectors.toList());
 
     Iterable<Module> allModules = concat(of(coreModule), modulesSortedOnPriority);
     Injector injector = Guice.createInjector(Stage.PRODUCTION, allModules);
@@ -219,7 +219,7 @@ class ServiceImpl implements Service {
         shutdownRequested, stopped);
   }
 
-  Set<ApolloModule> discoverAllModules() {
+  private Set<ApolloModule> discoverAllModules() {
     final Set<ApolloModule> allModules;
 
     if (moduleDiscovery) {
@@ -230,7 +230,7 @@ class ServiceImpl implements Service {
     return allModules;
   }
 
-  static Config parseArgs(
+  private static Config parseArgs(
       Config config, String[] args, boolean cliHelp,
       ImmutableList.Builder<String> unprocessedArgsBuilder) throws IOException {
 
@@ -387,7 +387,7 @@ class ServiceImpl implements Service {
     return config;
   }
 
-  static Config appendConfig(Config config, String key, Object value, String description) {
+  private static Config appendConfig(Config config, String key, Object value, String description) {
     return config.withValue(key, ConfigValueFactory.fromAnyRef(value, description));
   }
 
@@ -397,7 +397,7 @@ class ServiceImpl implements Service {
         false, false, true);
   }
 
-  static class BuilderImpl implements Builder {
+  private static class BuilderImpl implements Builder {
 
     private final String serviceName;
     private final ImmutableSet.Builder<ApolloModule> moduleBuilder;
@@ -479,33 +479,7 @@ class ServiceImpl implements Service {
     }
   }
 
-  static class ExecutorServiceCloseable implements Closeable {
-
-    private final ExecutorService executorService;
-
-    ExecutorServiceCloseable(ExecutorService executorService) {
-      this.executorService = executorService;
-    }
-
-    @Override
-    public void close() throws IOException {
-      executorService.shutdown();
-
-      boolean terminated;
-      try {
-        terminated = executorService.awaitTermination(10, TimeUnit.SECONDS);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        terminated = false;
-      }
-
-      if (!terminated) {
-        executorService.shutdownNow();
-      }
-    }
-  }
-
-  enum ModulePriorityOrdering implements Function<ApolloModule, Comparable> {
+  private enum ModulePriorityOrdering implements Function<ApolloModule, Comparable> {
     INSTANCE;
 
     @Override
@@ -514,7 +488,7 @@ class ServiceImpl implements Service {
     }
   }
 
-  static class Reaper implements Runnable {
+  private static class Reaper implements Runnable {
 
     private final Signaller signaller;
     private final AtomicBoolean started;
@@ -522,9 +496,9 @@ class ServiceImpl implements Service {
     private final long watchdogTimeout;
     private final TimeUnit watchdogTimeoutUnit;
 
-    public Reaper(Signaller signaller, AtomicBoolean started, CountDownLatch stopped,
-                  long watchdogTimeout,
-                  TimeUnit watchdogTimeoutUnit) {
+    Reaper(Signaller signaller, AtomicBoolean started, CountDownLatch stopped,
+           long watchdogTimeout,
+           TimeUnit watchdogTimeoutUnit) {
       this.signaller = signaller;
       this.started = started;
       this.stopped = stopped;
@@ -548,7 +522,7 @@ class ServiceImpl implements Service {
     }
   }
 
-  class InstanceImpl implements Instance {
+  private class InstanceImpl implements Instance {
 
     private final Injector injector;
     private final CountDownLatch shutdownRequested;
@@ -603,7 +577,7 @@ class ServiceImpl implements Service {
 
     @Override
     public boolean isShutdown() {
-      return shutdownRequested.getCount() == 0l;
+      return shutdownRequested.getCount() == 0L;
     }
 
     @Override
@@ -621,13 +595,13 @@ class ServiceImpl implements Service {
     }
   }
 
-  static class CoreModule extends AbstractModule {
+  private static class CoreModule extends AbstractModule {
 
-    public static final Key<ImmutableList<String>> UNPROCESSED_ARGS =
+    static final Key<ImmutableList<String>> UNPROCESSED_ARGS =
         new Key<ImmutableList<String>>(Names.named(Services.INJECT_UNPROCESSED_ARGS)) {
         };
 
-    public static final Key<String> SERVICE_NAME =
+    static final Key<String> SERVICE_NAME =
         new Key<String>(Names.named(Services.INJECT_SERVICE_NAME)) {
         };
 
@@ -671,7 +645,7 @@ class ServiceImpl implements Service {
     }
   }
 
-  static class SignallerImpl implements Signaller {
+  private static class SignallerImpl implements Signaller {
 
     private final CountDownLatch shutdownRequested;
     private final Thread threadToInterrupt;
