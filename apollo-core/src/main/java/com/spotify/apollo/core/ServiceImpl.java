@@ -27,10 +27,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.google.common.io.Closer;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.ListeningScheduledExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Guice;
@@ -61,7 +57,6 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -152,19 +147,13 @@ class ServiceImpl implements Service {
 
       final Config config = addEnvOverrides(env, parsedArguments).resolve();
 
-      final ListeningExecutorService executorService =
-          createExecutorService(closer);
-
-      final ListeningScheduledExecutorService scheduledExecutorService =
-          createScheduledExecutorService(closer);
-
       final Set<ApolloModule> allModules = discoverAllModules();
       final CoreModule coreModule =
           new CoreModule(this, config, signaller, closer, unprocessedArgs);
 
       final InstanceImpl instance = initInstance(
-          coreModule, allModules, closer, executorService,
-          scheduledExecutorService, shutdownRequested,
+          coreModule, allModules, closer,
+          shutdownRequested,
           stopped);
 
       started.set(true);
@@ -200,8 +189,6 @@ class ServiceImpl implements Service {
       CoreModule coreModule,
       Set<ApolloModule> modules,
       Closer closer,
-      ListeningExecutorService executorService,
-      ListeningScheduledExecutorService scheduledExecutorService,
       CountDownLatch shutdownRequested,
       CountDownLatch stopped) {
     List<ApolloModule> modulesSortedOnPriority = FluentIterable.from(modules)
@@ -228,7 +215,7 @@ class ServiceImpl implements Service {
     }
 
     return new InstanceImpl(
-        injector, executorService, scheduledExecutorService,
+        injector,
         shutdownRequested, stopped);
   }
 
@@ -241,29 +228,6 @@ class ServiceImpl implements Service {
       allModules = modules;
     }
     return allModules;
-  }
-
-  ListeningScheduledExecutorService createScheduledExecutorService(Closer closer) {
-    final ListeningScheduledExecutorService scheduledExecutorService =
-        MoreExecutors.listeningDecorator(
-            Executors.newScheduledThreadPool(
-                Math.max(Runtime.getRuntime().availableProcessors(), 2),
-                new ThreadFactoryBuilder().setNameFormat(serviceName + "-scheduled-%d").build()));
-    closer.register(asCloseable(scheduledExecutorService));
-    return scheduledExecutorService;
-  }
-
-  ListeningExecutorService createExecutorService(Closer closer) {
-    final ListeningExecutorService executorService =
-        MoreExecutors.listeningDecorator(
-            Executors.newCachedThreadPool(
-                new ThreadFactoryBuilder().setNameFormat(serviceName + "-worker-%d").build()));
-    closer.register(asCloseable(executorService));
-    return executorService;
-  }
-
-  Closeable asCloseable(final ExecutorService executorService) {
-    return new ExecutorServiceCloseable(executorService);
   }
 
   static Config parseArgs(
@@ -587,18 +551,13 @@ class ServiceImpl implements Service {
   class InstanceImpl implements Instance {
 
     private final Injector injector;
-    private final ListeningExecutorService executorService;
-    private final ListeningScheduledExecutorService scheduledExecutorService;
     private final CountDownLatch shutdownRequested;
     private final CountDownLatch stopped;
 
     InstanceImpl(
-        Injector injector, ListeningExecutorService executorService,
-        ListeningScheduledExecutorService scheduledExecutorService,
+        Injector injector,
         CountDownLatch shutdownRequested, CountDownLatch stopped) {
       this.injector = injector;
-      this.executorService = executorService;
-      this.scheduledExecutorService = scheduledExecutorService;
       this.shutdownRequested = shutdownRequested;
       this.stopped = stopped;
     }
@@ -611,16 +570,6 @@ class ServiceImpl implements Service {
     @Override
     public Config getConfig() {
       return resolve(Config.class);
-    }
-
-    @Override
-    public ListeningExecutorService getExecutorService() {
-      return executorService;
-    }
-
-    @Override
-    public ListeningScheduledExecutorService getScheduledExecutorService() {
-      return scheduledExecutorService;
     }
 
     @Override
