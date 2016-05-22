@@ -14,6 +14,12 @@ Defines a couple of utilities that make it easier to move between `ListenableFut
         .thenApply(message -> Response.forPayload(message.data()));
 ```
 
+Also defines the 
+[`ExecutorServiceCloser`](src/main/java/com/spotify/apollo/concurrent/ExecutorServiceCloser.java) 
+utility, which makes it convenient to register application-specific
+`ExecutorService` instances with the Apollo `Closer` for lifecycle 
+management.
+
 ## com.spotify.apollo.route
 
 Contains some serializer middlewares, and utilities for versioning endpoints.
