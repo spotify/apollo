@@ -114,7 +114,7 @@ public class StubClient implements Client, Closeable {
    * be invoked for each request that matches the supplied Matcher.
    */
   private void mapRequestToResponses(Matcher<Request> requestMatcher, ResponseSource responses) {
-    mappings.add(MatcherResponseSourcePair.create(requestMatcher, responses));
+    mappings.add(new MatcherResponseSourcePair(requestMatcher, responses));
   }
 
   /**
@@ -122,7 +122,7 @@ public class StubClient implements Client, Closeable {
    * to responses.
    */
   private void addMatcherFirst(Matcher<Request> requestMatcher, ResponseSource responses) {
-    mappings.addFirst(MatcherResponseSourcePair.create(requestMatcher, responses));
+    mappings.addFirst(new MatcherResponseSourcePair(requestMatcher, responses));
   }
 
   @Override
@@ -145,8 +145,8 @@ public class StubClient implements Client, Closeable {
    */
   private ResponseSource responseSource(Request request) {
     for (MatcherResponseSourcePair entry : mappings) {
-      if (entry.requestMatcher().matches(request)) {
-        return entry.responseSource();
+      if (entry.requestMatcher.matches(request)) {
+        return entry.responseSource;
       }
     }
     return null;
@@ -354,13 +354,14 @@ public class StubClient implements Client, Closeable {
     }
   }
 
-  @AutoValue
-  static abstract class MatcherResponseSourcePair {
-    public abstract Matcher<Request> requestMatcher();
-    public abstract ResponseSource responseSource();
+  private static class MatcherResponseSourcePair {
+    private final Matcher<Request> requestMatcher;
+    private final ResponseSource responseSource;
 
-    public static MatcherResponseSourcePair create(Matcher<Request> requestMatcher, ResponseSource responseSource) {
-      return new AutoValue_StubClient_MatcherResponseSourcePair(requestMatcher, responseSource);
+    private MatcherResponseSourcePair(Matcher<Request> requestMatcher,
+                                      ResponseSource responseSource) {
+      this.requestMatcher = requestMatcher;
+      this.responseSource = responseSource;
     }
   }
 }
