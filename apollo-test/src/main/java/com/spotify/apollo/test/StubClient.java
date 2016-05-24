@@ -259,7 +259,11 @@ public class StubClient implements Client, Closeable {
 
   /**
    * Immutable response builder.
+   *
+   * @deprecated in favour of using the {@link #addMapping(Matcher, Response)} or
+   * {@link #addMapping(Matcher, ResponseSource)} methods.
    */
+  @Deprecated
   public class StubbedResponseBuilder {
     @Nullable
     private final ResponseWithDelay responseWithDelay;
