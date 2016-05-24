@@ -21,7 +21,6 @@ package com.spotify.apollo.test.response;
 
 import com.spotify.apollo.Response;
 
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import okio.ByteString;
@@ -38,10 +37,6 @@ public class ResponseWithDelay {
   public static ResponseWithDelay forResponse(
       Response<ByteString> response, long delay, TimeUnit unit) {
     return new ResponseWithDelay(response, unit.toMillis(delay));
-  }
-
-  public static ResponseWithDelay forResponse(Response<ByteString> response, Duration delay) {
-    return new ResponseWithDelay(response, delay.toMillis());
   }
 
   private ResponseWithDelay(Response<ByteString> response, long delayMillis) {
