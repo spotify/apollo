@@ -345,7 +345,7 @@ public class StubClient implements Client, Closeable {
   }
 
   @AutoValue
-  static abstract class RequestResponsePair {
+  public static abstract class RequestResponsePair {
     public abstract Request request();
     public abstract Response<ByteString> response();
 
