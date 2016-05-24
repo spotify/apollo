@@ -117,14 +117,6 @@ public class StubClient implements Client, Closeable {
     mappings.add(new MatcherResponseSourcePair(requestMatcher, responses));
   }
 
-  /**
-   * Adds the supplied matcher first in the list of matchers to consider when mapping requests
-   * to responses.
-   */
-  private void addMatcherFirst(Matcher<Request> requestMatcher, ResponseSource responses) {
-    mappings.addFirst(new MatcherResponseSourcePair(requestMatcher, responses));
-  }
-
   @Override
   public void close() {
     if (ownExecutor) {
@@ -207,7 +199,10 @@ public class StubClient implements Client, Closeable {
    *
    * When using this method to define request to response mappings, the mappings will be evaluated
    * in the order which they were added.
-   * @deprecated in favour of {@link #when(Matcher)} or {@link #when(String)}.
+   *
+   * @deprecated in favour of {@link #addMapping(Matcher, ResponseSource)} or
+   * {@link #addMapping(Matcher, Response)}, since those methods provide a more intuitive way of
+   * setting up request to response mappings.
    */
   @Deprecated
   public StubbedResponseBuilder respond(Response<ByteString> response) {
@@ -221,7 +216,10 @@ public class StubClient implements Client, Closeable {
    *
    * When using this method to define request to response mappings, the mappings will be evaluated
    * in the order which they were added.
-   * @deprecated in favour of {@link #when(Matcher)} or {@link #when(String)}.
+   *
+   * @deprecated in favour of {@link #addMapping(Matcher, ResponseSource)} or
+   * {@link #addMapping(Matcher, Response)}, since those methods provide a more intuitive way of
+   * setting up request to response mappings.
    */
   @Deprecated
   public StubbedResponseBuilder respond(ResponseSource responseSource) {
@@ -229,26 +227,28 @@ public class StubClient implements Client, Closeable {
   }
 
   /**
-   * Configure a response source for matching requests. Each time a request is sent to the specified
-   * URI (irrespective of the method used), the to-be-specified Response or ResponseSource will be
-   * used.
+   * Configure a response for matching requests. Each time a request is sent that matches
+   * the supplied matcher, the supplied Response will be used.
    *
    * Request to response mappings defined using this method will be applied in reverse order of
    * addition, meaning that you can override previous choices in test code.
+   *
+   * This is equivalent to calling {@link #addMapping(Matcher, ResponseSource)} with
+   * {@code Responses.constant(ResponseWithDelay.forResponse(response))}.
    */
-  public WhenResponseBuilder when(String uri) {
-    return new WhenResponseBuilder(strictUriMatcher(uri));
+  public void addMapping(Matcher<Request> requestMatcher, Response<ByteString> response) {
+    addMapping(requestMatcher, Responses.constant(ResponseWithDelay.forResponse(response)));
   }
 
   /**
-   * Configure a response source for matching requests. Each time a request is sent that matches
+   * Configure a response for matching requests. Each time a request is sent that matches
    * the supplied matcher, the to-be-specified Response or ResponseSource will be used.
    *
    * Request to response mappings defined using this method will be applied in reverse order of
    * addition, meaning that you can override previous choices in test code.
    */
-  public WhenResponseBuilder when(Matcher<Request> requestMatcher) {
-    return new WhenResponseBuilder(requestMatcher);
+  public void addMapping(Matcher<Request> requestMatcher, ResponseSource responseSource) {
+    mappings.addFirst(new MatcherResponseSourcePair(requestMatcher, responseSource));
   }
 
   public static final class NoMatchingResponseFoundException extends Exception {
@@ -317,31 +317,6 @@ public class StubClient implements Client, Closeable {
       return Responses.constant(responseWithDelay);
     }
 
-  }
-
-
-  public class WhenResponseBuilder {
-
-    private final Matcher<Request> requestMatcher;
-
-    public WhenResponseBuilder(Matcher<Request> requestMatcher) {
-      this.requestMatcher = Objects.requireNonNull(requestMatcher);
-    }
-
-    /**
-     * Immediately respond with the supplied response to any matching request.
-     */
-    public void respond(Response<ByteString> response) {
-      addMatcherFirst(requestMatcher, Responses.constant(ResponseWithDelay.forResponse(response)));
-    }
-
-    /**
-     * Respond with responses and delays supplied by the provided ResponseSource to any matching
-     * request.
-     */
-    public void respond(ResponseSource responseSource) {
-      addMatcherFirst(requestMatcher, responseSource);
-    }
   }
 
   @AutoValue

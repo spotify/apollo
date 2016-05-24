@@ -28,7 +28,6 @@ import com.spotify.apollo.StatusType;
 import com.spotify.apollo.test.response.ResponseSource;
 import com.spotify.apollo.test.response.ResponseWithDelay;
 import com.spotify.apollo.test.response.Responses;
-import com.spotify.apollo.test.unit.RequestMatchers;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -38,7 +37,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +46,7 @@ import java.util.concurrent.ExecutionException;
 
 import okio.ByteString;
 
+import static com.spotify.apollo.test.unit.RequestMatchers.uri;
 import static com.spotify.apollo.test.unit.ResponseMatchers.hasPayload;
 import static com.spotify.apollo.test.unit.ResponseMatchers.hasStatus;
 import static com.spotify.apollo.test.unit.StatusTypeMatchers.withCode;
@@ -114,7 +113,8 @@ public class StubClientTest {
 
   @Test
   public void shouldReturnConfiguredStatusCode() throws Exception {
-    stubClient.respond(Response.of(Status.IM_A_TEAPOT, encodeUtf8("Hello World"))).to("http://ping");
+    stubClient.respond(Response.of(Status.IM_A_TEAPOT, encodeUtf8("Hello World")))
+        .to("http://ping");
 
     Response<ByteString> response = getResponseFromPing().toCompletableFuture().get();
     assertThat(response.status(), is(Status.IM_A_TEAPOT));
@@ -337,40 +337,31 @@ public class StubClientTest {
   }
 
   @Test
-  public void shouldSupportWhenBasedResponseConfiguration() throws Exception {
-    stubClient.when("http://ping").respond(Response.ok());
-
-    assertThat(getResponse("http://ping"), hasStatus(withCode(Status.OK)));
-  }
-
-  @Test
-  public void shouldSupportWhenWithRequestMatcher() throws Exception {
-    stubClient.when(RequestMatchers.uri(containsString("ping"))).respond(Response.ok());
+  public void shouldSupportAddMappingWithRequestMatcher() throws Exception {
+    stubClient.addMapping(uri(containsString("ping")), Response.ok());
 
     assertThat(getResponse("http://pingu"), hasStatus(withCode(Status.OK)));
   }
 
   @Test
-  public void shouldSupportWhenWithResponseSource() throws Exception {
-    stubClient.when(RequestMatchers.uri(containsString("ping")))
-        .respond(Responses.constant(ResponseWithDelay.forResponse(Response.ok(), Duration.ofMillis(10))));
+  public void shouldSupportAddMappingWithResponseSource() throws Exception {
+    stubClient.addMapping(uri(containsString("ping")),
+                          Responses.constant(ResponseWithDelay.forResponse(Response.ok())));
 
     assertThat(getResponse("http://pingu"), hasStatus(withCode(Status.OK)));
   }
 
   @Test
-  public void shouldApplyWhenMatchersInReverseOrder() throws Exception {
-    stubClient
-        .when(RequestMatchers.uri(containsString("p")))
-        .respond(Response.forStatus(Status.NOT_ACCEPTABLE));
-    stubClient
-        .when("http://pingpong")
-        .respond(Response.forPayload(ByteString.encodeUtf8("ok")));
-    stubClient
-        .when("http://pingpong")
-        .respond(Response.forPayload(ByteString.encodeUtf8("a game")));
+  public void shouldApplyAddedMappingsInReverseOrder() throws Exception {
+    stubClient.addMapping(uri(containsString("p")),
+                          Response.forStatus(Status.NOT_ACCEPTABLE));
+    stubClient.addMapping(uri(equalTo("http://pingpong")),
+                          Response.forPayload(ByteString.encodeUtf8("ok")));
+    stubClient.addMapping(uri(equalTo("http://pingpong")),
+                          Response.forPayload(ByteString.encodeUtf8("a game")));
 
     assertThat(getResponse("http://ping"), hasStatus(withCode(Status.NOT_ACCEPTABLE)));
-    assertThat(getResponse("http://pingpong"), hasPayload(equalTo(ByteString.encodeUtf8("a game"))));
+    assertThat(getResponse("http://pingpong"),
+               hasPayload(equalTo(ByteString.encodeUtf8("a game"))));
   }
 }
