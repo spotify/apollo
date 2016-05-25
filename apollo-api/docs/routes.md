@@ -15,7 +15,7 @@ routes.
 
 A route added with `RoutingEngine.registerAutoRoute(s)()`, or using the `Middlewares::autoSerialize`
 or `Middlewares::apolloDefaults` will serialize its response payload with the `AutoSerializer`.
-Routes added with `RoutingEngine.registerRoutes()` must return `Response<ByteStream>`s, and
+Routes added with `RoutingEngine.registerRoutes()` must return `Response<ByteString>`s, and
 no further processing will be done.
 
 ## Route handler reply types
