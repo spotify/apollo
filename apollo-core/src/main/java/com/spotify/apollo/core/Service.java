@@ -22,8 +22,6 @@ package com.spotify.apollo.core;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Closer;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 
 import com.spotify.apollo.module.ApolloModule;
 import com.typesafe.config.Config;
@@ -195,27 +193,6 @@ public interface Service {
      * @return The configuration for this service instance.
      */
     Config getConfig();
-
-    /**
-     * Returns a shared {@link com.google.common.util.concurrent.ListeningExecutorService} that has
-     * virtually infinite capacity and that can be used for long-running jobs.  This executor is
-     * scoped along with the service instance, which avoids the need to use the very problematic
-     * daemon threads.
-     *
-     * @return A shared {@link com.google.common.util.concurrent.ListeningExecutorService}.
-     */
-    ListeningExecutorService getExecutorService();
-
-    /**
-     * Returns a shared {@link com.google.common.util.concurrent.ListeningScheduledExecutorService}
-     * that has capacity appropriate for scheduled jobs, i.e. jobs that run periodically and have a
-     * limited execution time.  Use {@link #getExecutorService()} for jobs that run forever.  This
-     * executor is scoped along with the service instance, which avoids the need to use the very
-     * problematic daemon threads.
-     *
-     * @return A shared {@link com.google.common.util.concurrent.ListeningScheduledExecutorService}.
-     */
-    ListeningScheduledExecutorService getScheduledExecutorService();
 
     /**
      * Returns a {@link com.google.common.io.Closer} for convenience, where you can register {@link

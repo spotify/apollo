@@ -27,6 +27,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -35,6 +36,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,6 +55,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class ServiceImplTest {
+
+  private ScheduledExecutorService executorService;
+
+  @Before
+  public void setUp() throws Exception {
+    executorService = Executors.newSingleThreadScheduledExecutor();
+  }
 
   @Test
   public void testEmpty() throws Exception {
@@ -366,16 +375,8 @@ public class ServiceImplTest {
     Service service = ServiceImpl.builder("test").build();
     try (final Service.Instance instance = service.start("--syslog=false")) {
 
-      // Force predictable concurrency of signal and main loop start
-      final CountDownLatch countDownLatch = new CountDownLatch(1);
-      instance.getExecutorService().submit(() -> {
-        countDownLatch.await();
-        Thread.sleep(200);
-        instance.getSignaller().signalShutdown();
-        return null;
-      });
+      instance.getSignaller().signalShutdown();
 
-      countDownLatch.countDown();
       instance.waitForShutdown();
     }
   }
@@ -396,7 +397,7 @@ public class ServiceImplTest {
     Service service = ServiceImpl.builder("test").withShutdownInterrupt(true).build();
 
     try (Service.Instance instance = service.start()) {
-      instance.getScheduledExecutorService()
+      executorService
           .schedule(new Shutdowner(instance.getSignaller()), 5, TimeUnit.MILLISECONDS);
       new CountDownLatch(1).await(); // Wait forever
     }
@@ -493,17 +494,6 @@ public class ServiceImplTest {
 
     // Should not block for more than 1 sec (will be interrupted by test timeout if it blocks)
     threadCaptor.getValue().run();
-  }
-
-  @Test
-  public void testHasExecutors() throws Exception {
-    Service service = ServiceImpl.builder("test")
-        .build();
-
-    try (Service.Instance instance = service.start()) {
-      assertNotNull(instance.getExecutorService());
-      assertNotNull(instance.getScheduledExecutorService());
-    }
   }
 
   @Test(timeout = 1000)
