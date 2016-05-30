@@ -89,6 +89,23 @@ These are translated into configuration keys of the form `x.y=ab`.
 The values of the environment variables are treated as strings and
 copied verbatim; no special syntax is supported.
 
+The order of evaluating configuration sources (with later sources 
+overriding earlier ones) is:
+
+1. The initial configuration, either:
+  1. The file loaded by [`com.typesafe.config.ConfigFactory.load()`](https://github.com/typesafehub/config/blob/master/config/src/main/java/com/typesafe/config/ConfigFactory.java) 
+     invoked with the service name as the parameter. This happens if you 
+     start up your service with one of the `Service.start` methods that 
+     don't take a `Config` as an argument. The `HttpService` uses this
+     way.
+  2. The configuration specified as an argument to `Service.start` 
+2. Values specified using `-D` as a JVM CLI argument.
+3. Values specified as an apollo-specific CLI argument such as `--syslog`
+4. Values specified using `-D` as a program CLI argument.
+5. Values specified in a file supplied via the `--config` command line argument
+6. Values specified by environment variables that are translated into configuration keys as described above.
+
+
 ### Logging configuration
 
 NOTE/TODO: a logging module is currently not included
