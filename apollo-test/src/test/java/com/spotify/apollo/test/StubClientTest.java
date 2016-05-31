@@ -46,11 +46,15 @@ import java.util.concurrent.ExecutionException;
 
 import okio.ByteString;
 
+import static com.spotify.apollo.test.unit.RequestMatchers.uri;
+import static com.spotify.apollo.test.unit.ResponseMatchers.hasPayload;
+import static com.spotify.apollo.test.unit.ResponseMatchers.hasStatus;
 import static com.spotify.apollo.test.unit.StatusTypeMatchers.withCode;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.stream.Collectors.toSet;
 import static okio.ByteString.encodeUtf8;
 import static org.hamcrest.CoreMatchers.any;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.greaterThan;
@@ -80,15 +84,15 @@ public class StubClientTest {
   }
 
   private CompletionStage<String> getString(String uri) {
-    return getResponse(uri).thenApply(r -> r.payload().get().utf8());
+    return stubClient.send(Request.forUri(uri)).thenApply(r -> r.payload().get().utf8());
   }
 
   private CompletionStage<Response<ByteString>> getResponseFromPing() {
-    return getResponse("http://ping");
+    return stubClient.send(Request.forUri("http://ping"));
   }
 
-  private CompletionStage<Response<ByteString>> getResponse(String uri) {
-    return stubClient.send(Request.forUri(uri));
+  private Response<ByteString> getResponse(String uri) throws Exception {
+    return stubClient.send(Request.forUri(uri)).toCompletableFuture().get();
   }
 
   @Test
@@ -109,7 +113,8 @@ public class StubClientTest {
 
   @Test
   public void shouldReturnConfiguredStatusCode() throws Exception {
-    stubClient.respond(Response.of(Status.IM_A_TEAPOT, encodeUtf8("Hello World"))).to("http://ping");
+    stubClient.respond(Response.of(Status.IM_A_TEAPOT, encodeUtf8("Hello World")))
+        .to("http://ping");
 
     Response<ByteString> response = getResponseFromPing().toCompletableFuture().get();
     assertThat(response.status(), is(Status.IM_A_TEAPOT));
@@ -257,7 +262,7 @@ public class StubClientTest {
                            .withHeader("foo", "bar"))
         .to("http://ping");
 
-    Response reply = getResponse("http://ping").toCompletableFuture().get();
+    Response<ByteString> reply = getResponse("http://ping");
     assertThat(reply.headers().get("foo"), is(Optional.of("bar")));
   }
 
@@ -274,8 +279,8 @@ public class StubClientTest {
   public void shouldSupportTrackingRequests() throws Exception {
     stubClient.respond(Response.ok()).to(any(Request.class));
 
-    getResponse("http://ping").toCompletableFuture().get();
-    getResponse("http://pong").toCompletableFuture().get();
+    getResponse("http://ping");
+    getResponse("http://pong");
 
     Set<String> uris = stubClient.sentRequests().stream()
         .map(Request::uri)
@@ -288,11 +293,11 @@ public class StubClientTest {
   public void shouldSupportClearingRequests() throws Exception {
     stubClient.respond(Response.ok()).to(any(Request.class));
 
-    getResponse("http://ping").toCompletableFuture().get();
+    getResponse("http://ping");
 
     stubClient.clearRequests();
 
-    getResponse("http://pong").toCompletableFuture().get();
+    getResponse("http://pong");
 
     Set<String> uris = stubClient.sentRequests().stream()
         .map(Request::uri)
@@ -306,8 +311,8 @@ public class StubClientTest {
     stubClient.respond(Response.ok()).to("http://ping");
     stubClient.respond(Response.forStatus(Status.BAD_GATEWAY)).to("http://pong");
 
-    getResponse("http://ping").toCompletableFuture().get();
-    getResponse("http://pong").toCompletableFuture().get();
+    getResponse("http://ping");
+    getResponse("http://pong");
 
     Set<StatusType> statii = stubClient.requestsAndResponses().stream()
         .map(requestAndResponse -> requestAndResponse.response().status())
@@ -331,5 +336,32 @@ public class StubClientTest {
     };
   }
 
+  @Test
+  public void shouldSupportAddMappingWithRequestMatcher() throws Exception {
+    stubClient.addMapping(uri(containsString("ping")), Response.ok());
 
+    assertThat(getResponse("http://pingu"), hasStatus(withCode(Status.OK)));
+  }
+
+  @Test
+  public void shouldSupportAddMappingWithResponseSource() throws Exception {
+    stubClient.addMapping(uri(containsString("ping")),
+                          Responses.constant(ResponseWithDelay.forResponse(Response.ok())));
+
+    assertThat(getResponse("http://pingu"), hasStatus(withCode(Status.OK)));
+  }
+
+  @Test
+  public void shouldApplyAddedMappingsInReverseOrder() throws Exception {
+    stubClient.addMapping(uri(containsString("p")),
+                          Response.forStatus(Status.NOT_ACCEPTABLE));
+    stubClient.addMapping(uri(equalTo("http://pingpong")),
+                          Response.forPayload(ByteString.encodeUtf8("ok")));
+    stubClient.addMapping(uri(equalTo("http://pingpong")),
+                          Response.forPayload(ByteString.encodeUtf8("a game")));
+
+    assertThat(getResponse("http://ping"), hasStatus(withCode(Status.NOT_ACCEPTABLE)));
+    assertThat(getResponse("http://pingpong"),
+               hasPayload(equalTo(ByteString.encodeUtf8("a game"))));
+  }
 }
