@@ -3,3 +3,5 @@
 - fix meta tests/implement configuration support in meta + revisit skipped test in ServiceHelper, or wherever
 - figure out how to do overrides based on CLI/envvars.
 - implement in apollo-standalone, particularly interesting to see how hermes client config will work, with collections
+- consider removing the 'run <pod>' command line args - there doesn't seem to be any reason why apollo itself needs args?
+- go through all TODO comments in the code
