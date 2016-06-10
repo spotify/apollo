@@ -21,6 +21,7 @@ package com.spotify.apollo.httpservice;
 
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.core.Service;
+import com.spotify.apollo.environment.ApolloConfig;
 import com.spotify.apollo.environment.ApolloEnvironment;
 import com.spotify.apollo.environment.ApolloEnvironmentModule;
 import com.spotify.apollo.meta.MetaModule;
@@ -38,14 +39,14 @@ import static java.util.Objects.requireNonNull;
 class HttpServiceModule extends AbstractApolloModule {
 
   private final AppInit appInit;
-  private final HttpServiceConfiguration configuration;
+  private final ApolloConfig configuration;
 
-  private HttpServiceModule(AppInit appInit, HttpServiceConfiguration configuration) {
+  private HttpServiceModule(AppInit appInit, ApolloConfig configuration) {
     this.appInit = requireNonNull(appInit);
     this.configuration = requireNonNull(configuration);
   }
 
-  public static HttpServiceModule create(AppInit appInit, HttpServiceConfiguration configuration) {
+  public static HttpServiceModule create(AppInit appInit, ApolloConfig configuration) {
     return new HttpServiceModule(appInit, configuration);
   }
 
@@ -53,7 +54,7 @@ class HttpServiceModule extends AbstractApolloModule {
   protected void configure() {
     bindAppInit();
 
-    install(ApolloEnvironmentModule.create(configuration.apollo,
+    install(ApolloEnvironmentModule.create(configuration,
                                            beginWith(OUTGOING_CALLS).endWith(HTTP_CLIENT)
     ));
     install(MetaModule.create("apollo-http"));

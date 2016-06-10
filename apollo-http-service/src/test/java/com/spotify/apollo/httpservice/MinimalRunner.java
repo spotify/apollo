@@ -35,7 +35,7 @@ final class MinimalRunner {
    * @param args  Program arguments
    */
   public static void main(String... args) throws Exception {
-    HttpService.boot(MinimalRunner::app, "test", "run", "foo", "-Dhttp.server.port=8080");
+    HttpService.boot(MinimalRunner::app, "test", HttpServiceConfiguration.create("foo"), "run", "foo", "-Dhttp.server.port=8080");
   }
 
   public static void app(Environment env) {

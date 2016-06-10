@@ -52,30 +52,33 @@ public final class HttpService {
 
   public static Service.Builder usingAppInit(
       AppInit appInit,
-      String serviceName) {
+      String serviceName,
+      HttpServiceConfiguration configuration) {
 
-    return builder(serviceName)
-        .withModule(HttpServiceModule.create(appInit, null));
+    return builder(serviceName, configuration)
+        .withModule(HttpServiceModule.create(appInit, configuration.apollo()));
   }
 
-  public static Service.Builder builder(String serviceName) {
+  public static Service.Builder builder(String serviceName, HttpServiceConfiguration configuration) {
     return Services.usingName(serviceName)
         .usingModuleDiscovery(false)
-        .withModule(HttpClientModule.create())
-        .withModule(HttpServerModule.create(HttpServerModule.configuration));
+        .withModule(HttpClientModule.create(configuration.httpClient()))
+        .withModule(HttpServerModule.create(configuration.httpServer()));
   }
 
   public static void boot(AppInit appInit,
                           String serviceName,
+                          HttpServiceConfiguration configuration,
                           String... args) throws LoadingException {
-    boot(appInit, serviceName, noopListener(), args);
+    boot(appInit, serviceName, configuration, noopListener(), args);
   }
 
   public static void boot(AppInit appInit,
                           String serviceName,
+                          HttpServiceConfiguration configuration,
                           InstanceListener instanceListener,
                           String... args) throws LoadingException {
-    final Service service = usingAppInit(appInit, serviceName).build();
+    final Service service = usingAppInit(appInit, serviceName, configuration).build();
 
     boot(service, instanceListener, args);
   }

@@ -23,6 +23,7 @@ import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.httpservice.HttpServiceConfiguration;
 import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Middleware;
 import com.spotify.apollo.route.Route;
@@ -51,7 +52,7 @@ public class BlessedPathService implements AppInit {
   private static final Logger LOG = LoggerFactory.getLogger(BlessedPathService.class);
 
   public static void main(String... args) throws LoadingException {
-    HttpService.boot(new BlessedPathService(), "ping", "run", "cloud", "-v");
+    HttpService.boot(new BlessedPathService(), "ping", HttpServiceConfiguration.create("cloud"), "run", "cloud", "-v");
   }
 
   @Override

@@ -28,7 +28,30 @@ import com.spotify.apollo.http.server.JettyHttpServerConfiguration;
  * TODO: document!
  */
 public class HttpServiceConfiguration {
-  public ApolloConfig apollo;
-  public JettyHttpServerConfiguration httpServer;
-  public OkHttpClientConfiguration httpClient;
+  private ApolloConfig apollo;
+  private JettyHttpServerConfiguration httpServer;
+  private OkHttpClientConfiguration httpClient;
+
+  private HttpServiceConfiguration(ApolloConfig apollo, JettyHttpServerConfiguration httpServer,
+                                  OkHttpClientConfiguration httpClient) {
+    this.apollo = apollo;
+    this.httpServer = httpServer;
+    this.httpClient = httpClient;
+  }
+
+  public ApolloConfig apollo() {
+    return apollo;
+  }
+
+  public JettyHttpServerConfiguration httpServer() {
+    return httpServer;
+  }
+
+  public OkHttpClientConfiguration httpClient() {
+    return httpClient;
+  }
+
+  public static HttpServiceConfiguration create(String backend) {
+    return new HttpServiceConfiguration(ApolloConfig.forDomain(backend), JettyHttpServerConfiguration.create(), OkHttpClientConfiguration.create());
+  }
 }

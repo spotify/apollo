@@ -23,6 +23,7 @@ import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.core.Services;
+import com.spotify.apollo.environment.ApolloConfig;
 import com.spotify.apollo.request.RequestHandler;
 
 import org.junit.Test;
@@ -74,7 +75,7 @@ public class HttpServiceModuleTest {
 
   public Service service(AppInit app) {
     return Services.usingName("test")
-        .withModule(HttpServiceModule.create(app, null))
+        .withModule(HttpServiceModule.create(app, ApolloConfig.forDomain("floop")))
         .build();
   }
 
