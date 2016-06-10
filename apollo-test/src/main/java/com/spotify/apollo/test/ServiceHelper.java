@@ -477,8 +477,10 @@ public class ServiceHelper implements TestRule, Closeable {
         Service.Builder serviceBuilder = Services.usingName(serviceName)
             .usingModuleDiscovery(false)
             .withModule(
-                ApolloEnvironmentModule.create(beginWith(OUTGOING_CALLS, STUB_CLIENT)
-                                                   .endWith(HTTP_CLIENT)))
+                ApolloEnvironmentModule.create(null,
+                                               beginWith(OUTGOING_CALLS, STUB_CLIENT)
+                                                   .endWith(HTTP_CLIENT)
+                ))
             .withModule(MetaModule.create("service-helper"))
             .withModule(HttpClientModule.create())
             .withModule(

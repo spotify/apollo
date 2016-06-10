@@ -74,7 +74,7 @@ public class HttpServiceModuleTest {
 
   public Service service(AppInit app) {
     return Services.usingName("test")
-        .withModule(HttpServiceModule.create(app))
+        .withModule(HttpServiceModule.create(app, null))
         .build();
   }
 

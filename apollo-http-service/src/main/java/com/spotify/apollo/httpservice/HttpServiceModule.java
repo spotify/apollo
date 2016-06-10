@@ -30,6 +30,7 @@ import com.spotify.apollo.request.RequestHandler;
 import static com.spotify.apollo.environment.ClientDecoratorOrder.beginWith;
 import static com.spotify.apollo.http.client.HttpClientModule.HTTP_CLIENT;
 import static com.spotify.apollo.meta.MetaModule.OUTGOING_CALLS;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Used to gather dependencies from other modules into {@link HttpService}
@@ -37,20 +38,24 @@ import static com.spotify.apollo.meta.MetaModule.OUTGOING_CALLS;
 class HttpServiceModule extends AbstractApolloModule {
 
   private final AppInit appInit;
+  private final HttpServiceConfiguration configuration;
 
-  private HttpServiceModule(AppInit appInit) {
-    this.appInit = appInit;
+  private HttpServiceModule(AppInit appInit, HttpServiceConfiguration configuration) {
+    this.appInit = requireNonNull(appInit);
+    this.configuration = requireNonNull(configuration);
   }
 
-  public static HttpServiceModule create(AppInit appInit) {
-    return new HttpServiceModule(appInit);
+  public static HttpServiceModule create(AppInit appInit, HttpServiceConfiguration configuration) {
+    return new HttpServiceModule(appInit, configuration);
   }
 
   @Override
   protected void configure() {
     bindAppInit();
 
-    install(ApolloEnvironmentModule.create(beginWith(OUTGOING_CALLS).endWith(HTTP_CLIENT)));
+    install(ApolloEnvironmentModule.create(configuration.apollo,
+                                           beginWith(OUTGOING_CALLS).endWith(HTTP_CLIENT)
+    ));
     install(MetaModule.create("apollo-http"));
   }
 

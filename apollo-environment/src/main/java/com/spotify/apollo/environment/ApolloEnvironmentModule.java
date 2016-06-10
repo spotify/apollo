@@ -53,6 +53,7 @@ import static com.spotify.apollo.request.Handlers.endpointRunnableFactory;
 import static com.spotify.apollo.request.Handlers.requestHandler;
 import static com.spotify.apollo.request.Handlers.requestRunnableFactory;
 import static com.spotify.apollo.request.Handlers.withGathering;
+import static java.util.Objects.requireNonNull;
 
 /**
  * A module setting up implementations of Apollo API Framework components such as {@link
@@ -65,14 +66,18 @@ public class ApolloEnvironmentModule extends AbstractApolloModule {
 
   private static final Logger LOG = LoggerFactory.getLogger(ApolloEnvironmentModule.class);
 
+  private final ApolloConfig config;
   private final Comparator<ClientDecorator.Id> clientDecoratorComparator;
 
-  private ApolloEnvironmentModule(Comparator<ClientDecorator.Id> clientDecoratorComparator) {
-    this.clientDecoratorComparator = clientDecoratorComparator;
+  private ApolloEnvironmentModule(ApolloConfig config,
+                                  Comparator<ClientDecorator.Id> clientDecoratorComparator) {
+    this.config = requireNonNull(config);
+    this.clientDecoratorComparator = requireNonNull(clientDecoratorComparator);
   }
 
-  public static ApolloEnvironmentModule create(Comparator<ClientDecorator.Id> clientDecoratorComparator) {
-    return new ApolloEnvironmentModule(clientDecoratorComparator);
+  public static ApolloEnvironmentModule create(
+      ApolloConfig config, Comparator<ClientDecorator.Id> clientDecoratorComparator) {
+    return new ApolloEnvironmentModule(config, clientDecoratorComparator);
   }
 
   /**
@@ -92,7 +97,8 @@ public class ApolloEnvironmentModule extends AbstractApolloModule {
     Multibinder.newSetBinder(binder(), RequestRunnableFactoryDecorator.class);
     Multibinder.newSetBinder(binder(), EndpointRunnableFactoryDecorator.class);
 
-    bind(ApolloConfig.class).in(Singleton.class); // used by most sub-modules
+    // TODO: do we want this here, really?
+    bind(ApolloConfig.class).toInstance(config);
     bind(ApolloEnvironment.class).to(ApolloEnvironmentImpl.class).in(Singleton.class);
 
     install(EnvironmentModule.create(clientDecoratorComparator));

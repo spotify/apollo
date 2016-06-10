@@ -55,7 +55,7 @@ public final class HttpService {
       String serviceName) {
 
     return builder(serviceName)
-        .withModule(HttpServiceModule.create(appInit));
+        .withModule(HttpServiceModule.create(appInit, null));
   }
 
   public static Service.Builder builder(String serviceName) {

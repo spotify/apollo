@@ -54,7 +54,7 @@ public class ClientDecoratorTest {
 
     service = Services.usingName("ping")
         .withModule(new DecoratingModule(clientDecorator))
-        .withModule(ApolloEnvironmentModule.create((l, r) -> 0))
+        .withModule(ApolloEnvironmentModule.create(null, (l, r) -> 0))
         .withModule(MetaModule.create("floop"));
   }
 

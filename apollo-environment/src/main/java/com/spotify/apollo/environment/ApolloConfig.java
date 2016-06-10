@@ -20,12 +20,10 @@
 package com.spotify.apollo.environment;
 
 /**
- * Configuration object for keys under the apollo keyspace
+ * Configuration object for common Apollo configurable settings.
  */
 public class ApolloConfig {
 
-//  private final Config root;
-//  private final Config apolloNode;
   private final String backend;
   private final boolean enableIncomingRequestLogging;
   private final boolean enableOutgoingRequestLogging;
