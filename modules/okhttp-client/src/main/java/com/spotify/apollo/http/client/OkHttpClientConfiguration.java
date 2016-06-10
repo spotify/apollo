@@ -25,29 +25,46 @@ import java.util.Optional;
 /**
  * TODO: document!
  */
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class OkHttpClientConfiguration {
 
-  private final Optional<Integer> connectTimeoutMillis = Optional.empty();
-  private final Optional<Integer> readTimeoutMillis = Optional.empty();
-  private final Optional<Integer> writeTimeoutMillis = Optional.empty();
-  private final Optional<Integer> maxAsyncRequests = Optional.empty();
-  private final Optional<Integer> maxAsyncRequestsPerHost = Optional.empty();
+  private final Optional<Duration> connectTimeout;
+  private final Optional<Duration> readTimeout;
+  private final Optional<Duration> writeTimeout;
+  private final Optional<Integer> maxAsyncRequests;
+  private final Optional<Integer> maxAsyncRequestsPerHost;
 
   // defaults that come from com.squareup.okhttp.ConnectionPool
-  private final int maxIdleConnections = 5;
-  private final long connectionKeepAliveDurationMillis = Duration.ofMinutes(5).toMillis();
+  private final int maxIdleConnections;
+  private final long connectionKeepAliveDurationMillis;
 
-
-  public Optional<Integer> connectTimeoutMillis() {
-    return connectTimeoutMillis;
+  private OkHttpClientConfiguration(Optional<Duration> connectTimeout,
+                                    Optional<Duration> readTimeout,
+                                    Optional<Duration> writeTimeout,
+                                    Optional<Integer> maxAsyncRequests,
+                                    Optional<Integer> maxAsyncRequestsPerHost,
+                                    int maxIdleConnections,
+                                    long connectionKeepAliveDurationMillis) {
+    this.connectionKeepAliveDurationMillis = connectionKeepAliveDurationMillis;
+    this.maxIdleConnections = maxIdleConnections;
+    this.connectTimeout = connectTimeout;
+    this.readTimeout = readTimeout;
+    this.writeTimeout = writeTimeout;
+    this.maxAsyncRequests = maxAsyncRequests;
+    this.maxAsyncRequestsPerHost = maxAsyncRequestsPerHost;
   }
 
-  public Optional<Integer> readTimeoutMillis() {
-    return readTimeoutMillis;
+
+  public Optional<Duration> connectTimeout() {
+    return connectTimeout;
   }
 
-  public Optional<Integer> writeTimeoutMillis() {
-    return writeTimeoutMillis;
+  public Optional<Duration> readTimeout() {
+    return readTimeout;
+  }
+
+  public Optional<Duration> writeTimeout() {
+    return writeTimeout;
   }
 
   public int maxIdleConnections() {
@@ -64,5 +81,62 @@ public class OkHttpClientConfiguration {
 
   public Optional<Integer> maxAsyncRequestsPerHost() {
     return maxAsyncRequestsPerHost;
+  }
+
+  public OkHttpClientConfiguration withConnectTimeout(Duration timeout) {
+    return new OkHttpClientConfiguration(Optional.of(timeout),
+                                         readTimeout,
+                                         writeTimeout,
+                                         maxAsyncRequests,
+                                         maxAsyncRequestsPerHost,
+                                         maxIdleConnections,
+                                         connectionKeepAliveDurationMillis);
+  }
+
+  public static OkHttpClientConfiguration create() {
+    return new OkHttpClientConfiguration(Optional.empty(), Optional.empty(), Optional.empty(),
+                                         Optional.empty(), Optional.empty(), 5,
+                                         Duration.ofMinutes(5).toMillis()
+    );
+  }
+
+  public OkHttpClientConfiguration withReadTimeout(Duration timeout) {
+    return new OkHttpClientConfiguration(connectTimeout,
+                                         Optional.of(timeout),
+                                         writeTimeout,
+                                         maxAsyncRequests,
+                                         maxAsyncRequestsPerHost,
+                                         maxIdleConnections,
+                                         connectionKeepAliveDurationMillis);
+  }
+
+  public OkHttpClientConfiguration withWriteTimeout(Duration timeout) {
+    return new OkHttpClientConfiguration(connectTimeout,
+                                         readTimeout,
+                                         Optional.of(timeout),
+                                         maxAsyncRequests,
+                                         maxAsyncRequestsPerHost,
+                                         maxIdleConnections,
+                                         connectionKeepAliveDurationMillis);
+  }
+
+  public OkHttpClientConfiguration withMaxAsyncRequests(int maxRequests) {
+    return new OkHttpClientConfiguration(connectTimeout,
+                                         readTimeout,
+                                         writeTimeout,
+                                         Optional.of(maxRequests),
+                                         maxAsyncRequestsPerHost,
+                                         maxIdleConnections,
+                                         connectionKeepAliveDurationMillis);
+  }
+
+  public OkHttpClientConfiguration withMaxAsyncRequestsPerHost(int max) {
+    return new OkHttpClientConfiguration(connectTimeout,
+                                         readTimeout,
+                                         writeTimeout,
+                                         maxAsyncRequests,
+                                         Optional.of(max),
+                                         maxIdleConnections,
+                                         connectionKeepAliveDurationMillis);
   }
 }

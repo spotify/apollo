@@ -21,10 +21,10 @@ package com.spotify.apollo.http.client;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.squareup.okhttp.ConnectionPool;
 import com.squareup.okhttp.OkHttpClient;
 
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.requireNonNull;
@@ -44,14 +44,14 @@ class OkHttpClientProvider implements Provider<OkHttpClient> {
     final OkHttpClient client = new OkHttpClient();
 
     //timeouts settings
-    config.connectTimeoutMillis().ifPresent(
-        millis -> client.setConnectTimeout(millis, TimeUnit.MILLISECONDS));
+    config.connectTimeout().ifPresent(
+        timeout -> client.setConnectTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS));
 
-    config.readTimeoutMillis().ifPresent(
-        millis -> client.setReadTimeout(millis, TimeUnit.MILLISECONDS));
+    config.readTimeout().ifPresent(
+        timeout -> client.setReadTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS));
 
-    config.writeTimeoutMillis().ifPresent(
-        millis -> client.setWriteTimeout(millis, TimeUnit.MILLISECONDS));
+    config.writeTimeout().ifPresent(
+        timeout -> client.setWriteTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS));
 
     // connection pool settings
     client.setConnectionPool(new ConnectionPool(

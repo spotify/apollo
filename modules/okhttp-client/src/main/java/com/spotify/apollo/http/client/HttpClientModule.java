@@ -31,11 +31,14 @@ public class HttpClientModule extends AbstractApolloModule {
 
   public static final Id HTTP_CLIENT = Id.of(HttpClientModule.class, "HTTP client");
 
-  private HttpClientModule() {
+  private final OkHttpClientConfiguration configuration;
+
+  private HttpClientModule(OkHttpClientConfiguration configuration) {
+    this.configuration = configuration;
   }
 
-  public static ApolloModule create() {
-    return new HttpClientModule();
+  public static ApolloModule create(OkHttpClientConfiguration configuration) {
+    return new HttpClientModule(configuration);
   }
 
   @Override
@@ -43,6 +46,7 @@ public class HttpClientModule extends AbstractApolloModule {
     Multibinder.newSetBinder(binder(), ClientDecorator.class)
         .addBinding().to(HttpClientDecorator.class);
 
+    bind(OkHttpClientConfiguration.class).toInstance(configuration);
     bind(HttpClient.class);
     bind(OkHttpClient.class).toProvider(OkHttpClientProvider.class);
   }
