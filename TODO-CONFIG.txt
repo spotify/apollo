@@ -1,0 +1,5 @@
+- decide about setting apollo-configuration 'constants' for an application. Lenses?!?
+- implement service-specific configuration support
+- fix meta tests/implement configuration support in meta + revisit skipped test in ServiceHelper, or wherever
+- figure out how to do overrides based on CLI/envvars.
+- implement in apollo-standalone, particularly interesting to see how hermes client config will work, with collections
