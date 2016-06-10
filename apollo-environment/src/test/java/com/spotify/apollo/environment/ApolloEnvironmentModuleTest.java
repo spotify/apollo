@@ -65,7 +65,7 @@ public class ApolloEnvironmentModuleTest {
 
   @Before
   public void setUp() throws Exception {
-    config = new ApolloConfig("test-service-name", false, false, false);
+    config = ApolloConfig.forDomain("test-backend");
 
     ApolloEnvironmentModule appModule = ApolloEnvironmentModule.create(config, (l, r) -> 0);
     service = Services.usingName("ping")
@@ -131,7 +131,7 @@ public class ApolloEnvironmentModuleTest {
     assertNotNull(e.client());
     assertNotNull(e.routingEngine());
 
-    assertEquals("test-service-name", e.domain());
+    assertEquals("test-backend", e.domain());
   }
 
   @Test

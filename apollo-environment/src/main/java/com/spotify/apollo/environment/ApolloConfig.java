@@ -52,4 +52,8 @@ public class ApolloConfig {
   public boolean enableMetaApi() {
     return enableMetaApi;
   }
+
+  public static ApolloConfig forDomain(String backend) {
+    return new ApolloConfig(backend, true, true, true);
+  }
 }
