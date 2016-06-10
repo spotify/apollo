@@ -32,23 +32,25 @@ import javax.inject.Singleton;
 public class HttpServerModule extends AbstractApolloModule {
 
   private final Runnable onClose;
+  private final JettyHttpServerConfiguration configuration;
 
-  private HttpServerModule(Runnable onClose) {
+  private HttpServerModule(Runnable onClose, JettyHttpServerConfiguration configuration) {
     this.onClose = Objects.requireNonNull(onClose);
+    this.configuration = configuration;
   }
 
-  public static HttpServerModule create() {
-    return new HttpServerModule(() -> {});
+  public static HttpServerModule create(JettyHttpServerConfiguration configuration) {
+    return new HttpServerModule(() -> {}, configuration);
   }
 
   @VisibleForTesting
-  static HttpServerModule createForTest(Runnable onClose) {
-    return new HttpServerModule(onClose);
+  static HttpServerModule createForTest(Runnable onClose, JettyHttpServerConfiguration configuration) {
+    return new HttpServerModule(onClose, configuration);
   }
 
   @Override
   protected void configure() {
-//    bind(HttpServerConfig.class);
+    bind(JettyHttpServerConfiguration.class).toInstance(configuration);
     bind(Runnable.class).annotatedWith(Names.named("http-server-on-close")).toInstance(onClose);
     bind(HttpServer.class).toProvider(HttpServerProvider.class).in(Singleton.class);
   }

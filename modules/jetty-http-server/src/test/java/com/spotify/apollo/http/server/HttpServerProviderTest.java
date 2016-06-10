@@ -31,7 +31,6 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.Collections.singletonMap;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -41,14 +40,13 @@ public class HttpServerProviderTest {
   public void shouldCloseThingsInTheRightOrder() throws Exception {
     AtomicInteger counter = new AtomicInteger();
     Closer closer = Closer.create();
-//    Config config = ConfigFactory.parseMap(singletonMap("http.server.port", "9999"));
 
     // server close should happen first: counter goes from 0 to 1
     Runnable onClose = () -> counter.compareAndSet(0, 1);
 
     Injector injector = Guice.createInjector(
         new TestSetup(closer),
-        HttpServerModule.createForTest(onClose));
+        HttpServerModule.createForTest(onClose, JettyHttpServerConfiguration.create().withPort(9999)));
     HttpServer instance = injector.getInstance(HttpServer.class);
 
     // something that registered before start should close after server: counter goes from 1 to 2

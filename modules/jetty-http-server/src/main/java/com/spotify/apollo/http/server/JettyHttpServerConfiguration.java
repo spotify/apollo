@@ -19,30 +19,51 @@
  */
 package com.spotify.apollo.http.server;
 
+import javax.annotation.Nullable;
+
 /**
  * TODO: document!
  */
 public class JettyHttpServerConfiguration {
   private static final String DEFAULT_HTTP_ADDRESS = "0.0.0.0";
-  private static final int DEFAULT_TTL_MILLIS = 30000;
+  private static final long DEFAULT_TTL_MILLIS = 30000;
   private static final int DEFAULT_WORKER_THREADS =
       Math.max(Runtime.getRuntime().availableProcessors()/4, 2);
   private static final int DEFAULT_KEEP_ALIVE_TIMEOUT = 300; // SECONDS
   private static final int DEFAULT_MAX_HTTP_CHUNK_LENGTH = 128 * 1024; // 128 kB
 
-  private final String address = DEFAULT_HTTP_ADDRESS;
-  private final Integer port = null;
-  private final String registrationName = null;
-  private final long ttlMillis = DEFAULT_TTL_MILLIS;
-  private final int keepAliveTimeout = DEFAULT_KEEP_ALIVE_TIMEOUT;
-  private final int workerThreads = DEFAULT_WORKER_THREADS;
-  private final int maxHttpChunkLength = DEFAULT_MAX_HTTP_CHUNK_LENGTH;
-  private final boolean useFirstPathSegmentAsAuthority  = false;
+  private final String address;
+  @Nullable
+  private final Integer port;
+  private final String registrationName;
+  private final long ttlMillis;
+  private final int keepAliveTimeout;
+  private final int workerThreads;
+  private final int maxHttpChunkLength;
+  private final boolean useFirstPathSegmentAsAuthority;
+
+  private JettyHttpServerConfiguration(String address,
+                                       @Nullable Integer port,
+                                       long ttlMillis,
+                                       int keepAliveTimeout,
+                                       int workerThreads,
+                                       int maxHttpChunkLength,
+                                       boolean useFirstPathSegmentAsAuthority) {
+    this.address = address;
+    this.port = port;
+    registrationName = null;
+    this.ttlMillis = ttlMillis;
+    this.keepAliveTimeout = keepAliveTimeout;
+    this.workerThreads = workerThreads;
+    this.maxHttpChunkLength = maxHttpChunkLength;
+    this.useFirstPathSegmentAsAuthority = useFirstPathSegmentAsAuthority;
+  }
 
   public String address() {
     return address;
   }
 
+  @Nullable
   public Integer port() {
     return port;
   }
@@ -69,5 +90,21 @@ public class JettyHttpServerConfiguration {
 
   public boolean useFirstPathSegmentAsAuthority() {
     return useFirstPathSegmentAsAuthority;
+  }
+
+  public static JettyHttpServerConfiguration create() {
+    return new JettyHttpServerConfiguration(DEFAULT_HTTP_ADDRESS, null, DEFAULT_TTL_MILLIS,
+                                            DEFAULT_KEEP_ALIVE_TIMEOUT, DEFAULT_WORKER_THREADS,
+                                            DEFAULT_MAX_HTTP_CHUNK_LENGTH, false);
+  }
+
+  public JettyHttpServerConfiguration withPort(int port) {
+    return new JettyHttpServerConfiguration(address,
+                                            port,
+                                            ttlMillis,
+                                            keepAliveTimeout,
+                                            workerThreads,
+                                            maxHttpChunkLength,
+                                            useFirstPathSegmentAsAuthority);
   }
 }

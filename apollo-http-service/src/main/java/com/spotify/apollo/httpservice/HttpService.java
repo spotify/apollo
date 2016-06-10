@@ -62,7 +62,7 @@ public final class HttpService {
     return Services.usingName(serviceName)
         .usingModuleDiscovery(false)
         .withModule(HttpClientModule.create())
-        .withModule(HttpServerModule.create());
+        .withModule(HttpServerModule.create(HttpServerModule.configuration));
   }
 
   public static void boot(AppInit appInit,
