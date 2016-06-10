@@ -19,16 +19,24 @@
  */
 package com.spotify.apollo.core;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.math.IntMath;
+import com.google.inject.Binder;
+import com.google.inject.Key;
+import com.google.inject.Provides;
 
 import com.spotify.apollo.module.AbstractApolloModule;
+import com.spotify.apollo.module.ApolloModule;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -38,11 +46,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.spotify.apollo.core.Services.CommonConfigKeys.APOLLO_ARGS_CORE;
-import static com.spotify.apollo.core.Services.CommonConfigKeys.APOLLO_ARGS_UNPARSED;
-import static org.hamcrest.Matchers.contains;
+import javax.inject.Named;
+
+import static com.spotify.apollo.core.Services.INJECT_ARGS;
+import static com.spotify.apollo.core.Services.INJECT_ENVIRONMENT;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -73,319 +83,36 @@ public class ServiceImplTest {
   }
 
   @Test
-  public void testConfig() throws Exception {
+  public void shouldRetainArgs() throws Exception {
     Service service = ServiceImpl.builder("test").build();
 
     try (Service.Instance instance = service.start("-Dconfig=value")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      fail();
-//      assertThat(instance.getConfig().getString("config"), is("value"));
+      assertThat(instance.getUnprocessedArgs(), is(ImmutableList.of("-Dconfig=value")));
     }
   }
 
   @Test
-  public void testEnvConfig() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
+  public void shouldInjectArgs() throws Exception {
+    Service service = ServiceImpl.builder("test")
+        .withModule(new ArgsAndEnvCapturingModule())
+        .build();
 
-    try (Service.Instance instance = service
-        .start(new String[]{}, ImmutableMap.of("APOLLO_A_B", "value"))) {
-      fail();
-//      assertThat(instance.getConfig().getString("a.b"), is("value"));
+    try (Service.Instance instance = service.start("arg1", "arg2", "argC")) {
+      assertThat(instance.resolve(Args.class).args, equalTo(ImmutableList.of("arg1", "arg2", "argC")));
     }
   }
 
   @Test
-  public void testEnvConfigCustomPrefix() throws Exception {
-    Service service = ServiceImpl.builder("test").withEnvVarPrefix("horse").build();
+  public void shouldInjectEnvironment() throws Exception {
+    Service service = ServiceImpl.builder("test")
+        .withModule(new ArgsAndEnvCapturingModule())
+        .build();
 
-    try (Service.Instance instance = service
-        .start(new String[]{}, ImmutableMap.of("horse_A_B", "value"))) {
-      fail();
-//      assertThat(instance.getConfig().getString("a.b"), is("value"));
+    Map<String, String> envMap = ImmutableMap.of("hi", "ht", "asdas", "ddsf");
+
+    try (Service.Instance instance = service.start(new String[] { "-Dconfig=value" }, envMap)) {
+      assertThat(instance.resolve(Env.class).env, equalTo(envMap));
     }
-  }
-
-  @Test
-  public void testEnvConfigWithLeadingUnderscores() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service
-        .start(new String[]{}, ImmutableMap.of("APOLLO___A_B", "value"))) {
-      fail();
-//      assertThat(instance.getConfig().getString("_a.b"), is("value"));
-    }
-  }
-
-  @Test
-  public void testEnvConfigWithUnderscoresEverywhere() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service
-        .start(new String[]{}, ImmutableMap.of("APOLLO_A___B__C______D_____E__", "value"))) {
-      fail();
-//      assertThat(instance.getConfig().getString("a._b_c___d.__e_"), is("value"));
-    }
-  }
-
-  @Test
-  public void testOverlaysExplicitConfigFile() throws IOException {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("--config", "src/test/files/overlay.conf")) {
-      fail();
-//      Config config = instance.getConfig();
-//      assertThat(config.getString("bundled.value"), is("is loaded"));
-//      assertThat(config.getString("bundled.shadowed"), is("overlayed"));
-//      assertThat(config.getString("some.key"), is("has a value"));
-    }
-  }
-
-  @Test
-  public void testUsesConfig() throws IOException {
-    Service service = ServiceImpl.builder("test").build();
-
-    fail();
-//    Config config = ConfigFactory.empty()
-//        .withValue("this.key", ConfigValueFactory.fromAnyRef("value for this.key"));
-
-//    try (Service.Instance instance = service.start(new String[]{}, config)) {
-//      assertThat(instance.getConfig().getString("this.key"), is("value for this.key"));
-//    }
-  }
-
-  @Test
-  public void testConfigSupportsColonValues() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("-Dconfig=value:more")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-//      assertThat(instance.getConfig().getString("config"), is("value:more"));
-      fail();
-    }
-  }
-
-  @Test
-  public void testConfigSupportsEqualsValues() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("-Dconfig=value=more")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      fail();
-//      assertThat(instance.getConfig().getString("config"), is("value=more"));
-    }
-  }
-
-  @Test
-  public void testUnresolved() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("-Dfoo=bar", "hello")) {
-      assertThat(instance.getUnprocessedArgs(), contains("hello"));
-      fail();
-//      assertThat(instance.getConfig().getString("foo"), is("bar"));
-    }
-  }
-
-  @Test
-  public void testArgsDone() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("-Dfoo=bar", "--", "xyz", "-Dbar=baz", "abc")) {
-      assertThat(instance.getUnprocessedArgs(), contains("xyz", "-Dbar=baz", "abc"));
-      fail();
-//      assertThat(instance.getConfig().getString("foo"), is("bar"));
-//      assertThat(instance.getConfig().hasPath("bar"), is(false));
-    }
-  }
-
-  @Test
-  public void testArgsAreInConfig() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("-Dfoo=bar", "--", "xyz", "-Dbar=baz", "abc")) {
-      fail();
-//      assertThat(instance.getConfig().hasPath(APOLLO_ARGS_CORE.getKey()), is(true));
-//      assertThat(instance.getConfig().hasPath(APOLLO_ARGS_UNPARSED.getKey()), is(true));
-//      assertThat(instance.getConfig().getStringList(APOLLO_ARGS_CORE.getKey()),
-//                 contains("-Dfoo=bar", "--", "xyz", "-Dbar=baz", "abc"));
-//      assertThat(instance.getConfig().getStringList(APOLLO_ARGS_UNPARSED.getKey()),
-//                 contains("xyz", "-Dbar=baz", "abc"));
-    }
-  }
-
-  @Test
-  public void testVerbosity() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("-v")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(loggingVerbosity(instance), is(1));
-    }
-  }
-
-  private int loggingVerbosity(Service.Instance instance) {
-    fail();
-//    return instance.getConfig().getInt("logging.verbosity");
-    return Integer.MIN_VALUE;
-  }
-
-  @Test
-  public void testVerbosityLong() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("--verbose")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(loggingVerbosity(instance), is(1));
-    }
-  }
-
-  @Test
-  public void testVerbosityLongMany() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("--verbose", "--verbose")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(loggingVerbosity(instance), is(2));
-    }
-  }
-
-  @Test
-  public void testVerbosityStacked() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("-vvvv")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(loggingVerbosity(instance), is(4));
-    }
-  }
-
-  @Test
-  public void testVerbosityMany() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("-vv", "-vv")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(loggingVerbosity(instance), is(4));
-    }
-  }
-
-  @Test
-  public void testVerbosityQuiet() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("-q")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(loggingVerbosity(instance), is(-3));
-    }
-  }
-
-  @Test
-  public void testVerbosityQuietLong() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("--quiet")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(loggingVerbosity(instance), is(-3));
-    }
-  }
-
-  @Test
-  public void testVerbosityQuietThenVerbose() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("--quiet", "--verbose")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(loggingVerbosity(instance), is(-2));
-    }
-  }
-
-  @Test
-  public void testVerbosityConcise() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("-c")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(loggingVerbosity(instance), is(-1));
-    }
-  }
-
-  @Test
-  public void testVerbosityConciseLong() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("--concise")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(loggingVerbosity(instance), is(-1));
-    }
-  }
-
-  @Test
-  public void testVerbosityConciseLongMany() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("--concise", "--concise")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(loggingVerbosity(instance), is(-2));
-    }
-  }
-
-  @Test
-  public void testVerbosityConciseStacked() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("-cccc")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(loggingVerbosity(instance), is(-4));
-    }
-  }
-
-  @Test
-  public void testVerbosityConciseMany() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("-cc", "-cc")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(loggingVerbosity(instance), is(-4));
-    }
-  }
-
-  @Test
-  public void testSyslog() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("--syslog")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      fail();
-//      assertThat(instance.getConfig().getBoolean("logging.syslog"), is(true));
-    }
-  }
-
-  @Test
-  public void testSyslogTrue() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("--syslog=true")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      fail();
-//      assertThat(instance.getConfig().getBoolean("logging.syslog"), is(true));
-    }
-  }
-
-  @Test
-  public void testSyslogFalse() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("--syslog=false")) {
-      assertThat(instance.getUnprocessedArgs(), is(empty()));
-      fail();
-//      assertThat(instance.getConfig().getBoolean("logging.syslog"), is(false));
-    }
-  }
-
-  @Test(expected = ApolloHelpException.class)
-  public void testHelp() throws Exception {
-    Service service = ServiceImpl.builder("test").build();
-    Services.run(service, "--help");
   }
 
   @Test(timeout = 1000)
@@ -396,18 +123,6 @@ public class ServiceImplTest {
       instance.getSignaller().signalShutdown();
 
       instance.waitForShutdown();
-    }
-  }
-
-  @Test
-  public void testUnresolvedMixed() throws Exception {
-    // Issue #8
-    Service service = ServiceImpl.builder("test").build();
-
-    try (Service.Instance instance = service.start("--hello", "-Dfoo=bar", "bye")) {
-      assertThat(instance.getUnprocessedArgs(), contains("--hello", "bye"));
-      fail();
-//      assertThat(instance.getConfig().getString("foo"), is("bar"));
     }
   }
 
@@ -422,14 +137,14 @@ public class ServiceImplTest {
     }
   }
 
-  @Test
-  public void testHelpFallthrough() throws Exception {
-    Service service = ServiceImpl.builder("test").withCliHelp(false).build();
-
-    try (Service.Instance instance = service.start("--help", "-h")) {
-      assertThat(instance.getUnprocessedArgs(), contains("--help", "-h"));
-    }
-  }
+//  @Test
+//  public void testHelpFallthrough() throws Exception {
+//    Service service = ServiceImpl.builder("test").withCliHelp(false).build();
+//
+//    try (Service.Instance instance = service.start("--help", "-h")) {
+//      assertThat(instance.getUnprocessedArgs(), contains("--help", "-h"));
+//    }
+//  }
 
   @Test
   public void testMultipleModules() throws Exception {
@@ -587,11 +302,11 @@ public class ServiceImplTest {
     }
   }
 
-  static class Shutdowner implements Callable<Void> {
+  private static class Shutdowner implements Callable<Void> {
 
     private final Service.Signaller signaller;
 
-    public Shutdowner(Service.Signaller signaller) {
+    Shutdowner(Service.Signaller signaller) {
       this.signaller = signaller;
     }
 
@@ -606,7 +321,7 @@ public class ServiceImplTest {
 
     private final Runtime runtime;
 
-    public ShutdownHookSim(Runtime runtime) {
+    ShutdownHookSim(Runtime runtime) {
       this.runtime = runtime;
     }
 
@@ -620,6 +335,55 @@ public class ServiceImplTest {
       // This is what simulates the shutdown hook
       threadCaptor.getValue().run();
       return null;
+    }
+  }
+
+  private static class ArgsAndEnvCapturingModule implements ApolloModule {
+
+    @Override
+    public String getId() {
+      return "argscaptor";
+    }
+
+    @Override
+    public double getPriority() {
+      return 0;
+    }
+
+    @Override
+    public Set<? extends Key<?>> getLifecycleManaged() {
+      return Collections.emptySet();
+    }
+
+    @Override
+    public void configure(Binder binder) {
+
+    }
+
+    @Provides
+    public Args args(@Named(INJECT_ARGS) ImmutableList<String> args) {
+      return new Args(args);
+    }
+
+    @Provides
+    public Env env(@Named(INJECT_ENVIRONMENT) Map<String, String> env) {
+      return new Env(env);
+    }
+  }
+
+  private static class Args {
+    private final List<String> args;
+
+    private Args(List<String> args) {
+      this.args = args;
+    }
+  }
+
+  private static class Env {
+    private final Map<String, String> env;
+
+    private Env(Map<String, String> env) {
+      this.env = env;
     }
   }
 }

@@ -43,7 +43,7 @@ public interface Service {
   String getServiceName();
 
   /**
-   * Starts a new instance of this service that is fully initialized.
+   * Starts a fully initialized new instance of this service.
    *
    * @param args Command-line arguments for the service.
    * @return a new instance of this service that is up and running.
@@ -55,7 +55,7 @@ public interface Service {
   Instance start(String... args) throws IOException;
 
   /**
-   * Starts a new instance of this service that is fully initialized. It will pick up the
+   * Starts a new instance of this service that is fully initialized. TODO: update this comment It will pick up the
    * configuration from the *.conf file but can override keys using {@code env}.
    *
    * @param args Command-line arguments for the service.
@@ -95,6 +95,8 @@ public interface Service {
      * Registers the specified module as loadable by this service.  This does not guarantee that the
      * module is actually loaded; the modules themselves will inspect the configuration and actually
      * determine if they should be loaded.
+     *
+     * TODO: update above javadoc.
      *
      * @param module The module to register.
      * @return This builder.
@@ -203,6 +205,8 @@ public interface Service {
 
     /**
      * Returns the list of command-line arguments that were not recognized by Apollo, in order.
+     *
+     * TODO: rename and/or update javadocs?
      *
      * @return The list of command-line arguments that were not recognized by Apollo, in order.
      */

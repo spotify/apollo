@@ -41,11 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,15 +52,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import joptsimple.BuiltinHelpFormatter;
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
-
 import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.collect.Iterables.concat;
-import static com.spotify.apollo.core.Services.CommonConfigKeys;
 
 class ServiceImpl implements Service {
 
@@ -136,7 +125,7 @@ class ServiceImpl implements Service {
                    serviceName + "-reaper"));
 
     try {
-      final ImmutableList.Builder<String> unprocessedArgsBuilder = ImmutableList.builder();
+//      final ImmutableList.Builder<String> unprocessedArgsBuilder = ImmutableList.builder();
 //      Config parsedArguments = parseArgs(
 //          serviceConfig, args, cliHelp, unprocessedArgsBuilder);
 //      final ImmutableList<String> unprocessedArgs = unprocessedArgsBuilder.build();
@@ -145,7 +134,7 @@ class ServiceImpl implements Service {
 
       final Set<ApolloModule> allModules = discoverAllModules();
       final CoreModule coreModule =
-          new CoreModule(this, signaller, closer, unprocessedArgsBuilder.build());
+          new CoreModule(this, signaller, closer, ImmutableList.copyOf(args), env);
 
       final InstanceImpl instance = initInstance(
           coreModule, allModules, closer,
@@ -550,7 +539,7 @@ class ServiceImpl implements Service {
 
     @Override
     public ImmutableList<String> getUnprocessedArgs() {
-      return injector.getInstance(CoreModule.UNPROCESSED_ARGS);
+      return injector.getInstance(CoreModule.ARGS);
     }
 
     @Override
@@ -589,8 +578,11 @@ class ServiceImpl implements Service {
 
   private static class CoreModule extends AbstractModule {
 
-    static final Key<ImmutableList<String>> UNPROCESSED_ARGS =
-        new Key<ImmutableList<String>>(Names.named(Services.INJECT_UNPROCESSED_ARGS)) {
+    static final Key<ImmutableList<String>> ARGS =
+        new Key<ImmutableList<String>>(Names.named(Services.INJECT_ARGS)) {
+        };
+    static final Key<Map<String, String>> ENVIRONMENT =
+        new Key<Map<String, String>>(Names.named(Services.INJECT_ENVIRONMENT)) {
         };
 
     static final Key<String> SERVICE_NAME =
@@ -601,14 +593,16 @@ class ServiceImpl implements Service {
     private final Signaller signaller;
     private final Closer closer;
     private final ImmutableList<String> unprocessedArgs;
+    private final Map<String, String> env;
 
     CoreModule(
         ServiceImpl service, Signaller signaller,
-        Closer closer, ImmutableList<String> unprocessedArgs) {
+        Closer closer, ImmutableList<String> unprocessedArgs, Map<String, String> env) {
       this.service = service;
       this.signaller = signaller;
       this.closer = closer;
       this.unprocessedArgs = unprocessedArgs;
+      this.env = env;
     }
 
     @Override
@@ -623,7 +617,8 @@ class ServiceImpl implements Service {
       bind(Signaller.class).toInstance(signaller);
       bind(Closer.class).toInstance(closer);
       bind(SERVICE_NAME).toInstance(service.getServiceName());
-      bind(UNPROCESSED_ARGS).toInstance(unprocessedArgs);
+      bind(ARGS).toInstance(unprocessedArgs);
+      bind(ENVIRONMENT).toInstance(env);
     }
 
     @Override
