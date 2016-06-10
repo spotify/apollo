@@ -20,8 +20,6 @@
 package com.spotify.apollo.http.client;
 
 import com.squareup.okhttp.OkHttpClient;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
 import org.junit.Test;
 
@@ -30,8 +28,8 @@ import static org.junit.Assert.assertEquals;
 public class OkHttpClientProviderTest {
 
   private static OkHttpClient buildClient(final String str) {
-    final Config config = ConfigFactory.parseString(str);
-    final OkHttpClientProvider provider = new OkHttpClientProvider(config);
+//    final Config config = ConfigFactory.parseString(str);
+    final OkHttpClientProvider provider = new OkHttpClientProvider(null);
     return provider.get();
   }
 

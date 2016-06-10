@@ -29,7 +29,6 @@ import com.spotify.apollo.Client;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.EnvironmentFactory.RoutingContext;
-import com.typesafe.config.Config;
 
 import java.util.Comparator;
 import java.util.List;
@@ -83,7 +82,6 @@ class EnvironmentModule extends AbstractModule {
   @Provides
   @Singleton
   EnvironmentFactory environmentFactory(
-      Config configNode,
       ApolloConfig apolloConfig,
       Closer closer,
       Injector injector,
@@ -93,7 +91,7 @@ class EnvironmentModule extends AbstractModule {
     final Client unawareClient = incomingRequestAwareClient.asUnawareClient();
 
     return EnvironmentFactoryBuilder.newBuilder(backend, unawareClient, closer, injector::getInstance)
-        .withStaticConfig(configNode)
+//        .withStaticConfig(configNode)
         .build();
   }
 

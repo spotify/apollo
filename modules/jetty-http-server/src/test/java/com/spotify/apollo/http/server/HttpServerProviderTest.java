@@ -26,8 +26,6 @@ import com.google.inject.name.Names;
 
 import com.spotify.apollo.core.Services;
 import com.spotify.apollo.module.AbstractApolloModule;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
 import org.junit.Test;
 
@@ -43,13 +41,13 @@ public class HttpServerProviderTest {
   public void shouldCloseThingsInTheRightOrder() throws Exception {
     AtomicInteger counter = new AtomicInteger();
     Closer closer = Closer.create();
-    Config config = ConfigFactory.parseMap(singletonMap("http.server.port", "9999"));
+//    Config config = ConfigFactory.parseMap(singletonMap("http.server.port", "9999"));
 
     // server close should happen first: counter goes from 0 to 1
     Runnable onClose = () -> counter.compareAndSet(0, 1);
 
     Injector injector = Guice.createInjector(
-        new TestSetup(config, closer),
+        new TestSetup(closer),
         HttpServerModule.createForTest(onClose));
     HttpServer instance = injector.getInstance(HttpServer.class);
 
@@ -66,17 +64,15 @@ public class HttpServerProviderTest {
 
   static class TestSetup extends AbstractApolloModule {
 
-    private final Config config;
     private final Closer closer;
 
-    TestSetup(Config config, Closer closer) {
-      this.config = config;
+    TestSetup(Closer closer) {
       this.closer = closer;
     }
 
     @Override
     protected void configure() {
-      bind(Config.class).toInstance(config);
+//      bind(Config.class).toInstance(config);
       bind(Closer.class).toInstance(closer);
       bindConstant().annotatedWith(Names.named(Services.INJECT_SERVICE_NAME)).to("test");
     }

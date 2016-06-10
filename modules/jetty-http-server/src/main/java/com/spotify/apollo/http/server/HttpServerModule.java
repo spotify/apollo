@@ -48,7 +48,7 @@ public class HttpServerModule extends AbstractApolloModule {
 
   @Override
   protected void configure() {
-    bind(HttpServerConfig.class);
+//    bind(HttpServerConfig.class);
     bind(Runnable.class).annotatedWith(Names.named("http-server-on-close")).toInstance(onClose);
     bind(HttpServer.class).toProvider(HttpServerProvider.class).in(Singleton.class);
   }

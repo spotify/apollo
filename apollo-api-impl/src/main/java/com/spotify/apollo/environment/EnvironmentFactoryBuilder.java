@@ -23,8 +23,6 @@ import com.google.common.io.Closer;
 
 import com.spotify.apollo.Client;
 import com.spotify.apollo.environment.EnvironmentFactory.Resolver;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,12 +84,12 @@ public final class EnvironmentFactoryBuilder {
    *
    * @param configNode  The config object to use.
    */
-  public EnvironmentFactoryBuilder withStaticConfig(Config configNode) {
-    checkState(!this.configResolver.isPresent(), "Configuration resolution already set");
-
-    return new EnvironmentFactoryBuilder(backendDomain, client, closer, resolver,
-                                         Optional.of(new StaticConfigResolver(configNode)));
-  }
+//  public EnvironmentFactoryBuilder withStaticConfig(Config configNode) {
+//    checkState(!this.configResolver.isPresent(), "Configuration resolution already set");
+//
+//    return new EnvironmentFactoryBuilder(backendDomain, client, closer, resolver,
+//                                         Optional.of(new StaticConfigResolver(configNode)));
+//  }
 
   /**
    * Lazily load configuration from this classloader.
@@ -124,19 +122,19 @@ public final class EnvironmentFactoryBuilder {
     return new EnvironmentFactoryBuilder(backendDomain, client, closer, resolver);
   }
 
-  static class StaticConfigResolver implements EnvironmentConfigResolver {
-
-    private final Config configNode;
-
-    StaticConfigResolver(Config configNode) {
-      this.configNode = configNode;
-    }
-
-    @Override
-    public Config getConfig(String ignored) {
-      return configNode;
-    }
-  }
+//  static class StaticConfigResolver implements EnvironmentConfigResolver {
+//
+//    private final Config configNode;
+//
+//    StaticConfigResolver(Config configNode) {
+//      this.configNode = configNode;
+//    }
+//
+//    @Override
+//    public Config getConfig(String ignored) {
+//      return configNode;
+//    }
+//  }
 
   static class LazyConfigResolver implements EnvironmentConfigResolver {
 
@@ -144,7 +142,7 @@ public final class EnvironmentFactoryBuilder {
 
     private final Optional<ClassLoader> configClassLoader;
 
-    private Config configNode;
+//    private Config configNode;
 
     LazyConfigResolver() {
       this.configClassLoader = Optional.empty();
@@ -154,18 +152,18 @@ public final class EnvironmentFactoryBuilder {
       this.configClassLoader = Optional.of(configClassLoader);
     }
 
-    @Override
-    public synchronized Config getConfig(String serviceName) {
-      // Lazy initialization here
-      if (configNode == null) {
-        // Bundled config is optional
-        if (configClassLoader.isPresent()) {
-          configNode = ConfigFactory.load(configClassLoader.get(), serviceName);
-        } else {
-          configNode = ConfigFactory.load(serviceName);
-        }
-      }
-      return configNode;
-    }
+//    @Override
+//    public synchronized Config getConfig(String serviceName) {
+//      // Lazy initialization here
+//      if (configNode == null) {
+//        // Bundled config is optional
+//        if (configClassLoader.isPresent()) {
+//          configNode = ConfigFactory.load(configClassLoader.get(), serviceName);
+//        } else {
+//          configNode = ConfigFactory.load(serviceName);
+//        }
+//      }
+//      return configNode;
+//    }
   }
 }

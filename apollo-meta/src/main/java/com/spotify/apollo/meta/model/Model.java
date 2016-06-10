@@ -21,8 +21,6 @@ package com.spotify.apollo.meta.model;
 
 import com.google.common.collect.Maps;
 
-import com.typesafe.config.ConfigObject;
-
 import java.util.List;
 import java.util.Map;
 
@@ -44,10 +42,11 @@ public interface Model {
     double serviceUptime();
   }
 
-  @AutoMatter
-  interface LoadedConfig {
-    ConfigObject spNode();
-  }
+  // TODO
+//  @AutoMatter
+//  interface LoadedConfig {
+//    ConfigObject spNode();
+//  }
 
   class EndpointsInfo {
     public String docstring;

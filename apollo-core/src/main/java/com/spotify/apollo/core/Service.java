@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.Closer;
 
 import com.spotify.apollo.module.ApolloModule;
-import com.typesafe.config.Config;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -72,20 +71,20 @@ public interface Service {
   @VisibleForTesting
   Instance start(String[] args, Map<String, String> env) throws IOException;
 
-  /**
-   * Starts a new instance of this service that is fully initialized. It will initialize the service
-   * using the {@code config} passed as an argument and the environment variables.
-   *
-   * @param args   Command-line arguments for the service.
-   * @param config Configuration for the service.
-   * @return a new instance of this service that is up and running.
-   * @throws ApolloHelpException   if the user wants to show command-line help and not start the
-   *                               application.
-   * @throws ApolloCliException    if something else related to CLI parsing failed.
-   * @throws java.io.IOException   if the application could not start for some other reason.
-   */
-  @VisibleForTesting
-  Instance start(String[] args, Config config) throws IOException;
+//  /**
+//   * Starts a new instance of this service that is fully initialized. It will initialize the service
+//   * using the {@code config} passed as an argument and the environment variables.
+//   *
+//   * @param args   Command-line arguments for the service.
+//   * @param config Configuration for the service.
+//   * @return a new instance of this service that is up and running.
+//   * @throws ApolloHelpException   if the user wants to show command-line help and not start the
+//   *                               application.
+//   * @throws ApolloCliException    if something else related to CLI parsing failed.
+//   * @throws java.io.IOException   if the application could not start for some other reason.
+//   */
+//  @VisibleForTesting
+//  Instance start(String[] args, Config config) throws IOException;
 
   /**
    * A builder for a new service.
@@ -187,12 +186,12 @@ public interface Service {
      */
     Service getService();
 
-    /**
-     * Returns the configuration for this service instance.
-     *
-     * @return The configuration for this service instance.
-     */
-    Config getConfig();
+//    /**
+//     * Returns the configuration for this service instance.
+//     *
+//     * @return The configuration for this service instance.
+//     */
+//    Config getConfig();
 
     /**
      * Returns a {@link com.google.common.io.Closer} for convenience, where you can register {@link

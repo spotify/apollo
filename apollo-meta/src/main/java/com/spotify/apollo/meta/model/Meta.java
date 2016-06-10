@@ -19,8 +19,6 @@
  */
 package com.spotify.apollo.meta.model;
 
-import com.typesafe.config.Config;
-
 /**
  * Factory methods for creating metadata gatherers.
  */
@@ -34,7 +32,7 @@ public final class Meta {
     return new DefaultMetaGatherer(metaInfo);
   }
 
-  public static MetaGatherer createGatherer(Model.MetaInfo metaInfo, Config config) {
+  public static MetaGatherer createGatherer(Model.MetaInfo metaInfo, Object config) {
     return new DefaultMetaGatherer(metaInfo, config);
   }
 

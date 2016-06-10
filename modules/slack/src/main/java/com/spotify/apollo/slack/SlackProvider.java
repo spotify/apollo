@@ -26,13 +26,13 @@ import com.google.inject.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spotify.apollo.core.Service;
-import com.typesafe.config.Config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -53,37 +53,37 @@ class SlackProvider implements Provider<Slack> {
   static final String CONFIG_PATH_MSG_SHUTDOWN = "slack.messages.shutdown";
 
   private final String serviceName;
-  private final Config config;
+  private final SlackConfig config;
 
   @Inject
-  public SlackProvider(Service service, Config config) {
+  public SlackProvider(Service service, SlackConfig config) {
     this.serviceName = service.getServiceName();
     this.config = config;
   }
 
   @Override
   public Slack get() {
-    if (!SlackConfig.enabled(config)) {
+    if (!config.enabled()) {
       LOG.warn("Not loading Slack module");
       return new NoopSlackImpl();
     }
 
-    SlackConfig slackConfig = SlackConfig.fromConfig(config, serviceName);
-    return new SlackImpl(slackConfig);
+//    SlackConfig slackConfig = SlackConfig.fromConfig(config, serviceName);
+    return new SlackImpl(null);
   }
 
-  static class SlackImpl implements Slack {
+  private static class SlackImpl implements Slack {
 
     private final Client client;
     private final WebTarget target;
     private final ObjectMapper mapper;
     private final SlackConfig slackConfig;
 
-    public SlackImpl(SlackConfig slackConfig) {
+    SlackImpl(SlackConfig slackConfig) {
       this.client = ClientBuilder.newBuilder().build();
       this.target = client.target(slackConfig.webhook());
       this.mapper = new ObjectMapper();
-      this.slackConfig = slackConfig;
+      this.slackConfig = Objects.requireNonNull(slackConfig);
 
       if (!Strings.isNullOrEmpty(slackConfig.startupMsg())) {
         post(slackConfig.startupMsg());
@@ -133,33 +133,34 @@ class SlackProvider implements Provider<Slack> {
 
   static class SlackConfig {
 
+    private final boolean enabled;
     private final String webhook;
     private final String username;
     private final String emoji;
     private final String startupMsg;
     private final String shutdownMsg;
 
-    public static boolean enabled(Config config) {
-      return config.hasPath(CONFIG_PATH_WEBHOOK) &&
-             getOrDefault(config, CONFIG_PATH_ENABLED, true);
-    }
+//    public static SlackConfig fromConfig(Config config, String serviceName) {
+//      String webhook = config.getString(CONFIG_PATH_WEBHOOK);
+//      String username = getOrDefault(config, CONFIG_PATH_USERNAME, serviceName);
+//      String emoji = getOrDefault(config, CONFIG_PATH_EMOJI, ":spoticon:");
+//      String startupMsg = getOrDefault(config, CONFIG_PATH_MSG_STARTUP, "");
+//      String shutdwonMsg = getOrDefault(config, CONFIG_PATH_MSG_SHUTDOWN, "");
+//      return new SlackConfig(enabled, webhook, username, emoji, startupMsg, shutdwonMsg);
+//    }
 
-    public static SlackConfig fromConfig(Config config, String serviceName) {
-      String webhook = config.getString(CONFIG_PATH_WEBHOOK);
-      String username = getOrDefault(config, CONFIG_PATH_USERNAME, serviceName);
-      String emoji = getOrDefault(config, CONFIG_PATH_EMOJI, ":spoticon:");
-      String startupMsg = getOrDefault(config, CONFIG_PATH_MSG_STARTUP, "");
-      String shutdwonMsg = getOrDefault(config, CONFIG_PATH_MSG_SHUTDOWN, "");
-      return new SlackConfig(webhook, username, emoji, startupMsg, shutdwonMsg);
-    }
-
-    SlackConfig(String webhook, String username, String emoji, String startupMsg,
+    SlackConfig(boolean enabled, String webhook, String username, String emoji, String startupMsg,
                 String shutdownMsg) {
+      this.enabled = enabled;
       this.webhook = webhook;
       this.username = username;
       this.emoji = emoji;
       this.startupMsg = startupMsg;
       this.shutdownMsg = shutdownMsg;
+    }
+
+    public boolean enabled() {
+      return enabled;
     }
 
     public String username() {
@@ -180,14 +181,6 @@ class SlackProvider implements Provider<Slack> {
 
     public String webhook() {
       return webhook;
-    }
-
-    private static boolean getOrDefault(Config config, String path, boolean defaultValue) {
-      return config.hasPath(path) ? config.getBoolean(path) : defaultValue;
-    }
-
-    private static String getOrDefault(Config config, String path, String defaultValue) {
-      return config.hasPath(path) ? config.getString(path) : defaultValue;
     }
   }
 

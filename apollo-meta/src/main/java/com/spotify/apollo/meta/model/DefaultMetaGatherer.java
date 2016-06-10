@@ -21,7 +21,6 @@ package com.spotify.apollo.meta.model;
 
 import com.google.common.collect.Maps;
 
-import com.typesafe.config.Config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +31,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.annotation.Nullable;
 
-import static com.typesafe.config.ConfigFactory.empty;
-import static com.typesafe.config.ConfigFactory.parseMap;
 import static java.util.Collections.singletonMap;
 
 public class DefaultMetaGatherer implements MetaGatherer {
@@ -48,7 +45,7 @@ public class DefaultMetaGatherer implements MetaGatherer {
   private final Model.MetaInfo metaInfo;
 
   @Nullable
-  private final Config config;
+  private final Object config;
 
   private final CallsInfo endpoints;
   private final ConcurrentMap<String, CallsInfo> incoming = Maps.newConcurrentMap();
@@ -58,11 +55,11 @@ public class DefaultMetaGatherer implements MetaGatherer {
     this(DEFAULT_SIZE_LIMIT, metaInfo, null);
   }
 
-  DefaultMetaGatherer(Model.MetaInfo metaInfo, Config config) {
+  DefaultMetaGatherer(Model.MetaInfo metaInfo, Object config) {
     this(DEFAULT_SIZE_LIMIT, metaInfo, config);
   }
 
-  DefaultMetaGatherer(int sizeLimit, Model.MetaInfo metaInfo, @Nullable Config config) {
+  DefaultMetaGatherer(int sizeLimit, Model.MetaInfo metaInfo, @Nullable Object config) {
     this.sizeLimit = sizeLimit;
     this.endpoints = new CallsInfo(sizeLimit);
 
@@ -79,30 +76,30 @@ public class DefaultMetaGatherer implements MetaGatherer {
         .build();
   }
 
-  @Override
-  public synchronized Model.LoadedConfig loadedConfig() {
-    return new LoadedConfigBuilder()
-        .spNode(filteredConfig().root())
-        .build();
-  }
+//  @Override
+//  public synchronized Model.LoadedConfig loadedConfig() {
+//    return new LoadedConfigBuilder()
+//        .spNode(filteredConfig().root())
+//        .build();
+//  }
 
-  private Config filteredConfig() {
-    if (config == null) {
-      return empty();
-    } else {
-      if (!ConfigFilter.metaConfigEnabled(config)) {
-        String disableMessage =
-            "enable by adding '\"_meta\": { \"expose-config\": true },' to root level service "
-            + "config. See https://github.com/spotify/apollo/tree/master/apollo-api-impl"
-            + "/src/main/java/com/spotify/apollo/meta/model";
-        return parseMap(singletonMap("disabled", disableMessage));
-      } else {
-        Set<String> filter = ConfigFilter.configFilter(config);
-        return ConfigFilter.filterConfigObject(config.root(), filter)
-            .toConfig();
-      }
-    }
-  }
+//  private Config filteredConfig() {
+//    if (config == null) {
+//      return empty();
+//    } else {
+//      if (!ConfigFilter.metaConfigEnabled(config)) {
+//        String disableMessage =
+//            "enable by adding '\"_meta\": { \"expose-config\": true },' to root level service "
+//            + "config. See https://github.com/spotify/apollo/tree/master/apollo-api-impl"
+//            + "/src/main/java/com/spotify/apollo/meta/model";
+//        return parseMap(singletonMap("disabled", disableMessage));
+//      } else {
+//        Set<String> filter = ConfigFilter.configFilter(config);
+//        return ConfigFilter.filterConfigObject(config.root(), filter)
+//            .toConfig();
+//      }
+//    }
+//  }
 
   @Override
   public synchronized Model.EndpointsInfo endpoints() {

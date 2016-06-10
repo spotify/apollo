@@ -19,50 +19,39 @@
  */
 package com.spotify.apollo.environment;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-
-import java.util.Objects;
-
-import javax.inject.Inject;
-
-import static com.spotify.apollo.environment.ConfigUtil.either;
-import static com.spotify.apollo.environment.ConfigUtil.optionalBoolean;
-import static com.spotify.apollo.environment.ConfigUtil.optionalString;
-
 /**
  * Configuration object for keys under the apollo keyspace
  */
 public class ApolloConfig {
 
-  private final Config root;
-  private final Config apolloNode;
+//  private final Config root;
+//  private final Config apolloNode;
+  private final String backend;
+  private final boolean enableIncomingRequestLogging;
+  private final boolean enableOutgoingRequestLogging;
+  private final boolean enableMetaApi;
 
-  @Inject
-  public ApolloConfig(Config configNode) {
-    root = Objects.requireNonNull(configNode);
-
-    apolloNode = root.hasPath("apollo")
-                 ? root.getConfig("apollo")
-                 : ConfigFactory.empty();
+  public ApolloConfig(String backend, boolean enableIncomingRequestLogging,
+                      boolean enableOutgoingRequestLogging, boolean enableMetaApi) {
+    this.backend = backend;
+    this.enableIncomingRequestLogging = enableIncomingRequestLogging;
+    this.enableOutgoingRequestLogging = enableOutgoingRequestLogging;
+    this.enableMetaApi = enableMetaApi;
   }
 
   public String backend() {
-    return either(either(optionalString(apolloNode, "domain"),
-                         optionalString(apolloNode, "backend")),
-                  optionalString(root, "domain"))
-        .orElse("");
+    return backend;
   }
 
   public boolean enableIncomingRequestLogging() {
-    return optionalBoolean(apolloNode, "logIncomingRequests").orElse(true);
+    return enableIncomingRequestLogging;
   }
 
   public boolean enableOutgoingRequestLogging() {
-    return optionalBoolean(apolloNode, "logOutgoingRequests").orElse(true);
+    return enableOutgoingRequestLogging;
   }
 
   public boolean enableMetaApi() {
-    return optionalBoolean(apolloNode, "metaApi").orElse(true);
+    return enableMetaApi;
   }
 }

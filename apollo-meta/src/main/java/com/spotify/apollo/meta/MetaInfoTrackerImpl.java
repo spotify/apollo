@@ -30,7 +30,6 @@ import com.spotify.apollo.meta.model.MetaGatherer;
 import com.spotify.apollo.meta.model.MetaGatherer.CallsGatherer;
 import com.spotify.apollo.meta.model.MetaGatherer.EndpointGatherer;
 import com.spotify.apollo.meta.model.Model;
-import com.typesafe.config.Config;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +43,7 @@ class MetaInfoTrackerImpl implements MetaInfoTracker {
   MetaInfoTrackerImpl(
       Descriptor descriptor,
       String containerVersion,
-      Config configNode) {
+      Object configNode) {
     final Model.MetaInfo metaInfo = new MetaInfoBuilder()
         .buildVersion(descriptor.serviceName() + ' ' + descriptor.version())
         .containerVersion(containerVersion)

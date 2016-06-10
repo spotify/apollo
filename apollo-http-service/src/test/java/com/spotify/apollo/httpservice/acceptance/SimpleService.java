@@ -50,7 +50,8 @@ class SimpleService implements AppInit, ServiceStepdefs.BootedApplication {
   public void create(Environment environment) {
     pod = environment.domain();
 
-    reverserAddress = environment.config().getString("reverser.address");
+//    reverserAddress = environment.config().getString("reverser.address");
+    reverserAddress = "not working, do we need it?";
 
     environment.routingEngine()
         .registerAutoRoute(

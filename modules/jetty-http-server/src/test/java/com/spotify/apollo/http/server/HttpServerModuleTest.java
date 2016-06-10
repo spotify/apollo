@@ -28,8 +28,6 @@ import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestHandler;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -39,6 +37,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.spotify.apollo.Status.IM_A_TEAPOT;
@@ -149,8 +148,10 @@ public class HttpServerModuleTest {
         .build();
   }
 
-  Config onPort(int port) {
-    return ConfigFactory.parseMap(singletonMap("http.server.port", Integer.toString(port)));
+  Map<String, String> onPort(int port) {
+    fail();
+    return null;
+//    return ConfigFactory.parseMap(singletonMap("http.server.port", Integer.toString(port)));
   }
 
   String baseUrl(int port) {

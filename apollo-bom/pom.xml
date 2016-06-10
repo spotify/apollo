@@ -142,11 +142,6 @@
                 <version>2.21</version>
             </dependency>
             <dependency>
-                <groupId>com.typesafe</groupId>
-                <artifactId>config</artifactId>
-                <version>1.2.1</version>
-            </dependency>
-            <dependency>
                 <groupId>io.javaslang</groupId>
                 <artifactId>javaslang</artifactId>
                 <version>2.0.2</version>

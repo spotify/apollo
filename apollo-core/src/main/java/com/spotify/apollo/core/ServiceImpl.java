@@ -36,9 +36,6 @@ import com.google.inject.Stage;
 import com.google.inject.name.Names;
 
 import com.spotify.apollo.module.ApolloModule;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigValueFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,18 +109,18 @@ class ServiceImpl implements Service {
     return start(args, System.getenv());
   }
 
+//  @Override
+//  public Instance start(String[] args, Map<String, String> env) throws IOException {
+//    return start(args, ConfigFactory.load(serviceName), env);
+//  }
+
+//  @Override
+//  public Instance start(final String[] args, final Config config) throws IOException {
+//    return start(args, config, System.getenv());
+//  }
+
   @Override
   public Instance start(String[] args, Map<String, String> env) throws IOException {
-    return start(args, ConfigFactory.load(serviceName), env);
-  }
-
-  @Override
-  public Instance start(final String[] args, final Config config) throws IOException {
-    return start(args, config, System.getenv());
-  }
-
-  private Instance start(String[] args, Config serviceConfig, Map<String, String> env)
-      throws IOException {
     final Closer closer = Closer.create();
 
     final CountDownLatch shutdownRequested = new CountDownLatch(1);
@@ -140,15 +137,15 @@ class ServiceImpl implements Service {
 
     try {
       final ImmutableList.Builder<String> unprocessedArgsBuilder = ImmutableList.builder();
-      Config parsedArguments = parseArgs(
-          serviceConfig, args, cliHelp, unprocessedArgsBuilder);
-      final ImmutableList<String> unprocessedArgs = unprocessedArgsBuilder.build();
-
-      final Config config = addEnvOverrides(env, parsedArguments).resolve();
+//      Config parsedArguments = parseArgs(
+//          serviceConfig, args, cliHelp, unprocessedArgsBuilder);
+//      final ImmutableList<String> unprocessedArgs = unprocessedArgsBuilder.build();
+//
+//      final Config config = addEnvOverrides(env, parsedArguments).resolve();
 
       final Set<ApolloModule> allModules = discoverAllModules();
       final CoreModule coreModule =
-          new CoreModule(this, config, signaller, closer, unprocessedArgs);
+          new CoreModule(this, signaller, closer, unprocessedArgsBuilder.build());
 
       final InstanceImpl instance = initInstance(
           coreModule, allModules, closer,
@@ -167,22 +164,22 @@ class ServiceImpl implements Service {
     }
   }
 
-  private Config addEnvOverrides(Map<String, String> env, Config config) {
-    for (Map.Entry<String, String> var : env.entrySet()) {
-      String envKey = var.getKey();
-      if (envKey.startsWith(envVarPrefix + "_")) {
-        String configKey = envKey.substring(envVarPrefix.length())
-            .toLowerCase()
-            .replaceAll("(?<!_)_(?!_(__)*([^_]|$))", ".")
-            .replaceAll("__", "_")
-            .substring(1);
-        config = config.withValue(
-            configKey, ConfigValueFactory
-                .fromAnyRef(var.getValue(), "Environment variable " + envKey));
-      }
-    }
-    return config;
-  }
+//  private Config addEnvOverrides(Map<String, String> env, Config config) {
+//    for (Map.Entry<String, String> var : env.entrySet()) {
+//      String envKey = var.getKey();
+//      if (envKey.startsWith(envVarPrefix + "_")) {
+//        String configKey = envKey.substring(envVarPrefix.length())
+//            .toLowerCase()
+//            .replaceAll("(?<!_)_(?!_(__)*([^_]|$))", ".")
+//            .replaceAll("__", "_")
+//            .substring(1);
+//        config = config.withValue(
+//            configKey, ConfigValueFactory
+//                .fromAnyRef(var.getValue(), "Environment variable " + envKey));
+//      }
+//    }
+//    return config;
+//  }
 
   private InstanceImpl initInstance(
       CoreModule coreModule,
@@ -230,166 +227,166 @@ class ServiceImpl implements Service {
     return allModules;
   }
 
-  private static Config parseArgs(
-      Config config, String[] args, boolean cliHelp,
-      ImmutableList.Builder<String> unprocessedArgsBuilder) throws IOException {
+//  private static Config parseArgs(
+//      Config config, String[] args, boolean cliHelp,
+//      ImmutableList.Builder<String> unprocessedArgsBuilder) throws IOException {
+//
+//    config = appendConfig(
+//        config,
+//        CommonConfigKeys.APOLLO_ARGS_CORE.getKey(), Arrays.asList(args),
+//        "apollo cli args");
+//
+//    final OptionParser parser = new OptionParser();
+//
+//    parser.formatHelpWith(new BuiltinHelpFormatter(1024, 2));
+//    parser.allowsUnrecognizedOptions();
+//    parser.posixlyCorrect(System.getenv("POSIXLY_CORRECT") != null);
+//    parser.recognizeAlternativeLongOptions(true);
+//
+//    final OptionSpec<Void> helpOption;
+//    if (cliHelp) {
+//      helpOption =
+//          parser.acceptsAll(ImmutableList.of("help", "h"), "Shows this help.").forHelp();
+//    } else {
+//      helpOption = null;
+//    }
+//
+//    final OptionSpec<String> configOption = parser.accepts(
+//        "D",
+//        "Set configuration key with '-Dkey=value'.  Supports Typesafe Config syntax, i.e. "
+//        + "'-Dhosts+=foo.${domain}'.")
+//        .withRequiredArg();
+//
+//    final OptionSpec<Boolean> syslogOption = parser.accepts(
+//        "syslog",
+//        String.format(
+//            "Log to syslog (Alias for '-D%s=<value>').",
+//            CommonConfigKeys.LOGGING_SYSLOG.getKey()))
+//        .withOptionalArg().ofType(Boolean.class);
+//
+//    final OptionSpec<Void> verboseOption = parser.acceptsAll(
+//        ImmutableList.of("verbose", "v"),
+//        String.format(
+//            "Increase logging verbosity.  Overrides config key '%s'.",
+//            CommonConfigKeys.LOGGING_VERBOSITY.getKey()));
+//
+//    final OptionSpec<Void> conciseOption = parser.acceptsAll(
+//        ImmutableList.of("concise", "c"),
+//        String.format(
+//            "Decrease logging verbosity.  Overrides config key '%s'.",
+//            CommonConfigKeys.LOGGING_VERBOSITY.getKey()));
+//
+//    final OptionSpec<Void> quietOption = parser.acceptsAll(
+//        ImmutableList.of("quiet", "q"),
+//        String.format(
+//            "Resets logging level to OFF.  Can be mixed with '-v'/'--verbose' or "
+//            + "'-c'/'--concise'.  Overrides config key '%s'.",
+//            CommonConfigKeys.LOGGING_VERBOSITY.getKey()));
+//
+//    final OptionSpec<String> configFile = parser.accepts(
+//        "config",
+//        "Load configuration from the specified file. The values from the file will be "
+//        + "overlayed on top of any already loaded configuration.")
+//        .withRequiredArg();
+//
+//    final OptionSpec<String> unparsedOption =
+//        parser
+//            .nonOptions("Service-specific options that will be passed to the underlying service.");
+//
+//    final OptionSet parsed;
+//    try {
+//      parsed = parser.parse(args);
+//    } catch (OptionException e) {
+//      throw new ApolloCliException("Could not parse command-line arguments", e);
+//    }
+//
+//    if (helpOption != null && parsed.has(helpOption)) {
+//      // TODO: make help output a bit prettier
+//      StringWriter stringWriter = new StringWriter();
+//
+//      try (PrintWriter pw = new PrintWriter(stringWriter)) {
+//        pw.println();
+//        pw.println("Usage: <program> [options...] -- [non-option args...]");
+//        pw.println();
+//        parser.printHelpOn(pw);
+//      }
+//
+//      throw new ApolloHelpException(stringWriter.toString());
+//    }
+//
+//    unprocessedArgsBuilder.addAll(parsed.valuesOf(unparsedOption));
+//    config = appendConfig(
+//        config,
+//        CommonConfigKeys.APOLLO_ARGS_UNPARSED.getKey(),
+//        unprocessedArgsBuilder.build(), "apollo unparsed cli args");
+//
+//    int verbosity = 0;
+//    boolean hasVerbosity = false;
+//    for (OptionSpec<?> optionSpec : parsed.specs()) {
+//      if (optionSpec == quietOption) {
+//        verbosity = LOGGING_OFF_OFFSET;
+//        hasVerbosity = true;
+//      } else if (optionSpec == verboseOption) {
+//        verbosity++;
+//        hasVerbosity = true;
+//      } else if (optionSpec == conciseOption) {
+//        verbosity--;
+//        hasVerbosity = true;
+//      }
+//    }
+//
+//    if (hasVerbosity) {
+//      config = appendConfig(
+//          config,
+//          CommonConfigKeys.LOGGING_VERBOSITY.getKey(), verbosity,
+//          "Command-line verbosity flags");
+//    }
+//
+//    if (parsed.has(syslogOption)) {
+//      final boolean syslog;
+//
+//      if (parsed.hasArgument(syslogOption)) {
+//        syslog = parsed.valueOf(syslogOption);
+//      } else {
+//        syslog = true;
+//      }
+//
+//      config = appendConfig(
+//          config,
+//          CommonConfigKeys.LOGGING_SYSLOG.getKey(), syslog,
+//          "Command-line option --syslog");
+//    }
+//
+//    for (String configString : parsed.valuesOf(configOption)) {
+//      String[] parts = configString.split("=", 2);
+//
+//      final String key;
+//      final Object value;
+//      if (parts.length == 2) {
+//        key = parts[0];
+//        value = parts[1];
+//      } else {
+//        key = parts[0];
+//        value = true;
+//      }
+//      config = appendConfig(
+//          config,
+//          key, value,
+//          "Command-line configuration -D" + parts[0]);
+//    }
+//
+//    if (parsed.has(configFile)) {
+//      final String configFileValue = parsed.valueOf(configFile);
+//      final Config overlayConfig = ConfigFactory.parseFile(new File(configFileValue));
+//      config = overlayConfig.withFallback(config);
+//    }
+//
+//    return config;
+//  }
 
-    config = appendConfig(
-        config,
-        CommonConfigKeys.APOLLO_ARGS_CORE.getKey(), Arrays.asList(args),
-        "apollo cli args");
-
-    final OptionParser parser = new OptionParser();
-
-    parser.formatHelpWith(new BuiltinHelpFormatter(1024, 2));
-    parser.allowsUnrecognizedOptions();
-    parser.posixlyCorrect(System.getenv("POSIXLY_CORRECT") != null);
-    parser.recognizeAlternativeLongOptions(true);
-
-    final OptionSpec<Void> helpOption;
-    if (cliHelp) {
-      helpOption =
-          parser.acceptsAll(ImmutableList.of("help", "h"), "Shows this help.").forHelp();
-    } else {
-      helpOption = null;
-    }
-
-    final OptionSpec<String> configOption = parser.accepts(
-        "D",
-        "Set configuration key with '-Dkey=value'.  Supports Typesafe Config syntax, i.e. "
-        + "'-Dhosts+=foo.${domain}'.")
-        .withRequiredArg();
-
-    final OptionSpec<Boolean> syslogOption = parser.accepts(
-        "syslog",
-        String.format(
-            "Log to syslog (Alias for '-D%s=<value>').",
-            CommonConfigKeys.LOGGING_SYSLOG.getKey()))
-        .withOptionalArg().ofType(Boolean.class);
-
-    final OptionSpec<Void> verboseOption = parser.acceptsAll(
-        ImmutableList.of("verbose", "v"),
-        String.format(
-            "Increase logging verbosity.  Overrides config key '%s'.",
-            CommonConfigKeys.LOGGING_VERBOSITY.getKey()));
-
-    final OptionSpec<Void> conciseOption = parser.acceptsAll(
-        ImmutableList.of("concise", "c"),
-        String.format(
-            "Decrease logging verbosity.  Overrides config key '%s'.",
-            CommonConfigKeys.LOGGING_VERBOSITY.getKey()));
-
-    final OptionSpec<Void> quietOption = parser.acceptsAll(
-        ImmutableList.of("quiet", "q"),
-        String.format(
-            "Resets logging level to OFF.  Can be mixed with '-v'/'--verbose' or "
-            + "'-c'/'--concise'.  Overrides config key '%s'.",
-            CommonConfigKeys.LOGGING_VERBOSITY.getKey()));
-
-    final OptionSpec<String> configFile = parser.accepts(
-        "config",
-        "Load configuration from the specified file. The values from the file will be "
-        + "overlayed on top of any already loaded configuration.")
-        .withRequiredArg();
-
-    final OptionSpec<String> unparsedOption =
-        parser
-            .nonOptions("Service-specific options that will be passed to the underlying service.");
-
-    final OptionSet parsed;
-    try {
-      parsed = parser.parse(args);
-    } catch (OptionException e) {
-      throw new ApolloCliException("Could not parse command-line arguments", e);
-    }
-
-    if (helpOption != null && parsed.has(helpOption)) {
-      // TODO: make help output a bit prettier
-      StringWriter stringWriter = new StringWriter();
-
-      try (PrintWriter pw = new PrintWriter(stringWriter)) {
-        pw.println();
-        pw.println("Usage: <program> [options...] -- [non-option args...]");
-        pw.println();
-        parser.printHelpOn(pw);
-      }
-
-      throw new ApolloHelpException(stringWriter.toString());
-    }
-
-    unprocessedArgsBuilder.addAll(parsed.valuesOf(unparsedOption));
-    config = appendConfig(
-        config,
-        CommonConfigKeys.APOLLO_ARGS_UNPARSED.getKey(),
-        unprocessedArgsBuilder.build(), "apollo unparsed cli args");
-
-    int verbosity = 0;
-    boolean hasVerbosity = false;
-    for (OptionSpec<?> optionSpec : parsed.specs()) {
-      if (optionSpec == quietOption) {
-        verbosity = LOGGING_OFF_OFFSET;
-        hasVerbosity = true;
-      } else if (optionSpec == verboseOption) {
-        verbosity++;
-        hasVerbosity = true;
-      } else if (optionSpec == conciseOption) {
-        verbosity--;
-        hasVerbosity = true;
-      }
-    }
-
-    if (hasVerbosity) {
-      config = appendConfig(
-          config,
-          CommonConfigKeys.LOGGING_VERBOSITY.getKey(), verbosity,
-          "Command-line verbosity flags");
-    }
-
-    if (parsed.has(syslogOption)) {
-      final boolean syslog;
-
-      if (parsed.hasArgument(syslogOption)) {
-        syslog = parsed.valueOf(syslogOption);
-      } else {
-        syslog = true;
-      }
-
-      config = appendConfig(
-          config,
-          CommonConfigKeys.LOGGING_SYSLOG.getKey(), syslog,
-          "Command-line option --syslog");
-    }
-
-    for (String configString : parsed.valuesOf(configOption)) {
-      String[] parts = configString.split("=", 2);
-
-      final String key;
-      final Object value;
-      if (parts.length == 2) {
-        key = parts[0];
-        value = parts[1];
-      } else {
-        key = parts[0];
-        value = true;
-      }
-      config = appendConfig(
-          config,
-          key, value,
-          "Command-line configuration -D" + parts[0]);
-    }
-
-    if (parsed.has(configFile)) {
-      final String configFileValue = parsed.valueOf(configFile);
-      final Config overlayConfig = ConfigFactory.parseFile(new File(configFileValue));
-      config = overlayConfig.withFallback(config);
-    }
-
-    return config;
-  }
-
-  private static Config appendConfig(Config config, String key, Object value, String description) {
-    return config.withValue(key, ConfigValueFactory.fromAnyRef(value, description));
-  }
+//  private static Config appendConfig(Config config, String key, Object value, String description) {
+//    return config.withValue(key, ConfigValueFactory.fromAnyRef(value, description));
+//  }
 
   static Builder builder(String serviceName) {
     return new BuilderImpl(
@@ -542,11 +539,6 @@ class ServiceImpl implements Service {
     }
 
     @Override
-    public Config getConfig() {
-      return resolve(Config.class);
-    }
-
-    @Override
     public Closer getCloser() {
       return resolve(Closer.class);
     }
@@ -606,16 +598,14 @@ class ServiceImpl implements Service {
         };
 
     private final ServiceImpl service;
-    private final Config config;
     private final Signaller signaller;
     private final Closer closer;
     private final ImmutableList<String> unprocessedArgs;
 
     CoreModule(
-        ServiceImpl service, Config config, Signaller signaller,
+        ServiceImpl service, Signaller signaller,
         Closer closer, ImmutableList<String> unprocessedArgs) {
       this.service = service;
-      this.config = config;
       this.signaller = signaller;
       this.closer = closer;
       this.unprocessedArgs = unprocessedArgs;
@@ -630,7 +620,6 @@ class ServiceImpl implements Service {
       binder().requireExplicitBindings();
 
       bind(Service.class).toInstance(service);
-      bind(Config.class).toInstance(config);
       bind(Signaller.class).toInstance(signaller);
       bind(Closer.class).toInstance(closer);
       bind(SERVICE_NAME).toInstance(service.getServiceName());

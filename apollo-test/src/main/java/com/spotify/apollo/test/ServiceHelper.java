@@ -39,9 +39,6 @@ import com.spotify.apollo.http.client.HttpClientModule;
 import com.spotify.apollo.meta.MetaModule;
 import com.spotify.apollo.module.ApolloModule;
 import com.spotify.apollo.request.RequestHandler;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigValueFactory;
 
 import org.junit.Rule;
 import org.junit.rules.TestRule;
@@ -172,7 +169,6 @@ public class ServiceHelper implements TestRule, Closeable {
   private final Client serviceClient;
   private final List<ApolloModule> additionalModules;
 
-  private Config conf;
   private final ExecutorService executor = Executors.newSingleThreadExecutor(
       new ThreadFactoryBuilder()
           .setNameFormat("apollo-servicehelper-%d")
@@ -195,7 +191,6 @@ public class ServiceHelper implements TestRule, Closeable {
     this.serviceName = serviceName;
     this.stubClient = Objects.requireNonNull(stubClient);
     this.serviceClient = this::request;
-    this.conf = ConfigFactory.load(serviceName);
     additionalModules = new ArrayList<>();
   }
 
@@ -265,10 +260,11 @@ public class ServiceHelper implements TestRule, Closeable {
    * @return This ServiceHelper instance
    */
   public ServiceHelper conf(String key, String value) {
-    conf = conf.withValue(
-        key,
-        ConfigValueFactory.fromAnyRef(value, "Overridden var in ServiceHelper: " + key));
-    return this;
+    throw new IllegalStateException("implement!");
+//    conf = conf.withValue(
+//        key,
+//        ConfigValueFactory.fromAnyRef(value, "Overridden var in ServiceHelper: " + key));
+//    return this;
   }
 
   /**
@@ -284,10 +280,11 @@ public class ServiceHelper implements TestRule, Closeable {
    * @return      This ServiceHelper instance
    */
   public ServiceHelper conf(String key, Object value) {
-    conf = conf.withValue(
-        key,
-        ConfigValueFactory.fromAnyRef(value, "Overridden var in ServiceHelper: " + key));
-    return this;
+    throw new IllegalStateException("implement!");
+//    conf = conf.withValue(
+//        key,
+//        ConfigValueFactory.fromAnyRef(value, "Overridden var in ServiceHelper: " + key));
+//    return this;
   }
 
   /**
@@ -297,7 +294,7 @@ public class ServiceHelper implements TestRule, Closeable {
    * @return    This ServiceHelper instance
    */
   public ServiceHelper resetConf(String key) {
-    conf = conf.withoutPath(key);
+//    conf = conf.withoutPath(key);
     return this;
   }
 
@@ -496,7 +493,7 @@ public class ServiceHelper implements TestRule, Closeable {
 
         LOG.info("Starting with args: {}", Arrays.toString(args));
 
-        try (Service.Instance instance = service.start(args, conf)) {
+        try (Service.Instance instance = service.start(args)) {
           final RequestHandler envRequestHandler =
               ApolloEnvironmentModule.environment(instance)
                   .initialize(appInit);

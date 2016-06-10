@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * A fully configured server that can be started and stopped.
  */
@@ -40,14 +42,14 @@ class HttpServerImpl implements HttpServer {
   private static final String SERVER_ID = "http";
 
   private final Closer closer;
-  private final HttpServerConfig config;
+  private final JettyHttpServerConfiguration config;
   private final Runnable onClose;
 
   private Server server;
 
-  HttpServerImpl(Closer closer, HttpServerConfig config, Runnable onClose) {
+  HttpServerImpl(Closer closer, JettyHttpServerConfiguration config, Runnable onClose) {
     this.closer = closer;
-    this.config = config;
+    this.config = requireNonNull(config);
     this.onClose = onClose;
   }
 

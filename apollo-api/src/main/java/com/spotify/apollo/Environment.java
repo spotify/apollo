@@ -25,7 +25,6 @@ import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Middleware;
 import com.spotify.apollo.route.Route;
 import com.spotify.apollo.route.RouteProvider;
-import com.typesafe.config.Config;
 
 import java.util.stream.Stream;
 
@@ -55,12 +54,12 @@ public interface Environment {
    */
   Client client();
 
-  /**
-   * Returns configuration loaded by the framework on an application behalf.
-   *
-   * @return loaded configuration node.
-   */
-  Config config();
+//  /**
+//   * Returns configuration loaded by the framework on an application behalf.
+//   *
+//   * @return loaded configuration node.
+//   */
+//  Config config();
 
   /**
    * Returns the {@link RoutingEngine} of this application.

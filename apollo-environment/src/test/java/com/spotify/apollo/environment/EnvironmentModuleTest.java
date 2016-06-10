@@ -28,7 +28,6 @@ import com.google.inject.multibindings.Multibinder;
 
 import com.spotify.apollo.Request;
 import com.spotify.apollo.core.Services;
-import com.typesafe.config.Config;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -88,10 +87,10 @@ public class EnvironmentModuleTest {
       return "environment module test";
     }
 
-    @Provides
-    Config config() {
-      return mock(Config.class);
-    }
+//    @Provides
+//    Config config() {
+//      return mock(Config.class);
+//    }
 
     @Provides
     ApolloConfig apolloConfig() {

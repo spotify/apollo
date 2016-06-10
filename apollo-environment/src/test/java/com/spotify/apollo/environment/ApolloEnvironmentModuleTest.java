@@ -127,7 +127,6 @@ public class ApolloEnvironmentModuleTest {
 
   private static void validateEnv(Environment e) {
     assertNotNull(e);
-    assertNotNull(e.config());
     assertNotNull(e.client());
     assertNotNull(e.routingEngine());
 
@@ -147,9 +146,9 @@ public class ApolloEnvironmentModuleTest {
 
       final Environment e = envReference.get();
       assertNotNull(e);
-      assertNotNull(e.config());
 
-      assertEquals("baz", e.config().getString("bar")); // from ping.conf
+      fail();
+//      assertEquals("baz", e.config().getString("bar")); // from ping.conf
       assertEquals("my-domain", e.domain());
     } catch (IOException e) {
       fail(e.getMessage());

@@ -23,9 +23,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.math.IntMath;
 
 import com.spotify.apollo.module.AbstractApolloModule;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigValueFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -81,7 +78,8 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("-Dconfig=value")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getString("config"), is("value"));
+      fail();
+//      assertThat(instance.getConfig().getString("config"), is("value"));
     }
   }
 
@@ -91,7 +89,8 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service
         .start(new String[]{}, ImmutableMap.of("APOLLO_A_B", "value"))) {
-      assertThat(instance.getConfig().getString("a.b"), is("value"));
+      fail();
+//      assertThat(instance.getConfig().getString("a.b"), is("value"));
     }
   }
 
@@ -101,7 +100,8 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service
         .start(new String[]{}, ImmutableMap.of("horse_A_B", "value"))) {
-      assertThat(instance.getConfig().getString("a.b"), is("value"));
+      fail();
+//      assertThat(instance.getConfig().getString("a.b"), is("value"));
     }
   }
 
@@ -111,7 +111,8 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service
         .start(new String[]{}, ImmutableMap.of("APOLLO___A_B", "value"))) {
-      assertThat(instance.getConfig().getString("_a.b"), is("value"));
+      fail();
+//      assertThat(instance.getConfig().getString("_a.b"), is("value"));
     }
   }
 
@@ -121,7 +122,8 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service
         .start(new String[]{}, ImmutableMap.of("APOLLO_A___B__C______D_____E__", "value"))) {
-      assertThat(instance.getConfig().getString("a._b_c___d.__e_"), is("value"));
+      fail();
+//      assertThat(instance.getConfig().getString("a._b_c___d.__e_"), is("value"));
     }
   }
 
@@ -130,10 +132,11 @@ public class ServiceImplTest {
     Service service = ServiceImpl.builder("test").build();
 
     try (Service.Instance instance = service.start("--config", "src/test/files/overlay.conf")) {
-      Config config = instance.getConfig();
-      assertThat(config.getString("bundled.value"), is("is loaded"));
-      assertThat(config.getString("bundled.shadowed"), is("overlayed"));
-      assertThat(config.getString("some.key"), is("has a value"));
+      fail();
+//      Config config = instance.getConfig();
+//      assertThat(config.getString("bundled.value"), is("is loaded"));
+//      assertThat(config.getString("bundled.shadowed"), is("overlayed"));
+//      assertThat(config.getString("some.key"), is("has a value"));
     }
   }
 
@@ -141,12 +144,13 @@ public class ServiceImplTest {
   public void testUsesConfig() throws IOException {
     Service service = ServiceImpl.builder("test").build();
 
-    Config config = ConfigFactory.empty()
-        .withValue("this.key", ConfigValueFactory.fromAnyRef("value for this.key"));
+    fail();
+//    Config config = ConfigFactory.empty()
+//        .withValue("this.key", ConfigValueFactory.fromAnyRef("value for this.key"));
 
-    try (Service.Instance instance = service.start(new String[]{}, config)) {
-      assertThat(instance.getConfig().getString("this.key"), is("value for this.key"));
-    }
+//    try (Service.Instance instance = service.start(new String[]{}, config)) {
+//      assertThat(instance.getConfig().getString("this.key"), is("value for this.key"));
+//    }
   }
 
   @Test
@@ -155,7 +159,8 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("-Dconfig=value:more")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getString("config"), is("value:more"));
+//      assertThat(instance.getConfig().getString("config"), is("value:more"));
+      fail();
     }
   }
 
@@ -165,7 +170,8 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("-Dconfig=value=more")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getString("config"), is("value=more"));
+      fail();
+//      assertThat(instance.getConfig().getString("config"), is("value=more"));
     }
   }
 
@@ -175,7 +181,8 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("-Dfoo=bar", "hello")) {
       assertThat(instance.getUnprocessedArgs(), contains("hello"));
-      assertThat(instance.getConfig().getString("foo"), is("bar"));
+      fail();
+//      assertThat(instance.getConfig().getString("foo"), is("bar"));
     }
   }
 
@@ -185,8 +192,9 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("-Dfoo=bar", "--", "xyz", "-Dbar=baz", "abc")) {
       assertThat(instance.getUnprocessedArgs(), contains("xyz", "-Dbar=baz", "abc"));
-      assertThat(instance.getConfig().getString("foo"), is("bar"));
-      assertThat(instance.getConfig().hasPath("bar"), is(false));
+      fail();
+//      assertThat(instance.getConfig().getString("foo"), is("bar"));
+//      assertThat(instance.getConfig().hasPath("bar"), is(false));
     }
   }
 
@@ -195,12 +203,13 @@ public class ServiceImplTest {
     Service service = ServiceImpl.builder("test").build();
 
     try (Service.Instance instance = service.start("-Dfoo=bar", "--", "xyz", "-Dbar=baz", "abc")) {
-      assertThat(instance.getConfig().hasPath(APOLLO_ARGS_CORE.getKey()), is(true));
-      assertThat(instance.getConfig().hasPath(APOLLO_ARGS_UNPARSED.getKey()), is(true));
-      assertThat(instance.getConfig().getStringList(APOLLO_ARGS_CORE.getKey()),
-                 contains("-Dfoo=bar", "--", "xyz", "-Dbar=baz", "abc"));
-      assertThat(instance.getConfig().getStringList(APOLLO_ARGS_UNPARSED.getKey()),
-                 contains("xyz", "-Dbar=baz", "abc"));
+      fail();
+//      assertThat(instance.getConfig().hasPath(APOLLO_ARGS_CORE.getKey()), is(true));
+//      assertThat(instance.getConfig().hasPath(APOLLO_ARGS_UNPARSED.getKey()), is(true));
+//      assertThat(instance.getConfig().getStringList(APOLLO_ARGS_CORE.getKey()),
+//                 contains("-Dfoo=bar", "--", "xyz", "-Dbar=baz", "abc"));
+//      assertThat(instance.getConfig().getStringList(APOLLO_ARGS_UNPARSED.getKey()),
+//                 contains("xyz", "-Dbar=baz", "abc"));
     }
   }
 
@@ -210,8 +219,14 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("-v")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getInt("logging.verbosity"), is(1));
+      assertThat(loggingVerbosity(instance), is(1));
     }
+  }
+
+  private int loggingVerbosity(Service.Instance instance) {
+    fail();
+//    return instance.getConfig().getInt("logging.verbosity");
+    return Integer.MIN_VALUE;
   }
 
   @Test
@@ -220,7 +235,7 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("--verbose")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getInt("logging.verbosity"), is(1));
+      assertThat(loggingVerbosity(instance), is(1));
     }
   }
 
@@ -230,7 +245,7 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("--verbose", "--verbose")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getInt("logging.verbosity"), is(2));
+      assertThat(loggingVerbosity(instance), is(2));
     }
   }
 
@@ -240,7 +255,7 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("-vvvv")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getInt("logging.verbosity"), is(4));
+      assertThat(loggingVerbosity(instance), is(4));
     }
   }
 
@@ -250,7 +265,7 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("-vv", "-vv")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getInt("logging.verbosity"), is(4));
+      assertThat(loggingVerbosity(instance), is(4));
     }
   }
 
@@ -260,7 +275,7 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("-q")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getInt("logging.verbosity"), is(-3));
+      assertThat(loggingVerbosity(instance), is(-3));
     }
   }
 
@@ -270,7 +285,7 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("--quiet")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getInt("logging.verbosity"), is(-3));
+      assertThat(loggingVerbosity(instance), is(-3));
     }
   }
 
@@ -280,7 +295,7 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("--quiet", "--verbose")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getInt("logging.verbosity"), is(-2));
+      assertThat(loggingVerbosity(instance), is(-2));
     }
   }
 
@@ -290,7 +305,7 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("-c")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getInt("logging.verbosity"), is(-1));
+      assertThat(loggingVerbosity(instance), is(-1));
     }
   }
 
@@ -300,7 +315,7 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("--concise")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getInt("logging.verbosity"), is(-1));
+      assertThat(loggingVerbosity(instance), is(-1));
     }
   }
 
@@ -310,7 +325,7 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("--concise", "--concise")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getInt("logging.verbosity"), is(-2));
+      assertThat(loggingVerbosity(instance), is(-2));
     }
   }
 
@@ -320,7 +335,7 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("-cccc")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getInt("logging.verbosity"), is(-4));
+      assertThat(loggingVerbosity(instance), is(-4));
     }
   }
 
@@ -330,7 +345,7 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("-cc", "-cc")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getInt("logging.verbosity"), is(-4));
+      assertThat(loggingVerbosity(instance), is(-4));
     }
   }
 
@@ -340,7 +355,8 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("--syslog")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getBoolean("logging.syslog"), is(true));
+      fail();
+//      assertThat(instance.getConfig().getBoolean("logging.syslog"), is(true));
     }
   }
 
@@ -350,7 +366,8 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("--syslog=true")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getBoolean("logging.syslog"), is(true));
+      fail();
+//      assertThat(instance.getConfig().getBoolean("logging.syslog"), is(true));
     }
   }
 
@@ -360,7 +377,8 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("--syslog=false")) {
       assertThat(instance.getUnprocessedArgs(), is(empty()));
-      assertThat(instance.getConfig().getBoolean("logging.syslog"), is(false));
+      fail();
+//      assertThat(instance.getConfig().getBoolean("logging.syslog"), is(false));
     }
   }
 
@@ -388,7 +406,8 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start("--hello", "-Dfoo=bar", "bye")) {
       assertThat(instance.getUnprocessedArgs(), contains("--hello", "bye"));
-      assertThat(instance.getConfig().getString("foo"), is("bar"));
+      fail();
+//      assertThat(instance.getConfig().getString("foo"), is("bar"));
     }
   }
 

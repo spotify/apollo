@@ -25,8 +25,6 @@ import com.spotify.apollo.meta.model.MetaInfoBuilder;
 import com.spotify.apollo.test.ServiceHelper;
 import com.spotify.apollo.meta.model.Meta;
 import com.spotify.apollo.meta.model.MetaGatherer;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
 import org.junit.After;
 import org.junit.Test;
@@ -73,8 +71,8 @@ public class MetaApplicationTest {
   }
 
   private void setUpWith(String configName) throws InterruptedException {
-    Config config = ConfigFactory.load(configName);
-    gatherer = Meta.createGatherer(META_INFO, config);
+//    Config config = ConfigFactory.load(configName);
+    gatherer = Meta.createGatherer(META_INFO, null);
 
     app = new MetaApplication(gatherer);
     serviceHelper.start();

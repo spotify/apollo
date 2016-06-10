@@ -24,7 +24,6 @@ import com.google.common.io.Closer;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.environment.EnvironmentFactory.Resolver;
-import com.typesafe.config.Config;
 
 import static com.spotify.apollo.environment.EnvironmentFactory.RoutingContext;
 import static java.util.Objects.requireNonNull;
@@ -69,10 +68,10 @@ class EnvironmentImpl implements Environment {
     return client;
   }
 
-  @Override
-  public Config config() {
-    return configResolver.getConfig(serviceName);
-  }
+//  @Override
+//  public Config config() {
+//    return configResolver.getConfig(serviceName);
+//  }
 
   @Override
   public RoutingEngine routingEngine() {
