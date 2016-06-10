@@ -90,9 +90,7 @@ class EnvironmentModule extends AbstractModule {
     final String backend = apolloConfig.backend();
     final Client unawareClient = incomingRequestAwareClient.asUnawareClient();
 
-    return EnvironmentFactoryBuilder.newBuilder(backend, unawareClient, closer, injector::getInstance)
-//        .withStaticConfig(configNode)
-        .build();
+    return new EnvironmentFactoryImpl(backend, unawareClient, injector::getInstance, closer);
   }
 
   @Provides

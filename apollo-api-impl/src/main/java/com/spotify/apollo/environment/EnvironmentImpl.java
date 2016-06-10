@@ -36,7 +36,6 @@ class EnvironmentImpl implements Environment {
   private final String serviceName;
   private final String domain;
   private final Client client;
-  private final EnvironmentConfigResolver configResolver;
   private final Resolver resolver;
   private final RoutingContext routingContext;
   private final Closer closer;
@@ -45,14 +44,12 @@ class EnvironmentImpl implements Environment {
       String serviceName,
       String domain,
       Client client,
-      EnvironmentConfigResolver configResolver,
       Resolver resolver,
       RoutingContext routingContext,
       Closer closer) {
     this.serviceName = requireNonNull(serviceName, "serviceName");
     this.domain = requireNonNull(domain, "domain");
     this.client = requireNonNull(client, "client");
-    this.configResolver = requireNonNull(configResolver, "configResolver");
     this.resolver = requireNonNull(resolver, "resolver");
     this.routingContext = requireNonNull(routingContext, "routingContext");
     this.closer = requireNonNull(closer, "closer");
@@ -67,11 +64,6 @@ class EnvironmentImpl implements Environment {
   public Client client() {
     return client;
   }
-
-//  @Override
-//  public Config config() {
-//    return configResolver.getConfig(serviceName);
-//  }
 
   @Override
   public RoutingEngine routingEngine() {

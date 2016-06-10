@@ -54,13 +54,6 @@ public interface Environment {
    */
   Client client();
 
-//  /**
-//   * Returns configuration loaded by the framework on an application behalf.
-//   *
-//   * @return loaded configuration node.
-//   */
-//  Config config();
-
   /**
    * Returns the {@link RoutingEngine} of this application.
    *
