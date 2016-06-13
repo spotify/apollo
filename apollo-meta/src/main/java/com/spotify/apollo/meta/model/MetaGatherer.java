@@ -28,7 +28,7 @@ public interface MetaGatherer {
 
   // READ
   Model.MetaInfo info();
-//  Model.LoadedConfig loadedConfig();
+  Model.LoadedConfig loadedConfig();
   Model.EndpointsInfo endpoints();
   Model.ExternalCallsInfo calls();
 

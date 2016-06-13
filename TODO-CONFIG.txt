@@ -1,4 +1,15 @@
 - decide about setting apollo-configuration 'constants' for an application. Lenses?!?
+- fix meta tests/implement configuration support in meta + revisit skipped test in ServiceHelper, or wherever
+- figure out how to do overrides based on CLI/envvars.
+- implement in apollo-standalone, particularly interesting to see how hermes client config will work, with collections
+- consider removing the 'run <pod>' command line args - there doesn't seem to be any reason why apollo itself needs args?
+- go through all TODO comments in the code
+- update README files and other docs
+- go through CLI parsing and env overrides in ServiceImpl to see if something needs to be kept.
+
+
+
+DONE:
 - implement service-specific configuration support
   - use typesafe config!?
   - file name: default based on service name, override? requires standard apollo CLI args/arg
@@ -7,10 +18,3 @@
   - no overrides? if you have a config file, you might as well override things there; why bother with
     overrides? typesafe cfg does allow it, so maybe that's OK. There's also the consistency argument
   - simply do ConfigFactory.load(): typesafe config already has all the necessary override semantics.
-- fix meta tests/implement configuration support in meta + revisit skipped test in ServiceHelper, or wherever
-- figure out how to do overrides based on CLI/envvars.
-- implement in apollo-standalone, particularly interesting to see how hermes client config will work, with collections
-- consider removing the 'run <pod>' command line args - there doesn't seem to be any reason why apollo itself needs args?
-- go through all TODO comments in the code
-- update README files and other docs
-- go through CLI parsing and env overrides in ServiceImpl to see if something needs to be kept.

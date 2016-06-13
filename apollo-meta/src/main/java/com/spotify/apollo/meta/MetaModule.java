@@ -27,6 +27,7 @@ import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.ClientDecorator;
 import com.spotify.apollo.environment.ClientDecorator.Id;
 import com.spotify.apollo.module.AbstractApolloModule;
+import com.typesafe.config.Config;
 
 import java.io.IOException;
 
@@ -64,11 +65,11 @@ public class MetaModule extends AbstractApolloModule {
 
   @Provides
   @Singleton
-  private MetaInfoTracker metaInfoTracker(MetaDescriptor metaDescriptor) {
+  private MetaInfoTracker metaInfoTracker(MetaDescriptor metaDescriptor, Config config) {
     return new MetaInfoTrackerImpl(
         metaDescriptor.descriptor(),
         assemblyName + metaDescriptor.apolloVersion(),
-        null);
+        config);
   }
 
   @Provides
