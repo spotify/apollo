@@ -24,6 +24,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.Closer;
 
 import com.spotify.apollo.module.ApolloModule;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -188,12 +190,15 @@ public interface Service {
      */
     Service getService();
 
-//    /**
-//     * Returns the configuration for this service instance.
-//     *
-//     * @return The configuration for this service instance.
-//     */
-//    Config getConfig();
+    /**
+     * Returns the user (non-Apollo) configuration for this service instance. This configuration
+     * is obtained via an invocation of {@link ConfigFactory#load()}, and thus all the override
+     * mechanisms defined by Typesafe Config are available in order to arrive at the final set of
+     * configuration values.
+     *
+     * @return The user configuration for this service instance.
+    */
+    Config getConfig();
 
     /**
      * Returns a {@link com.google.common.io.Closer} for convenience, where you can register {@link

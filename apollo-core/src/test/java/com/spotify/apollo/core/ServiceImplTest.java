@@ -50,10 +50,12 @@ import javax.inject.Named;
 
 import static com.spotify.apollo.core.Services.INJECT_ARGS;
 import static com.spotify.apollo.core.Services.INJECT_ENVIRONMENT;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -97,6 +99,7 @@ public class ServiceImplTest {
         .withModule(new ArgsAndEnvCapturingModule())
         .build();
 
+    // TODO: should possibly remove this in favour of just keeping the args in the instance?
     try (Service.Instance instance = service.start("arg1", "arg2", "argC")) {
       assertThat(instance.resolve(Args.class).args, equalTo(ImmutableList.of("arg1", "arg2", "argC")));
     }
@@ -112,6 +115,17 @@ public class ServiceImplTest {
 
     try (Service.Instance instance = service.start(new String[] { "-Dconfig=value" }, envMap)) {
       assertThat(instance.resolve(Env.class).env, equalTo(envMap));
+    }
+  }
+
+  @Test
+  public void shouldLoadTypesafeConfig() throws Exception {
+    Service service = ServiceImpl.builder("test")
+        .build();
+
+    try (Service.Instance instance = service.start()) {
+      // apollo.version is defined in reference.conf in apollo.core
+      assertThat(instance.getConfig().getString("apollo.version"), not(nullValue()));
     }
   }
 

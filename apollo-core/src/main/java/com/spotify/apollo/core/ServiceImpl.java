@@ -36,6 +36,8 @@ import com.google.inject.Stage;
 import com.google.inject.name.Names;
 
 import com.spotify.apollo.module.ApolloModule;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +56,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.collect.Iterables.concat;
+import static java.util.Objects.requireNonNull;
 
 class ServiceImpl implements Service {
 
@@ -80,8 +83,8 @@ class ServiceImpl implements Service {
     this.envVarPrefix = envVarPrefix;
     this.watchdogTimeout = watchdogTimeout;
     this.watchdogTimeoutUnit = watchdogTimeoutUnit;
-    this.serviceName = Objects.requireNonNull(serviceName);
-    this.modules = Objects.requireNonNull(modules);
+    this.serviceName = requireNonNull(serviceName);
+    this.modules = requireNonNull(modules);
     this.runtime = runtime;
     this.moduleDiscovery = moduleDiscovery;
     this.shutdownInterrupt = shutdownInterrupt;
@@ -202,7 +205,9 @@ class ServiceImpl implements Service {
 
     return new InstanceImpl(
         injector,
-        shutdownRequested, stopped);
+        shutdownRequested,
+        stopped,
+        ConfigFactory.load());
   }
 
   private Set<ApolloModule> discoverAllModules() {
@@ -403,7 +408,7 @@ class ServiceImpl implements Service {
         boolean moduleDiscovery,
         boolean shutdownInterrupt,
         boolean cliHelp) {
-      this.serviceName = Objects.requireNonNull(serviceName);
+      this.serviceName = requireNonNull(serviceName);
       this.moduleBuilder = moduleBuilder;
       this.envVarPrefix = envVarPrefix;
       this.watchdogTimeout = watchdogTimeout;
@@ -513,18 +518,25 @@ class ServiceImpl implements Service {
     private final Injector injector;
     private final CountDownLatch shutdownRequested;
     private final CountDownLatch stopped;
+    private final Config config;
 
     InstanceImpl(
         Injector injector,
-        CountDownLatch shutdownRequested, CountDownLatch stopped) {
-      this.injector = injector;
-      this.shutdownRequested = shutdownRequested;
-      this.stopped = stopped;
+        CountDownLatch shutdownRequested, CountDownLatch stopped, Config config) {
+      this.injector = requireNonNull(injector);
+      this.shutdownRequested = requireNonNull(shutdownRequested);
+      this.stopped = requireNonNull(stopped);
+      this.config = requireNonNull(config);
     }
 
     @Override
     public Service getService() {
       return ServiceImpl.this;
+    }
+
+    @Override
+    public Config getConfig() {
+      return config;
     }
 
     @Override
