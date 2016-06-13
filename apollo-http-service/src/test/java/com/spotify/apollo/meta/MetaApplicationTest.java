@@ -25,6 +25,8 @@ import com.spotify.apollo.meta.model.MetaInfoBuilder;
 import com.spotify.apollo.test.ServiceHelper;
 import com.spotify.apollo.meta.model.Meta;
 import com.spotify.apollo.meta.model.MetaGatherer;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 import org.junit.After;
 import org.junit.Test;
@@ -32,6 +34,7 @@ import org.junit.Test;
 import okio.ByteString;
 
 import static com.spotify.apollo.meta.model.Model.MetaInfo;
+import static com.spotify.apollo.test.unit.ResponseMatchers.hasStatus;
 import static com.spotify.apollo.test.unit.StatusTypeMatchers.withCode;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
@@ -71,8 +74,8 @@ public class MetaApplicationTest {
   }
 
   private void setUpWith(String configName) throws InterruptedException {
-//    Config config = ConfigFactory.load(configName);
-    gatherer = Meta.createGatherer(META_INFO, null);
+    Config config = ConfigFactory.load(configName);
+    gatherer = Meta.createGatherer(META_INFO, config);
 
     app = new MetaApplication(gatherer);
     serviceHelper.start();
@@ -84,7 +87,7 @@ public class MetaApplicationTest {
     Response<ByteString> response = serviceHelper.request("GET", API_BASE + "/info")
         .toCompletableFuture().get();
 
-    assertThat(response.status(), withCode(200));
+    assertThat(response, hasStatus(withCode(200)));
 
     String responseJson = response.payload().get().utf8();
 

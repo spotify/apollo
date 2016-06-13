@@ -31,6 +31,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * A service that is controlled by Apollo.
@@ -160,6 +161,12 @@ public interface Service {
     Builder withWatchdogTimeout(long timeout, TimeUnit unit);
 
     /**
+     * Applies the supplied function to the service-specific Config object before making it
+     * available.
+     */
+    Builder withConfigDecorator(Function<Config, Config> decorator);
+
+    /**
      * The Java runtime to use when constructing service instances.  This is only respected by
      * Apollo itself; the service instance(s) configured by Apollo might decide to use the global
      * runtime. The default is to use the global JVM runtime.
@@ -190,6 +197,7 @@ public interface Service {
      */
     Service getService();
 
+    // TODO: is this really needed here?
     /**
      * Returns the user (non-Apollo) configuration for this service instance. This configuration
      * is obtained via an invocation of {@link ConfigFactory#load()}, and thus all the override

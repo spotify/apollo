@@ -28,6 +28,8 @@ import com.google.inject.Provides;
 
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.module.ApolloModule;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -126,6 +128,21 @@ public class ServiceImplTest {
     try (Service.Instance instance = service.start()) {
       // apollo.version is defined in reference.conf in apollo.core
       assertThat(instance.getConfig().getString("apollo.version"), not(nullValue()));
+    }
+  }
+
+  @Test
+  public void shouldApplyConfigDecorator() throws Exception {
+    Config override =
+        ConfigFactory.parseMap(ImmutableMap.of("apollo.version", "not a valid version"));
+
+    Service service = ServiceImpl.builder("test")
+        .withConfigDecorator(override::withFallback)
+        .build();
+
+    try (Service.Instance instance = service.start()) {
+      // apollo.version is defined in reference.conf in apollo.core
+      assertThat(instance.getConfig().getString("apollo.version"), is("not a valid version"));
     }
   }
 

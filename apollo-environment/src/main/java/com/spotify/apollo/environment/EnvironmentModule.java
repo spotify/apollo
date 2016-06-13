@@ -29,6 +29,7 @@ import com.spotify.apollo.Client;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.EnvironmentFactory.RoutingContext;
+import com.typesafe.config.Config;
 
 import java.util.Comparator;
 import java.util.List;
@@ -104,8 +105,9 @@ class EnvironmentModule extends AbstractModule {
   Environment environment(
       @Named(Services.INJECT_SERVICE_NAME) String serviceName,
       EnvironmentFactory environmentFactory,
-      RoutingContext routingContext) {
-    return environmentFactory.create(serviceName, routingContext);
+      RoutingContext routingContext,
+      Config config) {
+    return environmentFactory.create(serviceName, routingContext, config);
   }
 
   public static EnvironmentModule create(Comparator<ClientDecorator.Id> clientDecoratorComparator) {

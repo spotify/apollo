@@ -20,6 +20,7 @@
 package com.spotify.apollo.environment;
 
 import com.spotify.apollo.Environment;
+import com.typesafe.config.Config;
 
 import static com.spotify.apollo.Environment.RoutingEngine;
 
@@ -30,11 +31,11 @@ public interface EnvironmentFactory {
 
   /**
    * Create a new application environment.
-   *
    * @param serviceName     The application name
    * @param routingContext  A routing context for the created {@link Environment}
+   * @param config          Service-specific configuration
    */
-  Environment create(String serviceName, RoutingContext routingContext);
+  Environment create(String serviceName, RoutingContext routingContext, Config config);
 
   /**
    * Creates a {@link RoutingContext} to be used with an {@link Environment}.

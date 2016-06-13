@@ -70,7 +70,6 @@ public class ApolloEnvironmentModuleTest {
     ApolloEnvironmentModule appModule = ApolloEnvironmentModule.create(config, (l, r) -> 0);
     service = Services.usingName("ping")
         .withModule(appModule)
-        .withModule(new ConfigModule())
         .withModule(MetaModule.create("test"));
   }
 

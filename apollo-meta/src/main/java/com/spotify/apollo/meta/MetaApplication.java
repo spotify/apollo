@@ -65,8 +65,8 @@ public class MetaApplication implements RouteProvider {
     return new Result<>(gatherer.info());
   }
 
-  Result<String> config() {
-    return new Result<>("floopity!");
+  Result<Model.LoadedConfig> config() {
+    return new Result<>(gatherer.loadedConfig());
   }
 
   Result<Model.EndpointsInfo> endpoints() {

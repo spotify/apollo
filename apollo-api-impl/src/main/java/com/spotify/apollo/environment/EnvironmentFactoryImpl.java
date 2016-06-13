@@ -23,6 +23,7 @@ import com.google.common.io.Closer;
 
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Environment;
+import com.typesafe.config.Config;
 
 class EnvironmentFactoryImpl implements EnvironmentFactory {
 
@@ -43,9 +44,9 @@ class EnvironmentFactoryImpl implements EnvironmentFactory {
   }
 
   @Override
-  public Environment create(String serviceName, RoutingContext routingContext) {
+  public Environment create(String serviceName, RoutingContext routingContext, Config config) {
     return new EnvironmentImpl(
-        serviceName, backendDomain, client, resolver, routingContext, closer);
+        serviceName, backendDomain, client, resolver, routingContext, closer, config);
   }
 
   @Override

@@ -24,6 +24,7 @@ import com.google.common.io.Closer;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.environment.EnvironmentFactory.Resolver;
+import com.typesafe.config.Config;
 
 import static com.spotify.apollo.environment.EnvironmentFactory.RoutingContext;
 import static java.util.Objects.requireNonNull;
@@ -39,6 +40,7 @@ class EnvironmentImpl implements Environment {
   private final Resolver resolver;
   private final RoutingContext routingContext;
   private final Closer closer;
+  private final Config config;
 
   EnvironmentImpl(
       String serviceName,
@@ -46,13 +48,14 @@ class EnvironmentImpl implements Environment {
       Client client,
       Resolver resolver,
       RoutingContext routingContext,
-      Closer closer) {
+      Closer closer, Config config) {
     this.serviceName = requireNonNull(serviceName, "serviceName");
     this.domain = requireNonNull(domain, "domain");
     this.client = requireNonNull(client, "client");
     this.resolver = requireNonNull(resolver, "resolver");
     this.routingContext = requireNonNull(routingContext, "routingContext");
     this.closer = requireNonNull(closer, "closer");
+    this.config = requireNonNull(config);
   }
 
   @Override
@@ -78,5 +81,10 @@ class EnvironmentImpl implements Environment {
   @Override
   public <T> T resolve(Class<T> clazz) {
     return resolver.resolve(clazz);
+  }
+
+  @Override
+  public Config config() {
+    return config;
   }
 }

@@ -28,6 +28,8 @@ import com.spotify.apollo.Response;
 import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Route;
 import com.spotify.apollo.route.SyncHandler;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +42,6 @@ import okio.ByteString;
 import static com.spotify.apollo.environment.EnvironmentFactory.RoutingContext;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -62,15 +63,20 @@ public class EnvironmentFactoryImplTest {
 
   EnvironmentFactoryImpl sut;
 
+  Config config;
+
+
   @Before
   public void setUp() throws Exception {
     sut = new EnvironmentFactoryImpl(BACKEND_DOMAIN, client, resolver, closer);
+
+    config = ConfigFactory.empty();
   }
 
   @Test
   public void shouldResolveThroughResolver() throws Exception {
     when(resolver.resolve(String.class)).thenReturn("hello world");
-    final Environment environment = sut.create(SERVICE_NAME, routingContext);
+    final Environment environment = sut.create(SERVICE_NAME, routingContext, config);
 
     final String resolve = environment.resolve(String.class);
     assertEquals("hello world", resolve);
@@ -80,7 +86,7 @@ public class EnvironmentFactoryImplTest {
   public void shouldCollectRegisteredRoutes() throws Exception {
 
     final RoutingContext routingContext = sut.createRoutingContext();
-    final Environment environment = sut.create(SERVICE_NAME, routingContext);
+    final Environment environment = sut.create(SERVICE_NAME, routingContext, config);
 
     final Route<AsyncHandler<Response<ByteString>>> route1 =
         Route.sync("GET", "/f1", handler());
@@ -106,7 +112,7 @@ public class EnvironmentFactoryImplTest {
   public void shouldThrowIfUsedAfterInit() throws Exception {
 
     final RoutingContext routingContext = sut.createRoutingContext();
-    final Environment environment = sut.create(SERVICE_NAME, routingContext);
+    final Environment environment = sut.create(SERVICE_NAME, routingContext, config);
 
     final Route<AsyncHandler<Response<ByteString>>> route =
         Route.sync("GET", "/f1", handler());

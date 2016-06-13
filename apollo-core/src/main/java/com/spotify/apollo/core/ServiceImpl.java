@@ -19,7 +19,6 @@
  */
 package com.spotify.apollo.core;
 
-import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -46,12 +45,12 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.ImmutableList.of;
@@ -75,11 +74,13 @@ class ServiceImpl implements Service {
   private final boolean moduleDiscovery;
   private final boolean shutdownInterrupt;
   private final boolean cliHelp;
+  private final Function<Config, Config> configDecorator;
 
   private ServiceImpl(
       String serviceName, ImmutableSet<ApolloModule> modules, String envVarPrefix,
       long watchdogTimeout, TimeUnit watchdogTimeoutUnit, Runtime runtime,
-      boolean moduleDiscovery, boolean shutdownInterrupt, boolean cliHelp) {
+      boolean moduleDiscovery, boolean shutdownInterrupt, boolean cliHelp,
+      Function<Config, Config> configDecorator) {
     this.envVarPrefix = envVarPrefix;
     this.watchdogTimeout = watchdogTimeout;
     this.watchdogTimeoutUnit = watchdogTimeoutUnit;
@@ -89,6 +90,7 @@ class ServiceImpl implements Service {
     this.moduleDiscovery = moduleDiscovery;
     this.shutdownInterrupt = shutdownInterrupt;
     this.cliHelp = cliHelp;
+    this.configDecorator = requireNonNull(configDecorator);
   }
 
   @Override
@@ -136,13 +138,15 @@ class ServiceImpl implements Service {
 //      final Config config = addEnvOverrides(env, parsedArguments).resolve();
 
       final Set<ApolloModule> allModules = discoverAllModules();
+      final Config config = configDecorator.apply(ConfigFactory.load());
+
       final CoreModule coreModule =
-          new CoreModule(this, signaller, closer, ImmutableList.copyOf(args), env);
+          new CoreModule(this, signaller, closer, ImmutableList.copyOf(args), env, config);
 
       final InstanceImpl instance = initInstance(
           coreModule, allModules, closer,
           shutdownRequested,
-          stopped);
+          stopped, config);
 
       started.set(true);
       return instance;
@@ -178,7 +182,8 @@ class ServiceImpl implements Service {
       Set<ApolloModule> modules,
       Closer closer,
       CountDownLatch shutdownRequested,
-      CountDownLatch stopped) {
+      CountDownLatch stopped,
+      Config config) {
     List<ApolloModule> modulesSortedOnPriority = modules.stream()
         .sorted(Ordering.natural()
                     .reverse()
@@ -207,7 +212,7 @@ class ServiceImpl implements Service {
         injector,
         shutdownRequested,
         stopped,
-        ConfigFactory.load());
+        config);
   }
 
   private Set<ApolloModule> discoverAllModules() {
@@ -399,6 +404,7 @@ class ServiceImpl implements Service {
     private boolean moduleDiscovery;
     private boolean shutdownInterrupt;
     private boolean cliHelp;
+    private Function<Config, Config> configDecorator = config -> config;
 
     BuilderImpl(
         String serviceName,
@@ -445,6 +451,12 @@ class ServiceImpl implements Service {
     }
 
     @Override
+    public Builder withConfigDecorator(Function<Config, Config> decorator) {
+      this.configDecorator = decorator;
+      return this;
+    }
+
+    @Override
     public Builder withRuntime(Runtime runtime) {
       this.runtime = runtime;
       return this;
@@ -466,11 +478,11 @@ class ServiceImpl implements Service {
     public Service build() {
       return new ServiceImpl(
           serviceName, moduleBuilder.build(), envVarPrefix, watchdogTimeout, watchdogTimeoutUnit,
-          runtime, moduleDiscovery, shutdownInterrupt, cliHelp);
+          runtime, moduleDiscovery, shutdownInterrupt, cliHelp, configDecorator);
     }
   }
 
-  private enum ModulePriorityOrdering implements Function<ApolloModule, Comparable> {
+  private enum ModulePriorityOrdering implements com.google.common.base.Function<ApolloModule, Comparable> {
     INSTANCE;
 
     @Override
@@ -606,15 +618,18 @@ class ServiceImpl implements Service {
     private final Closer closer;
     private final ImmutableList<String> unprocessedArgs;
     private final Map<String, String> env;
+    private final Config config;
 
     CoreModule(
         ServiceImpl service, Signaller signaller,
-        Closer closer, ImmutableList<String> unprocessedArgs, Map<String, String> env) {
+        Closer closer, ImmutableList<String> unprocessedArgs, Map<String, String> env,
+        Config config) {
       this.service = service;
       this.signaller = signaller;
       this.closer = closer;
       this.unprocessedArgs = unprocessedArgs;
       this.env = env;
+      this.config = requireNonNull(config);
     }
 
     @Override
@@ -631,6 +646,7 @@ class ServiceImpl implements Service {
       bind(SERVICE_NAME).toInstance(service.getServiceName());
       bind(ARGS).toInstance(unprocessedArgs);
       bind(ENVIRONMENT).toInstance(env);
+      bind(Config.class).toInstance(config);
     }
 
     @Override

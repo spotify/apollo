@@ -24,6 +24,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.inject.Provides;
 
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Client;
@@ -38,8 +39,11 @@ import com.spotify.apollo.environment.ApolloEnvironmentModule;
 import com.spotify.apollo.http.client.HttpClientModule;
 import com.spotify.apollo.http.client.OkHttpClientConfiguration;
 import com.spotify.apollo.meta.MetaModule;
+import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.module.ApolloModule;
 import com.spotify.apollo.request.RequestHandler;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 import org.junit.Rule;
 import org.junit.rules.TestRule;
@@ -156,7 +160,7 @@ import static com.spotify.apollo.test.ForwardingStubClientModule.STUB_CLIENT;
 public class ServiceHelper implements TestRule, Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(ServiceHelper.class);
-  public static final String[] NO_ARGS = new String[0];
+  private static final String[] NO_ARGS = new String[0];
   private static final String DEFAULT_SCHEME = "http";
 
   // https://tools.ietf.org/html/rfc3986#section-3.1 Scheme
@@ -260,7 +264,7 @@ public class ServiceHelper implements TestRule, Closeable {
    * defined through this method will be overlayed over any existing config loaded through the
    * given service name when creating this ServiceHelper.
    *
-   * TODO: note that this is a convenience for the equivalent method of using a -D argument
+   * TODO: note that this is a convenience for the equivalent method of using a -D argument?
    *
    * @param key    The key to define
    * @param value  The value to associate with the key
@@ -459,10 +463,13 @@ public class ServiceHelper implements TestRule, Closeable {
 
     currentHelperFuture = executor.submit(() -> {
       try {
+        Config overrides = ConfigFactory.parseMap(configurationArguments, "service-helper-overrides");
+
         String domain = configurationArguments.getOrDefault(
             Services.CommonConfigKeys.APOLLO_DOMAIN.getKey(), "service-helper");
         Service.Builder serviceBuilder = Services.usingName(serviceName)
             .usingModuleDiscovery(false)
+            .withConfigDecorator(cfg -> overrides.withFallback(cfg))
             .withModule(
                 ApolloEnvironmentModule.create(ApolloConfig.forDomain(domain),
                                                beginWith(OUTGOING_CALLS, STUB_CLIENT)

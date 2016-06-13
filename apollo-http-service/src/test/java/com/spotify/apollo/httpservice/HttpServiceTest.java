@@ -64,6 +64,7 @@ public class HttpServiceTest {
       try {
         HttpService.boot(appInit, "test", HttpServiceConfiguration.create("foo"), waiter, "run", "foo");
       } catch (Exception e) {
+        e.printStackTrace();
         fail(e.getMessage());
       }
     }).start();
@@ -112,7 +113,7 @@ public class HttpServiceTest {
     }
 
     Service.Instance waitForInstance() throws InterruptedException {
-      latch.await(2000, TimeUnit.MILLISECONDS);
+      latch.await(3000, TimeUnit.MILLISECONDS);
       assertNotNull(instance);
       return instance;
     }

@@ -116,9 +116,7 @@ public class ServiceHelperTest {
   }
 
   @Test
-  @Ignore
   public void shouldSeeConfigValues() throws Exception {
-    // TODO: revisit this when I get to looking into standardised service-specific configuration
     String response = doGet("/conf-key");
     assertThat(response, is(TEST_CONFIG_THING));
   }

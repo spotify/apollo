@@ -25,6 +25,7 @@ import com.spotify.apollo.Request;
 import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Route;
 import com.spotify.apollo.route.RouteProvider;
+import com.typesafe.config.Config;
 
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Stream;
@@ -38,7 +39,8 @@ final class SomeApplication implements RouteProvider {
   private final SomeService someService;
 
   private SomeApplication(Environment environment, SomeService someService, CloseCall closeCall) {
-    this.someValue = "no value found for some.key";
+    Config config = environment.config();
+    this.someValue = config.hasPath("some.key") ? config.getString("some.key") : "no value found for some.key";
     this.someService = someService;
     this.domain = environment.domain();
 
