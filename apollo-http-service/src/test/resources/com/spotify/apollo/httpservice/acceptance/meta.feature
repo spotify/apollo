@@ -1,3 +1,4 @@
+@Focus
 Feature: Metadata collection features
 
   Background:

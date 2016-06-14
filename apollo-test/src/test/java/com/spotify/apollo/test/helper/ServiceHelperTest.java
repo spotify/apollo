@@ -24,6 +24,7 @@ import com.google.common.base.Stopwatch;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
 import com.spotify.apollo.core.Services;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.test.ServiceHelper;
@@ -45,6 +46,8 @@ import java.util.concurrent.TimeUnit;
 
 import okio.ByteString;
 
+import static com.spotify.apollo.test.unit.ResponseMatchers.hasStatus;
+import static com.spotify.apollo.test.unit.StatusTypeMatchers.withCode;
 import static okio.ByteString.encodeUtf8;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
@@ -274,6 +277,27 @@ public class ServiceHelperTest {
     thrown.expectMessage("Illegal scheme format");
 
     ServiceHelper.create(this::appInit, "test-service").scheme("http://"); // invalid
+  }
+
+  @Test
+  public void shouldSupportMetaApiByDefault() throws Exception {
+    Response<ByteString> response = serviceHelper.request("GET", "/_meta/0/info")
+        .toCompletableFuture().get();
+
+    assertThat(response, hasStatus(withCode(Status.OK)));
+  }
+
+  @Test
+  public void shouldSupportTurningOffMetaApi() throws Exception {
+    ServiceHelper noMeta = ServiceHelper.create(this::appInit, "test-service")
+        .disableMetaApi();
+
+    noMeta.start();
+
+    Response<ByteString> response = noMeta.request("GET", "/_meta/0/info")
+        .toCompletableFuture().get();
+
+    assertThat(response, hasStatus(withCode(Status.NOT_FOUND)));
   }
 
   private static void tooSlow(Environment environment) {

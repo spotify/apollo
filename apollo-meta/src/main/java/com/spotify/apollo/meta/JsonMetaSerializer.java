@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Payloads;
 import com.spotify.apollo.Serializer;
+import com.typesafe.config.ConfigValue;
 
 import io.norberg.automatter.jackson.AutoMatterModule;
 import okio.ByteString;
@@ -44,8 +45,8 @@ public class JsonMetaSerializer implements Serializer {
     final SimpleModule configModule = new SimpleModule();
     final SimpleModule configModuleWithOrigins = new SimpleModule();
 
-//    configModule.addSerializer(ConfigValue.class, new TypesafeConfigSerializer(false));
-//    configModuleWithOrigins.addSerializer(ConfigValue.class, new TypesafeConfigSerializer(true));
+    configModule.addSerializer(ConfigValue.class, new TypesafeConfigSerializer(false));
+    configModuleWithOrigins.addSerializer(ConfigValue.class, new TypesafeConfigSerializer(true));
 
     MAPPER = new ObjectMapper()
         .registerModule(new AutoMatterModule())

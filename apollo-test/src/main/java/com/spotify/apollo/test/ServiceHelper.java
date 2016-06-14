@@ -24,7 +24,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.google.inject.Provides;
 
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Client;
@@ -39,7 +38,6 @@ import com.spotify.apollo.environment.ApolloEnvironmentModule;
 import com.spotify.apollo.http.client.HttpClientModule;
 import com.spotify.apollo.http.client.OkHttpClientConfiguration;
 import com.spotify.apollo.meta.MetaModule;
-import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.module.ApolloModule;
 import com.spotify.apollo.request.RequestHandler;
 import com.typesafe.config.Config;
@@ -68,6 +66,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import okio.ByteString;
 
@@ -245,7 +244,7 @@ public class ServiceHelper implements TestRule, Closeable {
    * @return This ServiceHelper instance
    */
   public ServiceHelper disableMetaApi() {
-    return conf("apollo.metaApi", "false");
+    return conf("apollo.enableMetaApi", "false");
   }
 
   /**
@@ -471,7 +470,8 @@ public class ServiceHelper implements TestRule, Closeable {
             .usingModuleDiscovery(false)
             .withConfigDecorator(cfg -> overrides.withFallback(cfg))
             .withModule(
-                ApolloEnvironmentModule.create(ApolloConfig.forDomain(domain),
+                ApolloEnvironmentModule.create(ApolloConfig.forDomain(domain)
+                                                   .overriddenBy(filterAndRemovePrefix("apollo", configurationArguments)),
                                                beginWith(OUTGOING_CALLS, STUB_CLIENT)
                                                    .endWith(HTTP_CLIENT)
                 ))
@@ -517,6 +517,15 @@ public class ServiceHelper implements TestRule, Closeable {
     if (instance == null) {
       throw new IllegalStateException("Service failed during startup");
     }
+  }
+
+  // TODO: move to some util class? This is probably useful elsewhere as well
+  private Map<String, String> filterAndRemovePrefix(String keyPrefix, Map<String, String> overrides) {
+    String prefix = keyPrefix + ".";
+    return overrides.entrySet().stream()
+        .filter(e -> e.getKey().startsWith(prefix))
+        .collect(Collectors.toMap(e -> e.getKey().substring(prefix.length()),
+                                  Map.Entry::getValue));
   }
 
   private void instanceCreated(Service.Instance instance, RequestHandler requestHandler) {

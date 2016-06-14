@@ -19,10 +19,17 @@
  */
 package com.spotify.apollo.environment;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+
 /**
  * Configuration object for common Apollo configurable settings.
  */
 public class ApolloConfig {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ApolloConfig.class);
 
   private final String backend;
   private final boolean enableIncomingRequestLogging;
@@ -55,5 +62,35 @@ public class ApolloConfig {
 
   public static ApolloConfig forDomain(String backend) {
     return new ApolloConfig(backend, true, true, true);
+  }
+
+  public ApolloConfig overriddenBy(Map<String, String> overrides) {
+    String newBackend = backend;
+    Boolean newEnableIncomingRequestLogging = enableIncomingRequestLogging;
+    Boolean newEnableOutgoingRequestLogging = enableOutgoingRequestLogging;
+    Boolean newEnableMetaApi= enableMetaApi;
+
+    for (Map.Entry<String, String> entry : overrides.entrySet()) {
+      switch (entry.getKey()) {
+        case "backend":
+          newBackend = entry.getValue();
+          break;
+        case "enableIncomingRequestLogging":
+          newEnableIncomingRequestLogging = Boolean.valueOf(entry.getValue());
+          break;
+        case "enableOutgoingRequestLogging":
+          newEnableOutgoingRequestLogging = Boolean.valueOf(entry.getValue());
+          break;
+        case "enableMetaApi":
+          newEnableMetaApi = Boolean.valueOf(entry.getValue());
+          break;
+        default:
+          LOG.warn("unrecognised apollo config key: '{}' (value {})", entry.getKey(),
+                   entry.getValue());
+
+      }
+    }
+
+    return new ApolloConfig(newBackend, newEnableIncomingRequestLogging, newEnableOutgoingRequestLogging, newEnableMetaApi);
   }
 }
