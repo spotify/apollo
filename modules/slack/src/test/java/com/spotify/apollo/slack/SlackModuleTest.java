@@ -20,6 +20,9 @@
 package com.spotify.apollo.slack;
 
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -30,16 +33,14 @@ public class SlackModuleTest {
 
   @Test
   public void loadWithWebhook() {
-    fail();
-//    final Config config = ConfigFactory.parseString(
-//        "slack.webhook: \"https://hooks.slack.com/services/smth\"");
-//    assertTrue(SlackProvider.SlackConfig.enabled(config));
+    final Config config = ConfigFactory.parseString(
+        "slack.webhook: \"https://hooks.slack.com/services/smth\"");
+    assertTrue(SlackProvider.SlackConfig.enabled(config));
   }
 
   @Test
   public void dontLoadWithoutWebhook() {
-    fail();
-//    assertFalse(SlackProvider.SlackConfig.enabled(ConfigFactory.empty()));
+    assertFalse(SlackProvider.SlackConfig.enabled(ConfigFactory.empty()));
   }
 
 }

@@ -26,6 +26,7 @@ import com.google.inject.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spotify.apollo.core.Service;
+import com.typesafe.config.Config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,8 +69,7 @@ class SlackProvider implements Provider<Slack> {
       return new NoopSlackImpl();
     }
 
-//    SlackConfig slackConfig = SlackConfig.fromConfig(config, serviceName);
-    return new SlackImpl(null);
+    return new SlackImpl(config);
   }
 
   private static class SlackImpl implements Slack {
@@ -119,7 +119,7 @@ class SlackProvider implements Provider<Slack> {
     }
   }
 
-  static class NoopSlackImpl implements Slack {
+  private static class NoopSlackImpl implements Slack {
     @Override
     public boolean post(String message) {
       LOG.warn("Didn't post to Slack because module is disabled");
@@ -140,14 +140,19 @@ class SlackProvider implements Provider<Slack> {
     private final String startupMsg;
     private final String shutdownMsg;
 
-//    public static SlackConfig fromConfig(Config config, String serviceName) {
-//      String webhook = config.getString(CONFIG_PATH_WEBHOOK);
-//      String username = getOrDefault(config, CONFIG_PATH_USERNAME, serviceName);
-//      String emoji = getOrDefault(config, CONFIG_PATH_EMOJI, ":spoticon:");
-//      String startupMsg = getOrDefault(config, CONFIG_PATH_MSG_STARTUP, "");
-//      String shutdwonMsg = getOrDefault(config, CONFIG_PATH_MSG_SHUTDOWN, "");
-//      return new SlackConfig(enabled, webhook, username, emoji, startupMsg, shutdwonMsg);
-//    }
+    public static boolean enabled(Config config) {
+      return config.hasPath(CONFIG_PATH_WEBHOOK) &&
+             getOrDefault(config, CONFIG_PATH_ENABLED, true);
+    }
+
+    public static SlackConfig fromConfig(Config config, String serviceName) {
+      String webhook = config.getString(CONFIG_PATH_WEBHOOK);
+      String username = getOrDefault(config, CONFIG_PATH_USERNAME, serviceName);
+      String emoji = getOrDefault(config, CONFIG_PATH_EMOJI, ":spoticon:");
+      String startupMsg = getOrDefault(config, CONFIG_PATH_MSG_STARTUP, "");
+      String shutdwonMsg = getOrDefault(config, CONFIG_PATH_MSG_SHUTDOWN, "");
+      return new SlackConfig(enabled(config), webhook, username, emoji, startupMsg, shutdwonMsg);
+    }
 
     SlackConfig(boolean enabled, String webhook, String username, String emoji, String startupMsg,
                 String shutdownMsg) {
@@ -184,4 +189,11 @@ class SlackProvider implements Provider<Slack> {
     }
   }
 
+  private static boolean getOrDefault(Config config, String path, boolean defaultValue) {
+    return config.hasPath(path) ? config.getBoolean(path) : defaultValue;
+  }
+
+  private static String getOrDefault(Config config, String path, String defaultValue) {
+    return config.hasPath(path) ? config.getString(path) : defaultValue;
+  }
 }
