@@ -20,6 +20,7 @@
 package com.spotify.apollo.entity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spotify.apollo.Exploratory;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -29,6 +30,7 @@ import okio.ByteString;
 /**
  * Codec for writing and reading values using a Jackson {@link ObjectMapper}.
  */
+@Exploratory
 public class JacksonEntityCodec implements EntityCodec {
 
   private static final String DEFAULT_CONTENT_TYPE = "application/json";
