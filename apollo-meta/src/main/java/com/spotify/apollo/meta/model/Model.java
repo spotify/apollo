@@ -44,6 +44,7 @@ public interface Model {
     double serviceUptime();
   }
 
+  // TODO
   @AutoMatter
   interface LoadedConfig {
     ConfigObject spNode();

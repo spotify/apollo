@@ -34,6 +34,7 @@ import org.junit.Test;
 import okio.ByteString;
 
 import static com.spotify.apollo.meta.model.Model.MetaInfo;
+import static com.spotify.apollo.test.unit.ResponseMatchers.hasStatus;
 import static com.spotify.apollo.test.unit.StatusTypeMatchers.withCode;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
@@ -86,7 +87,7 @@ public class MetaApplicationTest {
     Response<ByteString> response = serviceHelper.request("GET", API_BASE + "/info")
         .toCompletableFuture().get();
 
-    assertThat(response.status(), withCode(200));
+    assertThat(response, hasStatus(withCode(200)));
 
     String responseJson = response.payload().get().utf8();
 

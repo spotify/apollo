@@ -60,6 +60,8 @@ The API is summarized in the
 
 ### Consistent configuration
 
+TODO: change this documentation!
+
 A core principle of Apollo Core is that everything should be configured via
 the service configuration.  No environment variables, weird
 command-line options or oracles.  Apollo Core then defines a standard way of

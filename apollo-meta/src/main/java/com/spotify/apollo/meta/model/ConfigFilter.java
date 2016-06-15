@@ -21,6 +21,7 @@ package com.spotify.apollo.meta.model;
 
 import com.google.common.collect.Sets;
 
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import com.typesafe.config.ConfigValue;
@@ -93,7 +94,7 @@ final class ConfigFilter {
     return result;
   }
 
-  static boolean isFiltered(String key, Set<String> filter) {
+  private static boolean isFiltered(String key, Set<String> filter) {
     for (String filterSubstring : filter) {
       if (key.contains(filterSubstring)) {
         return true;

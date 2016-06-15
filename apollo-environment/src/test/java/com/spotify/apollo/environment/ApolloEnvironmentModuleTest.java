@@ -19,8 +19,6 @@
  */
 package com.spotify.apollo.environment;
 
-import com.google.common.collect.ImmutableMap;
-
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.Request;
@@ -40,7 +38,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,8 +45,10 @@ import java.util.function.Consumer;
 
 import okio.ByteString;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.argThat;
@@ -59,14 +58,16 @@ import static org.mockito.Mockito.when;
 
 public class ApolloEnvironmentModuleTest {
 
-  static final String[] ZERO_ARGS = new String[0];
+  private static final String[] ZERO_ARGS = new String[0];
 
-  ApolloEnvironmentModule appModule;
-  Service.Builder service;
+  private Service.Builder service;
+  private ApolloConfig config;
 
   @Before
   public void setUp() throws Exception {
-    appModule = ApolloEnvironmentModule.create((l, r) -> 0);
+    config = ApolloConfig.forDomain("test-backend");
+
+    ApolloEnvironmentModule appModule = ApolloEnvironmentModule.create(config, (l, r) -> 0);
     service = Services.usingName("ping")
         .withModule(appModule)
         .withModule(MetaModule.create("test"));
@@ -127,32 +128,16 @@ public class ApolloEnvironmentModuleTest {
 
   private static void validateEnv(Environment e) {
     assertNotNull(e);
-    assertNotNull(e.config());
     assertNotNull(e.client());
     assertNotNull(e.routingEngine());
 
-    assertEquals("", e.domain());
+    assertEquals("test-backend", e.domain());
   }
 
   @Test
-  public void shouldSetUpConfig() throws Exception {
-    final AtomicReference<Environment> envReference = new AtomicReference<>();
-
-    final Map<String, String> env = ImmutableMap.of("APOLLO_APOLLO_DOMAIN", "my-domain");
-
-    try (Service.Instance i = service.build().start(ZERO_ARGS, env)) {
-      final ApolloEnvironment environment = ApolloEnvironmentModule.environment(i);
-      final RequestHandler handler = environment.initialize(new EnvApp(envReference::set));
-      assertNotNull(handler);
-
-      final Environment e = envReference.get();
-      assertNotNull(e);
-      assertNotNull(e.config());
-
-      assertEquals("baz", e.config().getString("bar")); // from ping.conf
-      assertEquals("my-domain", e.domain());
-    } catch (IOException e) {
-      fail(e.getMessage());
+  public void shouldSetUpApolloConfig() throws Exception {
+    try (Service.Instance i = service.build().start(ZERO_ARGS)) {
+      assertThat(i.resolve(ApolloConfig.class), equalTo(config));
     }
   }
 

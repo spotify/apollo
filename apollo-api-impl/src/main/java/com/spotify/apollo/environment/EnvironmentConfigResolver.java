@@ -19,10 +19,10 @@
  */
 package com.spotify.apollo.environment;
 
-import com.typesafe.config.Config;
 
 public interface EnvironmentConfigResolver {
 
-  Config getConfig(String serviceName);
+  // TODO: what about this one?
+//  Config getConfig(String serviceName);
 
 }

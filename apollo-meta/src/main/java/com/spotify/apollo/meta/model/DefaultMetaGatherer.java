@@ -21,6 +21,7 @@ package com.spotify.apollo.meta.model;
 
 import com.google.common.collect.Maps;
 
+
 import com.typesafe.config.Config;
 
 import org.slf4j.Logger;
@@ -62,7 +63,7 @@ public class DefaultMetaGatherer implements MetaGatherer {
     this(DEFAULT_SIZE_LIMIT, metaInfo, config);
   }
 
-  DefaultMetaGatherer(int sizeLimit, Model.MetaInfo metaInfo, @Nullable Config config) {
+  private DefaultMetaGatherer(int sizeLimit, Model.MetaInfo metaInfo, @Nullable Config config) {
     this.sizeLimit = sizeLimit;
     this.endpoints = new CallsInfo(sizeLimit);
 
@@ -81,6 +82,7 @@ public class DefaultMetaGatherer implements MetaGatherer {
 
   @Override
   public synchronized Model.LoadedConfig loadedConfig() {
+    // TODO: consider whether this should also display the 'apollo' configuration, somehow. It probably should.
     return new LoadedConfigBuilder()
         .spNode(filteredConfig().root())
         .build();

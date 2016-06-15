@@ -21,22 +21,22 @@ package com.spotify.apollo.http.client;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.squareup.okhttp.ConnectionPool;
 import com.squareup.okhttp.OkHttpClient;
-import com.typesafe.config.Config;
 
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static com.spotify.apollo.environment.ConfigUtil.optionalInt;
+import static java.util.Objects.requireNonNull;
+
 
 class OkHttpClientProvider implements Provider<OkHttpClient> {
 
-  private final OkHttpClientConfig config;
+  private final OkHttpClientConfiguration config;
 
   @Inject
-  OkHttpClientProvider(Config config) {
-    this.config = new OkHttpClientConfig(config);
+  OkHttpClientProvider(OkHttpClientConfiguration config) {
+    this.config = requireNonNull(config);
   }
 
   @Override
@@ -44,20 +44,19 @@ class OkHttpClientProvider implements Provider<OkHttpClient> {
     final OkHttpClient client = new OkHttpClient();
 
     //timeouts settings
-    config.connectTimeoutMillis().ifPresent(
-        millis -> client.setConnectTimeout(millis, TimeUnit.MILLISECONDS));
+    config.connectTimeout().ifPresent(
+        timeout -> client.setConnectTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS));
 
-    config.readTimeoutMillis().ifPresent(
-        millis -> client.setReadTimeout(millis, TimeUnit.MILLISECONDS));
+    config.readTimeout().ifPresent(
+        timeout -> client.setReadTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS));
 
-    config.writeTimeoutMillis().ifPresent(
-        millis -> client.setWriteTimeout(millis, TimeUnit.MILLISECONDS));
+    config.writeTimeout().ifPresent(
+        timeout -> client.setWriteTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS));
 
     // connection pool settings
     client.setConnectionPool(new ConnectionPool(
-        // defaults that come from com.squareup.okhttp.ConnectionPool
-        config.maxIdleConnections().orElse(5),
-        config.connectionKeepAliveDurationMillis().orElse(5 * 60 * 1000)
+        config.maxIdleConnections(),
+        config.connectionKeepAliveDurationMillis()
     ));
 
     // async dispatcher settings
@@ -67,42 +66,5 @@ class OkHttpClientProvider implements Provider<OkHttpClient> {
         max -> client.getDispatcher().setMaxRequestsPerHost(max));
 
     return client;
-  }
-
-  private static class OkHttpClientConfig {
-
-    private final Config config;
-
-    OkHttpClientConfig(final Config config) {
-      this.config = config;
-    }
-
-    Optional<Integer> connectTimeoutMillis() {
-      return optionalInt(config, "http.client.connectTimeout");
-    }
-
-    Optional<Integer> readTimeoutMillis() {
-      return optionalInt(config, "http.client.readTimeout");
-    }
-
-    Optional<Integer> writeTimeoutMillis() {
-      return optionalInt(config, "http.client.writeTimeout");
-    }
-
-    Optional<Integer> maxIdleConnections() {
-      return optionalInt(config, "http.client.maxIdleConnections");
-    }
-
-    Optional<Integer> connectionKeepAliveDurationMillis() {
-      return optionalInt(config, "http.client.keepAliveDuration");
-    }
-
-    Optional<Integer> maxAsyncRequests() {
-      return optionalInt(config, "http.client.async.maxRequests");
-    }
-
-    Optional<Integer> maxAsyncRequestsPerHost() {
-      return optionalInt(config, "http.client.async.maxRequestsPerHost");
-    }
   }
 }

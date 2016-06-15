@@ -19,6 +19,7 @@
  */
 package com.spotify.apollo.slack;
 
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -26,6 +27,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class SlackModuleTest {
 

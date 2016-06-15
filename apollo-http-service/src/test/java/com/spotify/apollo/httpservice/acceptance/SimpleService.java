@@ -23,6 +23,7 @@ import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.Request;
+import com.spotify.apollo.httpservice.HttpServiceConfiguration;
 import com.spotify.apollo.route.Route;
 import com.spotify.apollo.httpservice.LoadingException;
 import com.spotify.apollo.httpservice.HttpService;
@@ -43,7 +44,7 @@ class SimpleService implements AppInit, ServiceStepdefs.BootedApplication {
   }
 
   public static void main(String... args) throws LoadingException {
-    HttpService.boot(new SimpleService(), "ping", "run", "pod", "-vv");
+    HttpService.boot(new SimpleService(), "ping", HttpServiceConfiguration.create("pod"), "run", "pod", "-vv");
   }
 
   @Override

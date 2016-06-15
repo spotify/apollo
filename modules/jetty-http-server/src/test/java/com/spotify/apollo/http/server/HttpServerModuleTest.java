@@ -28,8 +28,6 @@ import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestHandler;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,7 +41,6 @@ import java.util.Optional;
 
 import static com.spotify.apollo.Status.IM_A_TEAPOT;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonMap;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -57,13 +54,13 @@ public class HttpServerModuleTest {
   @Rule
   public ExpectedException exception = ExpectedException.none();
 
-  OkHttpClient okHttpClient = new OkHttpClient();
+  private OkHttpClient okHttpClient = new OkHttpClient();
 
   @Test
   public void testCanStartRegularModule() throws Exception {
     int port = 9083;
 
-    try (Service.Instance instance = service().start(NO_ARGS, onPort(port))) {
+    try (Service.Instance instance = service(onPort(port)).start(NO_ARGS)) {
       HttpServer server = HttpServerModule.server(instance);
       assertCanNotConnect(port);
 
@@ -91,7 +88,7 @@ public class HttpServerModuleTest {
   public void testParsesQueryParameters() throws Exception {
     int port = 9084;
 
-    try (Service.Instance instance = service().start(NO_ARGS, onPort(port))) {
+    try (Service.Instance instance = service(onPort(port)).start(NO_ARGS)) {
       HttpServer server = HttpServerModule.server(instance);
       TestHandler testHandler = new TestHandler();
       server.start(testHandler);
@@ -117,7 +114,7 @@ public class HttpServerModuleTest {
   public void testParsesHeadersParameters() throws Exception {
     int port = 9085;
 
-    try (Service.Instance instance = service().start(NO_ARGS, onPort(port))) {
+    try (Service.Instance instance = service(onPort(port)).start(NO_ARGS)) {
       HttpServer server = HttpServerModule.server(instance);
       TestHandler testHandler = new TestHandler();
       server.start(testHandler);
@@ -143,14 +140,14 @@ public class HttpServerModuleTest {
     }
   }
 
-  Service service() {
+  Service service(JettyHttpServerConfiguration configuration) {
     return Services.usingName("test")
-        .withModule(HttpServerModule.create())
+        .withModule(HttpServerModule.create(configuration))
         .build();
   }
 
-  Config onPort(int port) {
-    return ConfigFactory.parseMap(singletonMap("http.server.port", Integer.toString(port)));
+  JettyHttpServerConfiguration onPort(int port) {
+    return JettyHttpServerConfiguration.create().withPort(port);
   }
 
   String baseUrl(int port) {

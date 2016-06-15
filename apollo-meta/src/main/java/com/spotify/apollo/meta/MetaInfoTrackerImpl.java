@@ -44,13 +44,13 @@ class MetaInfoTrackerImpl implements MetaInfoTracker {
   MetaInfoTrackerImpl(
       Descriptor descriptor,
       String containerVersion,
-      Config configNode) {
+      Config config) {
     final Model.MetaInfo metaInfo = new MetaInfoBuilder()
         .buildVersion(descriptor.serviceName() + ' ' + descriptor.version())
         .containerVersion(containerVersion)
         .build();
 
-    gatherer = Meta.createGatherer(metaInfo, configNode);
+    gatherer = Meta.createGatherer(metaInfo, config);
   }
 
   @Override

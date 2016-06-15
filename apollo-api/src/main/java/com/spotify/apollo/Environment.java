@@ -56,9 +56,11 @@ public interface Environment {
   Client client();
 
   /**
-   * Returns configuration loaded by the framework on an application behalf.
+   * Returns service-specific configuration loaded by the framework on behalf of the application.
    *
-   * @return loaded configuration node.
+   * TODO: update description!?
+   *
+   * @return loaded configuration
    */
   Config config();
 

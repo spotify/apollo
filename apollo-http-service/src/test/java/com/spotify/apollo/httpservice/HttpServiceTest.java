@@ -41,7 +41,7 @@ public class HttpServiceTest {
 
   // we need a static counter in order to be able to use the Class overload of
   // HttpService.boot
-  static final AtomicInteger counter = new AtomicInteger();
+  private static final AtomicInteger counter = new AtomicInteger();
 
   @Rule
   public ExpectedException exception = ExpectedException.none();
@@ -62,8 +62,9 @@ public class HttpServiceTest {
 
     new Thread(() -> {
       try {
-        HttpService.boot(appInit, "test", waiter, "run", "foo");
-      } catch (LoadingException e) {
+        HttpService.boot(appInit, "test", HttpServiceConfiguration.create("foo"), waiter, "run", "foo");
+      } catch (Exception e) {
+        e.printStackTrace();
         fail(e.getMessage());
       }
     }).start();
@@ -79,18 +80,18 @@ public class HttpServiceTest {
   @Test
   public void testBrokenServiceSimple() throws Exception {
     exception.expect(LoadingException.class);
-    HttpService.boot(new BrokenService(), "test", "run", "foo");
+    HttpService.boot(new BrokenService(), "test", HttpServiceConfiguration.create("foo"), "run", "foo");
   }
 
   @Test
   public void testBrokenService() throws Exception {
-    final Service service = HttpService.usingAppInit(new BrokenService(), "test").build();
+    final Service service = HttpService.usingAppInit(new BrokenService(), "test", HttpServiceConfiguration.create("foo")).build();
 
     exception.expect(LoadingException.class);
     HttpService.boot(service, "run", "foo");
   }
 
-  static class BrokenService implements AppInit {
+  private static class BrokenService implements AppInit {
 
     @Override
     public void create(Environment environment) {
@@ -98,7 +99,7 @@ public class HttpServiceTest {
     }
   }
 
-  static class InstanceWaiter implements InstanceListener {
+  private static class InstanceWaiter implements InstanceListener {
 
     private final CountDownLatch latch = new CountDownLatch(1);
 
@@ -112,7 +113,7 @@ public class HttpServiceTest {
     }
 
     Service.Instance waitForInstance() throws InterruptedException {
-      latch.await();
+      latch.await(3000, TimeUnit.MILLISECONDS);
       assertNotNull(instance);
       return instance;
     }

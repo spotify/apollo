@@ -35,13 +35,13 @@ class HttpServerProvider implements Provider<HttpServer> {
   private static final Logger LOG = LoggerFactory.getLogger(HttpServerProvider.class);
 
   private final Closer closer;
-  private final HttpServerConfig config;
+  private final JettyHttpServerConfiguration config;
   private final Runnable onClose;
 
   @Inject
   HttpServerProvider(
       Closer closer,
-      HttpServerConfig config,
+      JettyHttpServerConfiguration config,
       @Named("http-server-on-close") Runnable onClose) {
     this.closer = closer;
     this.config = config;
@@ -57,7 +57,7 @@ class HttpServerProvider implements Provider<HttpServer> {
     }
   }
 
-  static boolean enabled(HttpServerConfig config) {
+  static boolean enabled(JettyHttpServerConfiguration config) {
     return config.port() != null;
   }
 

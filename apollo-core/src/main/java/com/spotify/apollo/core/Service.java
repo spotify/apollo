@@ -25,11 +25,13 @@ import com.google.common.io.Closer;
 
 import com.spotify.apollo.module.ApolloModule;
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * A service that is controlled by Apollo.
@@ -44,7 +46,7 @@ public interface Service {
   String getServiceName();
 
   /**
-   * Starts a new instance of this service that is fully initialized.
+   * Starts a fully initialized new instance of this service.
    *
    * @param args Command-line arguments for the service.
    * @return a new instance of this service that is up and running.
@@ -56,7 +58,7 @@ public interface Service {
   Instance start(String... args) throws IOException;
 
   /**
-   * Starts a new instance of this service that is fully initialized. It will pick up the
+   * Starts a new instance of this service that is fully initialized. TODO: update this comment It will pick up the
    * configuration from the *.conf file but can override keys using {@code env}.
    *
    * @param args Command-line arguments for the service.
@@ -72,20 +74,20 @@ public interface Service {
   @VisibleForTesting
   Instance start(String[] args, Map<String, String> env) throws IOException;
 
-  /**
-   * Starts a new instance of this service that is fully initialized. It will initialize the service
-   * using the {@code config} passed as an argument and the environment variables.
-   *
-   * @param args   Command-line arguments for the service.
-   * @param config Configuration for the service.
-   * @return a new instance of this service that is up and running.
-   * @throws ApolloHelpException   if the user wants to show command-line help and not start the
-   *                               application.
-   * @throws ApolloCliException    if something else related to CLI parsing failed.
-   * @throws java.io.IOException   if the application could not start for some other reason.
-   */
-  @VisibleForTesting
-  Instance start(String[] args, Config config) throws IOException;
+//  /**
+//   * Starts a new instance of this service that is fully initialized. It will initialize the service
+//   * using the {@code config} passed as an argument and the environment variables.
+//   *
+//   * @param args   Command-line arguments for the service.
+//   * @param config Configuration for the service.
+//   * @return a new instance of this service that is up and running.
+//   * @throws ApolloHelpException   if the user wants to show command-line help and not start the
+//   *                               application.
+//   * @throws ApolloCliException    if something else related to CLI parsing failed.
+//   * @throws java.io.IOException   if the application could not start for some other reason.
+//   */
+//  @VisibleForTesting
+//  Instance start(String[] args, Config config) throws IOException;
 
   /**
    * A builder for a new service.
@@ -96,6 +98,8 @@ public interface Service {
      * Registers the specified module as loadable by this service.  This does not guarantee that the
      * module is actually loaded; the modules themselves will inspect the configuration and actually
      * determine if they should be loaded.
+     *
+     * TODO: update above javadoc.
      *
      * @param module The module to register.
      * @return This builder.
@@ -157,6 +161,12 @@ public interface Service {
     Builder withWatchdogTimeout(long timeout, TimeUnit unit);
 
     /**
+     * Applies the supplied function to the service-specific Config object before making it
+     * available.
+     */
+    Builder withConfigDecorator(Function<Config, Config> decorator);
+
+    /**
      * The Java runtime to use when constructing service instances.  This is only respected by
      * Apollo itself; the service instance(s) configured by Apollo might decide to use the global
      * runtime. The default is to use the global JVM runtime.
@@ -187,11 +197,15 @@ public interface Service {
      */
     Service getService();
 
+    // TODO: is this really needed here?
     /**
-     * Returns the configuration for this service instance.
+     * Returns the user (non-Apollo) configuration for this service instance. This configuration
+     * is obtained via an invocation of {@link ConfigFactory#load()}, and thus all the override
+     * mechanisms defined by Typesafe Config are available in order to arrive at the final set of
+     * configuration values.
      *
-     * @return The configuration for this service instance.
-     */
+     * @return The user configuration for this service instance.
+    */
     Config getConfig();
 
     /**
@@ -204,6 +218,8 @@ public interface Service {
 
     /**
      * Returns the list of command-line arguments that were not recognized by Apollo, in order.
+     *
+     * TODO: rename and/or update javadocs?
      *
      * @return The list of command-line arguments that were not recognized by Apollo, in order.
      */

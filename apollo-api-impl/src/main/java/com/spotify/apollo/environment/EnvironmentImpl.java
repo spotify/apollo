@@ -37,26 +37,25 @@ class EnvironmentImpl implements Environment {
   private final String serviceName;
   private final String domain;
   private final Client client;
-  private final EnvironmentConfigResolver configResolver;
   private final Resolver resolver;
   private final RoutingContext routingContext;
   private final Closer closer;
+  private final Config config;
 
   EnvironmentImpl(
       String serviceName,
       String domain,
       Client client,
-      EnvironmentConfigResolver configResolver,
       Resolver resolver,
       RoutingContext routingContext,
-      Closer closer) {
+      Closer closer, Config config) {
     this.serviceName = requireNonNull(serviceName, "serviceName");
     this.domain = requireNonNull(domain, "domain");
     this.client = requireNonNull(client, "client");
-    this.configResolver = requireNonNull(configResolver, "configResolver");
     this.resolver = requireNonNull(resolver, "resolver");
     this.routingContext = requireNonNull(routingContext, "routingContext");
     this.closer = requireNonNull(closer, "closer");
+    this.config = requireNonNull(config);
   }
 
   @Override
@@ -67,11 +66,6 @@ class EnvironmentImpl implements Environment {
   @Override
   public Client client() {
     return client;
-  }
-
-  @Override
-  public Config config() {
-    return configResolver.getConfig(serviceName);
   }
 
   @Override
@@ -87,5 +81,10 @@ class EnvironmentImpl implements Environment {
   @Override
   public <T> T resolve(Class<T> clazz) {
     return resolver.resolve(clazz);
+  }
+
+  @Override
+  public Config config() {
+    return config;
   }
 }

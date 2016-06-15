@@ -36,12 +36,12 @@ import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.ApolloConfig;
 import com.spotify.apollo.environment.ApolloEnvironmentModule;
 import com.spotify.apollo.http.client.HttpClientModule;
+import com.spotify.apollo.http.client.OkHttpClientConfiguration;
 import com.spotify.apollo.meta.MetaModule;
 import com.spotify.apollo.module.ApolloModule;
 import com.spotify.apollo.request.RequestHandler;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigValueFactory;
 
 import org.junit.Rule;
 import org.junit.rules.TestRule;
@@ -55,7 +55,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.CountDownLatch;
@@ -64,6 +66,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import okio.ByteString;
 
@@ -156,7 +159,7 @@ import static com.spotify.apollo.test.ForwardingStubClientModule.STUB_CLIENT;
 public class ServiceHelper implements TestRule, Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(ServiceHelper.class);
-  public static final String[] NO_ARGS = new String[0];
+  private static final String[] NO_ARGS = new String[0];
   private static final String DEFAULT_SCHEME = "http";
 
   // https://tools.ietf.org/html/rfc3986#section-3.1 Scheme
@@ -171,8 +174,8 @@ public class ServiceHelper implements TestRule, Closeable {
   private final StubClient stubClient;
   private final Client serviceClient;
   private final List<ApolloModule> additionalModules;
+  private final Map<String, String> configurationArguments;
 
-  private Config conf;
   private final ExecutorService executor = Executors.newSingleThreadExecutor(
       new ThreadFactoryBuilder()
           .setNameFormat("apollo-servicehelper-%d")
@@ -195,8 +198,8 @@ public class ServiceHelper implements TestRule, Closeable {
     this.serviceName = serviceName;
     this.stubClient = Objects.requireNonNull(stubClient);
     this.serviceClient = this::request;
-    this.conf = ConfigFactory.load(serviceName);
     additionalModules = new ArrayList<>();
+    configurationArguments = new HashMap<>();
   }
 
   /**
@@ -225,7 +228,7 @@ public class ServiceHelper implements TestRule, Closeable {
   }
 
   /**
-   * Run the service in the given domain. This will set the {@code "apollo.backend"} config key
+   * Run the service in the given domain. This will set the {@code "apollo.domain"} config key
    * which is also available through {@link Environment#domain()}.
    *
    * @param domain  The domain to use
@@ -241,7 +244,7 @@ public class ServiceHelper implements TestRule, Closeable {
    * @return This ServiceHelper instance
    */
   public ServiceHelper disableMetaApi() {
-    return conf("apollo.metaApi", "false");
+    return conf("apollo.enableMetaApi", "false");
   }
 
   /**
@@ -260,33 +263,14 @@ public class ServiceHelper implements TestRule, Closeable {
    * defined through this method will be overlayed over any existing config loaded through the
    * given service name when creating this ServiceHelper.
    *
+   * TODO: note that this is a convenience for the equivalent method of using a -D argument?
+   *
    * @param key    The key to define
    * @param value  The value to associate with the key
    * @return This ServiceHelper instance
    */
   public ServiceHelper conf(String key, String value) {
-    conf = conf.withValue(
-        key,
-        ConfigValueFactory.fromAnyRef(value, "Overridden var in ServiceHelper: " + key));
-    return this;
-  }
-
-  /**
-   * Run the service with the key/value pair defined in the loaded configuration. The key/values
-   * defined through this method will be overlayed over any existing config loaded through the
-   * given service name when creating this ServiceHelper.
-   *
-   * @param key   The key to define
-   * @param value The value for the configuration. It can be any accepted type as described by
-   *              this method's documentation:
-   *              {@link com.typesafe.config.ConfigValueFactory#fromAnyRef(
-   *              java.lang.Object, java.lang.String)}
-   * @return      This ServiceHelper instance
-   */
-  public ServiceHelper conf(String key, Object value) {
-    conf = conf.withValue(
-        key,
-        ConfigValueFactory.fromAnyRef(value, "Overridden var in ServiceHelper: " + key));
+    configurationArguments.put(key, value);
     return this;
   }
 
@@ -297,7 +281,8 @@ public class ServiceHelper implements TestRule, Closeable {
    * @return    This ServiceHelper instance
    */
   public ServiceHelper resetConf(String key) {
-    conf = conf.withoutPath(key);
+    configurationArguments.remove(key);
+
     return this;
   }
 
@@ -477,13 +462,21 @@ public class ServiceHelper implements TestRule, Closeable {
 
     currentHelperFuture = executor.submit(() -> {
       try {
+        Config overrides = ConfigFactory.parseMap(configurationArguments, "service-helper-overrides");
+
+        String domain = configurationArguments.getOrDefault(
+            Services.CommonConfigKeys.APOLLO_DOMAIN.getKey(), "service-helper");
         Service.Builder serviceBuilder = Services.usingName(serviceName)
             .usingModuleDiscovery(false)
+            .withConfigDecorator(cfg -> overrides.withFallback(cfg))
             .withModule(
-                ApolloEnvironmentModule.create(beginWith(OUTGOING_CALLS, STUB_CLIENT)
-                                                   .endWith(HTTP_CLIENT)))
+                ApolloEnvironmentModule.create(ApolloConfig.forDomain(domain)
+                                                   .overriddenBy(filterAndRemovePrefix("apollo", configurationArguments)),
+                                               beginWith(OUTGOING_CALLS, STUB_CLIENT)
+                                                   .endWith(HTTP_CLIENT)
+                ))
             .withModule(MetaModule.create("service-helper"))
-            .withModule(HttpClientModule.create())
+            .withModule(HttpClientModule.create(OkHttpClientConfiguration.create()))
             .withModule(
                 ForwardingStubClientModule
                     .create(forwardNonStubbedRequests, stubClient.asRequestAwareClient()));
@@ -496,7 +489,7 @@ public class ServiceHelper implements TestRule, Closeable {
 
         LOG.info("Starting with args: {}", Arrays.toString(args));
 
-        try (Service.Instance instance = service.start(args, conf)) {
+        try (Service.Instance instance = service.start(args)) {
           final RequestHandler envRequestHandler =
               ApolloEnvironmentModule.environment(instance)
                   .initialize(appInit);
@@ -524,6 +517,15 @@ public class ServiceHelper implements TestRule, Closeable {
     if (instance == null) {
       throw new IllegalStateException("Service failed during startup");
     }
+  }
+
+  // TODO: move to some util class? This is probably useful elsewhere as well
+  private Map<String, String> filterAndRemovePrefix(String keyPrefix, Map<String, String> overrides) {
+    String prefix = keyPrefix + ".";
+    return overrides.entrySet().stream()
+        .filter(e -> e.getKey().startsWith(prefix))
+        .collect(Collectors.toMap(e -> e.getKey().substring(prefix.length()),
+                                  Map.Entry::getValue));
   }
 
   private void instanceCreated(Service.Instance instance, RequestHandler requestHandler) {

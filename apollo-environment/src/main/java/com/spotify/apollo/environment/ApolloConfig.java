@@ -19,50 +19,78 @@
  */
 package com.spotify.apollo.environment;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
-
-import javax.inject.Inject;
-
-import static com.spotify.apollo.environment.ConfigUtil.either;
-import static com.spotify.apollo.environment.ConfigUtil.optionalBoolean;
-import static com.spotify.apollo.environment.ConfigUtil.optionalString;
+import java.util.Map;
 
 /**
- * Configuration object for keys under the apollo keyspace
+ * Configuration object for common Apollo configurable settings.
  */
 public class ApolloConfig {
 
-  private final Config root;
-  private final Config apolloNode;
+  private static final Logger LOG = LoggerFactory.getLogger(ApolloConfig.class);
 
-  @Inject
-  public ApolloConfig(Config configNode) {
-    root = Objects.requireNonNull(configNode);
+  private final String backend;
+  private final boolean enableIncomingRequestLogging;
+  private final boolean enableOutgoingRequestLogging;
+  private final boolean enableMetaApi;
 
-    apolloNode = root.hasPath("apollo")
-                 ? root.getConfig("apollo")
-                 : ConfigFactory.empty();
+  public ApolloConfig(String backend, boolean enableIncomingRequestLogging,
+                      boolean enableOutgoingRequestLogging, boolean enableMetaApi) {
+    this.backend = backend;
+    this.enableIncomingRequestLogging = enableIncomingRequestLogging;
+    this.enableOutgoingRequestLogging = enableOutgoingRequestLogging;
+    this.enableMetaApi = enableMetaApi;
   }
 
   public String backend() {
-    return either(either(optionalString(apolloNode, "domain"),
-                         optionalString(apolloNode, "backend")),
-                  optionalString(root, "domain"))
-        .orElse("");
+    return backend;
   }
 
   public boolean enableIncomingRequestLogging() {
-    return optionalBoolean(apolloNode, "logIncomingRequests").orElse(true);
+    return enableIncomingRequestLogging;
   }
 
   public boolean enableOutgoingRequestLogging() {
-    return optionalBoolean(apolloNode, "logOutgoingRequests").orElse(true);
+    return enableOutgoingRequestLogging;
   }
 
   public boolean enableMetaApi() {
-    return optionalBoolean(apolloNode, "metaApi").orElse(true);
+    return enableMetaApi;
+  }
+
+  public static ApolloConfig forDomain(String backend) {
+    return new ApolloConfig(backend, true, true, true);
+  }
+
+  public ApolloConfig overriddenBy(Map<String, String> overrides) {
+    String newBackend = backend;
+    Boolean newEnableIncomingRequestLogging = enableIncomingRequestLogging;
+    Boolean newEnableOutgoingRequestLogging = enableOutgoingRequestLogging;
+    Boolean newEnableMetaApi= enableMetaApi;
+
+    for (Map.Entry<String, String> entry : overrides.entrySet()) {
+      switch (entry.getKey()) {
+        case "backend":
+          newBackend = entry.getValue();
+          break;
+        case "enableIncomingRequestLogging":
+          newEnableIncomingRequestLogging = Boolean.valueOf(entry.getValue());
+          break;
+        case "enableOutgoingRequestLogging":
+          newEnableOutgoingRequestLogging = Boolean.valueOf(entry.getValue());
+          break;
+        case "enableMetaApi":
+          newEnableMetaApi = Boolean.valueOf(entry.getValue());
+          break;
+        default:
+          LOG.warn("unrecognised apollo config key: '{}' (value {})", entry.getKey(),
+                   entry.getValue());
+
+      }
+    }
+
+    return new ApolloConfig(newBackend, newEnableIncomingRequestLogging, newEnableOutgoingRequestLogging, newEnableMetaApi);
   }
 }

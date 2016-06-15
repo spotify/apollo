@@ -21,6 +21,7 @@ package com.spotify.apollo.httpservice.example;
 
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.core.Service;
+import com.spotify.apollo.httpservice.HttpServiceConfiguration;
 import com.spotify.apollo.route.Route;
 import com.spotify.apollo.httpservice.LoadingException;
 import com.spotify.apollo.httpservice.HttpService;
@@ -34,7 +35,7 @@ public final class ExampleService {
 
   public static void main(String... args) throws LoadingException {
 
-    final Service service = HttpService.usingAppInit(ExampleService::init, "ping")
+    final Service service = HttpService.usingAppInit(ExampleService::init, "ping", HttpServiceConfiguration.create("foo"))
         .build();
 
     HttpService.boot(service, args);

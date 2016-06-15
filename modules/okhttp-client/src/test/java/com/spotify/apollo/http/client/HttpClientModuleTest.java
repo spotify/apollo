@@ -26,24 +26,33 @@ import com.spotify.apollo.environment.ClientDecorator;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.squareup.okhttp.OkHttpClient;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
+import org.junit.Before;
 import org.junit.Test;
 
+import java.time.Duration;
 import java.util.Set;
 
+import static java.time.Duration.ofMillis;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class HttpClientModuleTest {
 
+  private OkHttpClientConfiguration configuration;
+
   Service service() {
     return Services.usingName("ping")
-        .withModule(HttpClientModule.create())
+        .withModule(HttpClientModule.create(configuration))
         .build();
+  }
+
+  @Before
+  public void setUp() throws Exception {
+    configuration = OkHttpClientConfiguration.create();
   }
 
   @Test
@@ -63,18 +72,13 @@ public class HttpClientModuleTest {
    */
   @Test
   public void testOkHttpClientIsConfigured() throws Exception {
-    final Config config = ConfigFactory.parseString("http.client.connectTimeout: 7982");
-
     final Service service = Services.usingName("test")
-        .withModule(HttpClientModule.create())
+        .withModule(HttpClientModule.create(configuration.withConnectTimeout(ofMillis(7982))))
         .build();
 
-    try (Service.Instance i = service.start(new String[] {}, config)) {
-
+    try (Service.Instance i = service.start()) {
       final OkHttpClient underlying = i.resolve(OkHttpClient.class);
       assertThat(underlying.getConnectTimeout(), is(7982));
     }
-
   }
-
 }

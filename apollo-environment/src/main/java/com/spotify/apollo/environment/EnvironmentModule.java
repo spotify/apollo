@@ -83,7 +83,6 @@ class EnvironmentModule extends AbstractModule {
   @Provides
   @Singleton
   EnvironmentFactory environmentFactory(
-      Config configNode,
       ApolloConfig apolloConfig,
       Closer closer,
       Injector injector,
@@ -92,9 +91,7 @@ class EnvironmentModule extends AbstractModule {
     final String backend = apolloConfig.backend();
     final Client unawareClient = incomingRequestAwareClient.asUnawareClient();
 
-    return EnvironmentFactoryBuilder.newBuilder(backend, unawareClient, closer, injector::getInstance)
-        .withStaticConfig(configNode)
-        .build();
+    return new EnvironmentFactoryImpl(backend, unawareClient, injector::getInstance, closer);
   }
 
   @Provides
@@ -108,8 +105,9 @@ class EnvironmentModule extends AbstractModule {
   Environment environment(
       @Named(Services.INJECT_SERVICE_NAME) String serviceName,
       EnvironmentFactory environmentFactory,
-      RoutingContext routingContext) {
-    return environmentFactory.create(serviceName, routingContext);
+      RoutingContext routingContext,
+      Config config) {
+    return environmentFactory.create(serviceName, routingContext, config);
   }
 
   public static EnvironmentModule create(Comparator<ClientDecorator.Id> clientDecoratorComparator) {

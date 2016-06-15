@@ -29,6 +29,7 @@ import org.junit.Test;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class SlackProviderTest {
 
@@ -42,7 +43,7 @@ public class SlackProviderTest {
         SlackProvider.CONFIG_PATH_MSG_SHUTDOWN, "shutdown"
     );
     SlackProvider.SlackConfig slackConfig =
-        SlackProvider.SlackConfig.fromConfig(ConfigFactory.parseMap(config), "servicename");
+        SlackProvider.SlackConfig.fromConfig(ConfigFactory.parseMap(config), "flopo");
 
     assertEquals(config.get(SlackProvider.CONFIG_PATH_USERNAME), slackConfig.username());
     assertEquals(config.get(SlackProvider.CONFIG_PATH_EMOJI), slackConfig.emoji());
@@ -56,9 +57,8 @@ public class SlackProviderTest {
     Map<String, Object> configMap = ImmutableMap.<String,Object>of(
         SlackProvider.CONFIG_PATH_WEBHOOK, "http://example.com"
     );
-    final Config config = ConfigFactory.parseMap(configMap);
     SlackProvider.SlackConfig slackConfig =
-        SlackProvider.SlackConfig.fromConfig(config, servicename);
+        SlackProvider.SlackConfig.fromConfig(ConfigFactory.parseMap(configMap), servicename);
 
     assertEquals(servicename, slackConfig.username());
   }
@@ -68,7 +68,8 @@ public class SlackProviderTest {
     Map<String, Object> configMap = ImmutableMap.<String,Object>of(
         SlackProvider.CONFIG_PATH_WEBHOOK, "http://example.com"
     );
-    final Config config = ConfigFactory.parseMap(configMap);
+    Config config = ConfigFactory.parseMap(configMap);
+
     SlackProvider.SlackConfig slackConfig = SlackProvider.SlackConfig.fromConfig(config, "nop");
 
     assertEquals(true, SlackProvider.SlackConfig.enabled(config));

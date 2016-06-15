@@ -44,7 +44,7 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class ClientDecoratorTest {
 
-  Service.Builder service;
+  private Service.Builder service;
 
   @Mock IncomingRequestAwareClient mockClient;
 
@@ -54,7 +54,7 @@ public class ClientDecoratorTest {
 
     service = Services.usingName("ping")
         .withModule(new DecoratingModule(clientDecorator))
-        .withModule(ApolloEnvironmentModule.create((l, r) -> 0))
+        .withModule(ApolloEnvironmentModule.create(ApolloConfig.forDomain("decoratortest"), (l, r) -> 0))
         .withModule(MetaModule.create("floop"));
   }
 
@@ -91,4 +91,5 @@ public class ClientDecoratorTest {
       return "test-decorator";
     }
   }
+
 }

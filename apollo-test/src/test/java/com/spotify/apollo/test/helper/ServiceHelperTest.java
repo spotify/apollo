@@ -24,11 +24,14 @@ import com.google.common.base.Stopwatch;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
+import com.spotify.apollo.core.Services;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.test.ServiceHelper;
 import com.spotify.apollo.test.StubClient;
 
 import org.junit.AfterClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -43,6 +46,8 @@ import java.util.concurrent.TimeUnit;
 
 import okio.ByteString;
 
+import static com.spotify.apollo.test.unit.ResponseMatchers.hasStatus;
+import static com.spotify.apollo.test.unit.StatusTypeMatchers.withCode;
 import static okio.ByteString.encodeUtf8;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
@@ -51,6 +56,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @RunWith(MockitoJUnitRunner.class)
 public class ServiceHelperTest {
 
@@ -69,7 +75,7 @@ public class ServiceHelperTest {
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
-  StubClient stubClient = serviceHelper.stubClient();
+  private StubClient stubClient = serviceHelper.stubClient();
 
   @Mock
   SomeApplication.SomeService someService;
@@ -77,7 +83,7 @@ public class ServiceHelperTest {
   @Mock
   static SomeApplication.CloseCall closeCall;
 
-  void appInit(Environment environment) {
+  private void appInit(Environment environment) {
     SomeApplication someApplication =
         SomeApplication.create(environment, someService, closeCall);
 
@@ -121,11 +127,10 @@ public class ServiceHelperTest {
   @Test
   public void shouldOverrideConfig() throws Exception {
     serviceHelper = ServiceHelper.create(this::appInit, SERVICE_NAME)
-        .conf("some.key", TEST_CONFIG_THING)
-        .conf("some.key", "different config")
+        .conf(Services.CommonConfigKeys.APOLLO_DOMAIN.getKey(), "different config")
         .args("-v");
     serviceHelper.start();
-    String response = doGet("/conf-key");
+    String response = doGet("/domain");
     assertThat(response, is("different config"));
   }
 
@@ -272,6 +277,27 @@ public class ServiceHelperTest {
     thrown.expectMessage("Illegal scheme format");
 
     ServiceHelper.create(this::appInit, "test-service").scheme("http://"); // invalid
+  }
+
+  @Test
+  public void shouldSupportMetaApiByDefault() throws Exception {
+    Response<ByteString> response = serviceHelper.request("GET", "/_meta/0/info")
+        .toCompletableFuture().get();
+
+    assertThat(response, hasStatus(withCode(Status.OK)));
+  }
+
+  @Test
+  public void shouldSupportTurningOffMetaApi() throws Exception {
+    ServiceHelper noMeta = ServiceHelper.create(this::appInit, "test-service")
+        .disableMetaApi();
+
+    noMeta.start();
+
+    Response<ByteString> response = noMeta.request("GET", "/_meta/0/info")
+        .toCompletableFuture().get();
+
+    assertThat(response, hasStatus(withCode(Status.NOT_FOUND)));
   }
 
   private static void tooSlow(Environment environment) {

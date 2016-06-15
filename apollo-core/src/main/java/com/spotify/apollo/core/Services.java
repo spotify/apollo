@@ -45,7 +45,8 @@ public final class Services {
   }
 
   public static final String INJECT_SERVICE_NAME = "service-name";
-  public static final String INJECT_UNPROCESSED_ARGS = "unprocessed-args";
+  public static final String INJECT_ARGS = "unprocessed-args";
+  public static final String INJECT_ENVIRONMENT = "environment";
 
   public enum CommonConfigKeys {
     LOGGING("logging"),
