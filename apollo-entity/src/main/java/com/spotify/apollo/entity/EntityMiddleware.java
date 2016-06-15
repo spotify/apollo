@@ -19,6 +19,7 @@
  */
 package com.spotify.apollo.entity;
 
+import com.spotify.apollo.Exploratory;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.route.AsyncHandler;
@@ -33,6 +34,7 @@ import okio.ByteString;
 /**
  * Apollo {@link Middleware}s for route handlers that work with a typed entity.
  */
+@Exploratory
 public interface EntityMiddleware {
 
   static EntityMiddleware forCodec(EntityCodec codec) {

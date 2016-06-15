@@ -19,6 +19,8 @@
  */
 package com.spotify.apollo.entity;
 
+import com.spotify.apollo.Exploratory;
+
 import java.io.IOException;
 
 import okio.ByteString;
@@ -26,6 +28,7 @@ import okio.ByteString;
 /**
  * Interface for serializing and de-serializing entity types.
  */
+@Exploratory
 public interface EntityCodec {
 
   String defaultContentType();
