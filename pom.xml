@@ -24,6 +24,7 @@
         <module>apollo-test</module>
         <module>apollo-extra</module>
         <module>apollo-entity</module>
+        <module>apollo-metrics</module>
         <module>apollo-http-service</module>
 
         <module>modules/slack</module>
