@@ -13,7 +13,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <semantic-metrics.version>0.5.1</semantic-metrics.version>
+        <semantic-metrics.version>0.6.0</semantic-metrics.version>
     </properties>
 
     <dependencyManagement>

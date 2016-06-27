@@ -32,6 +32,7 @@ import com.spotify.apollo.metrics.semantic.SemanticApolloMetrics;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.spotify.metrics.ffwd.FastForwardReporter;
+import com.spotify.metrics.jvm.CpuGaugeSet;
 import com.spotify.metrics.jvm.GarbageCollectorMetricSet;
 import com.spotify.metrics.jvm.MemoryUsageGaugeSet;
 import com.spotify.metrics.jvm.ThreadStatesMetricSet;
@@ -101,6 +102,7 @@ public class MetricsModule extends AbstractApolloModule {
     metricRegistry.register(MetricId.EMPTY, new MemoryUsageGaugeSet());
     metricRegistry.register(MetricId.EMPTY, new GarbageCollectorMetricSet());
     metricRegistry.register(MetricId.EMPTY, new ThreadStatesMetricSet());
+    metricRegistry.register(MetricId.EMPTY, CpuGaugeSet.create());
 
     return metricRegistry;
   }
