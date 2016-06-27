@@ -15,9 +15,10 @@ Maven dependency
 <dependency>
     <groupId>com.spotify</groupId>
     <artifactId>apollo-metrics</artifactId>
-    <version>1.0.0</version>
 </dependency>
 ```
+
+TODO: update these docs! 
 
 To include the metrics module, add it to your service assembly (e.g. the
 [http-service](https://github.com/spotify/apollo/tree/master/apollo-http-service) assembly) by doing:

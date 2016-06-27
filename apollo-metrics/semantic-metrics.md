@@ -4,6 +4,8 @@
 * `=>`: method call [`->`: new stats class]
 * `type=`: metric type used
 
+TODO: remove this file, once not needed
+
 ## Complete metrics tree
 
 ```
