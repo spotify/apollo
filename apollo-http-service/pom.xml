@@ -42,6 +42,10 @@
             <groupId>com.spotify</groupId>
             <artifactId>apollo-jetty-http-server</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>apollo-metrics</artifactId>
+        </dependency>
 
         <!--test scope-->
         <dependency>
@@ -67,6 +71,11 @@
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>apollo-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
