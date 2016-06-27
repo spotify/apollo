@@ -29,7 +29,7 @@ import com.spotify.apollo.request.TrackedOngoingRequest;
 import javax.inject.Inject;
 
 /**
- * An {@link EndpointRunnableFactory} that collect metrics
+ * An {@link EndpointRunnableFactory} that collects metrics
  */
 class MetricsCollectingEndpointRunnableFactoryDecorator implements EndpointRunnableFactoryDecorator {
 
