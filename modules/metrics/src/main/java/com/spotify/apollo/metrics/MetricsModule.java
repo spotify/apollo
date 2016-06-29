@@ -55,6 +55,8 @@ import javax.inject.Named;
  * Currently this module requires an external binding for a {@link MetricId} that
  * will be used as the ffwd prefix.
  */
+// we're OK with using Optional fields and parameters in this class
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @AutoService(ApolloModule.class)
 public class MetricsModule extends AbstractApolloModule {
 
@@ -62,7 +64,7 @@ public class MetricsModule extends AbstractApolloModule {
 
   private final Optional<MetricId> metricId;
 
-  MetricsModule(Optional<MetricId> metricId) {
+  private MetricsModule(Optional<MetricId> metricId) {
     this.metricId = metricId;
   }
 
@@ -98,7 +100,8 @@ public class MetricsModule extends AbstractApolloModule {
     final SemanticMetricRegistry metricRegistry = new SemanticMetricRegistry();
     LOG.info("Creating SemanticMetricRegistry");
 
-    // register JVM metricSets, using an empty MetricId as the FastForwardReporter will use the
+    // register JVM metricSets, using an empty MetricId as the FastForwardReporter will prepend
+    // the injected MetricId.
     metricRegistry.register(MetricId.EMPTY, new MemoryUsageGaugeSet());
     metricRegistry.register(MetricId.EMPTY, new GarbageCollectorMetricSet());
     metricRegistry.register(MetricId.EMPTY, new ThreadStatesMetricSet());
@@ -127,13 +130,8 @@ public class MetricsModule extends AbstractApolloModule {
           .schedule(TimeUnit.SECONDS, ffwdConfig.getInterval())
           .prefix(metricId);
 
-      if (ffwdConfig.host().isPresent()) {
-        builder.host(ffwdConfig.host().get());
-      }
-
-      if (ffwdConfig.port().isPresent()) {
-        builder.port(ffwdConfig.port().get());
-      }
+      ffwdConfig.host().ifPresent(builder::host);
+      ffwdConfig.port().ifPresent(builder::port);
 
       final FastForwardReporter reporter = builder.build();
       reporter.start();

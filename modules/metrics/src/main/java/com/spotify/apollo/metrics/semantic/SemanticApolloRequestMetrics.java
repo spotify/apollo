@@ -38,9 +38,7 @@ class SemanticApolloRequestMetrics implements ApolloRequestMetrics {
   private final MetricId countRequestId;
   private final MetricId timeRequestId;
 
-  private final ConcurrentMap<Integer, MetricId> statusCodeIds;
-
-  public SemanticApolloRequestMetrics(
+  SemanticApolloRequestMetrics(
       SemanticMetricRegistry metricRegistry,
       MetricId id) {
     this.metricRegistry = metricRegistry;
@@ -62,8 +60,6 @@ class SemanticApolloRequestMetrics implements ApolloRequestMetrics {
 
     timeRequestId = metricId.tagged(
         "what", "endpoint-request-duration");
-
-    statusCodeIds = new ConcurrentHashMap<>();
   }
 
   @Override
@@ -73,9 +69,7 @@ class SemanticApolloRequestMetrics implements ApolloRequestMetrics {
 
   @Override
   public void countRequest(int statusCode) {
-    MetricId statusCodeId = statusCodeIds.computeIfAbsent(
-        statusCode, code -> countRequestId.tagged("status-code", "" + code));
-    metricRegistry.meter(statusCodeId).mark();
+    metricRegistry.meter(countRequestId.tagged("status-code", String.valueOf(statusCode))).mark();
   }
 
   @Override

@@ -1,5 +1,8 @@
-- Go through and fix TODO comments
-- Wire up into HttpService
 - Create additional metrics (error ratios, etc.)
 - Add metrics filtering
 - Create decorator ordering
+- Go through and fix TODO comments
+
+
+DONE:
+- Wire up into HttpService
