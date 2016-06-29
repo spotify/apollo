@@ -35,7 +35,7 @@ public class SemanticApolloMetrics implements ApolloMetrics {
   }
 
   @Override
-  public ApolloServiceMetrics newScopeFactory(String serviceName) {
+  public ApolloServiceMetrics createForService(String serviceName) {
     final MetricId id = metricId.tagged("service", serviceName);
     return new SemanticApolloServiceMetrics(metricRegistry, id);
   }

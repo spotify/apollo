@@ -20,5 +20,5 @@
 package com.spotify.apollo.metrics;
 
 public interface ApolloMetrics {
-  ApolloServiceMetrics newScopeFactory(String serviceName);
+  ApolloServiceMetrics createForService(String serviceName);
 }

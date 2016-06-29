@@ -1,4 +1,5 @@
-- Create additional metrics (error ratios, etc.)
+- Create metric for reply sizes
+- Create metric for request sizes
 - Add metrics filtering
 - Create decorator ordering
 - Go through and fix TODO comments
@@ -6,3 +7,4 @@
 
 DONE:
 - Wire up into HttpService
+- Create error ratio metric

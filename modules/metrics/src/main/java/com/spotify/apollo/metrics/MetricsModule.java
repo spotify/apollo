@@ -119,7 +119,7 @@ public class MetricsModule extends AbstractApolloModule {
   public ApolloServiceMetrics apolloMetrics(
       ApolloMetrics apolloMetrics,
       @Named(Services.INJECT_SERVICE_NAME) String serviceName) {
-    return apolloMetrics.newScopeFactory(serviceName);
+    return apolloMetrics.createForService(serviceName);
   }
 
   @Provides @Singleton
