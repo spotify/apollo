@@ -21,13 +21,19 @@ package com.spotify.apollo.metrics.semantic;
 
 import com.google.common.base.Preconditions;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.RatioGauge;
+import com.spotify.apollo.StatusType;
 import com.spotify.apollo.metrics.ApolloRequestMetrics;
 import com.spotify.apollo.metrics.ApolloTimerContext;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Callable;
+import java.util.function.Supplier;
+
+import static com.spotify.apollo.StatusType.Family.INFORMATIONAL;
+import static com.spotify.apollo.StatusType.Family.SUCCESSFUL;
 
 class SemanticApolloRequestMetrics implements ApolloRequestMetrics {
 
@@ -37,6 +43,8 @@ class SemanticApolloRequestMetrics implements ApolloRequestMetrics {
   private final MetricId fanoutId;
   private final MetricId countRequestId;
   private final MetricId timeRequestId;
+  private final Meter sentReplies;
+  private final Meter sentErrors;
 
   SemanticApolloRequestMetrics(
       SemanticMetricRegistry metricRegistry,
@@ -60,6 +68,29 @@ class SemanticApolloRequestMetrics implements ApolloRequestMetrics {
 
     timeRequestId = metricId.tagged(
         "what", "endpoint-request-duration");
+
+    sentReplies = new Meter();
+    sentErrors = new Meter();
+
+    registerRatioGauge(metricId, "1m", () -> RatioGauge.Ratio.of(sentErrors.getOneMinuteRate(),
+                                                                 sentReplies.getOneMinuteRate()));
+    registerRatioGauge(metricId, "5m", () -> RatioGauge.Ratio.of(sentErrors.getFiveMinuteRate(),
+                                                                 sentReplies.getFiveMinuteRate()));
+    registerRatioGauge(metricId, "15m", () -> RatioGauge.Ratio.of(sentErrors.getFifteenMinuteRate(),
+                                                                  sentReplies.getFifteenMinuteRate()));
+  }
+
+  private void registerRatioGauge(MetricId metricId,
+                                  String stat,
+                                  Supplier<RatioGauge.Ratio> ratioSupplier) {
+    metricRegistry.register(
+        metricId.tagged("what", "error-ratio", "stat", stat),
+        new RatioGauge() {
+          @Override
+          protected Ratio getRatio() {
+            return ratioSupplier.get();
+          }
+        });
   }
 
   @Override
@@ -70,6 +101,12 @@ class SemanticApolloRequestMetrics implements ApolloRequestMetrics {
   @Override
   public void countRequest(int statusCode) {
     metricRegistry.meter(countRequestId.tagged("status-code", String.valueOf(statusCode))).mark();
+    sentReplies.mark();
+
+    StatusType.Family family = StatusType.Family.familyOf(statusCode);
+    if (family != INFORMATIONAL && family != SUCCESSFUL) {
+      sentErrors.mark();
+    }
   }
 
   @Override

@@ -19,18 +19,22 @@
  */
 package com.spotify.apollo.metrics.semantic;
 
+import com.codahale.metrics.Gauge;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.concurrent.TimeUnit;
+
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.iterableWithSize;
 
 public class SemanticApolloRequestMetricsTest {
 
@@ -52,8 +56,8 @@ public class SemanticApolloRequestMetricsTest {
     sut.fanout(29);
 
     assertThat(
-        metricRegistry.getMetrics().keySet(),
-        contains(
+        metricRegistry.getMetrics(),
+        hasKey(
             hasProperty("tags", allOf(
                 hasEntry("service", "test-service"),
                 hasEntry("component", "service-request"),
@@ -71,8 +75,8 @@ public class SemanticApolloRequestMetricsTest {
     sut.countRequest(302);
 
     assertThat(
-        metricRegistry.getMetrics().keySet(),
-        contains(
+        metricRegistry.getMetrics(),
+        hasKey(
             hasProperty("tags", allOf(
                 hasEntry("service", "test-service"),
                 hasEntry("component", "service-request"),
@@ -91,8 +95,8 @@ public class SemanticApolloRequestMetricsTest {
     sut.timeRequest().stop();
 
     assertThat(
-        metricRegistry.getMetrics().keySet(),
-        contains(
+        metricRegistry.getMetrics(),
+        hasKey(
             hasProperty("tags", allOf(
                 hasEntry("service", "test-service"),
                 hasEntry("component", "service-request"),
@@ -101,5 +105,58 @@ public class SemanticApolloRequestMetricsTest {
             ))
         )
     );
+  }
+
+  @Test
+  public void shouldTrackOneMinErrorRatio() throws Exception {
+    sut.countRequest(200);
+
+    assertThat(metricRegistry.getGauges(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("error-ratio") &&
+            metricId.getTags().get("stat").equals("1m"))
+                   .values(),
+               iterableWithSize(1));
+  }
+
+  @Test
+  public void shouldTrackFiveMinErrorRatio() throws Exception {
+    sut.countRequest(200);
+
+    assertThat(metricRegistry.getGauges(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("error-ratio") &&
+            metricId.getTags().get("stat").equals("5m"))
+                   .values(),
+               iterableWithSize(1));
+  }
+
+  @Test
+  public void shouldTrackFifteenMinErrorRatio() throws Exception {
+    sut.countRequest(200);
+
+    assertThat(metricRegistry.getGauges(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("error-ratio") &&
+            metricId.getTags().get("stat").equals("15m"))
+                   .values(),
+               iterableWithSize(1));
+  }
+
+  @Test
+  public void shouldCalculateOneMinErrorRatio() throws Exception {
+    sut.countRequest(200);
+    sut.countRequest(500);
+
+    //noinspection OptionalGetWithoutIsPresent
+    // the test above will fail if there's not exactly 1 such element
+    Gauge oneMin = metricRegistry.getGauges(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("error-ratio") &&
+            metricId.getTags().get("stat").equals("1m"))
+        .values().stream().findFirst().get();
+
+    // semantic metrics Meters take some time to update
+    await().atMost(15, TimeUnit.SECONDS).until(() -> (Double) oneMin.getValue() > 0.3 && (Double) oneMin.getValue() < 0.7);
   }
 }
