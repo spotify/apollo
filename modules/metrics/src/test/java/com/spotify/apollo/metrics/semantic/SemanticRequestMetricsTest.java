@@ -21,6 +21,7 @@ package com.spotify.apollo.metrics.semantic;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
+import com.spotify.apollo.Status;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
@@ -29,6 +30,9 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
+import static com.spotify.apollo.Status.FOUND;
+import static com.spotify.apollo.Status.INTERNAL_SERVER_ERROR;
+import static com.spotify.apollo.Status.OK;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
@@ -37,15 +41,15 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.iterableWithSize;
 
-public class SemanticApolloRequestMetricsTest {
+public class SemanticRequestMetricsTest {
 
   private SemanticMetricRegistry metricRegistry;
-  private SemanticApolloRequestMetrics sut;
+  private SemanticRequestMetrics sut;
 
   @Before
   public void setUp() throws Exception {
     metricRegistry = new SemanticMetricRegistry();
-    sut = new SemanticApolloRequestMetrics(
+    sut = new SemanticRequestMetrics(
         metricRegistry,
         MetricId.EMPTY.tagged("service", "test-service",
                               "endpoint", "hm://foo/<bar>"),
@@ -75,7 +79,7 @@ public class SemanticApolloRequestMetricsTest {
   @Test
   public void shouldTrackRequestStatusCode() throws Exception {
 
-    sut.countRequest(302);
+    sut.responseStatus(FOUND);
 
     assertThat(
         metricRegistry.getMetrics(),
@@ -112,7 +116,7 @@ public class SemanticApolloRequestMetricsTest {
 
   @Test
   public void shouldTrackOneMinErrorRatio() throws Exception {
-    sut.countRequest(200);
+    sut.responseStatus(OK);
 
     assertThat(metricRegistry.getGauges(
         (metricId, metric) ->
@@ -124,7 +128,7 @@ public class SemanticApolloRequestMetricsTest {
 
   @Test
   public void shouldTrackFiveMinErrorRatio() throws Exception {
-    sut.countRequest(200);
+    sut.responseStatus(OK);
 
     assertThat(metricRegistry.getGauges(
         (metricId, metric) ->
@@ -136,7 +140,7 @@ public class SemanticApolloRequestMetricsTest {
 
   @Test
   public void shouldTrackFifteenMinErrorRatio() throws Exception {
-    sut.countRequest(200);
+    sut.responseStatus(OK);
 
     assertThat(metricRegistry.getGauges(
         (metricId, metric) ->
@@ -148,8 +152,8 @@ public class SemanticApolloRequestMetricsTest {
 
   @Test
   public void shouldCalculateOneMinErrorRatio() throws Exception {
-    sut.countRequest(200);
-    sut.countRequest(500);
+    sut.responseStatus(OK);
+    sut.responseStatus(INTERNAL_SERVER_ERROR);
 
     //noinspection OptionalGetWithoutIsPresent
     // the test above will fail if there's not exactly 1 such element

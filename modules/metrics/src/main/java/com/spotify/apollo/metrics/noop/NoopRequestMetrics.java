@@ -17,8 +17,34 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.metrics;
+package com.spotify.apollo.metrics.noop;
 
-public interface ApolloServiceMetrics {
-  ApolloRequestMetrics newServiceRequest(String name);
+import com.spotify.apollo.StatusType;
+import com.spotify.apollo.metrics.RequestMetrics;
+import com.spotify.apollo.metrics.TimerContext;
+
+class NoopRequestMetrics implements RequestMetrics {
+
+  private NoopRequestMetrics() {
+  }
+
+  private static final NoopRequestMetrics INSTANCE =
+      new NoopRequestMetrics();
+
+  public static RequestMetrics instance() {
+    return INSTANCE;
+  }
+
+  @Override
+  public void fanout(int i) {
+  }
+
+  @Override
+  public void responseStatus(StatusType status) {
+  }
+
+  @Override
+  public TimerContext timeRequest() {
+    return NoopTimerContext.instance();
+  }
 }

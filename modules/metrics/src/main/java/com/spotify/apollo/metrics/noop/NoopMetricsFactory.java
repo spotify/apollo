@@ -17,8 +17,24 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.metrics;
+package com.spotify.apollo.metrics.noop;
 
-public interface ApolloMetrics {
-  ApolloServiceMetrics createForService(String serviceName);
+import com.spotify.apollo.metrics.ServiceMetrics;
+import com.spotify.apollo.metrics.MetricsFactory;
+
+public class NoopMetricsFactory implements MetricsFactory {
+
+  private NoopMetricsFactory() {
+  }
+
+  private static final NoopMetricsFactory INSTANCE = new NoopMetricsFactory();
+
+  public static MetricsFactory instance() {
+    return INSTANCE;
+  }
+
+  @Override
+  public ServiceMetrics createForService(String serviceName) {
+      return NoopServiceMetrics.instance();
+  }
 }

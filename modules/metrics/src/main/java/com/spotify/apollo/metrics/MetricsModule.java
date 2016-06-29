@@ -28,7 +28,7 @@ import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.EndpointRunnableFactoryDecorator;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.module.ApolloModule;
-import com.spotify.apollo.metrics.semantic.SemanticApolloMetrics;
+import com.spotify.apollo.metrics.semantic.SemanticMetricsFactory;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.spotify.metrics.ffwd.FastForwardReporter;
@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Named;
 
 /**
- * Provides bindings to {@link SemanticMetricRegistry} and {@link ApolloMetrics}.
+ * Provides bindings to {@link SemanticMetricRegistry} and {@link MetricsFactory}.
  *
  * A {@link FastForwardReporter} will be configured and started according to the
  * {@link FfwdConfig} schema.
@@ -55,7 +55,7 @@ import javax.inject.Named;
  * Currently this module requires an external binding for a {@link MetricId} that
  * will be used as the ffwd prefix.
  */
-// we're OK with using Optional fields and parameters in this class
+// we're OK with using Optional fields and parameters in this class because why not?
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @AutoService(ApolloModule.class)
 public class MetricsModule extends AbstractApolloModule {
@@ -111,20 +111,21 @@ public class MetricsModule extends AbstractApolloModule {
   }
 
   @Provides @Singleton
-  public ApolloMetrics apolloMetrics(SemanticMetricRegistry metricRegistry) {
-    return new SemanticApolloMetrics(metricRegistry);
+  public MetricsFactory apolloMetrics(SemanticMetricRegistry metricRegistry) {
+    return new SemanticMetricsFactory(metricRegistry);
   }
 
   @Provides @Singleton
-  public ApolloServiceMetrics apolloMetrics(
-      ApolloMetrics apolloMetrics,
+  public ServiceMetrics apolloMetrics(
+      MetricsFactory metricsFactory,
       @Named(Services.INJECT_SERVICE_NAME) String serviceName) {
-    return apolloMetrics.createForService(serviceName);
+    return metricsFactory.createForService(serviceName);
   }
 
   @Provides @Singleton
   public FastForwardReporter fastForwardReporter(SemanticMetricRegistry metricRegistry,
-                                                 MetricId metricId, FfwdConfig ffwdConfig) {
+                                                 MetricId metricId,
+                                                 FfwdConfig ffwdConfig) {
     try {
       final FastForwardReporter.Builder builder = FastForwardReporter.forRegistry(metricRegistry)
           .schedule(TimeUnit.SECONDS, ffwdConfig.getInterval())

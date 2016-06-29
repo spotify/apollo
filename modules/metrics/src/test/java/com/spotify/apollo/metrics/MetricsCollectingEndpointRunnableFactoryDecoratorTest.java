@@ -51,9 +51,12 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
 
-  @Mock ApolloServiceMetrics metrics;
-  @Mock ApolloRequestMetrics requestStats;
-  @Mock ApolloTimerContext endpointTimer;
+  @Mock
+  ServiceMetrics metrics;
+  @Mock
+  RequestMetrics requestStats;
+  @Mock
+  TimerContext endpointTimer;
 
   @Mock OngoingRequest ongoingRequest;
   @Mock Client client;
@@ -75,7 +78,7 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
     request = Request.forUri("hm://foo");
     requestContext = RequestContexts.create(request, client, Collections.emptyMap());
 
-    when(metrics.newServiceRequest(any())).thenReturn(requestStats);
+    when(metrics.metricsForEndpointCall(any())).thenReturn(requestStats);
     when(requestStats.timeRequest()).thenReturn(endpointTimer);
 
     when(ongoingRequest.request()).thenReturn(request);
@@ -128,7 +131,7 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
     ongoingRequestCaptor.getValue()
         .reply(Response.ok());
 
-    verify(requestStats).countRequest(Status.OK.code());
+    verify(requestStats).responseStatus(Status.OK);
   }
 
   @Test

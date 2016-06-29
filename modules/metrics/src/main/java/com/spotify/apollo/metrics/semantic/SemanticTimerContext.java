@@ -17,24 +17,20 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.metrics.noop;
+package com.spotify.apollo.metrics.semantic;
 
-import com.spotify.apollo.metrics.ApolloServiceMetrics;
-import com.spotify.apollo.metrics.ApolloMetrics;
+import com.codahale.metrics.Timer;
+import com.spotify.apollo.metrics.TimerContext;
 
-public class NoopApolloMetrics implements ApolloMetrics {
+class SemanticTimerContext implements TimerContext {
+  private final Timer.Context context;
 
-  private NoopApolloMetrics() {
-  }
-
-  private static final NoopApolloMetrics INSTANCE = new NoopApolloMetrics();
-
-  public static ApolloMetrics instance() {
-    return INSTANCE;
+  public SemanticTimerContext(Timer.Context context) {
+    this.context = context;
   }
 
   @Override
-  public ApolloServiceMetrics createForService(String serviceName) {
-      return NoopApolloServiceMetrics.instance();
+  public void stop() {
+    context.stop();
   }
 }

@@ -19,24 +19,24 @@
  */
 package com.spotify.apollo.metrics.semantic;
 
-import com.spotify.apollo.metrics.ApolloServiceMetrics;
-import com.spotify.apollo.metrics.ApolloMetrics;
+import com.spotify.apollo.metrics.ServiceMetrics;
+import com.spotify.apollo.metrics.MetricsFactory;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
-public class SemanticApolloMetrics implements ApolloMetrics {
+public class SemanticMetricsFactory implements MetricsFactory {
 
   private final SemanticMetricRegistry metricRegistry;
   private final MetricId metricId;
 
-  public SemanticApolloMetrics(final SemanticMetricRegistry metricRegistry) {
+  public SemanticMetricsFactory(final SemanticMetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
     this.metricId = MetricId.build();
   }
 
   @Override
-  public ApolloServiceMetrics createForService(String serviceName) {
+  public ServiceMetrics createForService(String serviceName) {
     final MetricId id = metricId.tagged("service", serviceName);
-    return new SemanticApolloServiceMetrics(metricRegistry, id);
+    return new SemanticServiceMetrics(metricRegistry, id);
   }
 }
