@@ -17,22 +17,11 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.metrics.noop;
+package com.spotify.apollo.metrics;
 
-import com.spotify.apollo.metrics.ApolloTimerContext;
-
-public class NoopApolloTimerContext implements ApolloTimerContext {
-
-  private NoopApolloTimerContext() {
-  }
-
-  private static final NoopApolloTimerContext INSTANCE = new NoopApolloTimerContext();
-
-  public static ApolloTimerContext instance() {
-    return INSTANCE;
-  }
-
-  @Override
-  public void stop() {
-  }
+/**
+ * Allows timing the duration of an operation.
+ */
+public interface TimerContext {
+  void stop();
 }

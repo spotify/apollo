@@ -24,8 +24,8 @@ import com.google.common.base.Preconditions;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.RatioGauge;
 import com.spotify.apollo.StatusType;
-import com.spotify.apollo.metrics.ApolloRequestMetrics;
-import com.spotify.apollo.metrics.ApolloTimerContext;
+import com.spotify.apollo.metrics.RequestMetrics;
+import com.spotify.apollo.metrics.TimerContext;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
@@ -35,7 +35,7 @@ import static com.spotify.apollo.StatusType.Family.INFORMATIONAL;
 import static com.spotify.apollo.StatusType.Family.SUCCESSFUL;
 import static java.util.Objects.requireNonNull;
 
-class SemanticApolloRequestMetrics implements ApolloRequestMetrics {
+class SemanticRequestMetrics implements RequestMetrics {
 
   private static final String COMPONENT = "service-request";
   private final SemanticMetricRegistry metricRegistry;
@@ -46,7 +46,7 @@ class SemanticApolloRequestMetrics implements ApolloRequestMetrics {
   private final Meter sentReplies;
   private final Meter sentErrors;
 
-  SemanticApolloRequestMetrics(
+  SemanticRequestMetrics(
       SemanticMetricRegistry metricRegistry,
       MetricId id,
       Meter sentReplies,
@@ -101,18 +101,18 @@ class SemanticApolloRequestMetrics implements ApolloRequestMetrics {
   }
 
   @Override
-  public void countRequest(int statusCode) {
-    metricRegistry.meter(countRequestId.tagged("status-code", String.valueOf(statusCode))).mark();
+  public void responseStatus(StatusType status) {
+    metricRegistry.meter(countRequestId.tagged("status-code", String.valueOf(status.code()))).mark();
     sentReplies.mark();
 
-    StatusType.Family family = StatusType.Family.familyOf(statusCode);
+    StatusType.Family family = status.family();
     if (family != INFORMATIONAL && family != SUCCESSFUL) {
       sentErrors.mark();
     }
   }
 
   @Override
-  public ApolloTimerContext timeRequest() {
-    return new SemanticApolloTimerContext(metricRegistry.timer(timeRequestId).time());
+  public TimerContext timeRequest() {
+    return new SemanticTimerContext(metricRegistry.timer(timeRequestId).time());
   }
 }

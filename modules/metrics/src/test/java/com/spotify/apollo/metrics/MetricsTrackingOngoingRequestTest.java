@@ -34,11 +34,11 @@ public class MetricsTrackingOngoingRequestTest {
 
 
   @Mock
-  ApolloRequestMetrics requestStats;
+  RequestMetrics requestStats;
   @Mock
   OngoingRequest delegate;
   @Mock
-  ApolloTimerContext timerContext;
+  TimerContext timerContext;
 
   @Before
   public void setUp() throws Exception {

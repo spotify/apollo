@@ -17,10 +17,24 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.metrics;
+package com.spotify.apollo.metrics.noop;
 
-public interface ApolloRequestMetrics {
-  void fanout(int i);
-  void countRequest(int statusCode);
-  ApolloTimerContext timeRequest();
+import com.spotify.apollo.metrics.ServiceMetrics;
+import com.spotify.apollo.metrics.RequestMetrics;
+
+class NoopServiceMetrics implements ServiceMetrics {
+  private NoopServiceMetrics() {
+  }
+
+  private static final NoopServiceMetrics INSTANCE =
+      new NoopServiceMetrics();
+
+  public static ServiceMetrics instance() {
+    return INSTANCE;
+  }
+
+  @Override
+  public RequestMetrics metricsForEndpointCall(String endpoint) {
+    return NoopRequestMetrics.instance();
+  }
 }

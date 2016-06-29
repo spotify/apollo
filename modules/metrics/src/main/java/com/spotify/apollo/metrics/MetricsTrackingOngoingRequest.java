@@ -34,15 +34,15 @@ class MetricsTrackingOngoingRequest
     extends ForwardingOngoingRequest
     implements TrackedOngoingRequest {
 
-  private final ApolloRequestMetrics metrics;
-  private final ApolloTimerContext timerContext;
+  private final RequestMetrics metrics;
+  private final TimerContext timerContext;
 
   private final AtomicInteger requestCounter = new AtomicInteger();
 
   MetricsTrackingOngoingRequest(
-      ApolloRequestMetrics metrics,
+      RequestMetrics metrics,
       OngoingRequest ongoingRequest,
-      ApolloTimerContext timerContext) {
+      TimerContext timerContext) {
     super(ongoingRequest);
     this.metrics = metrics;
 
@@ -52,7 +52,7 @@ class MetricsTrackingOngoingRequest
   @Override
   public void reply(Response<ByteString> message) {
     metrics.fanout(requestCounter.get());
-    metrics.countRequest(message.status().code());
+    metrics.responseStatus(message.status());
     timerContext.stop();
     super.reply(message);
   }

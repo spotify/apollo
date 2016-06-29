@@ -20,19 +20,19 @@
 package com.spotify.apollo.metrics.semantic;
 
 import com.codahale.metrics.Meter;
-import com.spotify.apollo.metrics.ApolloRequestMetrics;
-import com.spotify.apollo.metrics.ApolloServiceMetrics;
+import com.spotify.apollo.metrics.RequestMetrics;
+import com.spotify.apollo.metrics.ServiceMetrics;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
-class SemanticApolloServiceMetrics implements ApolloServiceMetrics {
+class SemanticServiceMetrics implements ServiceMetrics {
   private static final String COMPONENT = "scope-factory";
   private final SemanticMetricRegistry metricRegistry;
   private final MetricId metricId;
   private final Meter sentReplies;
   private final Meter sentErrors;
 
-  SemanticApolloServiceMetrics(SemanticMetricRegistry metricRegistry, MetricId id) {
+  SemanticServiceMetrics(SemanticMetricRegistry metricRegistry, MetricId id) {
     this.metricRegistry = metricRegistry;
     // Already tagged with 'application' and 'service'
     this.metricId = id.tagged("component", COMPONENT);
@@ -41,8 +41,8 @@ class SemanticApolloServiceMetrics implements ApolloServiceMetrics {
   }
 
   @Override
-  public ApolloRequestMetrics newServiceRequest(String name) {
-    final MetricId id = metricId.tagged("endpoint", name);
-    return new SemanticApolloRequestMetrics(metricRegistry, id, sentReplies, sentErrors);
+  public RequestMetrics metricsForEndpointCall(String endpoint) {
+    final MetricId id = metricId.tagged("endpoint", endpoint);
+    return new SemanticRequestMetrics(metricRegistry, id, sentReplies, sentErrors);
   }
 }

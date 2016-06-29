@@ -17,20 +17,17 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.metrics.semantic;
+package com.spotify.apollo.metrics;
 
-import com.codahale.metrics.Timer;
-import com.spotify.apollo.metrics.ApolloTimerContext;
+/**
+ * Defines an interface for metrics for a particular service.
+ */
+public interface ServiceMetrics {
 
-class SemanticApolloTimerContext implements ApolloTimerContext {
-  private final Timer.Context context;
-
-  public SemanticApolloTimerContext(Timer.Context context) {
-    this.context = context;
-  }
-
-  @Override
-  public void stop() {
-    context.stop();
-  }
+  /**
+   * Create a set of metrics for the given endpoint.
+   * @param endpoint a unique descriptor for the endpoint that was invoked
+   */
+  RequestMetrics metricsForEndpointCall(String endpoint);
 }
+

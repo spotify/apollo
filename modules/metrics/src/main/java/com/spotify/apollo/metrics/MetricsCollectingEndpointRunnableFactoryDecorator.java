@@ -33,10 +33,10 @@ import javax.inject.Inject;
  */
 class MetricsCollectingEndpointRunnableFactoryDecorator implements EndpointRunnableFactoryDecorator {
 
-  private final ApolloServiceMetrics metrics;
+  private final ServiceMetrics metrics;
 
   @Inject
-  MetricsCollectingEndpointRunnableFactoryDecorator(ApolloServiceMetrics metrics) {
+  MetricsCollectingEndpointRunnableFactoryDecorator(ServiceMetrics metrics) {
     this.metrics = metrics;
   }
 
@@ -46,9 +46,9 @@ class MetricsCollectingEndpointRunnableFactoryDecorator implements EndpointRunna
       final String endpointName = endpoint.info().getName();
 
       // note: will not time duration of matching and dispatching
-      final ApolloRequestMetrics requestStats = metrics.newServiceRequest(endpointName);
+      final RequestMetrics requestStats = metrics.metricsForEndpointCall(endpointName);
 
-      // note: countRequest is called in DownstreamCountingOngoingRequest
+      // note: responseStatus is called in DownstreamCountingOngoingRequest
 
       final TrackedOngoingRequest
           trackedRequest = new MetricsTrackingOngoingRequest(requestStats, request, requestStats.timeRequest());
