@@ -19,6 +19,7 @@
  */
 package com.spotify.apollo.metrics.semantic;
 
+import com.codahale.metrics.Meter;
 import com.spotify.apollo.metrics.ApolloRequestMetrics;
 import com.spotify.apollo.metrics.ApolloServiceMetrics;
 import com.spotify.metrics.core.MetricId;
@@ -28,16 +29,20 @@ class SemanticApolloServiceMetrics implements ApolloServiceMetrics {
   private static final String COMPONENT = "scope-factory";
   private final SemanticMetricRegistry metricRegistry;
   private final MetricId metricId;
+  private final Meter sentReplies;
+  private final Meter sentErrors;
 
-  public SemanticApolloServiceMetrics(SemanticMetricRegistry metricRegistry, MetricId id) {
+  SemanticApolloServiceMetrics(SemanticMetricRegistry metricRegistry, MetricId id) {
     this.metricRegistry = metricRegistry;
     // Already tagged with 'application' and 'service'
     this.metricId = id.tagged("component", COMPONENT);
+    sentReplies = new Meter();
+    sentErrors = new Meter();
   }
 
   @Override
   public ApolloRequestMetrics newServiceRequest(String name) {
     final MetricId id = metricId.tagged("endpoint", name);
-    return new SemanticApolloRequestMetrics(metricRegistry, id);
+    return new SemanticApolloRequestMetrics(metricRegistry, id, sentReplies, sentErrors);
   }
 }

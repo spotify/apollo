@@ -34,7 +34,7 @@ public class NoopApolloMetrics implements ApolloMetrics {
   }
 
   @Override
-  public ApolloServiceMetrics newScopeFactory(String serviceName) {
+  public ApolloServiceMetrics createForService(String serviceName) {
       return NoopApolloServiceMetrics.instance();
   }
 }

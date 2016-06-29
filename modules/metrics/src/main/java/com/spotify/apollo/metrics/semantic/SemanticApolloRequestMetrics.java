@@ -29,11 +29,11 @@ import com.spotify.apollo.metrics.ApolloTimerContext;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
-import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 import static com.spotify.apollo.StatusType.Family.INFORMATIONAL;
 import static com.spotify.apollo.StatusType.Family.SUCCESSFUL;
+import static java.util.Objects.requireNonNull;
 
 class SemanticApolloRequestMetrics implements ApolloRequestMetrics {
 
@@ -48,7 +48,9 @@ class SemanticApolloRequestMetrics implements ApolloRequestMetrics {
 
   SemanticApolloRequestMetrics(
       SemanticMetricRegistry metricRegistry,
-      MetricId id) {
+      MetricId id,
+      Meter sentReplies,
+      Meter sentErrors) {
     this.metricRegistry = metricRegistry;
     // Already tagged with 'service' and 'endpoint'. 'application' gets added by the ffwd reporter
     Preconditions.checkArgument(id.getTags().containsKey("service"),
@@ -69,15 +71,15 @@ class SemanticApolloRequestMetrics implements ApolloRequestMetrics {
     timeRequestId = metricId.tagged(
         "what", "endpoint-request-duration");
 
-    sentReplies = new Meter();
-    sentErrors = new Meter();
+    this.sentReplies = requireNonNull(sentReplies);
+    this.sentErrors = requireNonNull(sentErrors);
 
-    registerRatioGauge(metricId, "1m", () -> RatioGauge.Ratio.of(sentErrors.getOneMinuteRate(),
-                                                                 sentReplies.getOneMinuteRate()));
-    registerRatioGauge(metricId, "5m", () -> RatioGauge.Ratio.of(sentErrors.getFiveMinuteRate(),
-                                                                 sentReplies.getFiveMinuteRate()));
-    registerRatioGauge(metricId, "15m", () -> RatioGauge.Ratio.of(sentErrors.getFifteenMinuteRate(),
-                                                                  sentReplies.getFifteenMinuteRate()));
+    registerRatioGauge(metricId, "1m", () -> RatioGauge.Ratio.of(this.sentErrors.getOneMinuteRate(),
+                                                                 this.sentReplies.getOneMinuteRate()));
+    registerRatioGauge(metricId, "5m", () -> RatioGauge.Ratio.of(this.sentErrors.getFiveMinuteRate(),
+                                                                 this.sentReplies.getFiveMinuteRate()));
+    registerRatioGauge(metricId, "15m", () -> RatioGauge.Ratio.of(this.sentErrors.getFifteenMinuteRate(),
+                                                                  this.sentReplies.getFifteenMinuteRate()));
   }
 
   private void registerRatioGauge(MetricId metricId,

@@ -20,6 +20,7 @@
 package com.spotify.apollo.metrics.semantic;
 
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Meter;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
@@ -47,7 +48,9 @@ public class SemanticApolloRequestMetricsTest {
     sut = new SemanticApolloRequestMetrics(
         metricRegistry,
         MetricId.EMPTY.tagged("service", "test-service",
-                              "endpoint", "hm://foo/<bar>"));
+                              "endpoint", "hm://foo/<bar>"),
+        new Meter(),
+        new Meter());
   }
 
   @Test
