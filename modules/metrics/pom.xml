@@ -6,6 +6,7 @@
         <groupId>com.spotify</groupId>
         <artifactId>apollo-parent</artifactId>
         <version>1.1.1-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <name>Spotify Apollo Metrics Module</name>
