@@ -23,6 +23,7 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
+import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
@@ -82,7 +83,7 @@ public class SemanticRequestMetricsTest {
   }
 
   @Test
-  public void shouldTrackRequestStatusCode() throws Exception {
+  public void shouldTrackReplyStatusCode() throws Exception {
 
     sut.response(Response.forStatus(FOUND));
 
@@ -218,6 +219,20 @@ public class SemanticRequestMetricsTest {
     Collection<Histogram> histograms = metricRegistry.getHistograms(
         (metricId, metric) ->
             metricId.getTags().get("what").equals("reply-size") &&
+            metricId.getTags().get("unit").equals("B")
+    ).values();
+
+    assertThat(histograms, iterableWithSize(1));
+    assertThat(histograms.iterator().next().getCount(), is(1L));
+  }
+
+  @Test
+  public void shouldCalculateRequestSizes() throws Exception {
+    sut.incoming(Request.forUri("hm://foo").withPayload(ByteString.encodeUtf8("small, but nice")));
+
+    Collection<Histogram> histograms = metricRegistry.getHistograms(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("request-size") &&
             metricId.getTags().get("unit").equals("B")
     ).values();
 

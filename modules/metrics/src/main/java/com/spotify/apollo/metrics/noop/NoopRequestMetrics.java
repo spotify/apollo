@@ -19,6 +19,7 @@
  */
 package com.spotify.apollo.metrics.noop;
 
+import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.metrics.RequestMetrics;
 
@@ -34,6 +35,11 @@ class NoopRequestMetrics implements RequestMetrics {
 
   public static RequestMetrics instance() {
     return INSTANCE;
+  }
+
+  @Override
+  public void incoming(Request request) {
+
   }
 
   @Override

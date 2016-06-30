@@ -19,6 +19,7 @@
  */
 package com.spotify.apollo.metrics;
 
+import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 
 import okio.ByteString;
@@ -27,6 +28,12 @@ import okio.ByteString;
  * Defines an interface for how to collect statistics for an individual incoming request.
  */
 public interface RequestMetrics {
+
+  /**
+   * Register the incoming request
+   * @param request the incoming request
+   */
+  void incoming(Request request);
 
   /**
    * Register the fanout factor.

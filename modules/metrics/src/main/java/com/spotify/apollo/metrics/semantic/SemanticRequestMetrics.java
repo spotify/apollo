@@ -26,6 +26,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.RatioGauge;
 import com.codahale.metrics.RatioGauge.Ratio;
 import com.codahale.metrics.Timer;
+import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.StatusType;
 import com.spotify.apollo.metrics.RequestMetrics;
@@ -47,6 +48,7 @@ class SemanticRequestMetrics implements RequestMetrics {
 
   private final MetricId countRequestId;
   private final MetricId droppedRequestId;
+  private final MetricId requestSizeId;
   private final MetricId replySizeId;
   private final Meter sentReplies;
   private final Meter sentErrors;
@@ -80,6 +82,10 @@ class SemanticRequestMetrics implements RequestMetrics {
         "what", "dropped-request-rate",
         "unit", "request"
     );
+    requestSizeId = metricId.tagged(
+        "what", "request-size",
+        "unit", "B"
+    );
     replySizeId = metricId.tagged(
         "what", "reply-size",
         "unit", "B"
@@ -111,6 +117,12 @@ class SemanticRequestMetrics implements RequestMetrics {
             return ratioSupplier.get();
           }
         });
+  }
+
+  @Override
+  public void incoming(Request request) {
+    request.payload()
+        .ifPresent(payload -> metricRegistry.histogram(requestSizeId).update(payload.size()));
   }
 
   @Override
