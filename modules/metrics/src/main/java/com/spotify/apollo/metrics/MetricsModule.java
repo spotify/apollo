@@ -26,9 +26,9 @@ import com.google.inject.multibindings.Multibinder;
 
 import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.EndpointRunnableFactoryDecorator;
+import com.spotify.apollo.metrics.semantic.SemanticMetricsFactory;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.module.ApolloModule;
-import com.spotify.apollo.metrics.semantic.SemanticMetricsFactory;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.spotify.metrics.ffwd.FastForwardReporter;
@@ -41,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Named;
@@ -55,39 +54,22 @@ import javax.inject.Named;
  * Currently this module requires an external binding for a {@link MetricId} that
  * will be used as the ffwd prefix.
  */
-// we're OK with using Optional fields and parameters in this class because why not?
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @AutoService(ApolloModule.class)
 public class MetricsModule extends AbstractApolloModule {
 
   private static final Logger LOG = LoggerFactory.getLogger(MetricsModule.class);
 
-  private final Optional<MetricId> metricId;
-
-  private MetricsModule(Optional<MetricId> metricId) {
-    this.metricId = metricId;
-  }
-
-  // Visible for SPI support
-  public MetricsModule() {
-    this(Optional.empty());
+  private MetricsModule() {
+    // prevent external instantiation
   }
 
   public static MetricsModule create() {
-    return new MetricsModule(Optional.empty());
-  }
-
-  public static MetricsModule forMetricId(MetricId metricId) {
-    return new MetricsModule(Optional.of(metricId));
+    return new MetricsModule();
   }
 
   @Override
   protected void configure() {
     bind(FfwdConfig.class);
-
-    if (metricId.isPresent()) {
-      bind(MetricId.class).toInstance(metricId.get());
-    }
 
     Multibinder.newSetBinder(binder(), EndpointRunnableFactoryDecorator.class)
         .addBinding().to(MetricsCollectingEndpointRunnableFactoryDecorator.class);
