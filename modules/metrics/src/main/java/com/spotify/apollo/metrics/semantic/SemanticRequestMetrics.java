@@ -42,13 +42,13 @@ import okio.ByteString;
 
 import static com.spotify.apollo.StatusType.Family.INFORMATIONAL;
 import static com.spotify.apollo.StatusType.Family.SUCCESSFUL;
-import static com.spotify.apollo.metrics.semantic.Metric.DROPPED_REQUEST_RATE;
-import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_DURATION;
-import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_RATE;
-import static com.spotify.apollo.metrics.semantic.Metric.ERROR_RATIO;
-import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_FANOUT_FACTOR;
-import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_PAYLOAD_SIZE;
-import static com.spotify.apollo.metrics.semantic.Metric.RESPONSE_PAYLOAD_SIZE;
+import static com.spotify.apollo.metrics.semantic.What.DROPPED_REQUEST_RATE;
+import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION;
+import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
+import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO;
+import static com.spotify.apollo.metrics.semantic.What.REQUEST_FANOUT_FACTOR;
+import static com.spotify.apollo.metrics.semantic.What.REQUEST_PAYLOAD_SIZE;
+import static com.spotify.apollo.metrics.semantic.What.RESPONSE_PAYLOAD_SIZE;
 import static java.util.Objects.requireNonNull;
 
 // Optional fields are fine; they enable the use of the 'ifPresent' idiom which is more readable
@@ -69,7 +69,7 @@ class SemanticRequestMetrics implements RequestMetrics {
   private final Optional<Meter> droppedRequests;
 
   SemanticRequestMetrics(
-      Set<Metric> enabledMetrics,
+      Set<What> enabledMetrics,
       SemanticMetricRegistry metricRegistry,
       MetricId id,
       Meter sentReplies,
@@ -86,7 +86,7 @@ class SemanticRequestMetrics implements RequestMetrics {
     if (enabledMetrics.contains(ENDPOINT_REQUEST_RATE)) {
       requestRateCounter = Optional.of(response -> metricRegistry
           .meter(metricId.tagged(
-              "what", ENDPOINT_REQUEST_RATE.what(),
+              "what", ENDPOINT_REQUEST_RATE.tag(),
               "unit", "request",
               "status-code", String.valueOf(response.status().code())))
           .mark());
@@ -98,7 +98,7 @@ class SemanticRequestMetrics implements RequestMetrics {
       fanoutHistogram = Optional.of(
           metricRegistry.histogram(
               metricId.tagged(
-                  "what", REQUEST_FANOUT_FACTOR.what(),
+                  "what", REQUEST_FANOUT_FACTOR.tag(),
                   "unit", "request/request")));
     } else {
       fanoutHistogram = Optional.empty();
@@ -108,7 +108,7 @@ class SemanticRequestMetrics implements RequestMetrics {
       responseSizeHistogram = Optional.of(
           metricRegistry.histogram(
               metricId.tagged(
-                  "what", RESPONSE_PAYLOAD_SIZE.what(),
+                  "what", RESPONSE_PAYLOAD_SIZE.tag(),
                   "unit", "B"
               )));
     } else {
@@ -119,7 +119,7 @@ class SemanticRequestMetrics implements RequestMetrics {
       requestSizeHistogram = Optional.of(
           metricRegistry.histogram(
               metricId.tagged(
-                  "what", REQUEST_PAYLOAD_SIZE.what(),
+                  "what", REQUEST_PAYLOAD_SIZE.tag(),
                   "unit", "B"
               )));
     } else {
@@ -129,7 +129,7 @@ class SemanticRequestMetrics implements RequestMetrics {
     if (enabledMetrics.contains(ENDPOINT_REQUEST_DURATION)) {
       timerContext = Optional.of(
           metricRegistry
-              .timer(metricId.tagged("what", ENDPOINT_REQUEST_DURATION.what()))
+              .timer(metricId.tagged("what", ENDPOINT_REQUEST_DURATION.tag()))
               .time());
     } else {
       timerContext = Optional.empty();
@@ -139,7 +139,7 @@ class SemanticRequestMetrics implements RequestMetrics {
       droppedRequests = Optional.of(
           metricRegistry.meter(
               metricId.tagged(
-                  "what", DROPPED_REQUEST_RATE.what(),
+                  "what", DROPPED_REQUEST_RATE.tag(),
                   "unit", "request"
               )));
     } else {
@@ -167,7 +167,7 @@ class SemanticRequestMetrics implements RequestMetrics {
                                   Supplier<Ratio> ratioSupplier,
                                   SemanticMetricRegistry metricRegistry) {
     metricRegistry.register(
-        metricId.tagged("what", ERROR_RATIO.what(), "stat", stat),
+        metricId.tagged("what", ERROR_RATIO.tag(), "stat", stat),
         new RatioGauge() {
           @Override
           protected Ratio getRatio() {

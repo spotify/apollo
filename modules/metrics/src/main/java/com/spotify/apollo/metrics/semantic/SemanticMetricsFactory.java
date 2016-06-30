@@ -30,10 +30,10 @@ public class SemanticMetricsFactory implements MetricsFactory {
 
   private final SemanticMetricRegistry metricRegistry;
   private final MetricId metricId;
-  private final Set<Metric> enabledMetrics;
+  private final Set<What> enabledMetrics;
 
   public SemanticMetricsFactory(final SemanticMetricRegistry metricRegistry,
-                                Set<Metric> enabledMetrics) {
+                                Set<What> enabledMetrics) {
     this.metricRegistry = metricRegistry;
     this.metricId = MetricId.build();
     this.enabledMetrics = enabledMetrics;
