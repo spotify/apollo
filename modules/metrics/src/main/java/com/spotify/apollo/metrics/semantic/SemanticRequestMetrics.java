@@ -33,34 +33,51 @@ import com.spotify.apollo.metrics.RequestMetrics;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import okio.ByteString;
 
 import static com.spotify.apollo.StatusType.Family.INFORMATIONAL;
 import static com.spotify.apollo.StatusType.Family.SUCCESSFUL;
+import static com.spotify.apollo.metrics.semantic.Metric.DROPPED_REQUEST_RATE;
+import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_DURATION;
+import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_RATE;
+import static com.spotify.apollo.metrics.semantic.Metric.ERROR_RATIO;
+import static com.spotify.apollo.metrics.semantic.Metric.REPLY_SIZE;
+import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_FANOUT_FACTOR;
+import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_SIZE;
 import static java.util.Objects.requireNonNull;
 
+// Optional fields are fine; they enable the use of the 'ifPresent' idiom which is more compact
+// than if statements
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 class SemanticRequestMetrics implements RequestMetrics {
 
   private static final String COMPONENT = "service-request";
+
   private final SemanticMetricRegistry metricRegistry;
+  private final Set<Metric> enabledMetrics;
+  private final Meter sentReplies;
+  private final Meter sentErrors;
 
   private final MetricId countRequestId;
   private final MetricId droppedRequestId;
   private final MetricId requestSizeId;
   private final MetricId replySizeId;
-  private final Meter sentReplies;
-  private final Meter sentErrors;
-  private final Histogram fanoutHistogram;
-  private final Timer.Context timerContext;
+  private final Optional<Histogram> fanoutHistogram;
+  private final Optional<Timer.Context> timerContext;
 
   SemanticRequestMetrics(
+      Set<Metric> enabledMetrics,
       SemanticMetricRegistry metricRegistry,
       MetricId id,
       Meter sentReplies,
       Meter sentErrors) {
-    this.metricRegistry = metricRegistry;
+    this.enabledMetrics = requireNonNull(enabledMetrics);
+    this.metricRegistry = requireNonNull(metricRegistry);
+
     // Already tagged with 'service' and 'endpoint'. 'application' gets added by the ffwd reporter
     Preconditions.checkArgument(id.getTags().containsKey("service"),
                                 "metricId must be tagged with 'service'");
@@ -69,31 +86,39 @@ class SemanticRequestMetrics implements RequestMetrics {
 
     MetricId metricId = id.tagged("component", COMPONENT);
 
-    fanoutHistogram = metricRegistry.histogram(
-        metricId.tagged(
-            "what", "request-fanout-factor",
-            "unit", "request/request"));
+    if (enabledMetrics.contains(REQUEST_FANOUT_FACTOR)) {
+      fanoutHistogram = Optional.of(metricRegistry.histogram(
+          metricId.tagged(
+              "what", REQUEST_FANOUT_FACTOR.what(),
+              "unit", "request/request")));
+    } else {
+      fanoutHistogram = Optional.empty();
+    }
 
     countRequestId = metricId.tagged(
-        "what", "endpoint-request-rate",
+        "what", ENDPOINT_REQUEST_RATE.what(),
         "unit", "request");
 
     droppedRequestId = metricId.tagged(
-        "what", "dropped-request-rate",
+        "what", DROPPED_REQUEST_RATE.what(),
         "unit", "request"
     );
     requestSizeId = metricId.tagged(
-        "what", "request-size",
+        "what", REQUEST_SIZE.what(),
         "unit", "B"
     );
     replySizeId = metricId.tagged(
-        "what", "reply-size",
+        "what", REPLY_SIZE.what(),
         "unit", "B"
     );
 
-    timerContext = metricRegistry
-        .timer(metricId.tagged("what", "endpoint-request-duration"))
-        .time();
+    if (enabledMetrics.contains(ENDPOINT_REQUEST_DURATION)) {
+      timerContext = Optional.of(metricRegistry
+          .timer(metricId.tagged("what", ENDPOINT_REQUEST_DURATION.what()))
+          .time());
+    } else {
+      timerContext = Optional.empty();
+    }
 
     this.sentReplies = requireNonNull(sentReplies);
     this.sentErrors = requireNonNull(sentErrors);
@@ -109,35 +134,44 @@ class SemanticRequestMetrics implements RequestMetrics {
   private void registerRatioGauge(MetricId metricId,
                                   String stat,
                                   Supplier<Ratio> ratioSupplier) {
-    metricRegistry.register(
-        metricId.tagged("what", "error-ratio", "stat", stat),
-        new RatioGauge() {
-          @Override
-          protected Ratio getRatio() {
-            return ratioSupplier.get();
-          }
-        });
+    if (enabledMetrics.contains(ERROR_RATIO)) {
+      metricRegistry.register(
+          metricId.tagged("what", ERROR_RATIO.what(), "stat", stat),
+          new RatioGauge() {
+            @Override
+            protected Ratio getRatio() {
+              return ratioSupplier.get();
+            }
+          });
+    }
   }
 
   @Override
   public void incoming(Request request) {
-    request.payload()
-        .ifPresent(payload -> metricRegistry.histogram(requestSizeId).update(payload.size()));
+    if (enabledMetrics.contains(REQUEST_SIZE)) {
+      request.payload()
+          .ifPresent(payload -> metricRegistry.histogram(requestSizeId).update(payload.size()));
+    }
   }
 
   @Override
   public void fanout(int requests) {
-    fanoutHistogram.update(requests);
+    fanoutHistogram.ifPresent(histogram -> histogram.update(requests));
   }
 
   @Override
   public void response(Response<ByteString> response) {
-    metricRegistry.meter(
-        countRequestId.tagged("status-code", String.valueOf(response.status().code()))).mark();
-    response.payload().ifPresent(
-        payload -> metricRegistry.histogram(replySizeId).update(payload.size()));
+    if (enabledMetrics.contains(ENDPOINT_REQUEST_RATE)) {
+      metricRegistry.meter(
+          countRequestId.tagged("status-code", String.valueOf(response.status().code()))).mark();
+    }
+
+    if (enabledMetrics.contains(REPLY_SIZE)) {
+      response.payload().ifPresent(
+          payload -> metricRegistry.histogram(replySizeId).update(payload.size()));
+    }
     sentReplies.mark();
-    timerContext.stop();
+    timerContext.ifPresent(Timer.Context::stop);
 
     StatusType.Family family = response.status().family();
     if (family != INFORMATIONAL && family != SUCCESSFUL) {
@@ -147,7 +181,9 @@ class SemanticRequestMetrics implements RequestMetrics {
 
   @Override
   public void drop() {
-    metricRegistry.meter(droppedRequestId).mark();
-    timerContext.stop();
+    if (enabledMetrics.contains(DROPPED_REQUEST_RATE)) {
+      metricRegistry.meter(droppedRequestId).mark();
+    }
+    timerContext.ifPresent(Timer.Context::stop);
   }
 }

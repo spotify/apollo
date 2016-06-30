@@ -32,12 +32,21 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.EnumSet;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import okio.ByteString;
 
 import static com.spotify.apollo.Status.FOUND;
 import static com.spotify.apollo.Status.INTERNAL_SERVER_ERROR;
+import static com.spotify.apollo.metrics.semantic.Metric.DROPPED_REQUEST_RATE;
+import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_DURATION;
+import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_RATE;
+import static com.spotify.apollo.metrics.semantic.Metric.ERROR_RATIO;
+import static com.spotify.apollo.metrics.semantic.Metric.REPLY_SIZE;
+import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_FANOUT_FACTOR;
+import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_SIZE;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -54,8 +63,14 @@ public class SemanticRequestMetricsTest {
 
   @Before
   public void setUp() throws Exception {
+    sut = semanticRequestMetrics(EnumSet.allOf(Metric.class));
+  }
+
+  private SemanticRequestMetrics semanticRequestMetrics(EnumSet<Metric> enabledMetrics) {
     metricRegistry = new SemanticMetricRegistry();
-    sut = new SemanticRequestMetrics(
+
+    return new SemanticRequestMetrics(
+        enabledMetrics,
         metricRegistry,
         MetricId.EMPTY.tagged("service", "test-service",
                               "endpoint", "hm://foo/<bar>"),
@@ -83,8 +98,7 @@ public class SemanticRequestMetricsTest {
   }
 
   @Test
-  public void shouldTrackReplyStatusCode() throws Exception {
-
+  public void shouldTrackRequestRate() throws Exception {
     sut.response(Response.forStatus(FOUND));
 
     assertThat(
@@ -104,7 +118,6 @@ public class SemanticRequestMetricsTest {
 
   @Test
   public void shouldTrackRequestDuration() throws Exception {
-
     assertThat(
         metricRegistry.getMetrics(),
         hasKey(
@@ -238,5 +251,76 @@ public class SemanticRequestMetricsTest {
 
     assertThat(histograms, iterableWithSize(1));
     assertThat(histograms.iterator().next().getCount(), is(1L));
+  }
+
+  @Test
+  public void shouldSupportDisablingFanout() throws Exception {
+    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(REQUEST_FANOUT_FACTOR)));
+
+    sut.fanout(3240);
+
+    assertNotInRegistry(REQUEST_FANOUT_FACTOR);
+  }
+
+  @Test
+  public void shouldSupportDisablingRequestRate() throws Exception {
+    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(ENDPOINT_REQUEST_RATE)));
+
+    sut.response(Response.ok());
+
+    assertNotInRegistry(ENDPOINT_REQUEST_RATE);
+  }
+
+  @Test
+  public void shouldSupportDisablingRequestDuration() throws Exception {
+    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(ENDPOINT_REQUEST_DURATION)));
+
+    sut.response(Response.ok());
+
+    assertNotInRegistry(ENDPOINT_REQUEST_DURATION);
+  }
+
+  @Test
+  public void shouldSupportDisablingDropRate() throws Exception {
+    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(DROPPED_REQUEST_RATE)));
+
+    sut.drop();
+
+    assertNotInRegistry(DROPPED_REQUEST_RATE);
+  }
+
+  @Test
+  public void shouldSupportDisablingErrorRatio() throws Exception {
+    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(ERROR_RATIO)));
+
+    sut.response(Response.ok());
+
+    assertNotInRegistry(ERROR_RATIO);
+  }
+
+  @Test
+  public void shouldSupportDisablingRequestSize() throws Exception {
+    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(REQUEST_SIZE)));
+
+    sut.response(Response.forPayload(ByteString.encodeUtf8("flop")));
+
+    assertNotInRegistry(REQUEST_SIZE);
+  }
+
+  @Test
+  public void shouldSupportDisablingReplySize() throws Exception {
+    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(REPLY_SIZE)));
+
+    sut.response(Response.forPayload(ByteString.encodeUtf8("flop")));
+
+    assertNotInRegistry(REPLY_SIZE);
+  }
+
+  private void assertNotInRegistry(Metric metric) {
+    Optional<MetricId> metricId = metricRegistry.getNames().stream().
+        filter(id -> id.getTags().get("what").equals(metric.what()))
+        .findAny();
+
+    assertThat(metricId, is(Optional.empty()));
   }
 }
