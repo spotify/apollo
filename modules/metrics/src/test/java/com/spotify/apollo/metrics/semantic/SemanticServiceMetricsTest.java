@@ -25,6 +25,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.metrics.RequestMetrics;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
@@ -32,9 +33,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 import okio.ByteString;
 
@@ -44,9 +45,9 @@ import static com.spotify.apollo.metrics.semantic.What.DROPPED_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO;
-import static com.spotify.apollo.metrics.semantic.What.RESPONSE_PAYLOAD_SIZE;
 import static com.spotify.apollo.metrics.semantic.What.REQUEST_FANOUT_FACTOR;
 import static com.spotify.apollo.metrics.semantic.What.REQUEST_PAYLOAD_SIZE;
+import static com.spotify.apollo.metrics.semantic.What.RESPONSE_PAYLOAD_SIZE;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -56,32 +57,32 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.iterableWithSize;
 
-public class SemanticRequestMetricsTest {
+public class SemanticServiceMetricsTest {
 
   private SemanticMetricRegistry metricRegistry;
-  private SemanticRequestMetrics sut;
+
+  private RequestMetrics requestMetrics;
 
   @Before
   public void setUp() throws Exception {
-    sut = semanticRequestMetrics(EnumSet.allOf(What.class));
+    setupWithPredicate(what -> true);
   }
 
-  private SemanticRequestMetrics semanticRequestMetrics(EnumSet<What> enabledMetrics) {
+  private void setupWithPredicate(Predicate<What> predicate) {
     metricRegistry = new SemanticMetricRegistry();
-
-    return new SemanticRequestMetrics(
-        enabledMetrics::contains,
+    SemanticServiceMetrics serviceMetrics = new SemanticServiceMetrics(
         metricRegistry,
-        MetricId.EMPTY.tagged("service", "test-service",
-                              "endpoint", "hm://foo/<bar>"),
-        new Meter(),
-        new Meter());
+        MetricId.EMPTY
+            .tagged("service", "test-service"),
+        predicate);
+
+    requestMetrics = serviceMetrics.metricsForEndpointCall("hm://foo/<bar>");
   }
 
   @Test
   public void shouldTrackFanout() throws Exception {
 
-    sut.fanout(29);
+    requestMetrics.fanout(29);
 
     assertThat(
         metricRegistry.getMetrics(),
@@ -98,7 +99,7 @@ public class SemanticRequestMetricsTest {
 
   @Test
   public void shouldTrackRequestRate() throws Exception {
-    sut.response(Response.forStatus(FOUND));
+    requestMetrics.response(Response.forStatus(FOUND));
 
     assertThat(
         metricRegistry.getMetrics(),
@@ -131,7 +132,7 @@ public class SemanticRequestMetricsTest {
   @Test
   public void shouldCalculateRequestDurationOnResponse() throws Exception {
 
-    sut.response(Response.ok());
+    requestMetrics.response(Response.ok());
 
     Collection<Timer> timers = metricRegistry.getTimers(
         (metricId, metric) ->
@@ -145,7 +146,7 @@ public class SemanticRequestMetricsTest {
   @Test
   public void shouldCalculateRequestDurationOnDrop() throws Exception {
 
-    sut.drop();
+    requestMetrics.drop();
 
     Collection<Timer> timers = metricRegistry.getTimers(
         (metricId, metric) ->
@@ -158,7 +159,7 @@ public class SemanticRequestMetricsTest {
 
   @Test
   public void shouldTrackOneMinErrorRatio() throws Exception {
-    sut.response(Response.ok());
+    requestMetrics.response(Response.ok());
 
     assertThat(metricRegistry.getGauges(
         (metricId, metric) ->
@@ -170,7 +171,7 @@ public class SemanticRequestMetricsTest {
 
   @Test
   public void shouldTrackFiveMinErrorRatio() throws Exception {
-    sut.response(Response.ok());
+    requestMetrics.response(Response.ok());
 
     assertThat(metricRegistry.getGauges(
         (metricId, metric) ->
@@ -182,7 +183,7 @@ public class SemanticRequestMetricsTest {
 
   @Test
   public void shouldTrackFifteenMinErrorRatio() throws Exception {
-    sut.response(Response.ok());
+    requestMetrics.response(Response.ok());
 
     assertThat(metricRegistry.getGauges(
         (metricId, metric) ->
@@ -194,8 +195,8 @@ public class SemanticRequestMetricsTest {
 
   @Test
   public void shouldCalculateOneMinErrorRatio() throws Exception {
-    sut.response(Response.ok());
-    sut.response(Response.forStatus(INTERNAL_SERVER_ERROR));
+    requestMetrics.response(Response.ok());
+    requestMetrics.response(Response.forStatus(INTERNAL_SERVER_ERROR));
 
     //noinspection OptionalGetWithoutIsPresent
     // the test above will fail if there's not exactly 1 such element
@@ -211,7 +212,7 @@ public class SemanticRequestMetricsTest {
 
   @Test
   public void shouldCountDroppedRequests() throws Exception {
-    sut.drop();
+    requestMetrics.drop();
 
     Collection<Meter> meters = metricRegistry.getMeters(
         (metricId, metric) ->
@@ -224,7 +225,7 @@ public class SemanticRequestMetricsTest {
 
   @Test
   public void shouldCalculateResponseSizes() throws Exception {
-    sut.response(Response.forPayload(ByteString.encodeUtf8("this has non-zero size")));
+    requestMetrics.response(Response.forPayload(ByteString.encodeUtf8("this has non-zero size")));
 
     Collection<Histogram> histograms = metricRegistry.getHistograms(
         (metricId, metric) ->
@@ -238,7 +239,8 @@ public class SemanticRequestMetricsTest {
 
   @Test
   public void shouldCalculateRequestSizes() throws Exception {
-    sut.incoming(Request.forUri("hm://foo").withPayload(ByteString.encodeUtf8("small, but nice")));
+    requestMetrics
+        .incoming(Request.forUri("hm://foo").withPayload(ByteString.encodeUtf8("small, but nice")));
 
     Collection<Histogram> histograms = metricRegistry.getHistograms(
         (metricId, metric) ->
@@ -252,63 +254,63 @@ public class SemanticRequestMetricsTest {
 
   @Test
   public void shouldSupportDisablingFanout() throws Exception {
-    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(REQUEST_FANOUT_FACTOR)));
+    setupWithPredicate(what -> what != REQUEST_FANOUT_FACTOR);
 
-    sut.fanout(3240);
+    requestMetrics.fanout(3240);
 
     assertNotInRegistry(REQUEST_FANOUT_FACTOR);
   }
 
   @Test
   public void shouldSupportDisablingRequestRate() throws Exception {
-    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(ENDPOINT_REQUEST_RATE)));
+    setupWithPredicate(what -> what != ENDPOINT_REQUEST_RATE);
 
-    sut.response(Response.ok());
+    requestMetrics.response(Response.ok());
 
     assertNotInRegistry(ENDPOINT_REQUEST_RATE);
   }
 
   @Test
   public void shouldSupportDisablingRequestDuration() throws Exception {
-    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(ENDPOINT_REQUEST_DURATION)));
+    setupWithPredicate(what -> what != ENDPOINT_REQUEST_DURATION);
 
-    sut.response(Response.ok());
+    requestMetrics.response(Response.ok());
 
     assertNotInRegistry(ENDPOINT_REQUEST_DURATION);
   }
 
   @Test
   public void shouldSupportDisablingDropRate() throws Exception {
-    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(DROPPED_REQUEST_RATE)));
+    setupWithPredicate(what -> what != DROPPED_REQUEST_RATE);
 
-    sut.drop();
+    requestMetrics.drop();
 
     assertNotInRegistry(DROPPED_REQUEST_RATE);
   }
 
   @Test
   public void shouldSupportDisablingErrorRatio() throws Exception {
-    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(ERROR_RATIO)));
+    setupWithPredicate(what -> what != ERROR_RATIO);
 
-    sut.response(Response.ok());
+    requestMetrics.response(Response.ok());
 
     assertNotInRegistry(ERROR_RATIO);
   }
 
   @Test
   public void shouldSupportDisablingRequestSize() throws Exception {
-    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(REQUEST_PAYLOAD_SIZE)));
+    setupWithPredicate(what -> what != REQUEST_PAYLOAD_SIZE);
 
-    sut.response(Response.forPayload(ByteString.encodeUtf8("flop")));
+    requestMetrics.response(Response.forPayload(ByteString.encodeUtf8("flop")));
 
     assertNotInRegistry(REQUEST_PAYLOAD_SIZE);
   }
 
   @Test
   public void shouldSupportDisablingResponseSize() throws Exception {
-    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(RESPONSE_PAYLOAD_SIZE)));
+    setupWithPredicate(what -> what != RESPONSE_PAYLOAD_SIZE);
 
-    sut.response(Response.forPayload(ByteString.encodeUtf8("flop")));
+    requestMetrics.response(Response.forPayload(ByteString.encodeUtf8("flop")));
 
     assertNotInRegistry(RESPONSE_PAYLOAD_SIZE);
   }
