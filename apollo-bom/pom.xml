@@ -76,6 +76,11 @@
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
+                <artifactId>apollo-metrics</artifactId>
+                <version>1.1.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.spotify</groupId>
                 <artifactId>apollo-http-service</artifactId>
                 <version>1.1.1-SNAPSHOT</version>
             </dependency>
@@ -282,6 +287,12 @@
                 <groupId>uk.org.lidalia</groupId>
                 <artifactId>slf4j-test</artifactId>
                 <version>1.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>2.0.0</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

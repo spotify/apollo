@@ -27,6 +27,7 @@ import com.spotify.apollo.environment.ApolloConfig;
 import com.spotify.apollo.http.client.HttpClientModule;
 import com.spotify.apollo.http.server.HttpServerModule;
 import com.spotify.apollo.meta.MetaDescriptor;
+import com.spotify.apollo.metrics.MetricsModule;
 import com.spotify.apollo.request.RequestHandler;
 
 import org.slf4j.Logger;
@@ -61,6 +62,8 @@ public final class HttpService {
   public static Service.Builder builder(String serviceName) {
     return Services.usingName(serviceName)
         .usingModuleDiscovery(false)
+        .withModule(MetricsModule.create())
+        .withModule(MetricIdModule.create())
         .withModule(HttpClientModule.create())
         .withModule(HttpServerModule.create());
   }

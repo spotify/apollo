@@ -6,11 +6,16 @@
         <groupId>com.spotify</groupId>
         <artifactId>apollo-parent</artifactId>
         <version>1.1.1-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <name>Spotify Apollo HTTP Service</name>
-    <artifactId>apollo-http-service</artifactId>
+    <name>Spotify Apollo Metrics Module</name>
+    <artifactId>apollo-metrics</artifactId>
     <packaging>jar</packaging>
+
+    <properties>
+        <semantic-metrics.version>0.6.0</semantic-metrics.version>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -25,7 +30,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <!--compile scope-->
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>apollo-core</artifactId>
@@ -35,22 +39,41 @@
             <artifactId>apollo-environment</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.spotify</groupId>
-            <artifactId>apollo-okhttp-client</artifactId>
+            <groupId>com.spotify.metrics</groupId>
+            <artifactId>semantic-metrics-core</artifactId>
+            <version>${semantic-metrics.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.spotify</groupId>
-            <artifactId>apollo-jetty-http-server</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.spotify</groupId>
-            <artifactId>apollo-metrics</artifactId>
+            <groupId>com.spotify.metrics</groupId>
+            <artifactId>semantic-metrics-ffwd-reporter</artifactId>
+            <version>${semantic-metrics.version}</version>
         </dependency>
 
-        <!--test scope-->
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.auto.value</groupId>
+            <artifactId>auto-value</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -59,35 +82,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>info.cukes</groupId>
-            <artifactId>cucumber-java</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>info.cukes</groupId>
-            <artifactId>cucumber-junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.spotify</groupId>
-            <artifactId>apollo-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>com.github.siom79.japicmp</groupId>
-                <artifactId>japicmp-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
     <profiles>
         <profile>
@@ -111,7 +110,7 @@
                                                 <limit>
                                                     <counter>INSTRUCTION</counter>
                                                     <value>COVEREDRATIO</value>
-                                                    <minimum>0.78</minimum>
+                                                    <minimum>0.65</minimum>
                                                 </limit>
                                             </limits>
                                         </rule>

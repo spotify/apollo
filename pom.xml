@@ -28,6 +28,7 @@
         <module>modules/slack</module>
         <module>modules/jetty-http-server</module>
         <module>modules/okhttp-client</module>
+        <module>modules/metrics</module>
     </modules>
 
     <properties>

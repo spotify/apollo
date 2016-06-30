@@ -64,6 +64,7 @@ public class HttpServiceTest {
       try {
         HttpService.boot(appInit, "test", waiter, "run", "foo");
       } catch (LoadingException e) {
+        e.printStackTrace();
         fail(e.getMessage());
       }
     }).start();
