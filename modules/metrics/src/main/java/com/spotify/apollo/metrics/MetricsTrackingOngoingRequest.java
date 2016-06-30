@@ -35,31 +35,26 @@ class MetricsTrackingOngoingRequest
     implements TrackedOngoingRequest {
 
   private final RequestMetrics metrics;
-  private final TimerContext timerContext;
 
   private final AtomicInteger requestCounter = new AtomicInteger();
 
   MetricsTrackingOngoingRequest(
       RequestMetrics metrics,
-      OngoingRequest ongoingRequest,
-      TimerContext timerContext) {
+      OngoingRequest ongoingRequest) {
     super(ongoingRequest);
     this.metrics = metrics;
-
-    this.timerContext = requireNonNull(timerContext);
   }
 
   @Override
   public void reply(Response<ByteString> message) {
     metrics.fanout(requestCounter.get());
-    metrics.responseStatus(message.status());
-    timerContext.stop();
+    metrics.response(message);
     super.reply(message);
   }
 
   @Override
   public void drop() {
-    timerContext.stop();
+    metrics.drop();
     super.drop();
   }
 

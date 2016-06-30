@@ -48,10 +48,8 @@ class MetricsCollectingEndpointRunnableFactoryDecorator implements EndpointRunna
       // note: will not time duration of matching and dispatching
       final RequestMetrics requestStats = metrics.metricsForEndpointCall(endpointName);
 
-      // note: responseStatus is called in DownstreamCountingOngoingRequest
-
       final TrackedOngoingRequest
-          trackedRequest = new MetricsTrackingOngoingRequest(requestStats, request, requestStats.timeRequest());
+          trackedRequest = new MetricsTrackingOngoingRequest(requestStats, request);
       final Client instrumentingClient =
           new InstrumentingClient(requestContext.requestScopedClient(), trackedRequest);
       final RequestContext instrumentingContext =
@@ -60,8 +58,7 @@ class MetricsCollectingEndpointRunnableFactoryDecorator implements EndpointRunna
               instrumentingClient,
               requestContext.pathArgs());
 
-      return
-          delegate.create(trackedRequest, instrumentingContext, endpoint);
+      return delegate.create(trackedRequest, instrumentingContext, endpoint);
     };
   }
 }

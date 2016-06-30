@@ -23,7 +23,6 @@ import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
-import com.spotify.apollo.Status;
 import com.spotify.apollo.dispatch.Endpoint;
 import com.spotify.apollo.dispatch.EndpointInfo;
 import com.spotify.apollo.request.EndpointRunnableFactory;
@@ -42,9 +41,9 @@ import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import okio.ByteString;
+
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,8 +54,6 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
   ServiceMetrics metrics;
   @Mock
   RequestMetrics requestStats;
-  @Mock
-  TimerContext endpointTimer;
 
   @Mock OngoingRequest ongoingRequest;
   @Mock Client client;
@@ -69,17 +66,15 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
   @Captor ArgumentCaptor<OngoingRequest> ongoingRequestCaptor;
   @Captor ArgumentCaptor<RequestContext> requestContextCaptor;
 
-  Request request;
-  RequestContext requestContext;
-  EndpointRunnableFactory endpointRunnableFactory;
+  private RequestContext requestContext;
+  private EndpointRunnableFactory endpointRunnableFactory;
 
   @Before
   public void setUp() throws Exception {
-    request = Request.forUri("hm://foo");
+    Request request = Request.forUri("hm://foo");
     requestContext = RequestContexts.create(request, client, Collections.emptyMap());
 
     when(metrics.metricsForEndpointCall(any())).thenReturn(requestStats);
-    when(requestStats.timeRequest()).thenReturn(endpointTimer);
 
     when(ongoingRequest.request()).thenReturn(request);
     when(endpoint.info()).thenReturn(info);
@@ -128,38 +123,15 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
   public void shouldCountRequest() throws Exception {
     endpointRunnableFactory.create(ongoingRequest, requestContext, endpoint).run();
 
+    Response<ByteString> response = Response.ok();
     ongoingRequestCaptor.getValue()
-        .reply(Response.ok());
+        .reply(response);
 
-    verify(requestStats).responseStatus(Status.OK);
+    verify(requestStats).response(response);
   }
 
   @Test
-  public void shouldNotStopTimerBeforeReplySent() throws Exception {
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
-
-    executorService
-        .submit(endpointRunnableFactory.create(ongoingRequest, requestContext, endpoint))
-        .get();
-
-    verify(endpointTimer, never()).stop();
-  }
-
-  @Test
-  public void shouldStopTimerWhenReplySent() throws Exception {
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
-
-    executorService
-        .submit(endpointRunnableFactory.create(ongoingRequest, requestContext, endpoint))
-        .get();
-
-    ongoingRequestCaptor.getValue().reply(Response.ok());
-
-    verify(endpointTimer, timeout(50)).stop();
-  }
-
-  @Test
-  public void shouldStopTimerIfRequestDropped() throws Exception {
+  public void shouldForwardDrops() throws Exception {
     ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     executorService
@@ -168,6 +140,6 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
 
     ongoingRequestCaptor.getValue().drop();
 
-    verify(endpointTimer, timeout(50)).stop();
+    verify(requestStats).drop();
   }
 }
