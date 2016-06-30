@@ -1,5 +1,6 @@
 - Add metrics filtering
 - Create decorator ordering
+- Update documentation
 - Go through and fix TODO comments
 
 
