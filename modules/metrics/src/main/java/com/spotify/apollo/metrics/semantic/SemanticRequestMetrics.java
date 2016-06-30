@@ -50,7 +50,7 @@ import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_FANOUT_FACTOR;
 import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_SIZE;
 import static java.util.Objects.requireNonNull;
 
-// Optional fields are fine; they enable the use of the 'ifPresent' idiom which is more compact
+// Optional fields are fine; they enable the use of the 'ifPresent' idiom which is more readable
 // than if statements
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 class SemanticRequestMetrics implements RequestMetrics {
@@ -62,12 +62,12 @@ class SemanticRequestMetrics implements RequestMetrics {
   private final Meter sentReplies;
   private final Meter sentErrors;
 
-  private final MetricId countRequestId;
-  private final MetricId droppedRequestId;
-  private final MetricId requestSizeId;
-  private final MetricId replySizeId;
+  private final MetricId requestRateId;
   private final Optional<Histogram> fanoutHistogram;
+  private final Optional<Histogram> requestSizeHistogram;
+  private final Optional<Histogram> replySizeHistogram;
   private final Optional<Timer.Context> timerContext;
+  private final Optional<Meter> droppedRequests;
 
   SemanticRequestMetrics(
       Set<Metric> enabledMetrics,
@@ -86,38 +86,60 @@ class SemanticRequestMetrics implements RequestMetrics {
 
     MetricId metricId = id.tagged("component", COMPONENT);
 
+    requestRateId = metricId.tagged(
+        "what", ENDPOINT_REQUEST_RATE.what(),
+        "unit", "request");
+
     if (enabledMetrics.contains(REQUEST_FANOUT_FACTOR)) {
-      fanoutHistogram = Optional.of(metricRegistry.histogram(
-          metricId.tagged(
-              "what", REQUEST_FANOUT_FACTOR.what(),
-              "unit", "request/request")));
+      fanoutHistogram = Optional.of(
+          metricRegistry.histogram(
+              metricId.tagged(
+                  "what", REQUEST_FANOUT_FACTOR.what(),
+                  "unit", "request/request")));
     } else {
       fanoutHistogram = Optional.empty();
     }
 
-    countRequestId = metricId.tagged(
-        "what", ENDPOINT_REQUEST_RATE.what(),
-        "unit", "request");
+    if (enabledMetrics.contains(REPLY_SIZE)) {
+      replySizeHistogram = Optional.of(
+          metricRegistry.histogram(
+              metricId.tagged(
+                  "what", REPLY_SIZE.what(),
+                  "unit", "B"
+              )));
+    } else {
+      replySizeHistogram = Optional.empty();
+    }
 
-    droppedRequestId = metricId.tagged(
-        "what", DROPPED_REQUEST_RATE.what(),
-        "unit", "request"
-    );
-    requestSizeId = metricId.tagged(
-        "what", REQUEST_SIZE.what(),
-        "unit", "B"
-    );
-    replySizeId = metricId.tagged(
-        "what", REPLY_SIZE.what(),
-        "unit", "B"
-    );
+    if (enabledMetrics.contains(REQUEST_SIZE)) {
+      requestSizeHistogram = Optional.of(
+          metricRegistry.histogram(
+              metricId.tagged(
+                  "what", REQUEST_SIZE.what(),
+                  "unit", "B"
+              )));
+    } else {
+      requestSizeHistogram = Optional.empty();
+    }
 
     if (enabledMetrics.contains(ENDPOINT_REQUEST_DURATION)) {
-      timerContext = Optional.of(metricRegistry
-          .timer(metricId.tagged("what", ENDPOINT_REQUEST_DURATION.what()))
-          .time());
+      timerContext = Optional.of(
+          metricRegistry
+              .timer(metricId.tagged("what", ENDPOINT_REQUEST_DURATION.what()))
+              .time());
     } else {
       timerContext = Optional.empty();
+    }
+
+    if (enabledMetrics.contains(DROPPED_REQUEST_RATE)) {
+      droppedRequests = Optional.of(
+          metricRegistry.meter(
+              metricId.tagged(
+                  "what", DROPPED_REQUEST_RATE.what(),
+                  "unit", "request"
+              )));
+    } else {
+      droppedRequests = Optional.empty();
     }
 
     this.sentReplies = requireNonNull(sentReplies);
@@ -148,10 +170,9 @@ class SemanticRequestMetrics implements RequestMetrics {
 
   @Override
   public void incoming(Request request) {
-    if (enabledMetrics.contains(REQUEST_SIZE)) {
-      request.payload()
-          .ifPresent(payload -> metricRegistry.histogram(requestSizeId).update(payload.size()));
-    }
+    requestSizeHistogram
+        .ifPresent(histogram -> request.payload()
+            .ifPresent(payload -> histogram.update(payload.size())));
   }
 
   @Override
@@ -162,14 +183,15 @@ class SemanticRequestMetrics implements RequestMetrics {
   @Override
   public void response(Response<ByteString> response) {
     if (enabledMetrics.contains(ENDPOINT_REQUEST_RATE)) {
-      metricRegistry.meter(
-          countRequestId.tagged("status-code", String.valueOf(response.status().code()))).mark();
+      metricRegistry
+          .meter(requestRateId.tagged("status-code", String.valueOf(response.status().code())))
+          .mark();
     }
 
-    if (enabledMetrics.contains(REPLY_SIZE)) {
-      response.payload().ifPresent(
-          payload -> metricRegistry.histogram(replySizeId).update(payload.size()));
-    }
+    replySizeHistogram
+        .ifPresent(histogram -> response.payload()
+            .ifPresent(payload -> histogram.update(payload.size())));
+
     sentReplies.mark();
     timerContext.ifPresent(Timer.Context::stop);
 
@@ -181,9 +203,7 @@ class SemanticRequestMetrics implements RequestMetrics {
 
   @Override
   public void drop() {
-    if (enabledMetrics.contains(DROPPED_REQUEST_RATE)) {
-      metricRegistry.meter(droppedRequestId).mark();
-    }
+    droppedRequests.ifPresent(Meter::mark);
     timerContext.ifPresent(Timer.Context::stop);
   }
 }
