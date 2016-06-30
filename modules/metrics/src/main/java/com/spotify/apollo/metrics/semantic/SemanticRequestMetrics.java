@@ -35,6 +35,7 @@ import com.spotify.metrics.core.SemanticMetricRegistry;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import okio.ByteString;
@@ -45,9 +46,9 @@ import static com.spotify.apollo.metrics.semantic.Metric.DROPPED_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_DURATION;
 import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.Metric.ERROR_RATIO;
-import static com.spotify.apollo.metrics.semantic.Metric.RESPONSE_PAYLOAD_SIZE;
 import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_FANOUT_FACTOR;
 import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_PAYLOAD_SIZE;
+import static com.spotify.apollo.metrics.semantic.Metric.RESPONSE_PAYLOAD_SIZE;
 import static java.util.Objects.requireNonNull;
 
 // Optional fields are fine; they enable the use of the 'ifPresent' idiom which is more readable
@@ -57,12 +58,10 @@ class SemanticRequestMetrics implements RequestMetrics {
 
   private static final String COMPONENT = "service-request";
 
-  private final SemanticMetricRegistry metricRegistry;
-  private final Set<Metric> enabledMetrics;
   private final Meter sentReplies;
   private final Meter sentErrors;
 
-  private final MetricId requestRateId;
+  private final Optional<Consumer<Response<ByteString>>> requestRateCounter;
   private final Optional<Histogram> fanoutHistogram;
   private final Optional<Histogram> requestSizeHistogram;
   private final Optional<Histogram> responseSizeHistogram;
@@ -75,8 +74,6 @@ class SemanticRequestMetrics implements RequestMetrics {
       MetricId id,
       Meter sentReplies,
       Meter sentErrors) {
-    this.enabledMetrics = requireNonNull(enabledMetrics);
-    this.metricRegistry = requireNonNull(metricRegistry);
 
     // Already tagged with 'service' and 'endpoint'. 'application' gets added by the ffwd reporter
     Preconditions.checkArgument(id.getTags().containsKey("service"),
@@ -86,9 +83,16 @@ class SemanticRequestMetrics implements RequestMetrics {
 
     MetricId metricId = id.tagged("component", COMPONENT);
 
-    requestRateId = metricId.tagged(
-        "what", ENDPOINT_REQUEST_RATE.what(),
-        "unit", "request");
+    if (enabledMetrics.contains(ENDPOINT_REQUEST_RATE)) {
+      requestRateCounter = Optional.of(response -> metricRegistry
+          .meter(metricId.tagged(
+              "what", ENDPOINT_REQUEST_RATE.what(),
+              "unit", "request",
+              "status-code", String.valueOf(response.status().code())))
+          .mark());
+    } else {
+      requestRateCounter = Optional.empty();
+    }
 
     if (enabledMetrics.contains(REQUEST_FANOUT_FACTOR)) {
       fanoutHistogram = Optional.of(
@@ -145,27 +149,31 @@ class SemanticRequestMetrics implements RequestMetrics {
     this.sentReplies = requireNonNull(sentReplies);
     this.sentErrors = requireNonNull(sentErrors);
 
-    registerRatioGauge(metricId, "1m", () -> Ratio.of(this.sentErrors.getOneMinuteRate(),
-                                                      this.sentReplies.getOneMinuteRate()));
-    registerRatioGauge(metricId, "5m", () -> Ratio.of(this.sentErrors.getFiveMinuteRate(),
-                                                      this.sentReplies.getFiveMinuteRate()));
-    registerRatioGauge(metricId, "15m", () -> Ratio.of(this.sentErrors.getFifteenMinuteRate(),
-                                                       this.sentReplies.getFifteenMinuteRate()));
+    if (enabledMetrics.contains(ERROR_RATIO)) {
+      registerRatioGauge(metricId, "1m", () -> Ratio.of(this.sentErrors.getOneMinuteRate(),
+                                                        this.sentReplies.getOneMinuteRate()),
+                         metricRegistry);
+      registerRatioGauge(metricId, "5m", () -> Ratio.of(this.sentErrors.getFiveMinuteRate(),
+                                                        this.sentReplies.getFiveMinuteRate()),
+                         metricRegistry);
+      registerRatioGauge(metricId, "15m", () -> Ratio.of(this.sentErrors.getFifteenMinuteRate(),
+                                                         this.sentReplies.getFifteenMinuteRate()),
+                         metricRegistry);
+    }
   }
 
   private void registerRatioGauge(MetricId metricId,
                                   String stat,
-                                  Supplier<Ratio> ratioSupplier) {
-    if (enabledMetrics.contains(ERROR_RATIO)) {
-      metricRegistry.register(
-          metricId.tagged("what", ERROR_RATIO.what(), "stat", stat),
-          new RatioGauge() {
-            @Override
-            protected Ratio getRatio() {
-              return ratioSupplier.get();
-            }
-          });
-    }
+                                  Supplier<Ratio> ratioSupplier,
+                                  SemanticMetricRegistry metricRegistry) {
+    metricRegistry.register(
+        metricId.tagged("what", ERROR_RATIO.what(), "stat", stat),
+        new RatioGauge() {
+          @Override
+          protected Ratio getRatio() {
+            return ratioSupplier.get();
+          }
+        });
   }
 
   @Override
@@ -182,12 +190,7 @@ class SemanticRequestMetrics implements RequestMetrics {
 
   @Override
   public void response(Response<ByteString> response) {
-    if (enabledMetrics.contains(ENDPOINT_REQUEST_RATE)) {
-      metricRegistry
-          .meter(requestRateId.tagged("status-code", String.valueOf(response.status().code())))
-          .mark();
-    }
-
+    requestRateCounter.ifPresent(consumer -> consumer.accept(response));
     responseSizeHistogram
         .ifPresent(histogram -> response.payload()
             .ifPresent(payload -> histogram.update(payload.size())));
