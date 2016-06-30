@@ -45,9 +45,9 @@ import static com.spotify.apollo.metrics.semantic.Metric.DROPPED_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_DURATION;
 import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.Metric.ERROR_RATIO;
-import static com.spotify.apollo.metrics.semantic.Metric.REPLY_SIZE;
+import static com.spotify.apollo.metrics.semantic.Metric.RESPONSE_PAYLOAD_SIZE;
 import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_FANOUT_FACTOR;
-import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_SIZE;
+import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_PAYLOAD_SIZE;
 import static java.util.Objects.requireNonNull;
 
 // Optional fields are fine; they enable the use of the 'ifPresent' idiom which is more readable
@@ -65,7 +65,7 @@ class SemanticRequestMetrics implements RequestMetrics {
   private final MetricId requestRateId;
   private final Optional<Histogram> fanoutHistogram;
   private final Optional<Histogram> requestSizeHistogram;
-  private final Optional<Histogram> replySizeHistogram;
+  private final Optional<Histogram> responseSizeHistogram;
   private final Optional<Timer.Context> timerContext;
   private final Optional<Meter> droppedRequests;
 
@@ -100,22 +100,22 @@ class SemanticRequestMetrics implements RequestMetrics {
       fanoutHistogram = Optional.empty();
     }
 
-    if (enabledMetrics.contains(REPLY_SIZE)) {
-      replySizeHistogram = Optional.of(
+    if (enabledMetrics.contains(RESPONSE_PAYLOAD_SIZE)) {
+      responseSizeHistogram = Optional.of(
           metricRegistry.histogram(
               metricId.tagged(
-                  "what", REPLY_SIZE.what(),
+                  "what", RESPONSE_PAYLOAD_SIZE.what(),
                   "unit", "B"
               )));
     } else {
-      replySizeHistogram = Optional.empty();
+      responseSizeHistogram = Optional.empty();
     }
 
-    if (enabledMetrics.contains(REQUEST_SIZE)) {
+    if (enabledMetrics.contains(REQUEST_PAYLOAD_SIZE)) {
       requestSizeHistogram = Optional.of(
           metricRegistry.histogram(
               metricId.tagged(
-                  "what", REQUEST_SIZE.what(),
+                  "what", REQUEST_PAYLOAD_SIZE.what(),
                   "unit", "B"
               )));
     } else {
@@ -188,7 +188,7 @@ class SemanticRequestMetrics implements RequestMetrics {
           .mark();
     }
 
-    replySizeHistogram
+    responseSizeHistogram
         .ifPresent(histogram -> response.payload()
             .ifPresent(payload -> histogram.update(payload.size())));
 
