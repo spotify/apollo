@@ -28,7 +28,6 @@ import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.util.function.Predicate;
 
 class SemanticServiceMetrics implements ServiceMetrics {
-  private static final String COMPONENT = "scope-factory";
   private final SemanticMetricRegistry metricRegistry;
   private final MetricId metricId;
   private final Meter sentReplies;
@@ -40,7 +39,7 @@ class SemanticServiceMetrics implements ServiceMetrics {
                          Predicate<What> enabledMetrics) {
     this.metricRegistry = metricRegistry;
     // Already tagged with 'application' and 'service'
-    this.metricId = id.tagged("component", COMPONENT);
+    this.metricId = id;
     sentReplies = new Meter();
     sentErrors = new Meter();
     this.enabledMetrics = enabledMetrics;

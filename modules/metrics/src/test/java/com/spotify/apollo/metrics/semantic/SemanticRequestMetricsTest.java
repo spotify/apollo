@@ -88,7 +88,6 @@ public class SemanticRequestMetricsTest {
         hasKey(
             hasProperty("tags", allOf(
                 hasEntry("service", "test-service"),
-                hasEntry("component", "service-request"),
                 hasEntry("what", "request-fanout-factor"),
                 hasEntry("endpoint", "hm://foo/<bar>"),
                 hasEntry("unit", "request/request")
@@ -106,7 +105,6 @@ public class SemanticRequestMetricsTest {
         hasKey(
             hasProperty("tags", allOf(
                 hasEntry("service", "test-service"),
-                hasEntry("component", "service-request"),
                 hasEntry("what", "endpoint-request-rate"),
                 hasEntry("endpoint", "hm://foo/<bar>"),
                 hasEntry("status-code", "302"),
@@ -123,7 +121,6 @@ public class SemanticRequestMetricsTest {
         hasKey(
             hasProperty("tags", allOf(
                 hasEntry("service", "test-service"),
-                hasEntry("component", "service-request"),
                 hasEntry("what", "endpoint-request-duration"),
                 hasEntry("endpoint", "hm://foo/<bar>")
             ))
