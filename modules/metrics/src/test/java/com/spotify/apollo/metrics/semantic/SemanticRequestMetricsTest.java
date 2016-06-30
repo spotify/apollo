@@ -40,13 +40,13 @@ import okio.ByteString;
 
 import static com.spotify.apollo.Status.FOUND;
 import static com.spotify.apollo.Status.INTERNAL_SERVER_ERROR;
-import static com.spotify.apollo.metrics.semantic.Metric.DROPPED_REQUEST_RATE;
-import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_DURATION;
-import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_RATE;
-import static com.spotify.apollo.metrics.semantic.Metric.ERROR_RATIO;
-import static com.spotify.apollo.metrics.semantic.Metric.RESPONSE_PAYLOAD_SIZE;
-import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_FANOUT_FACTOR;
-import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_PAYLOAD_SIZE;
+import static com.spotify.apollo.metrics.semantic.What.DROPPED_REQUEST_RATE;
+import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION;
+import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
+import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO;
+import static com.spotify.apollo.metrics.semantic.What.RESPONSE_PAYLOAD_SIZE;
+import static com.spotify.apollo.metrics.semantic.What.REQUEST_FANOUT_FACTOR;
+import static com.spotify.apollo.metrics.semantic.What.REQUEST_PAYLOAD_SIZE;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -63,10 +63,10 @@ public class SemanticRequestMetricsTest {
 
   @Before
   public void setUp() throws Exception {
-    sut = semanticRequestMetrics(EnumSet.allOf(Metric.class));
+    sut = semanticRequestMetrics(EnumSet.allOf(What.class));
   }
 
-  private SemanticRequestMetrics semanticRequestMetrics(EnumSet<Metric> enabledMetrics) {
+  private SemanticRequestMetrics semanticRequestMetrics(EnumSet<What> enabledMetrics) {
     metricRegistry = new SemanticMetricRegistry();
 
     return new SemanticRequestMetrics(
@@ -316,9 +316,9 @@ public class SemanticRequestMetricsTest {
     assertNotInRegistry(RESPONSE_PAYLOAD_SIZE);
   }
 
-  private void assertNotInRegistry(Metric metric) {
+  private void assertNotInRegistry(What metric) {
     Optional<MetricId> metricId = metricRegistry.getNames().stream().
-        filter(id -> id.getTags().get("what").equals(metric.what()))
+        filter(id -> id.getTags().get("what").equals(metric.tag()))
         .findAny();
 
     assertThat(metricId, is(Optional.empty()));

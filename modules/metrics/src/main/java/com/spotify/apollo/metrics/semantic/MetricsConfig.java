@@ -27,23 +27,23 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import static com.spotify.apollo.metrics.semantic.Metric.DROPPED_REQUEST_RATE;
-import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_DURATION;
-import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_RATE;
-import static com.spotify.apollo.metrics.semantic.Metric.ERROR_RATIO;
+import static com.spotify.apollo.metrics.semantic.What.DROPPED_REQUEST_RATE;
+import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION;
+import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
+import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO;
 
 public class MetricsConfig {
 
   // visible for testing
   @SuppressWarnings("WeakerAccess")
-  static final Set<Metric> DEFAULT_ENABLED_METRICS =
+  static final Set<What> DEFAULT_ENABLED_METRICS =
       EnumSet.of(
           ENDPOINT_REQUEST_RATE,
           ENDPOINT_REQUEST_DURATION,
           DROPPED_REQUEST_RATE,
           ERROR_RATIO);
 
-  private final Set<Metric> enabledMetrics;
+  private final Set<What> enabledMetrics;
 
   @Inject
   MetricsConfig(Config config) {
@@ -54,17 +54,17 @@ public class MetricsConfig {
     }
   }
 
-  private Set<Metric> parseConfig(List<String> metrics) {
-    EnumSet<Metric> result = EnumSet.noneOf(Metric.class);
+  private Set<What> parseConfig(List<String> metrics) {
+    EnumSet<What> result = EnumSet.noneOf(What.class);
 
     for (String metricName : metrics) {
-      result.add(Metric.valueOf(metricName));
+      result.add(What.valueOf(metricName));
     }
 
     return result;
   }
 
-  public Set<Metric> serverMetrics() {
+  public Set<What> serverMetrics() {
     return enabledMetrics;
   }
 }

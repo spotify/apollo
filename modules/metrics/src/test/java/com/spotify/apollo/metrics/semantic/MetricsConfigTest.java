@@ -26,9 +26,9 @@ import org.junit.Test;
 
 import java.util.EnumSet;
 
-import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_DURATION;
-import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_RATE;
-import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_PAYLOAD_SIZE;
+import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION;
+import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
+import static com.spotify.apollo.metrics.semantic.What.REQUEST_PAYLOAD_SIZE;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 

@@ -22,7 +22,7 @@ package com.spotify.apollo.metrics.semantic;
 /**
  * Enumerates the metrics tracked, keyed by the 'what' tag.
  */
-public enum Metric {
+public enum What {
   REQUEST_FANOUT_FACTOR("request-fanout-factor"),
   ENDPOINT_REQUEST_RATE("endpoint-request-rate"),
   DROPPED_REQUEST_RATE("dropped-request-rate"),
@@ -32,13 +32,13 @@ public enum Metric {
   ERROR_RATIO("error-ratio")
   ;
 
-  private final String what;
+  private final String tag;
 
-  Metric(String what) {
-    this.what = what;
+  What(String tag) {
+    this.tag = tag;
   }
 
-  public String what() {
-    return what;
+  public String tag() {
+    return tag;
   }
 }
