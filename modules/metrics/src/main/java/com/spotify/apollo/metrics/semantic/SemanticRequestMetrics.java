@@ -56,8 +56,6 @@ import static java.util.Objects.requireNonNull;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 class SemanticRequestMetrics implements RequestMetrics {
 
-  private static final String COMPONENT = "service-request";
-
   private final Meter sentReplies;
   private final Meter sentErrors;
 
@@ -81,11 +79,9 @@ class SemanticRequestMetrics implements RequestMetrics {
     Preconditions.checkArgument(id.getTags().containsKey("endpoint"),
                                 "metricId must be tagged with 'endpoint'");
 
-    MetricId metricId = id.tagged("component", COMPONENT);
-
     if (enabledMetrics.test(ENDPOINT_REQUEST_RATE)) {
       requestRateCounter = Optional.of(response -> metricRegistry
-          .meter(metricId.tagged(
+          .meter(id.tagged(
               "what", ENDPOINT_REQUEST_RATE.tag(),
               "unit", "request",
               "status-code", String.valueOf(response.status().code())))
@@ -97,7 +93,7 @@ class SemanticRequestMetrics implements RequestMetrics {
     if (enabledMetrics.test(REQUEST_FANOUT_FACTOR)) {
       fanoutHistogram = Optional.of(
           metricRegistry.histogram(
-              metricId.tagged(
+              id.tagged(
                   "what", REQUEST_FANOUT_FACTOR.tag(),
                   "unit", "request/request")));
     } else {
@@ -107,7 +103,7 @@ class SemanticRequestMetrics implements RequestMetrics {
     if (enabledMetrics.test(RESPONSE_PAYLOAD_SIZE)) {
       responseSizeHistogram = Optional.of(
           metricRegistry.histogram(
-              metricId.tagged(
+              id.tagged(
                   "what", RESPONSE_PAYLOAD_SIZE.tag(),
                   "unit", "B"
               )));
@@ -118,7 +114,7 @@ class SemanticRequestMetrics implements RequestMetrics {
     if (enabledMetrics.test(REQUEST_PAYLOAD_SIZE)) {
       requestSizeHistogram = Optional.of(
           metricRegistry.histogram(
-              metricId.tagged(
+              id.tagged(
                   "what", REQUEST_PAYLOAD_SIZE.tag(),
                   "unit", "B"
               )));
@@ -129,7 +125,7 @@ class SemanticRequestMetrics implements RequestMetrics {
     if (enabledMetrics.test(ENDPOINT_REQUEST_DURATION)) {
       timerContext = Optional.of(
           metricRegistry
-              .timer(metricId.tagged("what", ENDPOINT_REQUEST_DURATION.tag()))
+              .timer(id.tagged("what", ENDPOINT_REQUEST_DURATION.tag()))
               .time());
     } else {
       timerContext = Optional.empty();
@@ -138,7 +134,7 @@ class SemanticRequestMetrics implements RequestMetrics {
     if (enabledMetrics.test(DROPPED_REQUEST_RATE)) {
       droppedRequests = Optional.of(
           metricRegistry.meter(
-              metricId.tagged(
+              id.tagged(
                   "what", DROPPED_REQUEST_RATE.tag(),
                   "unit", "request"
               )));
@@ -150,14 +146,14 @@ class SemanticRequestMetrics implements RequestMetrics {
     this.sentErrors = requireNonNull(sentErrors);
 
     if (enabledMetrics.test(ERROR_RATIO)) {
-      registerRatioGauge(metricId, "1m", () -> Ratio.of(this.sentErrors.getOneMinuteRate(),
-                                                        this.sentReplies.getOneMinuteRate()),
+      registerRatioGauge(id, "1m", () -> Ratio.of(this.sentErrors.getOneMinuteRate(),
+                                                  this.sentReplies.getOneMinuteRate()),
                          metricRegistry);
-      registerRatioGauge(metricId, "5m", () -> Ratio.of(this.sentErrors.getFiveMinuteRate(),
-                                                        this.sentReplies.getFiveMinuteRate()),
+      registerRatioGauge(id, "5m", () -> Ratio.of(this.sentErrors.getFiveMinuteRate(),
+                                                  this.sentReplies.getFiveMinuteRate()),
                          metricRegistry);
-      registerRatioGauge(metricId, "15m", () -> Ratio.of(this.sentErrors.getFifteenMinuteRate(),
-                                                         this.sentReplies.getFifteenMinuteRate()),
+      registerRatioGauge(id, "15m", () -> Ratio.of(this.sentErrors.getFifteenMinuteRate(),
+                                                   this.sentReplies.getFifteenMinuteRate()),
                          metricRegistry);
     }
   }
