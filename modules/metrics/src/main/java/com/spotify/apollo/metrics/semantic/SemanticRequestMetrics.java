@@ -24,9 +24,10 @@ import com.google.common.base.Preconditions;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.RatioGauge;
+import com.codahale.metrics.Timer;
+import com.spotify.apollo.Response;
 import com.spotify.apollo.StatusType;
 import com.spotify.apollo.metrics.RequestMetrics;
-import com.spotify.apollo.metrics.TimerContext;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
@@ -42,10 +43,11 @@ class SemanticRequestMetrics implements RequestMetrics {
   private final SemanticMetricRegistry metricRegistry;
 
   private final MetricId countRequestId;
-  private final MetricId timeRequestId;
+  private final MetricId droppedRequestId;
   private final Meter sentReplies;
   private final Meter sentErrors;
   private final Histogram fanoutHistogram;
+  private final Timer.Context timerContext;
 
   SemanticRequestMetrics(
       SemanticMetricRegistry metricRegistry,
@@ -70,8 +72,14 @@ class SemanticRequestMetrics implements RequestMetrics {
         "what", "endpoint-request-rate",
         "unit", "request");
 
-    timeRequestId = metricId.tagged(
-        "what", "endpoint-request-duration");
+    droppedRequestId = metricId.tagged(
+        "what", "dropped-request-rate",
+        "unit", "request"
+    );
+
+    timerContext = metricRegistry
+        .timer(metricId.tagged("what", "endpoint-request-duration"))
+        .time();
 
     this.sentReplies = requireNonNull(sentReplies);
     this.sentErrors = requireNonNull(sentErrors);
@@ -103,18 +111,21 @@ class SemanticRequestMetrics implements RequestMetrics {
   }
 
   @Override
-  public void responseStatus(StatusType status) {
-    metricRegistry.meter(countRequestId.tagged("status-code", String.valueOf(status.code()))).mark();
+  public void response(Response<?> response) {
+    metricRegistry.meter(countRequestId.tagged("status-code", String.valueOf(response.status().code()))).mark();
     sentReplies.mark();
+    timerContext.stop();
 
-    StatusType.Family family = status.family();
+    StatusType.Family family = response.status().family();
     if (family != INFORMATIONAL && family != SUCCESSFUL) {
       sentErrors.mark();
     }
   }
 
+
   @Override
-  public TimerContext timeRequest() {
-    return new SemanticTimerContext(metricRegistry.timer(timeRequestId).time());
+  public void drop() {
+    metricRegistry.meter(droppedRequestId).mark();
+    timerContext.stop();
   }
 }

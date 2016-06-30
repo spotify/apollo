@@ -21,19 +21,21 @@ package com.spotify.apollo.metrics.semantic;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
-import com.spotify.apollo.Status;
+import com.codahale.metrics.Timer;
+import com.spotify.apollo.Response;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 import static com.spotify.apollo.Status.FOUND;
 import static com.spotify.apollo.Status.INTERNAL_SERVER_ERROR;
-import static com.spotify.apollo.Status.OK;
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
@@ -79,7 +81,7 @@ public class SemanticRequestMetricsTest {
   @Test
   public void shouldTrackRequestStatusCode() throws Exception {
 
-    sut.responseStatus(FOUND);
+    sut.response(Response.forStatus(FOUND));
 
     assertThat(
         metricRegistry.getMetrics(),
@@ -99,8 +101,6 @@ public class SemanticRequestMetricsTest {
   @Test
   public void shouldTrackRequestDuration() throws Exception {
 
-    sut.timeRequest().stop();
-
     assertThat(
         metricRegistry.getMetrics(),
         hasKey(
@@ -115,8 +115,36 @@ public class SemanticRequestMetricsTest {
   }
 
   @Test
+  public void shouldCalculateRequestDurationOnResponse() throws Exception {
+
+    sut.response(Response.ok());
+
+    Collection<Timer> timers = metricRegistry.getTimers(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("endpoint-request-duration")
+    ).values();
+
+    assertThat(timers.size(), is(1));
+    assertThat(timers.iterator().next().getCount(), is(1L));
+  }
+
+  @Test
+  public void shouldCalculateRequestDurationOnDrop() throws Exception {
+
+    sut.drop();
+
+    Collection<Timer> timers = metricRegistry.getTimers(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("endpoint-request-duration")
+    ).values();
+
+    assertThat(timers.size(), is(1));
+    assertThat(timers.iterator().next().getCount(), is(1L));
+  }
+
+  @Test
   public void shouldTrackOneMinErrorRatio() throws Exception {
-    sut.responseStatus(OK);
+    sut.response(Response.ok());
 
     assertThat(metricRegistry.getGauges(
         (metricId, metric) ->
@@ -128,7 +156,7 @@ public class SemanticRequestMetricsTest {
 
   @Test
   public void shouldTrackFiveMinErrorRatio() throws Exception {
-    sut.responseStatus(OK);
+    sut.response(Response.ok());
 
     assertThat(metricRegistry.getGauges(
         (metricId, metric) ->
@@ -140,7 +168,7 @@ public class SemanticRequestMetricsTest {
 
   @Test
   public void shouldTrackFifteenMinErrorRatio() throws Exception {
-    sut.responseStatus(OK);
+    sut.response(Response.ok());
 
     assertThat(metricRegistry.getGauges(
         (metricId, metric) ->
@@ -152,8 +180,8 @@ public class SemanticRequestMetricsTest {
 
   @Test
   public void shouldCalculateOneMinErrorRatio() throws Exception {
-    sut.responseStatus(OK);
-    sut.responseStatus(INTERNAL_SERVER_ERROR);
+    sut.response(Response.ok());
+    sut.response(Response.forStatus(INTERNAL_SERVER_ERROR));
 
     //noinspection OptionalGetWithoutIsPresent
     // the test above will fail if there's not exactly 1 such element
@@ -165,5 +193,18 @@ public class SemanticRequestMetricsTest {
 
     // semantic metrics Meters take some time to update
     await().atMost(15, TimeUnit.SECONDS).until(() -> (Double) oneMin.getValue() > 0.3 && (Double) oneMin.getValue() < 0.7);
+  }
+
+  @Test
+  public void shouldCountDroppedRequests() throws Exception {
+    sut.drop();
+
+    Collection<Meter> meters = metricRegistry.getMeters(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("dropped-request-rate")
+    ).values();
+
+    assertThat(meters.size(), is(1));
+    assertThat(meters.iterator().next().getCount(), is(1L));
   }
 }

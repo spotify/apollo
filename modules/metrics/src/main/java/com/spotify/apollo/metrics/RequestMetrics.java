@@ -19,7 +19,7 @@
  */
 package com.spotify.apollo.metrics;
 
-import com.spotify.apollo.StatusType;
+import com.spotify.apollo.Response;
 
 /**
  * Defines an interface for how to collect statistics for an individual incoming request.
@@ -36,13 +36,12 @@ public interface RequestMetrics {
   /**
    * Register the response for this request - should be invoked once a reply is available.
    *
-   * @param status the response status
+   * @param response the response sent back to the caller
    */
-  void responseStatus(StatusType status);
+  void response(Response<?> response);
 
   /**
-   * Starts a timer for the request and returns a {@link TimerContext} that allows a caller to stop
-   * the timer once the request has finished processing.
+   * No response was sent; the request was dropped on the floor.
    */
-  TimerContext timeRequest();
+  void drop();
 }
