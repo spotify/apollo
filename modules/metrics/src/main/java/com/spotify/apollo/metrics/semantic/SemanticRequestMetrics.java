@@ -24,6 +24,7 @@ import com.google.common.base.Preconditions;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.RatioGauge;
+import com.codahale.metrics.RatioGauge.Ratio;
 import com.codahale.metrics.Timer;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.StatusType;
@@ -32,6 +33,8 @@ import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
 import java.util.function.Supplier;
+
+import okio.ByteString;
 
 import static com.spotify.apollo.StatusType.Family.INFORMATIONAL;
 import static com.spotify.apollo.StatusType.Family.SUCCESSFUL;
@@ -44,6 +47,7 @@ class SemanticRequestMetrics implements RequestMetrics {
 
   private final MetricId countRequestId;
   private final MetricId droppedRequestId;
+  private final MetricId replySizeId;
   private final Meter sentReplies;
   private final Meter sentErrors;
   private final Histogram fanoutHistogram;
@@ -76,6 +80,10 @@ class SemanticRequestMetrics implements RequestMetrics {
         "what", "dropped-request-rate",
         "unit", "request"
     );
+    replySizeId = metricId.tagged(
+        "what", "reply-size",
+        "unit", "B"
+    );
 
     timerContext = metricRegistry
         .timer(metricId.tagged("what", "endpoint-request-duration"))
@@ -84,17 +92,17 @@ class SemanticRequestMetrics implements RequestMetrics {
     this.sentReplies = requireNonNull(sentReplies);
     this.sentErrors = requireNonNull(sentErrors);
 
-    registerRatioGauge(metricId, "1m", () -> RatioGauge.Ratio.of(this.sentErrors.getOneMinuteRate(),
-                                                                 this.sentReplies.getOneMinuteRate()));
-    registerRatioGauge(metricId, "5m", () -> RatioGauge.Ratio.of(this.sentErrors.getFiveMinuteRate(),
-                                                                 this.sentReplies.getFiveMinuteRate()));
-    registerRatioGauge(metricId, "15m", () -> RatioGauge.Ratio.of(this.sentErrors.getFifteenMinuteRate(),
-                                                                  this.sentReplies.getFifteenMinuteRate()));
+    registerRatioGauge(metricId, "1m", () -> Ratio.of(this.sentErrors.getOneMinuteRate(),
+                                                      this.sentReplies.getOneMinuteRate()));
+    registerRatioGauge(metricId, "5m", () -> Ratio.of(this.sentErrors.getFiveMinuteRate(),
+                                                      this.sentReplies.getFiveMinuteRate()));
+    registerRatioGauge(metricId, "15m", () -> Ratio.of(this.sentErrors.getFifteenMinuteRate(),
+                                                       this.sentReplies.getFifteenMinuteRate()));
   }
 
   private void registerRatioGauge(MetricId metricId,
                                   String stat,
-                                  Supplier<RatioGauge.Ratio> ratioSupplier) {
+                                  Supplier<Ratio> ratioSupplier) {
     metricRegistry.register(
         metricId.tagged("what", "error-ratio", "stat", stat),
         new RatioGauge() {
@@ -111,8 +119,11 @@ class SemanticRequestMetrics implements RequestMetrics {
   }
 
   @Override
-  public void response(Response<?> response) {
-    metricRegistry.meter(countRequestId.tagged("status-code", String.valueOf(response.status().code()))).mark();
+  public void response(Response<ByteString> response) {
+    metricRegistry.meter(
+        countRequestId.tagged("status-code", String.valueOf(response.status().code()))).mark();
+    response.payload().ifPresent(
+        payload -> metricRegistry.histogram(replySizeId).update(payload.size()));
     sentReplies.mark();
     timerContext.stop();
 
@@ -121,7 +132,6 @@ class SemanticRequestMetrics implements RequestMetrics {
       sentErrors.mark();
     }
   }
-
 
   @Override
   public void drop() {

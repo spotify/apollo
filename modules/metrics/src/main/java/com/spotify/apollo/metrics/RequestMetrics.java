@@ -21,6 +21,8 @@ package com.spotify.apollo.metrics;
 
 import com.spotify.apollo.Response;
 
+import okio.ByteString;
+
 /**
  * Defines an interface for how to collect statistics for an individual incoming request.
  */
@@ -38,7 +40,7 @@ public interface RequestMetrics {
    *
    * @param response the response sent back to the caller
    */
-  void response(Response<?> response);
+  void response(Response<ByteString> response);
 
   /**
    * No response was sent; the request was dropped on the floor.

@@ -24,6 +24,8 @@ import com.spotify.apollo.StatusType;
 import com.spotify.apollo.metrics.RequestMetrics;
 import com.spotify.apollo.metrics.TimerContext;
 
+import okio.ByteString;
+
 class NoopRequestMetrics implements RequestMetrics {
 
   private NoopRequestMetrics() {
@@ -41,7 +43,7 @@ class NoopRequestMetrics implements RequestMetrics {
   }
 
   @Override
-  public void response(Response<?> response) {
+  public void response(Response<ByteString> response) {
   }
 
   @Override
