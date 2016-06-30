@@ -20,6 +20,7 @@
 package com.spotify.apollo.metrics.semantic;
 
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.spotify.apollo.Response;
@@ -31,6 +32,8 @@ import org.junit.Test;
 
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+
+import okio.ByteString;
 
 import static com.spotify.apollo.Status.FOUND;
 import static com.spotify.apollo.Status.INTERNAL_SERVER_ERROR;
@@ -206,5 +209,19 @@ public class SemanticRequestMetricsTest {
 
     assertThat(meters.size(), is(1));
     assertThat(meters.iterator().next().getCount(), is(1L));
+  }
+
+  @Test
+  public void shouldCalculateReplySizes() throws Exception {
+    sut.response(Response.forPayload(ByteString.encodeUtf8("this has non-zero size")));
+
+    Collection<Histogram> histograms = metricRegistry.getHistograms(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("reply-size") &&
+            metricId.getTags().get("unit").equals("B")
+    ).values();
+
+    assertThat(histograms, iterableWithSize(1));
+    assertThat(histograms.iterator().next().getCount(), is(1L));
   }
 }
