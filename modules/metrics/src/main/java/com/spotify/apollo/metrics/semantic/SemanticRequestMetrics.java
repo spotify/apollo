@@ -21,6 +21,7 @@ package com.spotify.apollo.metrics.semantic;
 
 import com.google.common.base.Preconditions;
 
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.RatioGauge;
 import com.spotify.apollo.StatusType;
@@ -40,11 +41,11 @@ class SemanticRequestMetrics implements RequestMetrics {
   private static final String COMPONENT = "service-request";
   private final SemanticMetricRegistry metricRegistry;
 
-  private final MetricId fanoutId;
   private final MetricId countRequestId;
   private final MetricId timeRequestId;
   private final Meter sentReplies;
   private final Meter sentErrors;
+  private final Histogram fanoutHistogram;
 
   SemanticRequestMetrics(
       SemanticMetricRegistry metricRegistry,
@@ -60,9 +61,10 @@ class SemanticRequestMetrics implements RequestMetrics {
 
     MetricId metricId = id.tagged("component", COMPONENT);
 
-    fanoutId = metricId.tagged(
-        "what", "request-fanout-factor",
-        "unit", "request/request");
+    fanoutHistogram = metricRegistry.histogram(
+        metricId.tagged(
+            "what", "request-fanout-factor",
+            "unit", "request/request"));
 
     countRequestId = metricId.tagged(
         "what", "endpoint-request-rate",
@@ -97,7 +99,7 @@ class SemanticRequestMetrics implements RequestMetrics {
 
   @Override
   public void fanout(int requests) {
-    metricRegistry.histogram(fanoutId).update(requests);
+    fanoutHistogram.update(requests);
   }
 
   @Override
