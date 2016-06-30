@@ -34,8 +34,8 @@ import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import okio.ByteString;
@@ -69,7 +69,7 @@ class SemanticRequestMetrics implements RequestMetrics {
   private final Optional<Meter> droppedRequests;
 
   SemanticRequestMetrics(
-      Set<What> enabledMetrics,
+      Predicate<What> enabledMetrics,
       SemanticMetricRegistry metricRegistry,
       MetricId id,
       Meter sentReplies,
@@ -83,7 +83,7 @@ class SemanticRequestMetrics implements RequestMetrics {
 
     MetricId metricId = id.tagged("component", COMPONENT);
 
-    if (enabledMetrics.contains(ENDPOINT_REQUEST_RATE)) {
+    if (enabledMetrics.test(ENDPOINT_REQUEST_RATE)) {
       requestRateCounter = Optional.of(response -> metricRegistry
           .meter(metricId.tagged(
               "what", ENDPOINT_REQUEST_RATE.tag(),
@@ -94,7 +94,7 @@ class SemanticRequestMetrics implements RequestMetrics {
       requestRateCounter = Optional.empty();
     }
 
-    if (enabledMetrics.contains(REQUEST_FANOUT_FACTOR)) {
+    if (enabledMetrics.test(REQUEST_FANOUT_FACTOR)) {
       fanoutHistogram = Optional.of(
           metricRegistry.histogram(
               metricId.tagged(
@@ -104,7 +104,7 @@ class SemanticRequestMetrics implements RequestMetrics {
       fanoutHistogram = Optional.empty();
     }
 
-    if (enabledMetrics.contains(RESPONSE_PAYLOAD_SIZE)) {
+    if (enabledMetrics.test(RESPONSE_PAYLOAD_SIZE)) {
       responseSizeHistogram = Optional.of(
           metricRegistry.histogram(
               metricId.tagged(
@@ -115,7 +115,7 @@ class SemanticRequestMetrics implements RequestMetrics {
       responseSizeHistogram = Optional.empty();
     }
 
-    if (enabledMetrics.contains(REQUEST_PAYLOAD_SIZE)) {
+    if (enabledMetrics.test(REQUEST_PAYLOAD_SIZE)) {
       requestSizeHistogram = Optional.of(
           metricRegistry.histogram(
               metricId.tagged(
@@ -126,7 +126,7 @@ class SemanticRequestMetrics implements RequestMetrics {
       requestSizeHistogram = Optional.empty();
     }
 
-    if (enabledMetrics.contains(ENDPOINT_REQUEST_DURATION)) {
+    if (enabledMetrics.test(ENDPOINT_REQUEST_DURATION)) {
       timerContext = Optional.of(
           metricRegistry
               .timer(metricId.tagged("what", ENDPOINT_REQUEST_DURATION.tag()))
@@ -135,7 +135,7 @@ class SemanticRequestMetrics implements RequestMetrics {
       timerContext = Optional.empty();
     }
 
-    if (enabledMetrics.contains(DROPPED_REQUEST_RATE)) {
+    if (enabledMetrics.test(DROPPED_REQUEST_RATE)) {
       droppedRequests = Optional.of(
           metricRegistry.meter(
               metricId.tagged(
@@ -149,7 +149,7 @@ class SemanticRequestMetrics implements RequestMetrics {
     this.sentReplies = requireNonNull(sentReplies);
     this.sentErrors = requireNonNull(sentErrors);
 
-    if (enabledMetrics.contains(ERROR_RATIO)) {
+    if (enabledMetrics.test(ERROR_RATIO)) {
       registerRatioGauge(metricId, "1m", () -> Ratio.of(this.sentErrors.getOneMinuteRate(),
                                                         this.sentReplies.getOneMinuteRate()),
                          metricRegistry);
