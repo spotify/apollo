@@ -28,7 +28,7 @@ import java.util.EnumSet;
 
 import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_DURATION;
 import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_RATE;
-import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_SIZE;
+import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_PAYLOAD_SIZE;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -43,9 +43,9 @@ public class MetricsConfigTest {
   @Test
   public void shouldEnableMetricsIfConfigured() throws Exception {
     Config config = ConfigFactory.parseString(
-        "metrics.server: [REQUEST_SIZE, ENDPOINT_REQUEST_DURATION, ENDPOINT_REQUEST_RATE]");
+        "metrics.server: [REQUEST_PAYLOAD_SIZE, ENDPOINT_REQUEST_DURATION, ENDPOINT_REQUEST_RATE]");
 
     assertThat(new MetricsConfig(config).serverMetrics(),
-               is(EnumSet.of(REQUEST_SIZE, ENDPOINT_REQUEST_DURATION, ENDPOINT_REQUEST_RATE)));
+               is(EnumSet.of(REQUEST_PAYLOAD_SIZE, ENDPOINT_REQUEST_DURATION, ENDPOINT_REQUEST_RATE)));
   }
 }

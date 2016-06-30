@@ -44,9 +44,9 @@ import static com.spotify.apollo.metrics.semantic.Metric.DROPPED_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_DURATION;
 import static com.spotify.apollo.metrics.semantic.Metric.ENDPOINT_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.Metric.ERROR_RATIO;
-import static com.spotify.apollo.metrics.semantic.Metric.REPLY_SIZE;
+import static com.spotify.apollo.metrics.semantic.Metric.RESPONSE_PAYLOAD_SIZE;
 import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_FANOUT_FACTOR;
-import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_SIZE;
+import static com.spotify.apollo.metrics.semantic.Metric.REQUEST_PAYLOAD_SIZE;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -226,12 +226,12 @@ public class SemanticRequestMetricsTest {
   }
 
   @Test
-  public void shouldCalculateReplySizes() throws Exception {
+  public void shouldCalculateResponseSizes() throws Exception {
     sut.response(Response.forPayload(ByteString.encodeUtf8("this has non-zero size")));
 
     Collection<Histogram> histograms = metricRegistry.getHistograms(
         (metricId, metric) ->
-            metricId.getTags().get("what").equals("reply-size") &&
+            metricId.getTags().get("what").equals("response-payload-size") &&
             metricId.getTags().get("unit").equals("B")
     ).values();
 
@@ -245,7 +245,7 @@ public class SemanticRequestMetricsTest {
 
     Collection<Histogram> histograms = metricRegistry.getHistograms(
         (metricId, metric) ->
-            metricId.getTags().get("what").equals("request-size") &&
+            metricId.getTags().get("what").equals("request-payload-size") &&
             metricId.getTags().get("unit").equals("B")
     ).values();
 
@@ -300,20 +300,20 @@ public class SemanticRequestMetricsTest {
 
   @Test
   public void shouldSupportDisablingRequestSize() throws Exception {
-    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(REQUEST_SIZE)));
+    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(REQUEST_PAYLOAD_SIZE)));
 
     sut.response(Response.forPayload(ByteString.encodeUtf8("flop")));
 
-    assertNotInRegistry(REQUEST_SIZE);
+    assertNotInRegistry(REQUEST_PAYLOAD_SIZE);
   }
 
   @Test
-  public void shouldSupportDisablingReplySize() throws Exception {
-    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(REPLY_SIZE)));
+  public void shouldSupportDisablingResponseSize() throws Exception {
+    sut = semanticRequestMetrics(EnumSet.complementOf(EnumSet.of(RESPONSE_PAYLOAD_SIZE)));
 
     sut.response(Response.forPayload(ByteString.encodeUtf8("flop")));
 
-    assertNotInRegistry(REPLY_SIZE);
+    assertNotInRegistry(RESPONSE_PAYLOAD_SIZE);
   }
 
   private void assertNotInRegistry(Metric metric) {

@@ -26,8 +26,8 @@ public enum Metric {
   REQUEST_FANOUT_FACTOR("request-fanout-factor"),
   ENDPOINT_REQUEST_RATE("endpoint-request-rate"),
   DROPPED_REQUEST_RATE("dropped-request-rate"),
-  REQUEST_SIZE("request-size"),
-  REPLY_SIZE("reply-size"),
+  REQUEST_PAYLOAD_SIZE("request-payload-size"),
+  RESPONSE_PAYLOAD_SIZE("response-payload-size"),
   ENDPOINT_REQUEST_DURATION("endpoint-request-duration"),
   ERROR_RATIO("error-ratio")
   ;
