@@ -42,11 +42,12 @@ public class MetricsTest extends AbstractModule {
   protected void configure() {
     bindConstant().annotatedWith(Names.named(Services.INJECT_SERVICE_NAME)).to("test");
     bind(Config.class).toInstance(ConfigFactory.empty());
+    bind(MetricId.class).toInstance(MetricId.EMPTY);
   }
 
   @Test
   public void testJvmMetricSets() throws Exception {
-    final Injector injector = Guice.createInjector(this, MetricsModule.forMetricId(MetricId.EMPTY));
+    final Injector injector = Guice.createInjector(this, MetricsModule.create());
 
     final SemanticMetricRegistry metricRegistry = injector.getInstance(SemanticMetricRegistry.class);
 
@@ -60,15 +61,13 @@ public class MetricsTest extends AbstractModule {
 
     assertFalse("Expected ThreadStatesMetricSet metrics to be registered with registry",
                 metricRegistry.getGauges(filterByTag("what", "jvm-thread-state")).isEmpty());
+
+    assertFalse("Expected CpuGaugeSet metrics to be registered with registry",
+                metricRegistry.getGauges(filterByTag("what", "process-cpu-load-percentage")).isEmpty());
   }
 
   private SemanticMetricFilter filterByTag(final String tagName, final String tagValue){
-    return new SemanticMetricFilter() {
-      @Override
-      public boolean matches(MetricId name, Metric metric) {
-        return name.getTags().containsKey(tagName) &&
-               name.getTags().get(tagName).equals(tagValue);
-      }
-    };
+    return (name, metric) -> name.getTags().containsKey(tagName) &&
+                             name.getTags().get(tagName).equals(tagValue);
   }
 }
