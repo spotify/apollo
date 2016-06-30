@@ -48,6 +48,8 @@ class MetricsCollectingEndpointRunnableFactoryDecorator implements EndpointRunna
       // note: will not time duration of matching and dispatching
       final RequestMetrics requestStats = metrics.metricsForEndpointCall(endpointName);
 
+      requestStats.incoming(request.request());
+
       final TrackedOngoingRequest
           trackedRequest = new MetricsTrackingOngoingRequest(requestStats, request);
       final Client instrumentingClient =

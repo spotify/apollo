@@ -66,12 +66,13 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
   @Captor ArgumentCaptor<OngoingRequest> ongoingRequestCaptor;
   @Captor ArgumentCaptor<RequestContext> requestContextCaptor;
 
+  private EndpointRunnableFactory decorated;
   private RequestContext requestContext;
-  private EndpointRunnableFactory endpointRunnableFactory;
+  private Request request;
 
   @Before
   public void setUp() throws Exception {
-    Request request = Request.forUri("hm://foo");
+    request = Request.forUri("hm://foo");
     requestContext = RequestContexts.create(request, client, Collections.emptyMap());
 
     when(metrics.metricsForEndpointCall(any())).thenReturn(requestStats);
@@ -83,20 +84,20 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
     when(delegate.create(ongoingRequestCaptor.capture(), requestContextCaptor.capture(), any()))
         .thenReturn(delegateRunnable);
 
-    endpointRunnableFactory = new MetricsCollectingEndpointRunnableFactoryDecorator(metrics)
+    decorated = new MetricsCollectingEndpointRunnableFactoryDecorator(metrics)
         .apply(delegate);
   }
 
   @Test
   public void shouldRunDelegate() throws Exception {
-    endpointRunnableFactory.create(ongoingRequest, requestContext, endpoint).run();
+    decorated.create(ongoingRequest, requestContext, endpoint).run();
 
     verify(delegateRunnable).run();
   }
 
   @Test
   public void shouldFinishOngoingRequest() throws Exception {
-    endpointRunnableFactory.create(ongoingRequest, requestContext, endpoint).run();
+    decorated.create(ongoingRequest, requestContext, endpoint).run();
 
     ongoingRequestCaptor.getValue()
         .reply(Response.ok());
@@ -107,7 +108,7 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
 
   @Test
   public void shouldTrackFanout() throws Exception {
-    endpointRunnableFactory.create(ongoingRequest, requestContext, endpoint).run();
+    decorated.create(ongoingRequest, requestContext, endpoint).run();
 
     requestContextCaptor.getValue()
         .requestScopedClient()
@@ -120,8 +121,15 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
   }
 
   @Test
-  public void shouldCountRequest() throws Exception {
-    endpointRunnableFactory.create(ongoingRequest, requestContext, endpoint).run();
+  public void shouldTrackRequest() throws Exception {
+    decorated.create(ongoingRequest, requestContext, endpoint).run();
+
+    verify(requestStats).incoming(request);
+  }
+
+  @Test
+  public void shouldTrackResponse() throws Exception {
+    decorated.create(ongoingRequest, requestContext, endpoint).run();
 
     Response<ByteString> response = Response.ok();
     ongoingRequestCaptor.getValue()
@@ -135,7 +143,7 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
     ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     executorService
-        .submit(endpointRunnableFactory.create(ongoingRequest, requestContext, endpoint))
+        .submit(decorated.create(ongoingRequest, requestContext, endpoint))
         .get();
 
     ongoingRequestCaptor.getValue().drop();
