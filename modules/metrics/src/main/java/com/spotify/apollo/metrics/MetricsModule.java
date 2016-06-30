@@ -26,6 +26,7 @@ import com.google.inject.multibindings.Multibinder;
 
 import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.EndpointRunnableFactoryDecorator;
+import com.spotify.apollo.metrics.semantic.MetricsConfig;
 import com.spotify.apollo.metrics.semantic.SemanticMetricsFactory;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.module.ApolloModule;
@@ -70,6 +71,7 @@ public class MetricsModule extends AbstractApolloModule {
   @Override
   protected void configure() {
     bind(FfwdConfig.class);
+    bind(MetricsConfig.class);
 
     Multibinder.newSetBinder(binder(), EndpointRunnableFactoryDecorator.class)
         .addBinding().to(MetricsCollectingEndpointRunnableFactoryDecorator.class);
@@ -93,8 +95,9 @@ public class MetricsModule extends AbstractApolloModule {
   }
 
   @Provides @Singleton
-  public MetricsFactory apolloMetrics(SemanticMetricRegistry metricRegistry) {
-    return new SemanticMetricsFactory(metricRegistry);
+  public MetricsFactory apolloMetrics(SemanticMetricRegistry metricRegistry,
+                                      MetricsConfig metricsConfig) {
+    return new SemanticMetricsFactory(metricRegistry, metricsConfig.serverMetrics());
   }
 
   @Provides @Singleton
