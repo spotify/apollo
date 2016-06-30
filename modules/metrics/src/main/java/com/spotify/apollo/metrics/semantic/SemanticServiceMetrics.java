@@ -25,7 +25,7 @@ import com.spotify.apollo.metrics.ServiceMetrics;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
-import java.util.Set;
+import java.util.function.Predicate;
 
 class SemanticServiceMetrics implements ServiceMetrics {
   private static final String COMPONENT = "scope-factory";
@@ -33,11 +33,11 @@ class SemanticServiceMetrics implements ServiceMetrics {
   private final MetricId metricId;
   private final Meter sentReplies;
   private final Meter sentErrors;
-  private final Set<What> enabledMetrics;
+  private final Predicate<What> enabledMetrics;
 
   SemanticServiceMetrics(SemanticMetricRegistry metricRegistry,
                          MetricId id,
-                         Set<What> enabledMetrics) {
+                         Predicate<What> enabledMetrics) {
     this.metricRegistry = metricRegistry;
     // Already tagged with 'application' and 'service'
     this.metricId = id.tagged("component", COMPONENT);

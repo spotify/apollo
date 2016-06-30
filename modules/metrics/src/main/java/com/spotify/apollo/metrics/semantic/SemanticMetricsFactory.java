@@ -25,15 +25,16 @@ import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
 import java.util.Set;
+import java.util.function.Predicate;
 
 public class SemanticMetricsFactory implements MetricsFactory {
 
   private final SemanticMetricRegistry metricRegistry;
   private final MetricId metricId;
-  private final Set<What> enabledMetrics;
+  private final Predicate<What> enabledMetrics;
 
   public SemanticMetricsFactory(final SemanticMetricRegistry metricRegistry,
-                                Set<What> enabledMetrics) {
+                                Predicate<What> enabledMetrics) {
     this.metricRegistry = metricRegistry;
     this.metricId = MetricId.build();
     this.enabledMetrics = enabledMetrics;

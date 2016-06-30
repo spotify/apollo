@@ -70,7 +70,7 @@ public class SemanticRequestMetricsTest {
     metricRegistry = new SemanticMetricRegistry();
 
     return new SemanticRequestMetrics(
-        enabledMetrics,
+        enabledMetrics::contains,
         metricRegistry,
         MetricId.EMPTY.tagged("service", "test-service",
                               "endpoint", "hm://foo/<bar>"),
