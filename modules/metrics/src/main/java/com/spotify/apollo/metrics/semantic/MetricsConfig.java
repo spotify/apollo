@@ -21,7 +21,9 @@ package com.spotify.apollo.metrics.semantic;
 
 import com.typesafe.config.Config;
 
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -44,6 +46,7 @@ public class MetricsConfig {
           ERROR_RATIO);
 
   private final Set<What> enabledMetrics;
+  private final Set<Integer> precreateCodes;
 
   @Inject
   MetricsConfig(Config config) {
@@ -51,6 +54,12 @@ public class MetricsConfig {
       enabledMetrics = parseConfig(config.getStringList("metrics.server"));
     } else {
       enabledMetrics = DEFAULT_ENABLED_METRICS;
+    }
+
+    if (config.hasPath("metrics.precreate-codes")) {
+      precreateCodes = new HashSet<>(config.getIntList("metrics.precreate-codes"));
+    } else {
+      precreateCodes = Collections.emptySet();
     }
   }
 
@@ -66,5 +75,9 @@ public class MetricsConfig {
 
   public Set<What> serverMetrics() {
     return enabledMetrics;
+  }
+
+  public Set<Integer> precreateCodes() {
+    return precreateCodes;
   }
 }

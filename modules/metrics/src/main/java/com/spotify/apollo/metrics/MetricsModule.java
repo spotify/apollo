@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Named;
@@ -98,7 +99,8 @@ public class MetricsModule extends AbstractApolloModule {
   public MetricsFactory apolloMetrics(SemanticMetricRegistry metricRegistry,
                                       MetricsConfig metricsConfig) {
     return new SemanticMetricsFactory(metricRegistry,
-                                      what -> metricsConfig.serverMetrics().contains(what));
+                                      what -> metricsConfig.serverMetrics().contains(what),
+                                      metricsConfig.precreateCodes());
   }
 
   @Provides @Singleton
