@@ -19,6 +19,8 @@
  */
 package com.spotify.apollo.metrics.semantic;
 
+import com.google.common.collect.ImmutableSet;
+
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
@@ -29,11 +31,17 @@ import com.spotify.apollo.metrics.RequestMetrics;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -52,6 +60,7 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasProperty;
@@ -69,11 +78,16 @@ public class SemanticServiceMetricsTest {
   }
 
   private void setupWithPredicate(Predicate<What> predicate) {
+    setupWith(predicate, Collections.emptySet());
+  }
+
+  private void setupWith(Predicate<What> predicate, Set<Integer> precreateCodes) {
     metricRegistry = new SemanticMetricRegistry();
     SemanticServiceMetrics serviceMetrics = new SemanticServiceMetrics(
         metricRegistry,
         MetricId.EMPTY
             .tagged("service", "test-service"),
+        precreateCodes,
         predicate);
 
     requestMetrics = serviceMetrics.metricsForEndpointCall("hm://foo/<bar>");
@@ -313,6 +327,38 @@ public class SemanticServiceMetricsTest {
     requestMetrics.response(Response.forPayload(ByteString.encodeUtf8("flop")));
 
     assertNotInRegistry(RESPONSE_PAYLOAD_SIZE);
+  }
+
+  @Test
+  public void shouldPrecreateMetersForDefinedStatusCodes() throws Exception {
+    setupWith(what -> true, ImmutableSet.of(200, 503));
+
+    Map<MetricId, Meter> meters = metricRegistry.getMeters(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("endpoint-request-rate")
+    );
+
+    assertThat(meters.size(), is(2));
+    assertThat(meters.keySet(), containsInAnyOrder(meterWithTag("status-code", "200"),
+                                                   meterWithTag("status-code", "503")));
+  }
+
+  private Matcher<MetricId> meterWithTag(String tag, String value) {
+    return new TypeSafeMatcher<MetricId>() {
+      @Override
+      protected boolean matchesSafely(MetricId item) {
+        return value.equals(item.getTags().get(tag));
+      }
+
+      @Override
+      public void describeTo(Description description) {
+        description.appendText("a metric Id with a tag '");
+        description.appendText(tag);
+        description.appendText("' whose value is '");
+        description.appendText(value);
+        description.appendText("'");
+      }
+    };
   }
 
   private void assertNotInRegistry(What metric) {

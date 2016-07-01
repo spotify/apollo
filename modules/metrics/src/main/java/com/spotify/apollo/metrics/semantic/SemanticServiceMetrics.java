@@ -22,6 +22,7 @@ package com.spotify.apollo.metrics.semantic;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableSet;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
@@ -35,6 +36,7 @@ import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -48,6 +50,7 @@ import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO;
 import static com.spotify.apollo.metrics.semantic.What.REQUEST_FANOUT_FACTOR;
 import static com.spotify.apollo.metrics.semantic.What.REQUEST_PAYLOAD_SIZE;
 import static com.spotify.apollo.metrics.semantic.What.RESPONSE_PAYLOAD_SIZE;
+import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 class SemanticServiceMetrics implements ServiceMetrics {
@@ -55,15 +58,18 @@ class SemanticServiceMetrics implements ServiceMetrics {
   private final SemanticMetricRegistry metricRegistry;
   private final MetricId metricId;
   private final Predicate<What> enabledMetrics;
+  private final Set<Integer> precreateCodes;
   private final LoadingCache<String, CachedMeters> metersCache;
 
   SemanticServiceMetrics(SemanticMetricRegistry metricRegistry,
                          MetricId id,
+                         Set<Integer> precreateCodes,
                          Predicate<What> enabledMetrics) {
-    this.metricRegistry = metricRegistry;
+    this.metricRegistry = requireNonNull(metricRegistry);
     // Already tagged with 'application' and 'service'
-    this.metricId = id;
-    this.enabledMetrics = enabledMetrics;
+    this.metricId = requireNonNull(id);
+    this.enabledMetrics = requireNonNull(enabledMetrics);
+    this.precreateCodes = ImmutableSet.copyOf(precreateCodes);
 
     metersCache = CacheBuilder.<String, CachedMeters>newBuilder()
         .build(new CacheLoader<String, CachedMeters>() {
@@ -90,7 +96,12 @@ class SemanticServiceMetrics implements ServiceMetrics {
   }
 
   private CachedMeters metersForEndpoint(String endpoint) {
-    final MetricId id = metricId.tagged("endpoint", endpoint);
+    MetricId id = metricId.tagged("endpoint", endpoint);
+
+    // precreate meters for defined status codes to ensure that they start out at value 0 on restart
+    for (Integer code : precreateCodes) {
+      requestRateMeter(id, code);
+    }
 
     Meter sentReplies = new Meter();
     Meter sentErrors = new Meter();
@@ -166,14 +177,16 @@ class SemanticServiceMetrics implements ServiceMetrics {
 
   private Optional<Consumer<Response<ByteString>>> requestRateCounter(MetricId id) {
     return enabledMetrics.test(ENDPOINT_REQUEST_RATE) ?
-           Optional.of(response -> metricRegistry
-               .meter(id.tagged(
-                   "what", ENDPOINT_REQUEST_RATE.tag(),
-                   "unit", "request",
-                   "status-code",
-                   String.valueOf(response.status().code())))
-               .mark()) :
+           Optional.of(response -> requestRateMeter(id, response.status().code()).mark()) :
            Optional.empty();
+  }
+
+  private Meter requestRateMeter(MetricId id, int code) {
+    return metricRegistry
+        .meter(id.tagged(
+            "what", ENDPOINT_REQUEST_RATE.tag(),
+            "unit", "request",
+            "status-code", String.valueOf(code)));
   }
 
   private void registerRatioGauge(MetricId metricId,

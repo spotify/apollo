@@ -26,6 +26,8 @@ import org.junit.Test;
 
 import java.util.EnumSet;
 
+import autovalue.shaded.com.google.common.common.collect.Sets;
+
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.REQUEST_PAYLOAD_SIZE;
@@ -47,5 +49,14 @@ public class MetricsConfigTest {
 
     assertThat(new MetricsConfig(config).serverMetrics(),
                is(EnumSet.of(REQUEST_PAYLOAD_SIZE, ENDPOINT_REQUEST_DURATION, ENDPOINT_REQUEST_RATE)));
+  }
+
+  @Test
+  public void shouldEnablePrecreatingMetersForStatusCodesIfConfigured() throws Exception {
+    Config config = ConfigFactory.parseString(
+        "metrics.precreate-codes: [300, 403, 404]");
+
+    assertThat(Sets.newHashSet(new MetricsConfig(config).precreateCodes()),
+               is(Sets.newHashSet(300, 403, 404)));
   }
 }
