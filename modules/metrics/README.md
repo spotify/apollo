@@ -6,53 +6,6 @@ with the Apollo request/response handling facilities.
 Including this this module in your assembly means that Apollo will add some metrics tracking
 requests per endpoint.
 
-
-## Usage
-
-Maven dependency
-
-```xml
-<dependency>
-    <groupId>com.spotify</groupId>
-    <artifactId>apollo-metrics</artifactId>
-</dependency>
-```
-
-TODO: update these docs! 
-
-To include the metrics module, add it to your service assembly (e.g. the
-[http-service](https://github.com/spotify/apollo/tree/master/apollo-http-service) assembly) by doing:
-
-```java
-public static void main(String[] args) throws LoadingException {
-  final Service myService = HttpService.usingAppInit(MyService::init, "my-service")
-      .withModule(MetricsModule.create())
-      .build();
-
-  HttpService.boot(myService, args);
-}
-```
-
-Or if using [apollo-core](https://github.com/spotify/apollo/tree/master/apollo-core) directly:
-
-```java
-public static void main(String[] args) throws IOException, InterruptedException {
-  final Service myService = Services.usingName("my-service")
-      .withModule(ApolloEnvironmentModule.create())
-      .withModule(MetricsModule.create())
-      .build();
-
-  try (Service.Instance instance = myService.start(args)) {
-    // set up
-
-    instance.waitForShutdown();
-  }
-}
-```
-
-Note that the metrics module requires [apollo-environment](https://github.com/spotify/apollo/tree/master/apollo-environment).
-
-
 ## Metrics
 
 All metrics will be tagged with the following tags:
@@ -61,7 +14,6 @@ All metrics will be tagged with the following tags:
 |-------------|----------------------------|------------------------------------------------------|
 | service     | name of Apollo application |                                                      |
 | endpoint    | method:uri-path-segment    | For instance, GET:/android/v1/search-artists/<query> |
-| component   | "service-request"          |                                                      |
 
 The following metrics are recorded:
 
@@ -71,7 +23,7 @@ A Meter metric, per status-code, tagged with:
 
 | tag         | value                      | comment                                              |
 |-------------|----------------------------|------------------------------------------------------|
-| what        | "endpoint-request-rate"    |                                                      |
+| what        | "endpoint-request-rate"    | Enable/disable with ENDPOINT_REQUEST_RATE            |
 | status-code | *                          | "200", "404", "418", etc.                            |
 | unit        | "request"                  |                                                      |
 
@@ -81,7 +33,7 @@ A Timer metric, tagged with:
 
 | tag         | value                      | comment                                              |
 |-------------|----------------------------|------------------------------------------------------|
-| what        | "endpoint-request-duration"|                                                      |
+| what        | "endpoint-request-duration"|  Enable/disable with ENDPOINT_REQUEST_DURATION       |
 
 ### Fan-out
 
@@ -89,11 +41,82 @@ A Histogram metric, tagged with:
 
 | tag         | value                      | comment                                              |
 |-------------|----------------------------|------------------------------------------------------|
-| what        | "request-fanout-factor"    |                                                      |
+| what        | "request-fanout-factor"    | Enable/disable with REQUEST_FANOUT_FACTOR            |
 | unit        | "request/request"          |                                                      |
 
 This metric will show you how many downstream requests each endpoint tends to make.
 
+### Request payload size
+
+A Histogram metric, tagged with:
+
+| tag         | value                      | comment                                              |
+|-------------|----------------------------|------------------------------------------------------|
+| what        | "request-payload-size"     | Enable/disable with REQUEST_PAYLOAD_SIZE             |
+| unit        | "B"                        | size in bytes                                        |
+
+### Response payload size
+
+A Histogram metric, tagged with:
+
+| tag         | value                      | comment                                              |
+|-------------|----------------------------|------------------------------------------------------|
+| what        | "response-payload-size"    | Enable/disable with RESPONSE_PAYLOAD_SIZE            |
+| unit        | "B"                        | size in bytes                                        |
+
+### Error ratios
+
+Three Gauges, tagged with: 
+
+| tag         | value                      | comment                                              |
+|-------------|----------------------------|------------------------------------------------------|
+| what        | "error-ratio"              | Enable/disable with ERROR_RATIO                      |
+| stat        | "1m", "5m", "15m"          | indicates the time interval in minutes               |
+
+The '1m' value shows the error ratio in the last minute, the '5m' value shows the ratio in 
+the last 5 minutes, etc. This metric doesn't include dropped requests. A response is classified
+as successful if it's status code is in the INFORMATIONAL or SUCCESSFUL status families. (See
+the `Family` enum in [`StatusType`](../../apollo-api/src/main/java/com/spotify/apollo/StatusType.java).
+
+### Dropped Requests
+
+A Meter, tagged with: 
+
+| tag         | value                      | comment                                              |
+|-------------|----------------------------|------------------------------------------------------|
+| what        | "dropped-request-rate"     | Enable/disable with DROPPED_REQUEST_RATE             |
+| unit        | "request"                  |                                                      |
+
+Requests are dropped when they expire: if they have a time-to-live and are older than
+that TTL, Apollo will not try to respond. Apollo may also drop requests if it is 
+overloaded and cannot respond to all incoming requests.
+
+
+## [ffwd](https://github.com/spotify/ffwd) reporter
+
+The metrics module includes the [ffwd reporter](https://github.com/spotify/semantic-metrics#provided-plugins)
+easily configurable from the apollo service configuration.
+
+## Configuration
+
+key | type | required | note
+--- | ---- | -------- | ----
+`metrics.server` | string list | optional | list of [`What`](src/main/java/com/spotify/apollo/metrics/semantic/What.java) names to enable; defaults to [ENDPOINT_REQUEST_RATE, ENDPOINT_REQUEST_DURATION, DROPPED_REQUEST_RATE, ERROR_RATIO]
+`metrics.precreate-codes` | int list | optional | list of status codes to precreate request-rate meters for, default empty
+`ffwd.interval` | int | optional | interval in seconds of reporting metrics to ffwd; default 30
+`ffwd.host` | string | optional | host where ffwd is running; default localhost
+`ffwd.port` | int | optional | port where ffwd is running; default 19091
+
+You may not want to enable all the metrics Apollo can create, since some of them can be expensive 
+(in particular on the alerting and graphing side), hence the ability to configure which
+metrics to emit via `metrics.server`.
+
+The `metrics.precreate-codes` setting is there since the request-rate meters
+are lazily created. Apollo doesn't emit any metrics for status codes it hasn't
+seen. This can lead to strange effects when, for instance, an error shows up
+for the first time after a restart. Pre-creating meters for status codes you 
+want to alert on makes it less likely to get false positives, since Apollo
+will then emit a '0' value until the first time a certain status code shows up.
 
 ## Custom Metrics
 
@@ -122,54 +145,3 @@ For client-side metrics, wrap the ```Client``` you get from the ```RequestContex
 way to how ```DecoratingClient``` is implemented. In your wrapper, ensure that the right metrics
 are tracked.
 
-### Custom per-endpoint response payload size histogram example
-
-```java
-  /**
-   * Use this method to transform a route to one that tracks response payload sizes in a Histogram,
-   * tagged with an endpoint tag set to method:uri of the route.
-   */
-  public Route<AsyncHandler<Response<ByteString>>> withResponsePayloadSizeHistogram(
-      Route<AsyncHandler<Response<ByteString>>> route) {
-
-    String endpointName = route.method() + ":" + route.uri();
-
-    return route.withMiddleware(responsePayloadSizeHistogram(endpointName));
-  }
-
-  /**
-   * Middleware to track response payload size in a Histogram,
-   * tagged with an endpoint tag set to the given endpoint name.
-   */
-  public Middleware<AsyncHandler<Response<ByteString>>, AsyncHandler<Response<ByteString>>>
-      responsePayloadSizeHistogram(String endpointName) {
-
-    final MetricId histogramId = MetricId.build()
-        .tagged("service", serviceName)
-        .tagged("endpoint", endpointName)
-        .tagged("what", "endpoint-response-size");
-
-    final Histogram histogram = registry.histogram(histogramId);
-
-    return (inner) -> (requestContext) ->
-        inner.invoke(requestContext).whenComplete(
-            (response, t) -> {
-              if (response != null) {
-                histogram.update(response.payload().map(ByteString::size).orElse(0));
-              }
-            }
-        );
-  }
-```
-
-
-## [ffwd](https://github.com/spotify/ffwd) reporter
-
-The metrics module includes the [ffwd reporter](https://github.com/spotify/semantic-metrics#provided-plugins)
-easily configurable from the apollo service configuration.
-
-key | type | required | note
---- | --- | --- | ---
-`ffwd.host` | string | optional | host of ffwd agent, default:`localhost`
-`ffwd.port` | int | optional | port of ffwd agent, default:`19091`
-`ffwd.interval` | int| optional | reporting interval in seconds, default:`30`

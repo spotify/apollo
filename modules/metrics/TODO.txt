@@ -1,10 +1,9 @@
-- Add metrics filtering
-- Create decorator ordering
-- Update documentation
-- Go through and fix TODO comments
+- Create decorator ordering - only for 2.0.0
 
 
 DONE:
+- Update documentation
+- Add metrics filtering
 - Create metric for request sizes
 - Create metric for reply sizes
 - Wire up into HttpService
