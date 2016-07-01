@@ -32,17 +32,20 @@ public class SemanticMetricsFactory implements MetricsFactory {
   private final SemanticMetricRegistry metricRegistry;
   private final MetricId metricId;
   private final Predicate<What> enabledMetrics;
+  private final Set<Integer> precreateCodes;
 
   public SemanticMetricsFactory(final SemanticMetricRegistry metricRegistry,
-                                Predicate<What> enabledMetrics) {
+                                Predicate<What> enabledMetrics,
+                                Set<Integer> precreateCodes) {
     this.metricRegistry = metricRegistry;
     this.metricId = MetricId.build();
     this.enabledMetrics = enabledMetrics;
+    this.precreateCodes = precreateCodes;
   }
 
   @Override
   public ServiceMetrics createForService(String serviceName) {
     final MetricId id = metricId.tagged("service", serviceName);
-    return new SemanticServiceMetrics(metricRegistry, id, enabledMetrics);
+    return new SemanticServiceMetrics(metricRegistry, id, precreateCodes, enabledMetrics);
   }
 }
