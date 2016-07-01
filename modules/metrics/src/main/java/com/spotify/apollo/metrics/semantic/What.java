@@ -17,22 +17,28 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.metrics.noop;
+package com.spotify.apollo.metrics.semantic;
 
-import com.spotify.apollo.metrics.TimerContext;
+/**
+ * Enumerates the metrics tracked, keyed by the 'what' tag.
+ */
+public enum What {
+  REQUEST_FANOUT_FACTOR("request-fanout-factor"),
+  ENDPOINT_REQUEST_RATE("endpoint-request-rate"),
+  DROPPED_REQUEST_RATE("dropped-request-rate"),
+  REQUEST_PAYLOAD_SIZE("request-payload-size"),
+  RESPONSE_PAYLOAD_SIZE("response-payload-size"),
+  ENDPOINT_REQUEST_DURATION("endpoint-request-duration"),
+  ERROR_RATIO("error-ratio")
+  ;
 
-public class NoopTimerContext implements TimerContext {
+  private final String tag;
 
-  private NoopTimerContext() {
+  What(String tag) {
+    this.tag = tag;
   }
 
-  private static final NoopTimerContext INSTANCE = new NoopTimerContext();
-
-  public static TimerContext instance() {
-    return INSTANCE;
-  }
-
-  @Override
-  public void stop() {
+  public String tag() {
+    return tag;
   }
 }

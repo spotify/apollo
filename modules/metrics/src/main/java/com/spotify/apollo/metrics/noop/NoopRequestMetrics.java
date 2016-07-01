@@ -19,9 +19,11 @@
  */
 package com.spotify.apollo.metrics.noop;
 
-import com.spotify.apollo.StatusType;
+import com.spotify.apollo.Request;
+import com.spotify.apollo.Response;
 import com.spotify.apollo.metrics.RequestMetrics;
-import com.spotify.apollo.metrics.TimerContext;
+
+import okio.ByteString;
 
 class NoopRequestMetrics implements RequestMetrics {
 
@@ -36,15 +38,20 @@ class NoopRequestMetrics implements RequestMetrics {
   }
 
   @Override
+  public void incoming(Request request) {
+
+  }
+
+  @Override
   public void fanout(int i) {
   }
 
   @Override
-  public void responseStatus(StatusType status) {
+  public void response(Response<ByteString> response) {
   }
 
   @Override
-  public TimerContext timeRequest() {
-    return NoopTimerContext.instance();
+  public void drop() {
+
   }
 }

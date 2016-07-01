@@ -19,102 +19,88 @@
  */
 package com.spotify.apollo.metrics.semantic;
 
-import com.google.common.base.Preconditions;
-
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
-import com.codahale.metrics.RatioGauge;
+import com.codahale.metrics.Timer;
+import com.spotify.apollo.Request;
+import com.spotify.apollo.Response;
 import com.spotify.apollo.StatusType;
 import com.spotify.apollo.metrics.RequestMetrics;
-import com.spotify.apollo.metrics.TimerContext;
-import com.spotify.metrics.core.MetricId;
-import com.spotify.metrics.core.SemanticMetricRegistry;
 
-import java.util.function.Supplier;
+import java.util.Optional;
+import java.util.function.Consumer;
+
+import okio.ByteString;
 
 import static com.spotify.apollo.StatusType.Family.INFORMATIONAL;
 import static com.spotify.apollo.StatusType.Family.SUCCESSFUL;
 import static java.util.Objects.requireNonNull;
 
+// Optional fields are fine; they enable the use of the 'ifPresent' idiom which is more readable
+// than if statements
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 class SemanticRequestMetrics implements RequestMetrics {
 
-  private static final String COMPONENT = "service-request";
-  private final SemanticMetricRegistry metricRegistry;
-
-  private final MetricId countRequestId;
-  private final MetricId timeRequestId;
+  private final Optional<Consumer<Response<ByteString>>> requestRateCounter;
+  private final Optional<Histogram> fanoutHistogram;
+  private final Optional<Histogram> requestSizeHistogram;
+  private final Optional<Histogram> responseSizeHistogram;
+  private final Optional<Timer.Context> timerContext;
+  private final Optional<Meter> droppedRequests;
   private final Meter sentReplies;
   private final Meter sentErrors;
-  private final Histogram fanoutHistogram;
 
   SemanticRequestMetrics(
-      SemanticMetricRegistry metricRegistry,
-      MetricId id,
+      Optional<Consumer<Response<ByteString>>> requestRateCounter,
+      Optional<Histogram> fanoutHistogram,
+      Optional<Histogram> responseSizeHistogram,
+      Optional<Histogram> requestSizeHistogram,
+      Optional<Timer.Context> timerContext,
+      Optional<Meter> droppedRequests,
       Meter sentReplies,
       Meter sentErrors) {
-    this.metricRegistry = metricRegistry;
-    // Already tagged with 'service' and 'endpoint'. 'application' gets added by the ffwd reporter
-    Preconditions.checkArgument(id.getTags().containsKey("service"),
-                                "metricId must be tagged with 'service'");
-    Preconditions.checkArgument(id.getTags().containsKey("endpoint"),
-                                "metricId must be tagged with 'endpoint'");
 
-    MetricId metricId = id.tagged("component", COMPONENT);
-
-    fanoutHistogram = metricRegistry.histogram(
-        metricId.tagged(
-            "what", "request-fanout-factor",
-            "unit", "request/request"));
-
-    countRequestId = metricId.tagged(
-        "what", "endpoint-request-rate",
-        "unit", "request");
-
-    timeRequestId = metricId.tagged(
-        "what", "endpoint-request-duration");
-
+    this.requestRateCounter = requireNonNull(requestRateCounter);
+    this.fanoutHistogram = requireNonNull(fanoutHistogram);
+    this.responseSizeHistogram = requireNonNull(responseSizeHistogram);
+    this.requestSizeHistogram = requireNonNull(requestSizeHistogram);
+    this.timerContext = requireNonNull(timerContext);
+    this.droppedRequests = requireNonNull(droppedRequests);
     this.sentReplies = requireNonNull(sentReplies);
     this.sentErrors = requireNonNull(sentErrors);
-
-    registerRatioGauge(metricId, "1m", () -> RatioGauge.Ratio.of(this.sentErrors.getOneMinuteRate(),
-                                                                 this.sentReplies.getOneMinuteRate()));
-    registerRatioGauge(metricId, "5m", () -> RatioGauge.Ratio.of(this.sentErrors.getFiveMinuteRate(),
-                                                                 this.sentReplies.getFiveMinuteRate()));
-    registerRatioGauge(metricId, "15m", () -> RatioGauge.Ratio.of(this.sentErrors.getFifteenMinuteRate(),
-                                                                  this.sentReplies.getFifteenMinuteRate()));
   }
 
-  private void registerRatioGauge(MetricId metricId,
-                                  String stat,
-                                  Supplier<RatioGauge.Ratio> ratioSupplier) {
-    metricRegistry.register(
-        metricId.tagged("what", "error-ratio", "stat", stat),
-        new RatioGauge() {
-          @Override
-          protected Ratio getRatio() {
-            return ratioSupplier.get();
-          }
-        });
+  @Override
+  public void incoming(Request request) {
+    requestSizeHistogram
+        .ifPresent(histogram -> request.payload()
+            .ifPresent(payload -> histogram.update(payload.size())));
   }
 
   @Override
   public void fanout(int requests) {
-    fanoutHistogram.update(requests);
+    fanoutHistogram.ifPresent(histogram -> histogram.update(requests));
   }
 
   @Override
-  public void responseStatus(StatusType status) {
-    metricRegistry.meter(countRequestId.tagged("status-code", String.valueOf(status.code()))).mark();
-    sentReplies.mark();
+  public void response(Response<ByteString> response) {
+    requestRateCounter.ifPresent(consumer -> consumer.accept(response));
+    responseSizeHistogram
+        .ifPresent(histogram -> response.payload()
+            .ifPresent(payload -> histogram.update(payload.size())));
 
-    StatusType.Family family = status.family();
+    sentReplies.mark();
+    timerContext.ifPresent(Timer.Context::stop);
+
+    StatusType.Family family = response.status().family();
     if (family != INFORMATIONAL && family != SUCCESSFUL) {
       sentErrors.mark();
     }
   }
 
   @Override
-  public TimerContext timeRequest() {
-    return new SemanticTimerContext(metricRegistry.timer(timeRequestId).time());
+  public void drop() {
+    droppedRequests.ifPresent(Meter::mark);
+    timerContext.ifPresent(Timer.Context::stop);
   }
 }

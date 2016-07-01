@@ -27,37 +27,66 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import okio.ByteString;
+
+import static com.spotify.apollo.Status.BAD_REQUEST;
 import static org.mockito.Mockito.verify;
 
 public class MetricsTrackingOngoingRequestTest {
-  MetricsTrackingOngoingRequest request;
-
+  private MetricsTrackingOngoingRequest request;
 
   @Mock
   RequestMetrics requestStats;
   @Mock
   OngoingRequest delegate;
-  @Mock
-  TimerContext timerContext;
+  private Response<ByteString> response;
 
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
 
-    request = new MetricsTrackingOngoingRequest(requestStats, delegate, timerContext);
+    request = new MetricsTrackingOngoingRequest(requestStats, delegate);
+    response = Response.forStatus(
+        BAD_REQUEST.withReasonPhrase("making it a little unusual for better tests"));
   }
 
   @Test
-  public void shouldStopTimerOnReply() throws Exception {
-    request.reply(Response.ok());
+  public void shouldAccountForResponses() throws Exception {
+    request.reply(response);
 
-    verify(timerContext).stop();
+    verify(requestStats).response(response);
   }
 
   @Test
-  public void shouldStopTimerOnDrop() throws Exception {
+  public void shouldAccountForDrops() throws Exception {
     request.drop();
 
-    verify(timerContext).stop();
+    verify(requestStats).drop();
+  }
+
+  @Test
+  public void shouldAccountForDownstreamRequestCountOnResponse() throws Exception {
+    request.incrementDownstreamRequests();
+    request.incrementDownstreamRequests();
+    request.incrementDownstreamRequests();
+    request.incrementDownstreamRequests();
+
+    request.reply(response);
+
+    verify(requestStats).fanout(4);
+  }
+
+  @Test
+  public void shouldForwardRepliesToDelegate() throws Exception {
+    request.reply(response);
+
+    verify(delegate).reply(response);
+  }
+
+  @Test
+  public void shouldForwardDropsToDelegate() throws Exception {
+    request.drop();
+
+    verify(delegate).drop();
   }
 }

@@ -19,30 +19,204 @@
  */
 package com.spotify.apollo.metrics.semantic;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
+import com.codahale.metrics.RatioGauge;
+import com.codahale.metrics.RatioGauge.Ratio;
+import com.codahale.metrics.Timer;
+import com.spotify.apollo.Response;
 import com.spotify.apollo.metrics.RequestMetrics;
 import com.spotify.apollo.metrics.ServiceMetrics;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import okio.ByteString;
+
+import static com.spotify.apollo.metrics.semantic.What.DROPPED_REQUEST_RATE;
+import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION;
+import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
+import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO;
+import static com.spotify.apollo.metrics.semantic.What.REQUEST_FANOUT_FACTOR;
+import static com.spotify.apollo.metrics.semantic.What.REQUEST_PAYLOAD_SIZE;
+import static com.spotify.apollo.metrics.semantic.What.RESPONSE_PAYLOAD_SIZE;
+
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 class SemanticServiceMetrics implements ServiceMetrics {
-  private static final String COMPONENT = "scope-factory";
+
   private final SemanticMetricRegistry metricRegistry;
   private final MetricId metricId;
-  private final Meter sentReplies;
-  private final Meter sentErrors;
+  private final Predicate<What> enabledMetrics;
+  private final LoadingCache<String, CachedMeters> metersCache;
 
-  SemanticServiceMetrics(SemanticMetricRegistry metricRegistry, MetricId id) {
+  SemanticServiceMetrics(SemanticMetricRegistry metricRegistry,
+                         MetricId id,
+                         Predicate<What> enabledMetrics) {
     this.metricRegistry = metricRegistry;
     // Already tagged with 'application' and 'service'
-    this.metricId = id.tagged("component", COMPONENT);
-    sentReplies = new Meter();
-    sentErrors = new Meter();
+    this.metricId = id;
+    this.enabledMetrics = enabledMetrics;
+
+    metersCache = CacheBuilder.<String, CachedMeters>newBuilder()
+        .build(new CacheLoader<String, CachedMeters>() {
+          @Override
+          public CachedMeters load(String endpoint) throws Exception {
+            return metersForEndpoint(endpoint);
+          }
+        });
   }
 
   @Override
   public RequestMetrics metricsForEndpointCall(String endpoint) {
+    CachedMeters meters = metersCache.getUnchecked(endpoint);
+
+    return new SemanticRequestMetrics(
+        meters.requestRateCounter,
+        meters.fanoutHistogram,
+        meters.responseSizeHistogram,
+        meters.requestSizeHistogram,
+        meters.requestDurationTimer.map(Timer::time),
+        meters.droppedRequests,
+        meters.sentReplies,
+        meters.sentErrors);
+  }
+
+  private CachedMeters metersForEndpoint(String endpoint) {
     final MetricId id = metricId.tagged("endpoint", endpoint);
-    return new SemanticRequestMetrics(metricRegistry, id, sentReplies, sentErrors);
+
+    Meter sentReplies = new Meter();
+    Meter sentErrors = new Meter();
+
+    if (enabledMetrics.test(ERROR_RATIO)) {
+      registerRatioGauge(id, "1m", () -> Ratio.of(sentErrors.getOneMinuteRate(),
+                                                  sentReplies.getOneMinuteRate()),
+                         metricRegistry);
+      registerRatioGauge(id, "5m", () -> Ratio.of(sentErrors.getFiveMinuteRate(),
+                                                  sentReplies.getFiveMinuteRate()),
+                         metricRegistry);
+      registerRatioGauge(id, "15m", () -> Ratio.of(sentErrors.getFifteenMinuteRate(),
+                                                   sentReplies.getFifteenMinuteRate()),
+                         metricRegistry);
+    }
+
+    return new CachedMeters(
+        requestRateCounter(id),
+        fanoutHistogram(id),
+        responseSizeHistogram(id),
+        requestSizeHistogram(id),
+        requestDurationTimer(id),
+        droppedRequests(id),
+        sentReplies,
+        sentErrors);
+  }
+
+  private Optional<Meter> droppedRequests(MetricId id) {
+    return enabledMetrics.test(DROPPED_REQUEST_RATE) ?
+           Optional.of(metricRegistry.meter(
+               id.tagged(
+                   "what", DROPPED_REQUEST_RATE.tag(),
+                   "unit", "request"
+               ))) :
+           Optional.empty();
+  }
+
+  private Optional<Timer> requestDurationTimer(MetricId id) {
+    return enabledMetrics.test(ENDPOINT_REQUEST_DURATION) ?
+           Optional.of(metricRegistry
+                           .timer(id.tagged("what", ENDPOINT_REQUEST_DURATION.tag()))) :
+           Optional.empty();
+  }
+
+  private Optional<Histogram> requestSizeHistogram(MetricId id) {
+    return enabledMetrics.test(REQUEST_PAYLOAD_SIZE) ?
+           Optional.of(metricRegistry.histogram(
+               id.tagged(
+                   "what", REQUEST_PAYLOAD_SIZE.tag(),
+                   "unit", "B"
+               ))) :
+           Optional.empty();
+  }
+
+  private Optional<Histogram> responseSizeHistogram(MetricId id) {
+    return enabledMetrics.test(RESPONSE_PAYLOAD_SIZE) ?
+           Optional.of(metricRegistry.histogram(
+               id.tagged(
+                   "what", RESPONSE_PAYLOAD_SIZE.tag(),
+                   "unit", "B"
+               ))) :
+           Optional.empty();
+  }
+
+  private Optional<Histogram> fanoutHistogram(MetricId id) {
+    return enabledMetrics.test(REQUEST_FANOUT_FACTOR) ?
+           Optional.of(metricRegistry.histogram(
+               id.tagged(
+                   "what", REQUEST_FANOUT_FACTOR.tag(),
+                   "unit", "request/request"))) :
+           Optional.empty();
+  }
+
+  private Optional<Consumer<Response<ByteString>>> requestRateCounter(MetricId id) {
+    return enabledMetrics.test(ENDPOINT_REQUEST_RATE) ?
+           Optional.of(response -> metricRegistry
+               .meter(id.tagged(
+                   "what", ENDPOINT_REQUEST_RATE.tag(),
+                   "unit", "request",
+                   "status-code",
+                   String.valueOf(response.status().code())))
+               .mark()) :
+           Optional.empty();
+  }
+
+  private void registerRatioGauge(MetricId metricId,
+                                  String stat,
+                                  Supplier<Ratio> ratioSupplier,
+                                  SemanticMetricRegistry metricRegistry) {
+    metricRegistry.register(
+        metricId.tagged("what", ERROR_RATIO.tag(), "stat", stat),
+        new RatioGauge() {
+          @Override
+          protected Ratio getRatio() {
+            return ratioSupplier.get();
+          }
+        });
+  }
+
+  private static class CachedMeters {
+
+    private final Optional<Consumer<Response<ByteString>>> requestRateCounter;
+    private final Optional<Histogram> fanoutHistogram;
+    private final Optional<Histogram> responseSizeHistogram;
+    private final Optional<Histogram> requestSizeHistogram;
+    private final Optional<Timer> requestDurationTimer;
+    private final Optional<Meter> droppedRequests;
+    private final Meter sentReplies;
+    private final Meter sentErrors;
+
+
+    private CachedMeters(Optional<Consumer<Response<ByteString>>> requestRateCounter,
+                         Optional<Histogram> fanoutHistogram,
+                         Optional<Histogram> responseSizeHistogram,
+                         Optional<Histogram> requestSizeHistogram,
+                         Optional<Timer> requestDurationTimer,
+                         Optional<Meter> droppedRequests,
+                         Meter sentReplies, Meter sentErrors) {
+      this.requestRateCounter = requestRateCounter;
+      this.fanoutHistogram = fanoutHistogram;
+      this.requestSizeHistogram = requestSizeHistogram;
+      this.responseSizeHistogram = responseSizeHistogram;
+      this.requestDurationTimer = requestDurationTimer;
+      this.droppedRequests = droppedRequests;
+      this.sentReplies = sentReplies;
+      this.sentErrors = sentErrors;
+    }
   }
 }
