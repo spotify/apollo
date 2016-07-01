@@ -97,7 +97,8 @@ public class MetricsModule extends AbstractApolloModule {
   @Provides @Singleton
   public MetricsFactory apolloMetrics(SemanticMetricRegistry metricRegistry,
                                       MetricsConfig metricsConfig) {
-    return new SemanticMetricsFactory(metricRegistry, what -> metricsConfig.serverMetrics().contains(what));
+    return new SemanticMetricsFactory(metricRegistry,
+                                      what -> metricsConfig.serverMetrics().contains(what));
   }
 
   @Provides @Singleton
