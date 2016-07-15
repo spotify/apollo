@@ -40,6 +40,7 @@ import okio.ByteString;
 
 import static java.lang.String.format;
 import static java.util.Optional.empty;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
@@ -82,6 +83,28 @@ public class HttpClientTest {
 
     assertThat(response.status(), withCode(204));
     assertThat(response.payload(), is(empty()));
+  }
+
+  @Test
+  public void testSendWithCustomHeader() throws Exception {
+    mockServerClient.when(
+        request()
+            .withMethod("GET")
+            .withPath("/foo.php")
+            .withHeader("x-my-special-header", "yes")
+    ).respond(
+        response()
+            .withStatusCode(200)
+            .withHeader("x-got-the-special-header", "yup")
+    );
+
+    String uri =  format("http://localhost:%d/foo.php", mockServerRule.getHttpPort());
+    Response<ByteString> response = HttpClient.createUnconfigured()
+        .send(Request.forUri(uri, "GET").withHeader("x-my-special-header", "yes"), empty())
+        .toCompletableFuture().get();
+
+    assertThat(response.status(), withCode(200));
+    assertThat(response.headers().get("x-got-the-special-header"), equalTo(Optional.of("yup")));
   }
 
   @Test
