@@ -21,6 +21,7 @@ package com.spotify.apollo.http.client;
 
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
 
+import com.squareup.okhttp.Headers;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -74,6 +75,7 @@ class HttpClient implements IncomingRequestAwareClient {
     final Request request = new Request.Builder()
         .method(apolloRequest.method(), requestBody.orElse(null))
         .url(apolloRequest.uri())
+        .headers(Headers.of(apolloRequest.headers().asMap()))
         .build();
 
     final CompletableFuture<com.spotify.apollo.Response<ByteString>> result =
