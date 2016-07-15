@@ -21,6 +21,7 @@ package com.spotify.apollo.http.client;
 
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
 
+import com.squareup.okhttp.Headers;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -38,6 +39,7 @@ import okio.ByteString;
 class HttpClient implements IncomingRequestAwareClient {
 
   private static final MediaType DEFAULT_CONTENT_TYPE = MediaType.parse("application/octet-stream");
+  private static final String AUTHORIZATION_HEADER = "Authorization";
 
   private final OkHttpClient client;
 
@@ -71,9 +73,17 @@ class HttpClient implements IncomingRequestAwareClient {
       return RequestBody.create(contentType, payload);
     });
 
+    Headers.Builder headersBuilder = new Headers.Builder();
+    apolloRequest.headers().forEach((k, v) -> headersBuilder.add(k, v));
+
+    apolloIncomingRequest
+        .flatMap(req -> req.header(AUTHORIZATION_HEADER))
+        .ifPresent(header -> headersBuilder.add(AUTHORIZATION_HEADER, header));
+
     final Request request = new Request.Builder()
         .method(apolloRequest.method(), requestBody.orElse(null))
         .url(apolloRequest.uri())
+        .headers(headersBuilder.build())
         .build();
 
     final CompletableFuture<com.spotify.apollo.Response<ByteString>> result =

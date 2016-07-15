@@ -40,6 +40,7 @@ import okio.ByteString;
 
 import static java.lang.String.format;
 import static java.util.Optional.empty;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
@@ -82,6 +83,28 @@ public class HttpClientTest {
 
     assertThat(response.status(), withCode(204));
     assertThat(response.payload(), is(empty()));
+  }
+
+  @Test
+  public void testSendWithCustomHeader() throws Exception {
+    mockServerClient.when(
+        request()
+            .withMethod("GET")
+            .withPath("/foo.php")
+            .withHeader("x-my-special-header", "yes")
+    ).respond(
+        response()
+            .withStatusCode(200)
+            .withHeader("x-got-the-special-header", "yup")
+    );
+
+    String uri =  format("http://localhost:%d/foo.php", mockServerRule.getHttpPort());
+    Response<ByteString> response = HttpClient.createUnconfigured()
+        .send(Request.forUri(uri, "GET").withHeader("x-my-special-header", "yes"), empty())
+        .toCompletableFuture().get();
+
+    assertThat(response.status(), withCode(200));
+    assertThat(response.headers().get("x-got-the-special-header"), equalTo("yup"));
   }
 
   @Test
@@ -159,6 +182,28 @@ public class HttpClientTest {
       HttpClient.createUnconfigured()
           .send(request, empty())
           .toCompletableFuture().get();
+  }
+
+  @Test
+  public void testAuthContextPropagation() throws Exception {
+    mockServerClient.when(
+        request().withHeader("Authorization", "Basic dXNlcjpwYXNz")
+    ).respond(
+        response().withHeader("x-auth-was-fine", "yes")
+    );
+
+    String uri = format("http://localhost:%d/foo.php", mockServerRule.getHttpPort());
+    Request request = Request.forUri(uri, "GET");
+
+    Request originalRequest = Request
+        .forUri("http://original.uri/")
+        .withHeader("Authorization", "Basic dXNlcjpwYXNz");
+
+    final Response<ByteString> response = HttpClient.createUnconfigured()
+        .send(request, Optional.of(originalRequest))
+        .toCompletableFuture().get();
+
+    assertThat(response.headers().get("x-auth-was-fine"), equalTo("yes"));
   }
 
   @Test
