@@ -60,6 +60,11 @@ public interface Route<H> {
         method(), uri(), handler(), doc(summary, description));
   }
 
+  default Route<H> withDocString(DocString doc) {
+    return copy(
+        method(), uri(), handler(), doc);
+  }
+
   default <K> Route<K> withMiddleware(Middleware<? super H, ? extends K> middleware) {
     return copy(
         method(), uri(), middleware.apply(handler()), docString().orElse(null));
