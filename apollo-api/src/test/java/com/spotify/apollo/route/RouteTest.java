@@ -20,9 +20,12 @@
 package com.spotify.apollo.route;
 
 import com.spotify.apollo.RequestContext;
+import com.spotify.apollo.route.Route.DocString;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -44,5 +47,14 @@ public class RouteTest {
 
     String actual = route.handler().invoke(requestContext).toCompletableFuture().get();
     assertThat(actual, equalTo("this is the best response"));
+  }
+
+  @Test
+  public void shouldSupportSupplyingDocStringValueType() throws Exception {
+    Route<AsyncHandler<String>> route =
+        Route.sync("GET", "/foo", requestContext -> "this is the best response")
+            .withDocString(DocString.doc("summary", "description"));
+
+    assertThat(route.docString(), equalTo(Optional.of(DocString.doc("summary", "description"))));
   }
 }
