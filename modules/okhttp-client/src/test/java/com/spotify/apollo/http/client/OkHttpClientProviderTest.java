@@ -19,6 +19,8 @@
  */
 package com.spotify.apollo.http.client;
 
+import com.google.common.io.Closer;
+
 import com.squareup.okhttp.OkHttpClient;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -31,7 +33,8 @@ public class OkHttpClientProviderTest {
 
   private static OkHttpClient buildClient(final String str) {
     final Config config = ConfigFactory.parseString(str);
-    final OkHttpClientProvider provider = new OkHttpClientProvider(config);
+    final Closer closer = Closer.create();
+    final OkHttpClientProvider provider = new OkHttpClientProvider(config, closer);
     return provider.get();
   }
 
