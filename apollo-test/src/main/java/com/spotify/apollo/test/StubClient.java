@@ -104,7 +104,12 @@ public class StubClient implements Client, Closeable {
       requestsAndResponses.add(RequestResponsePair.create(request, response));
       future.complete(response);
     };
-    executor.schedule(replyTask, responseWithDelay.getDelayMillis(), TimeUnit.MILLISECONDS);
+
+    if (responseWithDelay.getDelayMillis() <= 0) {
+      replyTask.run();
+    } else {
+      executor.schedule(replyTask, responseWithDelay.getDelayMillis(), TimeUnit.MILLISECONDS);
+    }
 
     return future;
   }
