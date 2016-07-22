@@ -46,6 +46,10 @@
             <groupId>com.squareup.okhttp</groupId>
             <artifactId>okhttp</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>apollo-extra</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
