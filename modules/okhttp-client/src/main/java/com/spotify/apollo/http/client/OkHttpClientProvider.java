@@ -19,8 +19,10 @@
  */
 package com.spotify.apollo.http.client;
 
+import com.google.common.io.Closer;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.squareup.okhttp.ConnectionPool;
 import com.squareup.okhttp.OkHttpClient;
 import com.typesafe.config.Config;
@@ -33,10 +35,12 @@ import static com.spotify.apollo.environment.ConfigUtil.optionalInt;
 class OkHttpClientProvider implements Provider<OkHttpClient> {
 
   private final OkHttpClientConfig config;
+  private final Closer closer;
 
   @Inject
-  OkHttpClientProvider(Config config) {
+  OkHttpClientProvider(Config config, Closer closer) {
     this.config = new OkHttpClientConfig(config);
+    this.closer = closer;
   }
 
   @Override
@@ -65,6 +69,8 @@ class OkHttpClientProvider implements Provider<OkHttpClient> {
 
     config.maxAsyncRequestsPerHost().ifPresent(
         max -> client.getDispatcher().setMaxRequestsPerHost(max));
+
+    closer.register(() -> client.getDispatcher().getExecutorService().shutdown());
 
     return client;
   }
