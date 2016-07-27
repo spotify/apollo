@@ -17,6 +17,12 @@ key | type | required | note
 
 _todo_ implement all config keys
 
+## Special request headers
+
+Header              | Effect
+--------------------|
+`X-Calling-Service` | Accessible through `Request#service`
+
 ## Example
 This example shows how to start an http server using the HttpServerModule from apollo-core.
 
