@@ -25,7 +25,7 @@ A Meter metric, per status-code, tagged with:
 |-------------|----------------------------|------------------------------------------------------|
 | what        | "endpoint-request-rate"    | Enable/disable with ENDPOINT_REQUEST_RATE            |
 | status-code | *                          | "200", "404", "418", etc.                            |
-| unit        | "request"                  |                                                      |
+| unit        | "request/s"                | Requests per second.                                 |
 
 ### Endpoint request duration
 
@@ -85,7 +85,7 @@ A Meter, tagged with:
 | tag         | value                      | comment                                              |
 |-------------|----------------------------|------------------------------------------------------|
 | what        | "dropped-request-rate"     | Enable/disable with DROPPED_REQUEST_RATE             |
-| unit        | "request"                  |                                                      |
+| unit        | "request/s"                | Requests per second.                                 |
 
 Requests are dropped when they expire: if they have a time-to-live and are older than
 that TTL, Apollo will not try to respond. Apollo may also drop requests if it is 
