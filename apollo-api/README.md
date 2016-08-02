@@ -75,11 +75,6 @@ version since you'll need it later in the build configuration.
         <groupId>com.spotify</groupId>
         <artifactId>apollo-http-service</artifactId>
     </dependency>
-    <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-        <version>1.1.3</version>
-    </dependency>
 </dependencies>
 ```
 
