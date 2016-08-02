@@ -16,6 +16,7 @@
     <properties>
         <cucumber.version>1.2.4</cucumber.version>
         <auto-matter.version>0.11.0</auto-matter.version>
+        <logback.version>1.1.7</logback.version>
     </properties>
 
     <dependencyManagement>
@@ -154,12 +155,12 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.1.3</version>
+                <version>${logback.version}</version>
             </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
-                <version>1.1.3</version>
+                <version>${logback.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
@@ -185,7 +186,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.16</version>
+                <version>1.7.20</version>
             </dependency>
 
             <dependency>

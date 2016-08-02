@@ -6,7 +6,8 @@ Apollo HTTP Service
 The `apollo-http-service` library is a small bundle of Apollo modules. It incorporates both
 [apollo-api](../apollo-api) and [apollo-core](../apollo-core) and ties them together with the
 [jetty-http-server](../modules/jetty-http-server) and the [okhttp-client](../modules/okhttp-client)
-to make a complete service.
+to make a complete service. It also adds `logback-classic` as an SLF4J
+implementation to give you logging capabilities.
 
 Apollo HTTP Service gives you what you need to start your backend service. Here, for example, we
 tell `HttpService` to boot a service named `"ping"`, defined by the function `Ping::init`, and
@@ -82,7 +83,8 @@ http.server.port = 8080
 http.server.port = ${?HTTP_PORT}
 ```
 
-For more information on how to manage configuration, see [Apollo Core](../apollo-core) and the [Typesafe Config](https://github.com/typesafehub/config) documentation.
+For more information on how to manage configuration, see [Apollo Core](../apollo-core),
+the [logback-classic](http://logback.qos.ch/) and the [Typesafe Config](https://github.com/typesafehub/config) documentation.
 
 ### Maven
 
@@ -116,13 +118,6 @@ For more information on how to manage configuration, see [Apollo Core](../apollo
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>apollo-http-service</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.1.3</version>
-            <scope>runtime</scope>
         </dependency>
    </dependencies>
 
@@ -181,7 +176,6 @@ The Maven configuration is a bit lengthy so it deserves some more explanation:
 
 * We use a property named `mainClass` to refer to our main class. This will be used later.
 * Under the `dependencyManagement` we import all the Apollo artifact versions through the `apollo-bom` artifact. For more information about importing managed dependencies, see the [Maven documentation](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Importing_Dependencies).
-* We add `logback-classic` as a runtime dependency to get log output. Any [SLF4J](http://www.slf4j.org/) compatible logging implementation would do.
 * We configure the compiler plugin to target JDK 8.
 * We configure the `maven-dependency-plugin` to copy all runtime dependency jars into `${project.build.directory}/lib`. These will be referenced from the main artifact.
 * We configure `maven-jar-plugin` to add the classpath jars to the manifest, prefixed with `lib/` along with the `MainClass` entry to use our main class.
