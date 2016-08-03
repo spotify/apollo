@@ -19,8 +19,8 @@ _todo_ implement all config keys
 
 ## Special request headers
 
-Header              | Effect
---------------------|
+Header | Effect
+--- | ---
 `X-Calling-Service` | Accessible through `Request#service`
 
 ## Example
