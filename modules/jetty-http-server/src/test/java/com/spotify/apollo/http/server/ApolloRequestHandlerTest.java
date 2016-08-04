@@ -21,6 +21,7 @@ package com.spotify.apollo.http.server;
 
 import com.google.common.collect.ImmutableList;
 
+import com.google.common.collect.ImmutableMap;
 import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.ServerInfo;
 import com.spotify.apollo.request.ServerInfos;
@@ -40,6 +41,7 @@ import java.util.Optional;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import okio.ByteString;
 
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -60,7 +62,9 @@ public class ApolloRequestHandlerTest {
 
     requestHandler = new ApolloRequestHandler(serverInfo, mockDelegate);
 
-    httpServletRequest = mockRequest("PUT", "http://somehost/a/b?q=abc&b=adf&q=def");
+    httpServletRequest = mockRequest("PUT",
+                                     "http://somehost/a/b?q=abc&b=adf&q=def",
+                                     emptyMap());
   }
 
   @Test
@@ -107,7 +111,38 @@ public class ApolloRequestHandlerTest {
                is(Optional.of(ByteString.encodeUtf8("hi there"))));
   }
 
-  private MockHttpServletRequest mockRequest(String method, String requestURI) {
+  @Test
+  public void shouldExtractCallingServiceFromHeader() throws Exception {
+    httpServletRequest = mockRequest("PUT",
+                                     "http://somehost/a/b?q=abc&b=adf&q=def",
+                                     ImmutableMap.of("X-Calling-Service", "testservice"));
+
+    assertThat(requestHandler.asApolloRequest(httpServletRequest).service(),
+               is(Optional.of("testservice")));
+  }
+
+  @Test
+  public void shouldNotExtractCallingServiceFromEmptyHeader() throws Exception {
+    httpServletRequest = mockRequest("PUT",
+                                     "http://somehost/a/b?q=abc&b=adf&q=def",
+                                     ImmutableMap.of("X-Calling-Service", ""));
+
+    assertThat(requestHandler.asApolloRequest(httpServletRequest).service(),
+               is(Optional.empty()));
+  }
+
+  @Test
+  public void shouldHandleMissingCallingServiceHeader() throws Exception {
+    httpServletRequest = mockRequest("PUT",
+                                     "http://somehost/a/b?q=abc&b=adf&q=def",
+                                     emptyMap());
+
+    assertThat(requestHandler.asApolloRequest(httpServletRequest).service(),
+               is(Optional.empty()));
+  }
+
+  private MockHttpServletRequest mockRequest(
+      String method, String requestURI, Map<String, String> headers) {
     QueryStringDecoder decoder = new QueryStringDecoder(requestURI);
 
     final MockHttpServletRequest mockHttpServletRequest =
@@ -120,6 +155,8 @@ public class ApolloRequestHandlerTest {
               return value.toArray(new String[value.size()]);
             })));
     mockHttpServletRequest.setQueryString(requestURI.replace(decoder.path() + "?", ""));
+
+    headers.forEach(mockHttpServletRequest::addHeader);
 
     return mockHttpServletRequest;
   }

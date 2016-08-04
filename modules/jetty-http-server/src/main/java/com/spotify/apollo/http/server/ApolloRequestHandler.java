@@ -48,6 +48,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import okio.ByteString;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -99,6 +100,11 @@ class ApolloRequestHandler extends AbstractHandler {
 
     Request result = Request.forUri(uri, method)
         .withHeaders(headers);
+
+    final String callingService = headers.get("X-Calling-Service");
+    if (!isNullOrEmpty(callingService)) {
+      result = result.withService(callingService);
+    }
 
     if (payload.isPresent()) {
       result = result.withPayload(payload.get());
