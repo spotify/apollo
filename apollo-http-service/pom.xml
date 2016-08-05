@@ -46,6 +46,10 @@
             <groupId>com.spotify</groupId>
             <artifactId>apollo-metrics</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
 
         <!--test scope-->
         <dependency>
