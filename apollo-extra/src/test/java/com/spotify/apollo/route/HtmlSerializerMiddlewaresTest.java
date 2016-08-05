@@ -85,7 +85,7 @@ public class HtmlSerializerMiddlewaresTest {
 
   private void checkContentTypeAndBody(final Response<ByteString> response) {
     assertEquals("<html>yo</html>\n", response.payload().get().utf8());
-    assertThat(response.headers().get("Content-Type"), is(Optional.of("text/html; charset=UTF8")));
+    assertThat(response.headers().get("Content-Type"), is(Optional.of("text/html; charset=utf-8")));
   }
 
 }
