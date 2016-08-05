@@ -33,7 +33,7 @@ public class JsonSerializerMiddlewares {
   }
 
   private static final String CONTENT_TYPE = "Content-Type";
-  private static final String JSON = "application/json; charset=UTF8";
+  private static final String JSON = "application/json; charset=utf-8";
 
   private static <T> ByteString serialize(ObjectWriter objectWriter, T object) {
     try {

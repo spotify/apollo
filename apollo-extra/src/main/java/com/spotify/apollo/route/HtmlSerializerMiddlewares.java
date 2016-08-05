@@ -40,7 +40,7 @@ import okio.ByteString;
 public class HtmlSerializerMiddlewares {
 
   private static final String CONTENT_TYPE = "Content-Type";
-  private static final String HTML = "text/html; charset=UTF8";
+  private static final String HTML = "text/html; charset=utf-8";
 
   private static final Configuration configuration = new Configuration(Configuration.VERSION_2_3_22);
 

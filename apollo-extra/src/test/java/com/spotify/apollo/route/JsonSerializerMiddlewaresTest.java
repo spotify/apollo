@@ -48,7 +48,7 @@ public class JsonSerializerMiddlewaresTest {
 
   private static void checkContentType(Response<ByteString> response) {
     assertThat(response.headers().get("Content-Type"),
-               is(Optional.of("application/json; charset=UTF8")));
+               is(Optional.of("application/json; charset=utf-8")));
   }
 
   @Test
