@@ -24,7 +24,6 @@ import com.spotify.apollo.request.ForwardingOngoingRequest;
 import com.spotify.apollo.request.OngoingRequest;
 
 import java.util.Optional;
-import java.util.function.BiConsumer;
 
 import okio.ByteString;
 
@@ -38,10 +37,10 @@ import static java.util.Objects.requireNonNull;
  * This class is intended to simplify reporting the outcomes of requests via, for instance, logging.
  */
 public class OutcomeReportingOngoingRequest extends ForwardingOngoingRequest {
-  private final BiConsumer<OngoingRequest, Optional<Response<ByteString>>> consumer;
+  private final RequestOutcomeConsumer consumer;
 
   protected OutcomeReportingOngoingRequest(OngoingRequest delegate,
-                                           BiConsumer<OngoingRequest, Optional<Response<ByteString>>> consumer) {
+                                           RequestOutcomeConsumer consumer) {
     super(delegate);
     this.consumer = requireNonNull(consumer);
   }
