@@ -40,6 +40,8 @@ import java.util.function.BiConsumer;
 
 import okio.ByteString;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Logs requests and their outcomes. The method for logging is configurable via the
  * {@link #setLogger(BiConsumer)} method.
@@ -60,36 +62,41 @@ public class RequestLoggingDecorator implements EndpointRunnableFactoryDecorator
   private static final Logger LOGGER = LoggerFactory.getLogger(RequestLoggingDecorator.class);
   private static final DateTimeFormatter DATE_TIME_FORMATTER = new DateTimeFormatterBuilder()
       .appendLiteral("[")
-      .appendValue(ChronoField.DAY_OF_MONTH)
+      .appendValue(ChronoField.DAY_OF_MONTH, 2)
       .appendLiteral('/')
       .appendText(ChronoField.MONTH_OF_YEAR, TextStyle.SHORT)
       .appendLiteral('/')
-      .appendValue(ChronoField.YEAR)
+      .appendValue(ChronoField.YEAR, 4)
       .appendLiteral(':')
-      .appendValue(ChronoField.HOUR_OF_DAY)
+      .appendValue(ChronoField.HOUR_OF_DAY, 2)
       .appendLiteral(':')
-      .appendValue(ChronoField.MINUTE_OF_HOUR)
+      .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
       .appendLiteral(':')
-      .appendValue(ChronoField.SECOND_OF_MINUTE)
+      .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
       .appendLiteral(' ')
       .appendOffset("+HHMM", "UTC")
       .appendLiteral(']')
       .toFormatter(Locale.ENGLISH);
+  private static final BiConsumer<OngoingRequest, Optional<Response<ByteString>>>
+      LOG_WITH_COMBINED_FORMAT =
+      (ongoingRequest, response) ->
+          LOGGER.info("- - - {} \"{}\" {} {} \"{}\" \"{}\"",
+                      DATE_TIME_FORMATTER.format(ZonedDateTime.now()),
+                      String.format("%s %s", ongoingRequest.request().method(),
+                                    ongoingRequest.request().uri()),
+                      response.map(r -> String.valueOf(r.status().code())).orElse("DROPPED"),
+                      response.flatMap(
+                          r -> r.payload().flatMap(p -> Optional.of(String.valueOf(p.size()))))
+                          .orElse("-"),
+                      ongoingRequest.request().header("Referer").orElse("-"),
+                      ongoingRequest.request().header("User-Agent").orElse("-"));
 
-  private BiConsumer<OngoingRequest, Optional<Response<ByteString>>> logger =
-      (ongoingRequest, response) -> {
-        LOGGER.info("- - - {} \"{}\" {} {} \"{}\" \"{}\"",
-                    DATE_TIME_FORMATTER.format(ZonedDateTime.now()),
-                    String.format("%s %s", ongoingRequest.request().method(), ongoingRequest.request().uri()),
-                    response.map(r -> String.valueOf(r.status().code())).orElse("DROPPED"),
-                    response.flatMap(r -> r.payload().flatMap(p -> Optional.of(String.valueOf(p.size())))).orElse("-"),
-                    ongoingRequest.request().header("Referer").orElse("-"),
-                    ongoingRequest.request().header("User-Agent").orElse("-"));
-      };
+  private BiConsumer<OngoingRequest, Optional<Response<ByteString>>> logger
+       = LOG_WITH_COMBINED_FORMAT;
 
   @Inject(optional = true)
   public void setLogger(BiConsumer<OngoingRequest, Optional<Response<ByteString>>> logger) {
-    this.logger = logger;
+    this.logger = requireNonNull(logger);
   }
 
   @Override
