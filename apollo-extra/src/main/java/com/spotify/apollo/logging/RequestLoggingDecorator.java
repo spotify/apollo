@@ -21,10 +21,8 @@ package com.spotify.apollo.logging;
 
 import com.google.inject.Inject;
 
-import com.spotify.apollo.Response;
 import com.spotify.apollo.environment.EndpointRunnableFactoryDecorator;
 import com.spotify.apollo.request.EndpointRunnableFactory;
-import com.spotify.apollo.request.OngoingRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,15 +34,12 @@ import java.time.format.TextStyle;
 import java.time.temporal.ChronoField;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.function.BiConsumer;
-
-import okio.ByteString;
 
 import static java.util.Objects.requireNonNull;
 
 /**
  * Logs requests and their outcomes. The method for logging is configurable via the
- * {@link #setLogger(BiConsumer)} method.
+ * {@link #setLogger(RequestOutcomeConsumer)} method.
  * <p/>
  * By default, uses a log format based on an approximation of the
  * combined log format from Apache HTTPD (http://httpd.apache.org/docs/1.3/logs.html#combined).
@@ -77,7 +72,7 @@ public class RequestLoggingDecorator implements EndpointRunnableFactoryDecorator
       .appendOffset("+HHMM", "UTC")
       .appendLiteral(']')
       .toFormatter(Locale.ENGLISH);
-  private static final BiConsumer<OngoingRequest, Optional<Response<ByteString>>>
+  private static final RequestOutcomeConsumer
       LOG_WITH_COMBINED_FORMAT =
       (ongoingRequest, response) ->
           LOGGER.info("- - - {} \"{}\" {} {} \"{}\" \"{}\"",
@@ -91,11 +86,10 @@ public class RequestLoggingDecorator implements EndpointRunnableFactoryDecorator
                       ongoingRequest.request().header("Referer").orElse("-"),
                       ongoingRequest.request().header("User-Agent").orElse("-"));
 
-  private BiConsumer<OngoingRequest, Optional<Response<ByteString>>> logger
-       = LOG_WITH_COMBINED_FORMAT;
+  private RequestOutcomeConsumer logger = LOG_WITH_COMBINED_FORMAT;
 
   @Inject(optional = true)
-  public void setLogger(BiConsumer<OngoingRequest, Optional<Response<ByteString>>> logger) {
+  public void setLogger(RequestOutcomeConsumer logger) {
     this.logger = requireNonNull(logger);
   }
 

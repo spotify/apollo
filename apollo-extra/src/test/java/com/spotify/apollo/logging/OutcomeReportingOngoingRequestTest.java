@@ -27,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Optional;
-import java.util.function.BiConsumer;
 
 import okio.ByteString;
 
@@ -69,7 +68,7 @@ public class OutcomeReportingOngoingRequestTest {
   }
 
   @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-  private static class Logger implements BiConsumer<OngoingRequest, Optional<Response<ByteString>>> {
+  private static class Logger implements RequestOutcomeConsumer {
     private OngoingRequest request;
     private Optional<Response<ByteString>> response;
 
