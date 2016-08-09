@@ -25,7 +25,7 @@ import com.spotify.apollo.AppInit;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.environment.ApolloEnvironment;
 import com.spotify.apollo.environment.ApolloEnvironmentModule;
-import com.spotify.apollo.environment.EndpointRunnableFactoryDecorator;
+import com.spotify.apollo.environment.RequestRunnableFactoryDecorator;
 import com.spotify.apollo.logging.RequestLoggingDecorator;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.request.RequestHandler;
@@ -50,7 +50,7 @@ class HttpServiceModule extends AbstractApolloModule {
     bindAppInit();
 
     install(ApolloEnvironmentModule.create());
-    Multibinder.newSetBinder(binder(), EndpointRunnableFactoryDecorator.class)
+    Multibinder.newSetBinder(binder(), RequestRunnableFactoryDecorator.class)
         .addBinding().to(RequestLoggingDecorator.class);
   }
 
