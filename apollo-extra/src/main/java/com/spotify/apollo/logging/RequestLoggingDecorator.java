@@ -40,7 +40,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Logs requests and their outcomes. The method for logging is configurable via the
  * {@link #setLogger(RequestOutcomeConsumer)} method.
- * <p/>
+ * <p>
  * By default, uses a log format based on an approximation of the
  * combined log format from Apache HTTPD (http://httpd.apache.org/docs/1.3/logs.html#combined).
  * Known divergences:
@@ -88,6 +88,20 @@ public class RequestLoggingDecorator implements RequestRunnableFactoryDecorator 
 
   private RequestOutcomeConsumer logger = LOG_WITH_COMBINED_FORMAT;
 
+  /**
+   * Optionally override how logging is done. See
+   * https://github.com/google/guice/wiki/Injections#optional-injections for detailed information
+   * about how to override. You will probably want a Guice module with a method similar to:
+   * <pre>
+   * {@code
+   *   protected void configure() {
+   *     bind(RequestOutcomeConsumer.class).toInstance(new MyLogger());
+   *   }
+   * }
+   * </pre>
+   *
+   * @param logger the consumer to use instead of the default
+   */
   @Inject(optional = true)
   public void setLogger(RequestOutcomeConsumer logger) {
     this.logger = requireNonNull(logger);
