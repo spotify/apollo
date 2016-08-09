@@ -28,7 +28,11 @@ import java.util.function.BiConsumer;
 import okio.ByteString;
 
 /**
- * TODO: document!
+ * Defines an API for notification of the outcome of a particular request. Once the request has
+ * finished processing, this consumer can be called (via a {@link OutcomeReportingOngoingRequest},
+ * for instance), with the originating {@link OngoingRequest} and an optional {@link Response} as
+ * parameters. If the {@link Response} {@link Optional} is empty, that means the request was
+ * dropped and no response was sent to the caller.
  */
 public interface RequestOutcomeConsumer
     extends BiConsumer<OngoingRequest, Optional<Response<ByteString>>>  {
