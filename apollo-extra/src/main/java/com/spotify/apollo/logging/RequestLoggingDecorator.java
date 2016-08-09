@@ -21,8 +21,8 @@ package com.spotify.apollo.logging;
 
 import com.google.inject.Inject;
 
-import com.spotify.apollo.environment.EndpointRunnableFactoryDecorator;
-import com.spotify.apollo.request.EndpointRunnableFactory;
+import com.spotify.apollo.environment.RequestRunnableFactoryDecorator;
+import com.spotify.apollo.request.RequestRunnableFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +52,7 @@ import static java.util.Objects.requireNonNull;
  *  - remote ident is not supported (always '-')
  *  - remote user is not supported (always '-')
  */
-public class RequestLoggingDecorator implements EndpointRunnableFactoryDecorator {
+public class RequestLoggingDecorator implements RequestRunnableFactoryDecorator {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RequestLoggingDecorator.class);
   private static final DateTimeFormatter DATE_TIME_FORMATTER = new DateTimeFormatterBuilder()
@@ -94,10 +94,8 @@ public class RequestLoggingDecorator implements EndpointRunnableFactoryDecorator
   }
 
   @Override
-  public EndpointRunnableFactory apply(EndpointRunnableFactory delegate) {
-    return ((ongoingRequest, requestContext, endpoint) ->
-                delegate.create(new OutcomeReportingOngoingRequest(ongoingRequest, logger),
-                                requestContext,
-                                endpoint));
+  public RequestRunnableFactory apply(RequestRunnableFactory delegate) {
+    return ongoingRequest ->
+                delegate.create(new OutcomeReportingOngoingRequest(ongoingRequest, logger));
   }
 }

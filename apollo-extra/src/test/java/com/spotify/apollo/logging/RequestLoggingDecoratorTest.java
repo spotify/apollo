@@ -21,8 +21,10 @@ package com.spotify.apollo.logging;
 
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
-import com.spotify.apollo.request.EndpointRunnableFactory;
+import com.spotify.apollo.dispatch.Endpoint;
 import com.spotify.apollo.request.OngoingRequest;
+import com.spotify.apollo.request.RequestRunnableFactory;
+import com.spotify.apollo.route.RuleMatch;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -41,6 +43,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import okio.ByteString;
@@ -50,10 +53,12 @@ import static org.junit.Assert.assertThat;
 
 public class RequestLoggingDecoratorTest {
 
-  public static final String MAGIC_TIMESTAMP = "TIMESTAMP";
+  private static final String MAGIC_TIMESTAMP = "TIMESTAMP";
+  private static final BiConsumer<OngoingRequest, RuleMatch<Endpoint>>
+      EMPTY_CONTINUATION = (ongoingRequest1, endpointRuleMatch) -> { };
   private RequestLoggingDecorator decorator;
 
-  private EndpointRunnableFactory delegateFactory;
+  private RequestRunnableFactory delegateFactory;
   private final Request request = Request.forUri("http://tessting");
   private OngoingRequest ongoingRequest = new FakeRequest(request);
 
@@ -66,7 +71,7 @@ public class RequestLoggingDecoratorTest {
   public void setUp() throws Exception {
     decorator = new RequestLoggingDecorator();
 
-    delegateFactory = ((ongoingRequest, requestContext, endpoint) -> () -> ongoingRequest.reply(Response.ok()));
+    delegateFactory = ongoingRequest -> matchContinuation -> ongoingRequest.reply(Response.ok());
   }
 
   @Test
@@ -103,7 +108,7 @@ public class RequestLoggingDecoratorTest {
     AtomicReference<Request> reference = new AtomicReference<>();
     decorator.setLogger((request, response) -> reference.set(request.request()));
 
-    decorator.apply(delegateFactory).create(ongoingRequest, null, null).run();
+    decorator.apply(delegateFactory).create(ongoingRequest).run(EMPTY_CONTINUATION);
 
     assertThat(reference.get(), is(request));
   }
@@ -149,9 +154,9 @@ public class RequestLoggingDecoratorTest {
   }
 
   private List<LoggingEvent> collectLoggingEventsForRequest(OngoingRequest ongoingRequest) {
-    EndpointRunnableFactory decorated = decorator.apply(delegateFactory);
+    RequestRunnableFactory decorated = decorator.apply(delegateFactory);
 
-    decorated.create(ongoingRequest, null, null).run();
+    decorated.create(ongoingRequest).run(EMPTY_CONTINUATION);
 
     return testLogger.getLoggingEvents().stream()
         .filter(event -> event.getLevel() == Level.INFO)
