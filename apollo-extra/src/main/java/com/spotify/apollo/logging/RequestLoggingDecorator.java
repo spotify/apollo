@@ -79,10 +79,9 @@ public class RequestLoggingDecorator implements RequestRunnableFactoryDecorator 
                       DATE_TIME_FORMATTER.format(ZonedDateTime.now()),
                       String.format("%s %s", ongoingRequest.request().method(),
                                     ongoingRequest.request().uri()),
-                      response.map(r -> String.valueOf(r.status().code())).orElse("DROPPED"),
+                      response.map(r -> String.valueOf(r.status().code())).orElse("-"),
                       response.flatMap(
-                          r -> r.payload().flatMap(p -> Optional.of(String.valueOf(p.size()))))
-                          .orElse("-"),
+                          r -> r.payload().map(p -> String.valueOf(p.size()))).orElse("-"),
                       ongoingRequest.request().header("Referer").orElse("-"),
                       ongoingRequest.request().header("User-Agent").orElse("-"));
 
