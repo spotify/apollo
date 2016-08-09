@@ -127,6 +127,19 @@ public class RequestLoggingDecoratorTest {
 
   }
 
+  @Test
+  public void shouldLogDashIfNoReply() throws Exception {
+    delegateFactory = ongoingRequest ->
+        matchContinuation -> ongoingRequest.drop();
+
+    List<LoggingEvent> events = collectLoggingEventsForRequest(ongoingRequest);
+
+    assertThat(events,
+               is(singleEventMatching("- - - {} \"{}\" {} {} \"{}\" \"{}\"",
+                                      MAGIC_TIMESTAMP, "GET http://tessting", "-", "-", "-", "-")));
+
+  }
+
   private Matcher<List<LoggingEvent>> singleEventMatching(String message, String... args) {
     return new TypeSafeMatcher<List<LoggingEvent>>() {
       @Override

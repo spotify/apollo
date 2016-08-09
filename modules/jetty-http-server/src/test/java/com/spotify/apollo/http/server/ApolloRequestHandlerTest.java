@@ -57,6 +57,7 @@ import okio.ByteString;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -194,12 +195,12 @@ public class ApolloRequestHandlerTest {
 
     ongoingRequest.reply(Response.forPayload(ByteString.encodeUtf8("floop")));
 
-    List<LoggingEvent> events = testLogger.getAllLoggingEvents().stream()
+    List<LoggingEvent> events = testLogger.getLoggingEvents().stream()
         .filter(event -> event.getLevel() == Level.ERROR)
         .filter(event -> event.getMessage().contains("Failed to write response"))
         .collect(Collectors.toList());
 
-    assertThat(events.size(), is(1));
+    assertThat(events, hasSize(1));
   }
 
   private MockHttpServletRequest mockRequest(
