@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 
 import okio.ByteString;
 
+import static okio.ByteString.encodeUtf8;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -111,6 +112,19 @@ public class RequestLoggingDecoratorTest {
     decorator.apply(delegateFactory).create(ongoingRequest).run(EMPTY_CONTINUATION);
 
     assertThat(reference.get(), is(request));
+  }
+
+  @Test
+  public void shouldLogSizeInBytesIfPresent() throws Exception {
+    delegateFactory = ongoingRequest ->
+        matchContinuation -> ongoingRequest.reply(Response.forPayload(encodeUtf8("7 bytes")));
+
+    List<LoggingEvent> events = collectLoggingEventsForRequest(ongoingRequest);
+
+    assertThat(events,
+               is(singleEventMatching("- - - {} \"{}\" {} {} \"{}\" \"{}\"",
+                                      MAGIC_TIMESTAMP, "GET http://tessting", "200", "7", "-", "-")));
+
   }
 
   private Matcher<List<LoggingEvent>> singleEventMatching(String message, String... args) {
