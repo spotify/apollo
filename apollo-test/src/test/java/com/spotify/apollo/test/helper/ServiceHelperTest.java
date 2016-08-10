@@ -62,6 +62,7 @@ public class ServiceHelperTest {
 
   @Rule
   public ServiceHelper serviceHelper = ServiceHelper.create(this::appInit, SERVICE_NAME)
+      .startTimeoutSeconds(10)
       .domain("xyz99.spotify.net")
       .conf("some.key", TEST_CONFIG_THING)
       .args("-v");

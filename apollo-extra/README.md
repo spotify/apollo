@@ -17,3 +17,24 @@ Defines a couple of utilities that make it easier to move between `ListenableFut
 ## com.spotify.apollo.route
 
 Contains some serializer middlewares, and utilities for versioning endpoints.
+
+## com.spotify.apollo.logging
+
+Contains logging utilities, or more generally, a solution that allows
+subscribing for notifications of request outcomes, with a default 
+implementation that logs using the Apache HTTPD 'combined' format.
+
+To send this to an access log file, use a configuration similar to:
+
+```
+    <appender name="ACCESSLOG" class="ch.qos.logback.core.FileAppender">
+        <file>/path/to/access.log</file>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.spotify.apollo.logging.RequestLoggingDecorator" level="INFO">
+        <appender-ref ref="ACCESSLOG"/>
+    </logger>
+```

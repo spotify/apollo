@@ -20,23 +20,36 @@
 package com.spotify.apollo.http.server;
 
 import com.google.common.collect.ImmutableList;
-
 import com.google.common.collect.ImmutableMap;
+
+import com.spotify.apollo.Request;
+import com.spotify.apollo.Response;
 import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.ServerInfo;
 import com.spotify.apollo.request.ServerInfos;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletRequest;
 
+import uk.org.lidalia.slf4jext.Level;
+import uk.org.lidalia.slf4jtest.LoggingEvent;
+import uk.org.lidalia.slf4jtest.TestLogger;
+import uk.org.lidalia.slf4jtest.TestLoggerFactory;
+import uk.org.lidalia.slf4jtest.TestLoggerFactoryResetRule;
+
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.servlet.AsyncContext;
 
 import io.netty.handler.codec.http.QueryStringDecoder;
 import okio.ByteString;
@@ -44,15 +57,30 @@ import okio.ByteString;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 public class ApolloRequestHandlerTest {
   ApolloRequestHandler requestHandler;
 
   @Mock
   RequestHandler mockDelegate;
+  @Mock
+  AsyncContext asyncContext;
+  @Mock
+  javax.servlet.http.HttpServletResponse response;
+  @Mock
+  javax.servlet.ServletOutputStream outputStream;
 
   MockHttpServletRequest httpServletRequest;
+
+  @Rule
+  public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
+
+  private final TestLogger testLogger = TestLoggerFactory.getTestLogger(ApolloRequestHandler.class);
 
   @Before
   public void setUp() throws Exception {
@@ -139,6 +167,40 @@ public class ApolloRequestHandlerTest {
 
     assertThat(requestHandler.asApolloRequest(httpServletRequest).service(),
                is(Optional.empty()));
+  }
+
+  // note: this test may fail when running in IntelliJ, due to
+  // https://youtrack.jetbrains.com/issue/IDEA-122783
+  @Test
+  public void shouldLogErrorWritingResponse() throws Exception {
+    when(asyncContext.getResponse()).thenReturn(response);
+    when(response.getOutputStream()).thenReturn(outputStream);
+    doThrow(new IOException("expected")).when(outputStream).write(any(byte[].class));
+
+    ApolloRequestHandler.AsyncContextOngoingRequest ongoingRequest = new ApolloRequestHandler.AsyncContextOngoingRequest(
+        new ServerInfo() {
+          @Override
+          public String id() {
+            return "14";
+          }
+
+          @Override
+          public InetSocketAddress socketAddress() {
+            return InetSocketAddress.createUnresolved("localhost", 888);
+          }
+        },
+        Request.forUri("http://localhost:888"),
+        asyncContext, 9123
+    );
+
+    ongoingRequest.reply(Response.forPayload(ByteString.encodeUtf8("floop")));
+
+    List<LoggingEvent> events = testLogger.getLoggingEvents().stream()
+        .filter(event -> event.getLevel() == Level.ERROR)
+        .filter(event -> event.getMessage().contains("Failed to write response"))
+        .collect(Collectors.toList());
+
+    assertThat(events, hasSize(1));
   }
 
   private MockHttpServletRequest mockRequest(
