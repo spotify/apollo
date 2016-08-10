@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.ServerInfo;
 import com.spotify.apollo.request.ServerInfos;
@@ -50,6 +51,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.RequestDispatcher;
 
 import io.netty.handler.codec.http.QueryStringDecoder;
 import okio.ByteString;
@@ -61,6 +63,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class ApolloRequestHandlerTest {
@@ -201,6 +205,33 @@ public class ApolloRequestHandlerTest {
         .collect(Collectors.toList());
 
     assertThat(events, hasSize(1));
+  }
+
+  @Test
+  public void shouldNotForwardErrorDispatch() throws Exception {
+    org.eclipse.jetty.server.Request baseRequest = errorDispatchRequest();
+    requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
+
+    verify(mockDelegate, never()).handle(any(OngoingRequest.class));
+  }
+
+  @Test
+  public void shouldSendErrorResponseFromDispatch() throws Exception {
+    org.eclipse.jetty.server.Request baseRequest = errorDispatchRequest();
+    requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
+
+    verify(response).sendError(500, "tje error messaje");
+  }
+
+  private org.eclipse.jetty.server.Request errorDispatchRequest() {
+    org.eclipse.jetty.server.Request baseRequest = new org.eclipse.jetty.server.Request(null, null);
+
+    // from HttpChannel ERROR_DISPATCH case; using this to detect that the request has in fact
+    // errored out already
+    baseRequest.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, 500);
+    baseRequest.setAttribute(RequestDispatcher.ERROR_MESSAGE, "tje error messaje");
+    baseRequest.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, "/floop");
+    return baseRequest;
   }
 
   private MockHttpServletRequest mockRequest(

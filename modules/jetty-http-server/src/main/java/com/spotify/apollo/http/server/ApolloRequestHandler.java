@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,6 +55,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static javax.servlet.RequestDispatcher.ERROR_MESSAGE;
+import static javax.servlet.RequestDispatcher.ERROR_STATUS_CODE;
 
 class ApolloRequestHandler extends AbstractHandler {
 
@@ -73,6 +76,17 @@ class ApolloRequestHandler extends AbstractHandler {
       org.eclipse.jetty.server.Request baseRequest,
       HttpServletRequest req,
       HttpServletResponse resp) throws IOException, ServletException {
+
+    if (baseRequest.getAttribute(ERROR_STATUS_CODE) != null) {
+      LOGGER.debug("Ignoring error dispatch request");
+      int statusCode = Integer.valueOf(baseRequest.getAttribute(ERROR_STATUS_CODE).toString());
+      Object message = baseRequest.getAttribute(ERROR_MESSAGE);
+      resp.sendError(statusCode, message == null ? null : message.toString());
+      return;
+    }
+
+    LOGGER.info("handling request {} with status code {}", baseRequest,
+                baseRequest.getAttribute(ERROR_STATUS_CODE));
 
     final long arrivalTimeNanos = System.nanoTime();
     final AsyncContext asyncContext = baseRequest.startAsync();
