@@ -17,7 +17,7 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.logging;
+package com.spotify.apollo.logging.extra;
 
 import com.spotify.apollo.Response;
 import com.spotify.apollo.request.OngoingRequest;

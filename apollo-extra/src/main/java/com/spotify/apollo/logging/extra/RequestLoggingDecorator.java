@@ -17,7 +17,7 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.logging;
+package com.spotify.apollo.logging.extra;
 
 import com.google.inject.Inject;
 
@@ -33,7 +33,6 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoField;
 import java.util.Locale;
-import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
