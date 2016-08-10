@@ -30,6 +30,8 @@ import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.ServerInfo;
 
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -54,6 +56,8 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 class ApolloRequestHandler extends AbstractHandler {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ApolloRequestHandler.class);
 
   private final RequestHandler requestHandler;
   private final ServerInfo serverInfo;
@@ -160,14 +164,13 @@ class ApolloRequestHandler extends AbstractHandler {
 
       response.headers().asMap().forEach(httpResponse::addHeader);
 
-      try {
-        final Optional<ByteString> payload = response.payload();
-        if (payload.isPresent()) {
-          payload.get().write(httpResponse.getOutputStream());
+      response.payload().ifPresent(payload -> {
+        try {
+          payload.write(httpResponse.getOutputStream());
+        } catch (IOException e) {
+          LOGGER.error("Failed to write response", e);
         }
-      } catch (IOException e) {
-        // Log and give up,
-      }
+      });
 
       asyncContext.complete();
     }
