@@ -24,16 +24,21 @@ import com.google.common.collect.ImmutableMap;
 
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
+import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.ServerInfo;
 import com.spotify.apollo.request.ServerInfos;
 
+import org.eclipse.jetty.server.HttpChannel;
+import org.eclipse.jetty.server.HttpInput;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import uk.org.lidalia.slf4jext.Level;
 import uk.org.lidalia.slf4jtest.LoggingEvent;
@@ -44,12 +49,15 @@ import uk.org.lidalia.slf4jtest.TestLoggerFactoryResetRule;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.http.HttpServletResponse;
 
 import io.netty.handler.codec.http.QueryStringDecoder;
 import okio.ByteString;
@@ -60,39 +68,55 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class ApolloRequestHandlerTest {
-  ApolloRequestHandler requestHandler;
+  private ApolloRequestHandler requestHandler;
 
-  @Mock
-  RequestHandler mockDelegate;
+  private FakeRequestHandler delegate;
+  private MockHttpServletRequest httpServletRequest;
+  private MockHttpServletResponse response;
+  private Duration requestTimeout;
+  private final TestLogger testLogger = TestLoggerFactory.getTestLogger(ApolloRequestHandler.class);
+  private org.eclipse.jetty.server.Request baseRequest;
+
   @Mock
   AsyncContext asyncContext;
   @Mock
-  javax.servlet.http.HttpServletResponse response;
-  @Mock
   javax.servlet.ServletOutputStream outputStream;
+  @Mock
+  private HttpChannel httpChannel;
+  @Mock
+  private HttpInput httpInput;
 
-  MockHttpServletRequest httpServletRequest;
 
   @Rule
   public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
 
-  private final TestLogger testLogger = TestLoggerFactory.getTestLogger(ApolloRequestHandler.class);
 
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
 
+    delegate = new FakeRequestHandler();
+    response = new MockHttpServletResponse();
     ServerInfo serverInfo = ServerInfos.create("id", InetSocketAddress.createUnresolved("localhost", 80));
 
-    requestHandler = new ApolloRequestHandler(serverInfo, mockDelegate);
+    requestTimeout = Duration.ofMillis(8275523);
+    requestHandler = new ApolloRequestHandler(serverInfo, delegate, requestTimeout);
 
     httpServletRequest = mockRequest("PUT",
                                      "http://somehost/a/b?q=abc&b=adf&q=def",
                                      emptyMap());
+    // Request is extremely complex, and there doesn't seem to be a fake implementation that can
+    // be used in tests, so resorting to spying on it.
+    baseRequest = spy(new org.eclipse.jetty.server.Request(httpChannel, httpInput));
+    doReturn(asyncContext).when(baseRequest).startAsync();
+    when(asyncContext.getResponse()).thenReturn(response);
   }
 
   @Test
@@ -173,8 +197,9 @@ public class ApolloRequestHandlerTest {
   // https://youtrack.jetbrains.com/issue/IDEA-122783
   @Test
   public void shouldLogErrorWritingResponse() throws Exception {
-    when(asyncContext.getResponse()).thenReturn(response);
-    when(response.getOutputStream()).thenReturn(outputStream);
+    HttpServletResponse spy = spy(response);
+    when(asyncContext.getResponse()).thenReturn(spy);
+    doReturn(outputStream).when(spy).getOutputStream();
     doThrow(new IOException("expected")).when(outputStream).write(any(byte[].class));
 
     ApolloRequestHandler.AsyncContextOngoingRequest ongoingRequest = new ApolloRequestHandler.AsyncContextOngoingRequest(
@@ -203,6 +228,48 @@ public class ApolloRequestHandlerTest {
     assertThat(events, hasSize(1));
   }
 
+  @Test
+  public void shouldForwardRepliesToJetty() throws Exception {
+    requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
+
+    delegate.replyLast(Response.forStatus(Status.IM_A_TEAPOT));
+
+    verify(asyncContext).complete();
+    assertThat(response.getStatus(), is(Status.IM_A_TEAPOT.code()));
+    assertThat(response.getErrorMessage(), is(Status.IM_A_TEAPOT.reasonPhrase()));
+  }
+
+  // I would prefer to test this in a less implementation-dependent way (validating that a timeout
+  // is actually sent, rather than that a particular listener is registered), but the servlet APIs
+  // aren't designed that way.
+  @Test
+  public void shouldRegisterTimeoutListenerWithContext() throws Exception {
+    requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
+
+    verify(asyncContext).addListener(TimeoutListener.getInstance());
+  }
+
+  // I would prefer to test this in a less implementation-dependent way (validating that a timeout
+  // is actually sent, rather than that a particular listener is registered), but the servlet APIs
+  // aren't designed that way.
+  @Test
+  public void shouldSetTimeout() throws Exception {
+    requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
+
+    verify(asyncContext).setTimeout(requestTimeout.toMillis());
+  }
+
+  @Test
+  public void shouldRespond500ForDrop() throws Exception {
+    requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
+
+    delegate.dropLast();
+
+    verify(asyncContext).complete();
+    assertThat(response.getStatus(), is(500));
+    assertThat(response.getErrorMessage(), is("dropped"));
+  }
+
   private MockHttpServletRequest mockRequest(
       String method, String requestURI, Map<String, String> headers) {
     QueryStringDecoder decoder = new QueryStringDecoder(requestURI);
@@ -221,5 +288,22 @@ public class ApolloRequestHandlerTest {
     headers.forEach(mockHttpServletRequest::addHeader);
 
     return mockHttpServletRequest;
+  }
+
+  private static class FakeRequestHandler implements RequestHandler {
+    private final LinkedList<OngoingRequest> requests = new LinkedList<>();
+
+    @Override
+    public void handle(OngoingRequest ongoingRequest) {
+      requests.add(ongoingRequest);
+    }
+
+    void replyLast(Response<ByteString> response) {
+      requests.getLast().reply(response);
+    }
+
+    void dropLast() {
+      requests.getLast().drop();
+    }
   }
 }
