@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 
 /**
  * A fully configured server that can be started and stopped.
@@ -60,10 +61,11 @@ class HttpServerImpl implements HttpServer {
         ServerInfos.create(SERVER_ID, serverSocketAddress);
 
     server = new Server(serverSocketAddress);
-    server.setHandler(new ApolloRequestHandler(serverInfo, requestHandler));
+    server.setHandler(new ApolloRequestHandler(serverInfo, requestHandler,
+                                               Duration.ofMillis(config.ttlMillis())));
     try {
       server.start();
-      closer.register(this::close);
+      closer.register(this);
     } catch (Exception e) {
       throw new RuntimeException("Failed to start server", e);
     }
