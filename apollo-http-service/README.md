@@ -107,7 +107,7 @@ the [logback-classic](http://logback.qos.ch/) and the [Typesafe Config](https://
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-bom</artifactId>
-                <version>1.1.0</version>
+                <version>1.2.4</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
