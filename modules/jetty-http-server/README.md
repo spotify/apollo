@@ -9,11 +9,6 @@ key | type | required | note
 `http.server.port` | int | optional | ie 8080
 `http.server.address` | string | optional | default 0.0.0.0
 `http.server.ttlMillis` | int | optional | default 30000, determines how long before an error response is sent
-`http.server.keepAliveTimeout` | int | optional | default 300
-`http.server.workerThreads` | int | optional | default max(availableProcessors/4, 2)
-`http.server.maxHttpChunkLength` | int | optional | default 128 * 1024
-
-_todo_ implement all config keys
 
 ## Special request headers
 
