@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
 import com.spotify.apollo.StatusType;
 import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestHandler;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -61,10 +63,13 @@ class ApolloRequestHandler extends AbstractHandler {
 
   private final RequestHandler requestHandler;
   private final ServerInfo serverInfo;
+  private final Duration requestTimeout;
 
-  ApolloRequestHandler(ServerInfo serverInfo, RequestHandler requestHandler) {
+  ApolloRequestHandler(ServerInfo serverInfo, RequestHandler requestHandler,
+                       Duration requestTimeout) {
     this.requestHandler = requireNonNull(requestHandler);
     this.serverInfo = requireNonNull(serverInfo);
+    this.requestTimeout = requireNonNull(requestTimeout);
   }
 
   @Override
@@ -76,6 +81,9 @@ class ApolloRequestHandler extends AbstractHandler {
 
     final long arrivalTimeNanos = System.nanoTime();
     final AsyncContext asyncContext = baseRequest.startAsync();
+    asyncContext.setTimeout(requestTimeout.toMillis());
+    asyncContext.addListener(TimeoutListener.getInstance());
+
     requestHandler.handle(new AsyncContextOngoingRequest(
         serverInfo, asApolloRequest(req), asyncContext, arrivalTimeNanos));
 
@@ -122,7 +130,7 @@ class ApolloRequestHandler extends AbstractHandler {
     return ByteString.read(input, contentLength);
   }
 
-  static <T> Stream<T> toStream(Enumeration<T> enumeration) {
+  private static <T> Stream<T> toStream(Enumeration<T> enumeration) {
     List<T> list = new ArrayList<>();
     while (enumeration.hasMoreElements()) {
       list.add(enumeration.nextElement());
@@ -177,7 +185,8 @@ class ApolloRequestHandler extends AbstractHandler {
 
     @Override
     public void drop() {
-      asyncContext.complete();
+      // 'true' dropping in the sense of dropping on the floor doesn't seem easily done with Jetty
+      reply(Response.forStatus(Status.INTERNAL_SERVER_ERROR.withReasonPhrase("dropped")));
     }
 
     @Override
@@ -190,4 +199,5 @@ class ApolloRequestHandler extends AbstractHandler {
       return arrivalTimeNanos;
     }
   }
+
 }
