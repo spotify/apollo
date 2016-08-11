@@ -31,10 +31,6 @@ class HttpServerConfig {
   private static final String CONFIG_BASE_NAME = "http.server";
   private static final String DEFAULT_HTTP_ADDRESS = "0.0.0.0";
   private static final int DEFAULT_TTL_MILLIS = 30000;
-  private static final int DEFAULT_WORKER_THREADS =
-      Math.max(Runtime.getRuntime().availableProcessors()/4, 2);
-  private static final int DEFAULT_KEEP_ALIVE_TIMEOUT = 300; // SECONDS
-  private static final int DEFAULT_MAX_HTTP_CHUNK_LENGTH = 128 * 1024; // 128 kB
 
   private final Config config;
 
@@ -53,17 +49,5 @@ class HttpServerConfig {
 
   public long ttlMillis() {
     return optionalInt(config, CONFIG_BASE_NAME + ".ttlMillis").orElse(DEFAULT_TTL_MILLIS);
-  }
-
-  public int keepAliveTimeout() {
-    return optionalInt(config, CONFIG_BASE_NAME + ".keepAliveTimeout").orElse(DEFAULT_KEEP_ALIVE_TIMEOUT);
-  }
-
-  public int workerThreads() {
-    return optionalInt(config, CONFIG_BASE_NAME + ".workerThreads").orElse(DEFAULT_WORKER_THREADS);
-  }
-
-  public int maxHttpChunkLength() {
-    return optionalInt(config, CONFIG_BASE_NAME + ".maxHttpChunkLength").orElse(DEFAULT_MAX_HTTP_CHUNK_LENGTH);
   }
 }
