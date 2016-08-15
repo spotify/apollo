@@ -438,6 +438,23 @@ public class ServiceHelper implements TestRule, Closeable {
     return request(Request.forUri(uriString, method).withPayload(payload));
   }
 
+  /**
+   * Get an instance provided by one of the Apollo modules.
+   *
+   * @param type The type of instance to get
+   * @return     An instance of the given type.
+   * @throws java.lang.IllegalStateException if the service instance is not available.
+   */
+  public <T> T resolve(Class<T> type) {
+    final Service.Instance instance = this.instance;
+
+    if (instance == null) {
+      throw new IllegalStateException("service instance not available");
+    }
+
+    return instance.resolve(type);
+  }
+
   @Override
   public Statement apply(final Statement base, final Description description) {
     return new Statement() {
