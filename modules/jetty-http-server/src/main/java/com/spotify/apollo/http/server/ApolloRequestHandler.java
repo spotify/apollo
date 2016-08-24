@@ -165,22 +165,28 @@ class ApolloRequestHandler extends AbstractHandler {
 
     @Override
     public void reply(Response<ByteString> response) {
-      final HttpServletResponse httpResponse = (HttpServletResponse) asyncContext.getResponse();
+      try {
+        final HttpServletResponse httpResponse = (HttpServletResponse) asyncContext.getResponse();
 
-      final StatusType status = response.status();
-      httpResponse.setStatus(status.code(), status.reasonPhrase());
+        final StatusType status = response.status();
+        httpResponse.setStatus(status.code(), status.reasonPhrase());
 
-      response.headers().forEach(httpResponse::addHeader);
+        response.headers().forEach(httpResponse::addHeader);
 
-      response.payload().ifPresent(payload -> {
-        try {
-          payload.write(httpResponse.getOutputStream());
-        } catch (IOException e) {
-          LOGGER.error("Failed to write response", e);
-        }
-      });
+        response.payload().ifPresent(payload -> {
+          try {
+            payload.write(httpResponse.getOutputStream());
+          } catch (IOException e) {
+            LOGGER.warn("Failed to write response", e);
+          }
+        });
 
-      asyncContext.complete();
+        asyncContext.complete();
+      } catch (Exception e) {
+        // this can happen 'normally' when the request has timed out, for instance. In this case,
+        // an IllegalStateException will be thrown.
+        LOGGER.warn("Error sending response", e);
+      }
     }
 
     @Override
