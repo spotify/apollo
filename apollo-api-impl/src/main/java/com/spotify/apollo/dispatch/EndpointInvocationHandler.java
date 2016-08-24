@@ -55,20 +55,26 @@ public class EndpointInvocationHandler implements EndpointRunnableFactory {
     try {
       endpoint.invoke(requestContext)
           .whenComplete((message, throwable) -> {
-            if (message != null) {
-              ongoingRequest.reply(message);
-            } else if (throwable != null) {
-              // unwrap CompletionException
-              if (throwable instanceof CompletionException) {
-                throwable = throwable.getCause();
+            try {
+              if (message != null) {
+                ongoingRequest.reply(message);
+              } else if (throwable != null) {
+                // unwrap CompletionException
+                if (throwable instanceof CompletionException) {
+                  throwable = throwable.getCause();
+                }
+                handleException(throwable, ongoingRequest);
+              } else {
+                LOG.error(
+                    "Both message and throwable null in EndpointInvocationHandler for request "
+                    + ongoingRequest
+                    + " - this shouldn't happen!");
+                handleException(new IllegalStateException("Both message and throwable null"),
+                                ongoingRequest);
               }
-              handleException(throwable, ongoingRequest);
-            }
-            else {
-              LOG.error("Both message and throwable null in EndpointInvocationHandler for request " + ongoingRequest
-                        + " - this shouldn't happen!");
-              handleException(new IllegalStateException("Both message and throwable null"),
-                              ongoingRequest);
+            } catch (Throwable t) {
+              // don't try to respond here; just log the fact that responding failed.
+              LOG.error("Exception caught when replying", t);
             }
           });
     } catch (Exception e) {
