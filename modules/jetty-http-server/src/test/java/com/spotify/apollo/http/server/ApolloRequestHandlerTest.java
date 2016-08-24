@@ -64,7 +64,9 @@ import okio.ByteString;
 
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -196,7 +198,7 @@ public class ApolloRequestHandlerTest {
   // note: this test may fail when running in IntelliJ, due to
   // https://youtrack.jetbrains.com/issue/IDEA-122783
   @Test
-  public void shouldLogErrorWritingResponse() throws Exception {
+  public void shouldLogWarningOnErrorWritingResponse() throws Exception {
     HttpServletResponse spy = spy(response);
     when(asyncContext.getResponse()).thenReturn(spy);
     doReturn(outputStream).when(spy).getOutputStream();
@@ -221,11 +223,78 @@ public class ApolloRequestHandlerTest {
     ongoingRequest.reply(Response.forPayload(ByteString.encodeUtf8("floop")));
 
     List<LoggingEvent> events = testLogger.getLoggingEvents().stream()
-        .filter(event -> event.getLevel() == Level.ERROR)
+        .filter(event -> event.getLevel() == Level.WARN)
         .filter(event -> event.getMessage().contains("Failed to write response"))
         .collect(Collectors.toList());
 
     assertThat(events, hasSize(1));
+  }
+
+  // note: this test may fail when running in IntelliJ, due to
+  // https://youtrack.jetbrains.com/issue/IDEA-122783
+  @Test
+  public void shouldLogWarningOnFailureToGetAsyncContextResponse() throws Exception {
+    when(asyncContext.getResponse()).thenThrow(new IllegalStateException("context completed test"));
+
+    ApolloRequestHandler.AsyncContextOngoingRequest ongoingRequest = new ApolloRequestHandler.AsyncContextOngoingRequest(
+        new ServerInfo() {
+          @Override
+          public String id() {
+            return "14";
+          }
+
+          @Override
+          public InetSocketAddress socketAddress() {
+            return InetSocketAddress.createUnresolved("localhost", 888);
+          }
+        },
+        Request.forUri("http://localhost:888"),
+        asyncContext, 9123
+    );
+
+    ongoingRequest.reply(Response.forPayload(ByteString.encodeUtf8("floop")));
+
+    List<String> events = testLogger.getLoggingEvents().stream()
+        .filter(event -> event.getLevel() == Level.WARN)
+        .map(LoggingEvent::getMessage)
+        .collect(Collectors.toList());
+
+    assertThat(events, hasSize(1));
+    assertThat(events, hasItem(containsString("Error sending response")));
+  }
+
+  // note: this test may fail when running in IntelliJ, due to
+  // https://youtrack.jetbrains.com/issue/IDEA-122783
+  @Test
+  public void shouldLogWarningOnFailureToCompleteAsyncContext() throws Exception {
+    when(asyncContext.getResponse()).thenReturn(response);
+    doThrow(new IllegalStateException("completed test")).when(asyncContext).complete();
+
+    ApolloRequestHandler.AsyncContextOngoingRequest ongoingRequest = new ApolloRequestHandler.AsyncContextOngoingRequest(
+        new ServerInfo() {
+          @Override
+          public String id() {
+            return "14";
+          }
+
+          @Override
+          public InetSocketAddress socketAddress() {
+            return InetSocketAddress.createUnresolved("localhost", 888);
+          }
+        },
+        Request.forUri("http://localhost:888"),
+        asyncContext, 9123
+    );
+
+    ongoingRequest.reply(Response.forPayload(ByteString.encodeUtf8("floop")));
+
+    List<String> events = testLogger.getLoggingEvents().stream()
+        .filter(event -> event.getLevel() == Level.WARN)
+        .map(LoggingEvent::getMessage)
+        .collect(Collectors.toList());
+
+    assertThat(events, hasSize(1));
+    assertThat(events, hasItem(containsString("Error sending response")));
   }
 
   @Test
