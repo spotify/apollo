@@ -83,7 +83,6 @@ public class ApolloRequestHandlerTest {
   private MockHttpServletRequest httpServletRequest;
   private MockHttpServletResponse response;
   private Duration requestTimeout;
-  private final TestLogger testLogger = TestLoggerFactory.getTestLogger(ApolloRequestHandler.class);
   private org.eclipse.jetty.server.Request baseRequest;
 
   @Mock
@@ -94,10 +93,6 @@ public class ApolloRequestHandlerTest {
   private HttpChannel httpChannel;
   @Mock
   private HttpInput httpInput;
-
-
-  @Rule
-  public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
 
 
   @Before
@@ -195,118 +190,6 @@ public class ApolloRequestHandlerTest {
                is(Optional.empty()));
   }
 
-  // note: this test may fail when running in IntelliJ, due to
-  // https://youtrack.jetbrains.com/issue/IDEA-122783
-  @Test
-  public void shouldLogWarningOnErrorWritingResponse() throws Exception {
-    HttpServletResponse spy = spy(response);
-    when(asyncContext.getResponse()).thenReturn(spy);
-    doReturn(outputStream).when(spy).getOutputStream();
-    doThrow(new IOException("expected")).when(outputStream).write(any(byte[].class));
-
-    ApolloRequestHandler.AsyncContextOngoingRequest ongoingRequest = new ApolloRequestHandler.AsyncContextOngoingRequest(
-        new ServerInfo() {
-          @Override
-          public String id() {
-            return "14";
-          }
-
-          @Override
-          public InetSocketAddress socketAddress() {
-            return InetSocketAddress.createUnresolved("localhost", 888);
-          }
-        },
-        Request.forUri("http://localhost:888"),
-        asyncContext, 9123
-    );
-
-    ongoingRequest.reply(Response.forPayload(ByteString.encodeUtf8("floop")));
-
-    List<LoggingEvent> events = testLogger.getLoggingEvents().stream()
-        .filter(event -> event.getLevel() == Level.WARN)
-        .filter(event -> event.getMessage().contains("Failed to write response"))
-        .collect(Collectors.toList());
-
-    assertThat(events, hasSize(1));
-  }
-
-  // note: this test may fail when running in IntelliJ, due to
-  // https://youtrack.jetbrains.com/issue/IDEA-122783
-  @Test
-  public void shouldLogWarningOnFailureToGetAsyncContextResponse() throws Exception {
-    when(asyncContext.getResponse()).thenThrow(new IllegalStateException("context completed test"));
-
-    ApolloRequestHandler.AsyncContextOngoingRequest ongoingRequest = new ApolloRequestHandler.AsyncContextOngoingRequest(
-        new ServerInfo() {
-          @Override
-          public String id() {
-            return "14";
-          }
-
-          @Override
-          public InetSocketAddress socketAddress() {
-            return InetSocketAddress.createUnresolved("localhost", 888);
-          }
-        },
-        Request.forUri("http://localhost:888"),
-        asyncContext, 9123
-    );
-
-    ongoingRequest.reply(Response.forPayload(ByteString.encodeUtf8("floop")));
-
-    List<String> events = testLogger.getLoggingEvents().stream()
-        .filter(event -> event.getLevel() == Level.WARN)
-        .map(LoggingEvent::getMessage)
-        .collect(Collectors.toList());
-
-    assertThat(events, hasSize(1));
-    assertThat(events, hasItem(containsString("Error sending response")));
-  }
-
-  // note: this test may fail when running in IntelliJ, due to
-  // https://youtrack.jetbrains.com/issue/IDEA-122783
-  @Test
-  public void shouldLogWarningOnFailureToCompleteAsyncContext() throws Exception {
-    when(asyncContext.getResponse()).thenReturn(response);
-    doThrow(new IllegalStateException("completed test")).when(asyncContext).complete();
-
-    ApolloRequestHandler.AsyncContextOngoingRequest ongoingRequest = new ApolloRequestHandler.AsyncContextOngoingRequest(
-        new ServerInfo() {
-          @Override
-          public String id() {
-            return "14";
-          }
-
-          @Override
-          public InetSocketAddress socketAddress() {
-            return InetSocketAddress.createUnresolved("localhost", 888);
-          }
-        },
-        Request.forUri("http://localhost:888"),
-        asyncContext, 9123
-    );
-
-    ongoingRequest.reply(Response.forPayload(ByteString.encodeUtf8("floop")));
-
-    List<String> events = testLogger.getLoggingEvents().stream()
-        .filter(event -> event.getLevel() == Level.WARN)
-        .map(LoggingEvent::getMessage)
-        .collect(Collectors.toList());
-
-    assertThat(events, hasSize(1));
-    assertThat(events, hasItem(containsString("Error sending response")));
-  }
-
-  @Test
-  public void shouldForwardRepliesToJetty() throws Exception {
-    requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
-
-    delegate.replyLast(Response.forStatus(Status.IM_A_TEAPOT));
-
-    verify(asyncContext).complete();
-    assertThat(response.getStatus(), is(Status.IM_A_TEAPOT.code()));
-    assertThat(response.getErrorMessage(), is(Status.IM_A_TEAPOT.reasonPhrase()));
-  }
 
   // I would prefer to test this in a less implementation-dependent way (validating that a timeout
   // is actually sent, rather than that a particular listener is registered), but the servlet APIs
@@ -315,28 +198,17 @@ public class ApolloRequestHandlerTest {
   public void shouldRegisterTimeoutListenerWithContext() throws Exception {
     requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
 
-    verify(asyncContext).addListener(TimeoutListener.getInstance());
+    verify(asyncContext).addListener(any(TimeoutListener.class));
   }
 
   // I would prefer to test this in a less implementation-dependent way (validating that a timeout
-  // is actually sent, rather than that a particular listener is registered), but the servlet APIs
+  // is actually sent, rather than that a particular timeout value is set), but the servlet APIs
   // aren't designed that way.
   @Test
   public void shouldSetTimeout() throws Exception {
     requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
 
     verify(asyncContext).setTimeout(requestTimeout.toMillis());
-  }
-
-  @Test
-  public void shouldRespond500ForDrop() throws Exception {
-    requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
-
-    delegate.dropLast();
-
-    verify(asyncContext).complete();
-    assertThat(response.getStatus(), is(500));
-    assertThat(response.getErrorMessage(), is("dropped"));
   }
 
   private MockHttpServletRequest mockRequest(

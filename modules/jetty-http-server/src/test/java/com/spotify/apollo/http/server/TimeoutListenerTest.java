@@ -19,50 +19,35 @@
  */
 package com.spotify.apollo.http.server;
 
+import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
+import com.spotify.apollo.request.OngoingRequest;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.mock.web.MockHttpServletResponse;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.AsyncEvent;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class TimeoutListenerTest {
 
   private TimeoutListener listener;
 
-  private MockHttpServletResponse response;
   @Mock
-  private AsyncContext asyncContext;
+  private OngoingRequest ongoingRequest;
 
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
 
-    response = new MockHttpServletResponse();
-    listener = TimeoutListener.getInstance();
-
-    when(asyncContext.getResponse()).thenReturn(response);
+    listener = TimeoutListener.create(ongoingRequest);
   }
 
   @Test
   public void shouldSendErrorResponseOnTimeout() throws Exception {
-    listener.onTimeout(new AsyncEvent(asyncContext));
+    listener.onTimeout(null);
 
-    assertThat(response.getStatus(), is(500));
-    assertThat(response.getErrorMessage(), is("Timeout"));
-  }
-
-  @Test
-  public void shouldCompleteContextOnTimeout() throws Exception {
-    listener.onTimeout(new AsyncEvent(asyncContext));
-
-    verify(asyncContext).complete();
+    verify(ongoingRequest).reply(Response.forStatus(Status.INTERNAL_SERVER_ERROR.withReasonPhrase("Timeout")));
   }
 }
