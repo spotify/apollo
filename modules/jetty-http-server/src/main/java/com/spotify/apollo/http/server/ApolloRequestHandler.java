@@ -23,16 +23,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 
 import com.spotify.apollo.Request;
-import com.spotify.apollo.Response;
-import com.spotify.apollo.Status;
-import com.spotify.apollo.StatusType;
-import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.ServerInfo;
 
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -59,8 +53,6 @@ import static java.util.Optional.of;
 
 class ApolloRequestHandler extends AbstractHandler {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ApolloRequestHandler.class);
-
   private final RequestHandler requestHandler;
   private final ServerInfo serverInfo;
   private final Duration requestTimeout;
@@ -79,13 +71,16 @@ class ApolloRequestHandler extends AbstractHandler {
       HttpServletRequest req,
       HttpServletResponse resp) throws IOException, ServletException {
 
-    final long arrivalTimeNanos = System.nanoTime();
+    final long arrivalTime = System.nanoTime();
     final AsyncContext asyncContext = baseRequest.startAsync();
-    asyncContext.setTimeout(requestTimeout.toMillis());
-    asyncContext.addListener(TimeoutListener.getInstance());
+    
+    AsyncContextOngoingRequest ongoingRequest =
+        new AsyncContextOngoingRequest(serverInfo, asApolloRequest(req), asyncContext, arrivalTime);
 
-    requestHandler.handle(new AsyncContextOngoingRequest(
-        serverInfo, asApolloRequest(req), asyncContext, arrivalTimeNanos));
+    asyncContext.setTimeout(requestTimeout.toMillis());
+    asyncContext.addListener(TimeoutListener.create(ongoingRequest));
+
+    requestHandler.handle(ongoingRequest);
 
     baseRequest.setHandled(true);
   }
@@ -137,73 +132,4 @@ class ApolloRequestHandler extends AbstractHandler {
     }
     return list.stream();
   }
-
-  static class AsyncContextOngoingRequest implements OngoingRequest {
-
-    private final ServerInfo serverInfo;
-    private final long arrivalTimeNanos;
-    private final Request request;
-    private final AsyncContext asyncContext;
-
-    AsyncContextOngoingRequest(ServerInfo serverInfo, Request request, AsyncContext asyncContext,
-                               long arrivalTimeNanos) {
-      this.serverInfo = serverInfo;
-      this.request = requireNonNull(request);
-      this.asyncContext = requireNonNull(asyncContext);
-      this.arrivalTimeNanos = arrivalTimeNanos;
-    }
-
-    @Override
-    public Request request() {
-      return request;
-    }
-
-    @Override
-    public ServerInfo serverInfo() {
-      return serverInfo;
-    }
-
-    @Override
-    public void reply(Response<ByteString> response) {
-      try {
-        final HttpServletResponse httpResponse = (HttpServletResponse) asyncContext.getResponse();
-
-        final StatusType status = response.status();
-        httpResponse.setStatus(status.code(), status.reasonPhrase());
-
-        response.headers().asMap().forEach(httpResponse::addHeader);
-
-        response.payload().ifPresent(payload -> {
-          try {
-            payload.write(httpResponse.getOutputStream());
-          } catch (IOException e) {
-            LOGGER.warn("Failed to write response", e);
-          }
-        });
-
-        asyncContext.complete();
-      } catch (Exception e) {
-        // this can happen 'normally' when the request has timed out, for instance. In this case,
-        // an IllegalStateException will be thrown.
-        LOGGER.warn("Error sending response", e);
-      }
-    }
-
-    @Override
-    public void drop() {
-      // 'true' dropping in the sense of dropping on the floor doesn't seem easily done with Jetty
-      reply(Response.forStatus(Status.INTERNAL_SERVER_ERROR.withReasonPhrase("dropped")));
-    }
-
-    @Override
-    public boolean isExpired() {
-      return false;
-    }
-
-    @Override
-    public long arrivalTimeNanos() {
-      return arrivalTimeNanos;
-    }
-  }
-
 }
