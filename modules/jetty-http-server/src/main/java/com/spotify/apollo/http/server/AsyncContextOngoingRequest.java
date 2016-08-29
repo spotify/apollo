@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.AsyncContext;
@@ -50,14 +51,16 @@ class AsyncContextOngoingRequest implements OngoingRequest {
   private final long arrivalTimeNanos;
   private final Request request;
   private final AsyncContext asyncContext;
+  private final RequestOutcomeConsumer logger;
   private final AtomicBoolean replied = new AtomicBoolean(false);
 
   AsyncContextOngoingRequest(ServerInfo serverInfo, Request request, AsyncContext asyncContext,
-                             long arrivalTimeNanos) {
+                             long arrivalTimeNanos, RequestOutcomeConsumer logger) {
     this.serverInfo = serverInfo;
     this.request = requireNonNull(request);
     this.asyncContext = requireNonNull(asyncContext);
     this.arrivalTimeNanos = arrivalTimeNanos;
+    this.logger = requireNonNull(logger);
   }
 
   @Override
@@ -72,6 +75,17 @@ class AsyncContextOngoingRequest implements OngoingRequest {
 
   @Override
   public void reply(Response<ByteString> response) {
+    sendReply(response);
+  }
+
+  @Override
+  public void drop() {
+    // 'true' dropping in the sense of dropping on the floor doesn't seem easily done with Jetty
+    sendReply(Response.forStatus(Status.INTERNAL_SERVER_ERROR.withReasonPhrase("dropped")));
+  }
+
+  // handles common functionality for reply() and drop() and is not overridable
+  private void sendReply(Response<ByteString> response) {
     if (!replied.compareAndSet(false, true)) {
       LOGGER.warn("Already replied to ongoing request {} - spurious response {}", request, response);
     } else {
@@ -91,13 +105,9 @@ class AsyncContextOngoingRequest implements OngoingRequest {
       });
 
       asyncContext.complete();
-    }
-  }
 
-  @Override
-  public void drop() {
-    // 'true' dropping in the sense of dropping on the floor doesn't seem easily done with Jetty
-    reply(Response.forStatus(Status.INTERNAL_SERVER_ERROR.withReasonPhrase("dropped")));
+      logger.accept(this, Optional.of(response));
+    }
   }
 
   @Override
