@@ -56,12 +56,14 @@ class ApolloRequestHandler extends AbstractHandler {
   private final RequestHandler requestHandler;
   private final ServerInfo serverInfo;
   private final Duration requestTimeout;
+  private final RequestOutcomeConsumer logger;
 
   ApolloRequestHandler(ServerInfo serverInfo, RequestHandler requestHandler,
-                       Duration requestTimeout) {
+                       Duration requestTimeout, RequestOutcomeConsumer logger) {
     this.requestHandler = requireNonNull(requestHandler);
     this.serverInfo = requireNonNull(serverInfo);
     this.requestTimeout = requireNonNull(requestTimeout);
+    this.logger = requireNonNull(logger);
   }
 
   @Override
@@ -74,12 +76,9 @@ class ApolloRequestHandler extends AbstractHandler {
     final long arrivalTime = System.nanoTime();
     final AsyncContext asyncContext = baseRequest.startAsync();
 
-    // TODO:
-    // - make AsyncOngoingRequest handle the logging
-    // - remove/deprecate request logging decorator
-
     AsyncContextOngoingRequest ongoingRequest =
-        new AsyncContextOngoingRequest(serverInfo, asApolloRequest(req), asyncContext, arrivalTime);
+        new AsyncContextOngoingRequest(serverInfo, asApolloRequest(req), asyncContext, arrivalTime,
+                                       logger);
 
     asyncContext.setTimeout(requestTimeout.toMillis());
     asyncContext.addListener(TimeoutListener.create(ongoingRequest));
