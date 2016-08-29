@@ -26,6 +26,12 @@ Contains some serializer middlewares, and utilities for versioning endpoints.
 
 ## com.spotify.apollo.logging
 
+NOTE: these utilities are deprecated, since they utilise request processing
+decorators, and these decorators may modify the request or response, leading
+to disagreement between the actual response and what is logged. See the
+[HttpService README](../apollo-http-service/README.md) for a description of
+the preferred way to set up logging.
+
 Contains logging utilities, or more generally, a solution that allows
 subscribing for notifications of request outcomes, with a default 
 implementation that logs using the Apache HTTPD 'combined' format.
