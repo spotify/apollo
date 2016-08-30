@@ -19,20 +19,30 @@
  */
 package com.spotify.apollo.http.server;
 
+import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
+import com.spotify.apollo.request.OngoingRequest;
+
 import java.io.IOException;
 
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
-import javax.servlet.http.HttpServletResponse;
+
+import okio.ByteString;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Handles timeouts sent by Jetty, ensuring we send a response.
  */
 final class TimeoutListener implements AsyncListener {
-  private static final TimeoutListener INSTANCE = new TimeoutListener();
 
-  private TimeoutListener() {
-    // prevent instantiation from outside class
+  private static final Response<ByteString> TIMEOUT_RESPONSE =
+      Response.forStatus(Status.INTERNAL_SERVER_ERROR.withReasonPhrase("Timeout"));
+  private final OngoingRequest ongoingRequest;
+
+  private TimeoutListener(OngoingRequest ongoingRequest) {
+    this.ongoingRequest = requireNonNull(ongoingRequest);
   }
 
   @Override
@@ -42,8 +52,7 @@ final class TimeoutListener implements AsyncListener {
 
   @Override
   public void onTimeout(AsyncEvent event) throws IOException {
-    ((HttpServletResponse) event.getSuppliedResponse()).sendError(500, "Timeout");
-    event.getAsyncContext().complete();
+    ongoingRequest.reply(TIMEOUT_RESPONSE);
   }
 
   @Override
@@ -56,7 +65,7 @@ final class TimeoutListener implements AsyncListener {
     // empty
   }
 
-  public static TimeoutListener getInstance() {
-    return INSTANCE;
+  public static TimeoutListener create(OngoingRequest ongoingRequest) {
+    return new TimeoutListener(ongoingRequest);
   }
 }

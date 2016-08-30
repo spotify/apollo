@@ -43,13 +43,16 @@ class HttpServerImpl implements HttpServer {
   private final Closer closer;
   private final HttpServerConfig config;
   private final Runnable onClose;
+  private final RequestOutcomeConsumer logger;
 
   private Server server;
 
-  HttpServerImpl(Closer closer, HttpServerConfig config, Runnable onClose) {
+  HttpServerImpl(Closer closer, HttpServerConfig config, Runnable onClose,
+                 RequestOutcomeConsumer logger) {
     this.closer = closer;
     this.config = config;
     this.onClose = onClose;
+    this.logger = logger;
   }
 
   @Override
@@ -62,7 +65,7 @@ class HttpServerImpl implements HttpServer {
 
     server = new Server(serverSocketAddress);
     server.setHandler(new ApolloRequestHandler(serverInfo, requestHandler,
-                                               Duration.ofMillis(config.ttlMillis())));
+                                               Duration.ofMillis(config.ttlMillis()), logger));
     try {
       server.start();
       closer.register(this);

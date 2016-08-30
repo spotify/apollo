@@ -19,14 +19,10 @@
  */
 package com.spotify.apollo.httpservice;
 
-import com.google.inject.multibindings.Multibinder;
-
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.environment.ApolloEnvironment;
 import com.spotify.apollo.environment.ApolloEnvironmentModule;
-import com.spotify.apollo.environment.RequestRunnableFactoryDecorator;
-import com.spotify.apollo.logging.extra.RequestLoggingDecorator;
 import com.spotify.apollo.meta.MetaModule;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.request.RequestHandler;
@@ -56,8 +52,6 @@ class HttpServiceModule extends AbstractApolloModule {
 
     install(ApolloEnvironmentModule.create(beginWith(OUTGOING_CALLS).endWith(HTTP_CLIENT)));
     install(MetaModule.create("apollo-http"));
-    Multibinder.newSetBinder(binder(), RequestRunnableFactoryDecorator.class)
-        .addBinding().to(RequestLoggingDecorator.class);
   }
 
   private void bindAppInit() {

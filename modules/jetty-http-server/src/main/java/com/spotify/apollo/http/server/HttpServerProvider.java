@@ -30,6 +30,8 @@ import java.io.IOException;
 import javax.inject.Named;
 import javax.inject.Provider;
 
+import static java.util.Objects.requireNonNull;
+
 class HttpServerProvider implements Provider<HttpServer> {
 
   private static final Logger LOG = LoggerFactory.getLogger(HttpServerProvider.class);
@@ -37,6 +39,9 @@ class HttpServerProvider implements Provider<HttpServer> {
   private final Closer closer;
   private final HttpServerConfig config;
   private final Runnable onClose;
+  // non-final because optional injection doesn't work with constructor args
+  // NOTE: it is probably a good idea to make this handle both statistics tracking and logging
+  private RequestOutcomeConsumer logger = CombinedFormatLogger.logger();
 
   @Inject
   HttpServerProvider(
@@ -53,8 +58,27 @@ class HttpServerProvider implements Provider<HttpServer> {
     if (!enabled(config)) {
       return NoopServer.INSTANCE;
     } else {
-      return new HttpServerImpl(closer, config, onClose);
+      return new HttpServerImpl(closer, config, onClose, logger);
     }
+  }
+
+  /**
+   * Optionally override how logging is done. See
+   * https://github.com/google/guice/wiki/Injections#optional-injections for detailed information
+   * about how to override. You will probably want a Guice module with a method similar to:
+   * <pre>
+   * {@code
+   *   protected void configure() {
+   *     bind(RequestOutcomeConsumer.class).toInstance(new MyLogger());
+   *   }
+   * }
+   * </pre>
+   *
+   * @param logger the consumer to use instead of the default
+   */
+  @Inject(optional = true)
+  public void setLogger(RequestOutcomeConsumer logger) {
+    this.logger = requireNonNull(logger);
   }
 
   static boolean enabled(HttpServerConfig config) {
