@@ -192,3 +192,37 @@ Try a request with `curl`
 $ curl http://localhost:8080/ping
 pong
 ```
+
+Logging
+=======
+
+The HTTP service logs incoming requests and their responses, using a default
+implementation that logs with [approximately](../modules/jetty-http-server/src/main/java/com/spotify/apollo/http/server/CombinedFormatLogger.java)
+the Apache HTTPD 'combined' format.
+
+To send this to an access log file, use a configuration similar to:
+
+```
+    <appender name="ACCESSLOG" class="ch.qos.logback.core.FileAppender">
+        <file>/path/to/access.log</file>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.spotify.apollo.http.server.CombinedFormatLogger" level="INFO">
+        <appender-ref ref="ACCESSLOG"/>
+    </logger>
+```
+
+To customise the logging implementation using [Guice optional injections](https://github.com/google/guice/wiki/Injections#optional-injections),
+do something along the lines of this:
+
+```
+public class MyModule extends AbstractModule {
+  // ...
+  protected void configure() {
+    bind(com.spotify.apollo.http.server.RequestOutcomeConsumer.class).toInstance(new MyLogger());
+  }
+}
+```

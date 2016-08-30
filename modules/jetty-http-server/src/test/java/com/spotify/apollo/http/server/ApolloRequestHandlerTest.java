@@ -22,9 +22,6 @@ package com.spotify.apollo.http.server;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import com.spotify.apollo.Request;
-import com.spotify.apollo.Response;
-import com.spotify.apollo.Status;
 import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.ServerInfo;
@@ -33,20 +30,12 @@ import com.spotify.apollo.request.ServerInfos;
 import org.eclipse.jetty.server.HttpChannel;
 import org.eclipse.jetty.server.HttpInput;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import uk.org.lidalia.slf4jext.Level;
-import uk.org.lidalia.slf4jtest.LoggingEvent;
-import uk.org.lidalia.slf4jtest.TestLogger;
-import uk.org.lidalia.slf4jtest.TestLoggerFactory;
-import uk.org.lidalia.slf4jtest.TestLoggerFactoryResetRule;
-
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -54,24 +43,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
 
 import io.netty.handler.codec.http.QueryStringDecoder;
 import okio.ByteString;
 
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -83,7 +69,6 @@ public class ApolloRequestHandlerTest {
   private MockHttpServletRequest httpServletRequest;
   private MockHttpServletResponse response;
   private Duration requestTimeout;
-  private final TestLogger testLogger = TestLoggerFactory.getTestLogger(ApolloRequestHandler.class);
   private org.eclipse.jetty.server.Request baseRequest;
 
   @Mock
@@ -94,10 +79,8 @@ public class ApolloRequestHandlerTest {
   private HttpChannel httpChannel;
   @Mock
   private HttpInput httpInput;
-
-
-  @Rule
-  public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
+  @Mock
+  private RequestOutcomeConsumer logger;
 
 
   @Before
@@ -109,7 +92,7 @@ public class ApolloRequestHandlerTest {
     ServerInfo serverInfo = ServerInfos.create("id", InetSocketAddress.createUnresolved("localhost", 80));
 
     requestTimeout = Duration.ofMillis(8275523);
-    requestHandler = new ApolloRequestHandler(serverInfo, delegate, requestTimeout);
+    requestHandler = new ApolloRequestHandler(serverInfo, delegate, requestTimeout, logger);
 
     httpServletRequest = mockRequest("PUT",
                                      "http://somehost/a/b?q=abc&b=adf&q=def",
@@ -119,6 +102,14 @@ public class ApolloRequestHandlerTest {
     baseRequest = spy(new org.eclipse.jetty.server.Request(httpChannel, httpInput));
     doReturn(asyncContext).when(baseRequest).startAsync();
     when(asyncContext.getResponse()).thenReturn(response);
+  }
+
+  @Test
+  public void shouldForwardRequestsToDelegate() throws Exception {
+    requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
+
+    assertThat(delegate.requests, hasItem(instanceOf(OngoingRequest.class)));
+    assertThat(delegate.requests, hasSize(1));
   }
 
   @Test
@@ -195,118 +186,6 @@ public class ApolloRequestHandlerTest {
                is(Optional.empty()));
   }
 
-  // note: this test may fail when running in IntelliJ, due to
-  // https://youtrack.jetbrains.com/issue/IDEA-122783
-  @Test
-  public void shouldLogWarningOnErrorWritingResponse() throws Exception {
-    HttpServletResponse spy = spy(response);
-    when(asyncContext.getResponse()).thenReturn(spy);
-    doReturn(outputStream).when(spy).getOutputStream();
-    doThrow(new IOException("expected")).when(outputStream).write(any(byte[].class));
-
-    ApolloRequestHandler.AsyncContextOngoingRequest ongoingRequest = new ApolloRequestHandler.AsyncContextOngoingRequest(
-        new ServerInfo() {
-          @Override
-          public String id() {
-            return "14";
-          }
-
-          @Override
-          public InetSocketAddress socketAddress() {
-            return InetSocketAddress.createUnresolved("localhost", 888);
-          }
-        },
-        Request.forUri("http://localhost:888"),
-        asyncContext, 9123
-    );
-
-    ongoingRequest.reply(Response.forPayload(ByteString.encodeUtf8("floop")));
-
-    List<LoggingEvent> events = testLogger.getLoggingEvents().stream()
-        .filter(event -> event.getLevel() == Level.WARN)
-        .filter(event -> event.getMessage().contains("Failed to write response"))
-        .collect(Collectors.toList());
-
-    assertThat(events, hasSize(1));
-  }
-
-  // note: this test may fail when running in IntelliJ, due to
-  // https://youtrack.jetbrains.com/issue/IDEA-122783
-  @Test
-  public void shouldLogWarningOnFailureToGetAsyncContextResponse() throws Exception {
-    when(asyncContext.getResponse()).thenThrow(new IllegalStateException("context completed test"));
-
-    ApolloRequestHandler.AsyncContextOngoingRequest ongoingRequest = new ApolloRequestHandler.AsyncContextOngoingRequest(
-        new ServerInfo() {
-          @Override
-          public String id() {
-            return "14";
-          }
-
-          @Override
-          public InetSocketAddress socketAddress() {
-            return InetSocketAddress.createUnresolved("localhost", 888);
-          }
-        },
-        Request.forUri("http://localhost:888"),
-        asyncContext, 9123
-    );
-
-    ongoingRequest.reply(Response.forPayload(ByteString.encodeUtf8("floop")));
-
-    List<String> events = testLogger.getLoggingEvents().stream()
-        .filter(event -> event.getLevel() == Level.WARN)
-        .map(LoggingEvent::getMessage)
-        .collect(Collectors.toList());
-
-    assertThat(events, hasSize(1));
-    assertThat(events, hasItem(containsString("Error sending response")));
-  }
-
-  // note: this test may fail when running in IntelliJ, due to
-  // https://youtrack.jetbrains.com/issue/IDEA-122783
-  @Test
-  public void shouldLogWarningOnFailureToCompleteAsyncContext() throws Exception {
-    when(asyncContext.getResponse()).thenReturn(response);
-    doThrow(new IllegalStateException("completed test")).when(asyncContext).complete();
-
-    ApolloRequestHandler.AsyncContextOngoingRequest ongoingRequest = new ApolloRequestHandler.AsyncContextOngoingRequest(
-        new ServerInfo() {
-          @Override
-          public String id() {
-            return "14";
-          }
-
-          @Override
-          public InetSocketAddress socketAddress() {
-            return InetSocketAddress.createUnresolved("localhost", 888);
-          }
-        },
-        Request.forUri("http://localhost:888"),
-        asyncContext, 9123
-    );
-
-    ongoingRequest.reply(Response.forPayload(ByteString.encodeUtf8("floop")));
-
-    List<String> events = testLogger.getLoggingEvents().stream()
-        .filter(event -> event.getLevel() == Level.WARN)
-        .map(LoggingEvent::getMessage)
-        .collect(Collectors.toList());
-
-    assertThat(events, hasSize(1));
-    assertThat(events, hasItem(containsString("Error sending response")));
-  }
-
-  @Test
-  public void shouldForwardRepliesToJetty() throws Exception {
-    requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
-
-    delegate.replyLast(Response.forStatus(Status.IM_A_TEAPOT));
-
-    verify(asyncContext).complete();
-    assertThat(response.getStatus(), is(Status.IM_A_TEAPOT.code()));
-    assertThat(response.getErrorMessage(), is(Status.IM_A_TEAPOT.reasonPhrase()));
-  }
 
   // I would prefer to test this in a less implementation-dependent way (validating that a timeout
   // is actually sent, rather than that a particular listener is registered), but the servlet APIs
@@ -315,28 +194,17 @@ public class ApolloRequestHandlerTest {
   public void shouldRegisterTimeoutListenerWithContext() throws Exception {
     requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
 
-    verify(asyncContext).addListener(TimeoutListener.getInstance());
+    verify(asyncContext).addListener(any(TimeoutListener.class));
   }
 
   // I would prefer to test this in a less implementation-dependent way (validating that a timeout
-  // is actually sent, rather than that a particular listener is registered), but the servlet APIs
+  // is actually sent, rather than that a particular timeout value is set), but the servlet APIs
   // aren't designed that way.
   @Test
   public void shouldSetTimeout() throws Exception {
     requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
 
     verify(asyncContext).setTimeout(requestTimeout.toMillis());
-  }
-
-  @Test
-  public void shouldRespond500ForDrop() throws Exception {
-    requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
-
-    delegate.dropLast();
-
-    verify(asyncContext).complete();
-    assertThat(response.getStatus(), is(500));
-    assertThat(response.getErrorMessage(), is("dropped"));
   }
 
   private MockHttpServletRequest mockRequest(
@@ -367,12 +235,5 @@ public class ApolloRequestHandlerTest {
       requests.add(ongoingRequest);
     }
 
-    void replyLast(Response<ByteString> response) {
-      requests.getLast().reply(response);
-    }
-
-    void dropLast() {
-      requests.getLast().drop();
-    }
   }
 }

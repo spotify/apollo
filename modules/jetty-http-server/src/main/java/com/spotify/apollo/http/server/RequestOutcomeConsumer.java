@@ -17,7 +17,7 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.logging.extra;
+package com.spotify.apollo.http.server;
 
 import com.spotify.apollo.Response;
 import com.spotify.apollo.request.OngoingRequest;
@@ -29,15 +29,10 @@ import okio.ByteString;
 
 /**
  * Defines an API for notification of the outcome of a particular request. Once the request has
- * finished processing, this consumer can be called (via a {@link OutcomeReportingOngoingRequest},
- * for instance), with the originating {@link OngoingRequest} and an optional {@link Response} as
- * parameters. If the {@link Response} {@link Optional} is empty, that means the request was
- * dropped and no response was sent to the caller.
- *
- *  @deprecated since outcome tracking/logging in the decorator chain is brittle; later decorators
- *     may change the response or outright fail.
+ * finished processing, this consumer can be called with the originating {@link OngoingRequest} and
+ * an optional {@link Response} as parameters. If the {@link Response} {@link Optional} is empty,
+ * that means the request was dropped and no response was sent to the caller.
  */
-@Deprecated
 public interface RequestOutcomeConsumer
     extends BiConsumer<OngoingRequest, Optional<Response<ByteString>>>  {
 

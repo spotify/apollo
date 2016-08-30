@@ -35,7 +35,11 @@ import static java.util.Objects.requireNonNull;
  * contain the response that was sent.
  * <p/>
  * This class is intended to simplify reporting the outcomes of requests via, for instance, logging.
+ *
+ *  @deprecated since outcome tracking/logging in the decorator chain is brittle; later decorators
+ *     may change the response or outright fail.
  */
+@Deprecated
 public class OutcomeReportingOngoingRequest extends ForwardingOngoingRequest {
   private final RequestOutcomeConsumer consumer;
 

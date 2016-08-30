@@ -17,12 +17,7 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.logging.extra;
-
-import com.google.inject.Inject;
-
-import com.spotify.apollo.environment.RequestRunnableFactoryDecorator;
-import com.spotify.apollo.request.RequestRunnableFactory;
+package com.spotify.apollo.http.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +32,7 @@ import java.util.Locale;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Logs requests and their outcomes. The method for logging is configurable via the
- * {@link #setLogger(RequestOutcomeConsumer)} method.
- * <p>
- * By default, uses a log format based on an approximation of the
+ * Logs requests and their outcomes using a log format based on an approximation of the
  * combined log format from Apache HTTPD (http://httpd.apache.org/docs/1.3/logs.html#combined).
  * Known divergences:
  *  - not reporting the protocol version in the request line, because this information isn't
@@ -50,14 +42,10 @@ import static java.util.Objects.requireNonNull;
  *  - if a request was dropped, a dash ('-') is logged instead of a numeric response code
  *  - remote ident is not supported (always '-')
  *  - remote user is not supported (always '-')
- *
- *  @deprecated since outcome tracking/logging in the decorator chain is brittle; later decorators
- *     may change the response or outright fail.
  */
-@Deprecated
-public class RequestLoggingDecorator implements RequestRunnableFactoryDecorator {
+final class CombinedFormatLogger {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(RequestLoggingDecorator.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CombinedFormatLogger.class);
   private static final DateTimeFormatter DATE_TIME_FORMATTER = new DateTimeFormatterBuilder()
       .appendLiteral("[")
       .appendValue(ChronoField.DAY_OF_MONTH, 2)
@@ -88,30 +76,11 @@ public class RequestLoggingDecorator implements RequestRunnableFactoryDecorator 
                       ongoingRequest.request().header("Referer").orElse("-"),
                       ongoingRequest.request().header("User-Agent").orElse("-"));
 
-  private RequestOutcomeConsumer logger = LOG_WITH_COMBINED_FORMAT;
-
-  /**
-   * Optionally override how logging is done. See
-   * https://github.com/google/guice/wiki/Injections#optional-injections for detailed information
-   * about how to override. You will probably want a Guice module with a method similar to:
-   * <pre>
-   * {@code
-   *   protected void configure() {
-   *     bind(RequestOutcomeConsumer.class).toInstance(new MyLogger());
-   *   }
-   * }
-   * </pre>
-   *
-   * @param logger the consumer to use instead of the default
-   */
-  @Inject(optional = true)
-  public void setLogger(RequestOutcomeConsumer logger) {
-    this.logger = requireNonNull(logger);
+  private CombinedFormatLogger() {
+    // prevent instantiation
   }
 
-  @Override
-  public RequestRunnableFactory apply(RequestRunnableFactory delegate) {
-    return ongoingRequest ->
-                delegate.create(new OutcomeReportingOngoingRequest(ongoingRequest, logger));
+  static RequestOutcomeConsumer logger() {
+    return LOG_WITH_COMBINED_FORMAT;
   }
 }
