@@ -27,6 +27,7 @@ import com.spotify.apollo.Response;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.test.ServiceHelper;
 import com.spotify.apollo.test.StubClient;
+import com.spotify.metrics.core.SemanticMetricRegistry;
 
 import org.junit.AfterClass;
 import org.junit.Rule;
@@ -70,7 +71,7 @@ public class ServiceHelperTest {
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
-  StubClient stubClient = serviceHelper.stubClient();
+  private StubClient stubClient = serviceHelper.stubClient();
 
   @Mock
   SomeApplication.SomeService someService;
@@ -78,7 +79,7 @@ public class ServiceHelperTest {
   @Mock
   static SomeApplication.CloseCall closeCall;
 
-  void appInit(Environment environment) {
+  private void appInit(Environment environment) {
     SomeApplication someApplication =
         SomeApplication.create(environment, someService, closeCall);
 
@@ -252,7 +253,7 @@ public class ServiceHelperTest {
     withModule.start();
   }
 
-    @Test
+  @Test
   public void shouldUseScheme() throws Exception {
     ServiceHelper scheme = ServiceHelper.create(this::appInit, "test-service")
         .scheme("gopher+my-go.pher");
@@ -273,6 +274,17 @@ public class ServiceHelperTest {
     thrown.expectMessage("Illegal scheme format");
 
     ServiceHelper.create(this::appInit, "test-service").scheme("http://"); // invalid
+  }
+
+  @Test
+  public void shouldAllowSemanticMetricRegistryResolution() throws Exception {
+    ServiceHelper serviceHelper = ServiceHelper.create(this::resolveRegistry, "resolve-registry");
+
+    serviceHelper.start();
+  }
+
+  private void resolveRegistry(Environment environment) {
+    assertThat(environment.resolve(SemanticMetricRegistry.class), is(notNullValue()));
   }
 
   private static void tooSlow(Environment environment) {
