@@ -24,6 +24,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.inject.Provides;
 
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Client;
@@ -37,8 +38,11 @@ import com.spotify.apollo.environment.ApolloConfig;
 import com.spotify.apollo.environment.ApolloEnvironmentModule;
 import com.spotify.apollo.http.client.HttpClientModule;
 import com.spotify.apollo.meta.MetaModule;
+import com.spotify.apollo.metrics.MetricsModule;
+import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.module.ApolloModule;
 import com.spotify.apollo.request.RequestHandler;
+import com.spotify.metrics.core.MetricId;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
@@ -64,6 +68,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+
+import javax.inject.Singleton;
 
 import okio.ByteString;
 
@@ -484,6 +490,8 @@ public class ServiceHelper implements TestRule, Closeable {
                                                    .endWith(HTTP_CLIENT)))
             .withModule(MetaModule.create("service-helper"))
             .withModule(HttpClientModule.create())
+            .withModule(MetricsModule.create())
+            .withModule(new MetricIdModule())
             .withModule(
                 ForwardingStubClientModule
                     .create(forwardNonStubbedRequests, stubClient.asRequestAwareClient()));
@@ -546,6 +554,25 @@ public class ServiceHelper implements TestRule, Closeable {
       instance = null;
       Futures.getUnchecked(currentHelperFuture);
       currentHelperFuture = null;
+    }
+  }
+
+  private static class MetricIdModule extends AbstractApolloModule {
+    @Override
+    protected void configure() {
+
+    }
+
+    @Override
+    public String getId() {
+      return "servicehelper-metric-id";
+    }
+
+    @Provides
+    @Singleton
+    public MetricId metricId() {
+      return MetricId.build("apollo").tagged(
+          "service-framework", "service-helper");
     }
   }
 }
