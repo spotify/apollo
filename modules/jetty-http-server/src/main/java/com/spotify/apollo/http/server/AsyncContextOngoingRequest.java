@@ -19,6 +19,8 @@
  */
 package com.spotify.apollo.http.server;
 
+import com.google.common.collect.ImmutableMap;
+
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
@@ -30,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -53,14 +56,17 @@ class AsyncContextOngoingRequest implements OngoingRequest {
   private final AsyncContext asyncContext;
   private final RequestOutcomeConsumer logger;
   private final AtomicBoolean replied = new AtomicBoolean(false);
+  private final Map<String, String> metadata;
 
   AsyncContextOngoingRequest(ServerInfo serverInfo, Request request, AsyncContext asyncContext,
-                             long arrivalTimeNanos, RequestOutcomeConsumer logger) {
+                             long arrivalTimeNanos, RequestOutcomeConsumer logger,
+                             Map<String, String> metadata) {
     this.serverInfo = serverInfo;
     this.request = requireNonNull(request);
     this.asyncContext = requireNonNull(asyncContext);
     this.arrivalTimeNanos = arrivalTimeNanos;
     this.logger = requireNonNull(logger);
+    this.metadata = ImmutableMap.copyOf(metadata);
   }
 
   @Override
@@ -118,5 +124,10 @@ class AsyncContextOngoingRequest implements OngoingRequest {
   @Override
   public long arrivalTimeNanos() {
     return arrivalTimeNanos;
+  }
+
+  @Override
+  public Map<String, String> metadata() {
+    return metadata;
   }
 }

@@ -19,6 +19,8 @@
  */
 package com.spotify.apollo.metrics;
 
+import com.google.common.collect.ImmutableMap;
+
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -43,6 +45,8 @@ import java.util.concurrent.Executors;
 
 import okio.ByteString;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,7 +77,9 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
   @Before
   public void setUp() throws Exception {
     request = Request.forUri("hm://foo");
-    requestContext = RequestContexts.create(request, client, Collections.emptyMap());
+    requestContext = RequestContexts.create(request, client, Collections.emptyMap(),
+                                            87345234L,
+                                            ImmutableMap.of("hey", "there", "meta", "data"));
 
     when(metrics.metricsForEndpointCall(any())).thenReturn(requestStats);
 
@@ -149,5 +155,15 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
     ongoingRequestCaptor.getValue().drop();
 
     verify(requestStats).drop();
+  }
+
+  @Test
+  public void shouldCopyMetadataFromIncomingRequestContext() throws Exception {
+    decorated.create(ongoingRequest, requestContext, endpoint).run();
+
+    RequestContext copied = requestContextCaptor.getValue();
+
+    assertThat(copied.metadata(), is(requestContext.metadata()));
+    assertThat(copied.arrivalTimeNanos(), is(requestContext.arrivalTimeNanos()));
   }
 }

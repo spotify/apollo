@@ -20,6 +20,7 @@
 package com.spotify.apollo.request;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableMap;
 
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
@@ -37,9 +38,20 @@ public abstract class RequestContexts implements RequestContext {
 
   public static RequestContext create(
       Request request, Client client, Map<String, String> pathArgs, long arrivalTimeNanos) {
-    return new AutoValue_RequestContexts(request, client, pathArgs, arrivalTimeNanos);
+    return create(request, client, pathArgs, arrivalTimeNanos, ImmutableMap.of());
   }
 
+  public static RequestContext create(
+      Request request, Client client, Map<String, String> pathArgs,
+      long arrivalTimeNanos, Map<String, String> metadata) {
+    return new AutoValue_RequestContexts(request, client, pathArgs, arrivalTimeNanos, metadata);
+  }
+
+  // override default implementation to ensure auto-value will generate a field for this
   @Override
   public abstract long arrivalTimeNanos();
+
+  // override default implementation to ensure auto-value will generate a field for this
+  @Override
+  public abstract Map<String, String> metadata();
 }

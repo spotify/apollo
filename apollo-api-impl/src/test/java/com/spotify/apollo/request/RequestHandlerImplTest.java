@@ -19,6 +19,8 @@
  */
 package com.spotify.apollo.request;
 
+import com.google.common.collect.ImmutableMap;
+
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
@@ -130,6 +132,22 @@ public class RequestHandlerImplTest {
 
     final RequestContext requestContext = requestContextCaptor.getValue();
     assertThat(requestContext.arrivalTimeNanos(), is(ARRIVAL_TIME_NANOS));
+  }
+
+  @Test
+  public void shouldCopyRequestMetadataToContext() throws Exception {
+    ImmutableMap<String, String> expected = ImmutableMap.of("hi", "ho");
+    when(ongoingRequest.metadata()).thenReturn(expected);
+
+    requestHandler.handle(ongoingRequest);
+
+    verify(requestRunnable).run(continuationCaptor.capture());
+
+    continuationCaptor.getValue()
+        .accept(ongoingRequest, match);
+
+    final RequestContext requestContext = requestContextCaptor.getValue();
+    assertThat(requestContext.metadata(), is(expected));
   }
 
   private static class NoopClient implements IncomingRequestAwareClient {

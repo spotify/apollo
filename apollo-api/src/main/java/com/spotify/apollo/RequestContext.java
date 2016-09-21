@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * This object contains all the needed information related to an incoming request.
  */
-public interface RequestContext {
+public interface RequestContext extends RequestMetadata {
 
   /**
    * Get the incoming request message.
@@ -50,25 +50,4 @@ public interface RequestContext {
    * { "param" : "over", "param2": "the%32rainbow" }.
    */
   Map<String, String> pathArgs();
-
-  /**
-   * Get the arrival time of the incoming request in nanoseconds. Note that this is not
-   * unix epoch as the time is provided by {@link System#nanoTime()}. To get unix epoch
-   * time, do something like:
-   *
-   * <pre>
-   * {@code
-   * long processingTimeNanos = System.nanoTime() - requestContext.arrivalTimeNanos();
-   * long arrivalTimeUnixEpochMillis = System.currentTimeMillis() +
-   *                                   TimeUnit.NANOSECONDS.toMillis(processingTimeNanos);
-   * }
-   * </pre>
-   *
-   * @see System#nanoTime()
-   */
-  default long arrivalTimeNanos() {
-    // This is not a good default for real implementations. It is simply a catch-all
-    // default to not break existing implementations.
-    return System.nanoTime();
-  }
 }

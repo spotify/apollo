@@ -19,6 +19,8 @@
  */
 package com.spotify.apollo.http.server;
 
+import com.google.common.collect.ImmutableMap;
+
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
@@ -110,7 +112,8 @@ public class AsyncContextOngoingRequestTest {
         REQUEST,
         asyncContext,
         ARRIVAL_TIME_NANOS,
-        logger);
+        logger,
+        ImmutableMap.of());
   }
 
   // note: this test may fail when running in IntelliJ, due to
@@ -196,7 +199,7 @@ public class AsyncContextOngoingRequestTest {
     Subclassed(ServerInfo serverInfo, Request request,
                AsyncContext asyncContext, long arrivalTimeNanos,
                RequestOutcomeConsumer logger) {
-      super(serverInfo, request, asyncContext, arrivalTimeNanos, logger);
+      super(serverInfo, request, asyncContext, arrivalTimeNanos, logger, ImmutableMap.of());
     }
 
     @Override

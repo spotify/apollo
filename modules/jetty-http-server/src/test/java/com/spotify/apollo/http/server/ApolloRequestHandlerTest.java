@@ -22,6 +22,7 @@ package com.spotify.apollo.http.server;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.ServerInfo;
@@ -49,12 +50,18 @@ import javax.servlet.AsyncContext;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import okio.ByteString;
 
+import static com.spotify.apollo.http.server.JettyHttpRequestMetadata.PROTOCOL_VERSION;
+import static com.spotify.apollo.http.server.JettyHttpRequestMetadata.REMOTE_ADDRESS;
+import static com.spotify.apollo.http.server.JettyHttpRequestMetadata.REMOTE_PORT;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.iterableWithSize;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -207,6 +214,40 @@ public class ApolloRequestHandlerTest {
     verify(asyncContext).setTimeout(requestTimeout.toMillis());
   }
 
+  @Test
+  public void shouldAddProtocolToOngoingRequest() throws Exception {
+    requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
+
+    verifyMetadata(PROTOCOL_VERSION, "HTTP/1.1");
+  }
+
+  @Test
+  public void shouldAddRemoteAddressToOngoingRequest() throws Exception {
+    requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
+
+    verifyMetadata(REMOTE_ADDRESS, "123.45.67.89");
+  }
+
+  @Test
+  public void shouldAddRemotePortToOngoingRequest() throws Exception {
+    requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
+
+    verifyMetadata(REMOTE_PORT, "8734");
+  }
+
+  @Test
+  public void shouldAddOriginatorToOngoingRequest() throws Exception {
+    requestHandler.handle("/floop", baseRequest, httpServletRequest, response);
+
+    verifyMetadata(RequestMetadata.METADATA_SOURCE, ApolloRequestHandler.class.getName());
+  }
+
+  private void verifyMetadata(Object field, String value) {
+    assertThat(delegate.requests, is(iterableWithSize(1)));
+    assertThat(delegate.requests.get(0).metadata(),
+               hasEntry(field.toString(), value));
+  }
+
   private MockHttpServletRequest mockRequest(
       String method, String requestURI, Map<String, String> headers) {
     QueryStringDecoder decoder = new QueryStringDecoder(requestURI);
@@ -223,6 +264,9 @@ public class ApolloRequestHandlerTest {
     mockHttpServletRequest.setQueryString(requestURI.replace(decoder.path() + "?", ""));
 
     headers.forEach(mockHttpServletRequest::addHeader);
+    mockHttpServletRequest.setProtocol("HTTP/1.1");
+    mockHttpServletRequest.setRemoteAddr("123.45.67.89");
+    mockHttpServletRequest.setRemotePort(8734);
 
     return mockHttpServletRequest;
   }
