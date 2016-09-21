@@ -24,12 +24,14 @@ import com.google.common.collect.ImmutableMap;
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.Request;
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.core.Services;
 import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestHandler;
+import com.spotify.apollo.request.RequestMetadataImpl;
 import com.spotify.apollo.route.Route;
 
 import org.hamcrest.Description;
@@ -39,7 +41,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -49,19 +53,16 @@ import okio.ByteString;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class ApolloEnvironmentModuleTest {
 
-  static final String[] ZERO_ARGS = new String[0];
+  private static final String[] ZERO_ARGS = new String[0];
 
-  ApolloEnvironmentModule appModule;
-  Service.Builder service;
+  private ApolloEnvironmentModule appModule;
+  private Service.Builder service;
 
   @Before
   public void setUp() throws Exception {
@@ -197,11 +198,11 @@ public class ApolloEnvironmentModuleTest {
           });
       assertNotNull(handler);
 
-      final OngoingRequest ongoingRequest = ongoingRequest("http://foo");
+      final FakeOngoingRequest ongoingRequest = ongoingRequest("http://foo");
 
       handler.handle(ongoingRequest);
+      assertThat(ongoingRequest.getReply(), hasStatus(Status.GONE));
       assertEquals("hello", lastResponseRef.get());
-      verify(ongoingRequest).reply(argThat(hasStatus(Status.GONE)));
     } catch (IOException e) {
       fail(e.getMessage());
     }
@@ -222,10 +223,8 @@ public class ApolloEnvironmentModuleTest {
     };
   }
 
-  private OngoingRequest ongoingRequest(String uri) {
-    OngoingRequest ongoingRequest = mock(OngoingRequest.class);
-    when(ongoingRequest.request()).thenReturn(Request.forUri(uri));
-    return ongoingRequest;
+  private FakeOngoingRequest ongoingRequest(String uri) {
+    return new FakeOngoingRequest(Request.forUri(uri));
   }
 
   private static class EnvApp implements AppInit {
@@ -240,6 +239,44 @@ public class ApolloEnvironmentModuleTest {
     public void create(Environment environment) {
       assertNotNull(environment);
       envCallback.accept(environment);
+    }
+  }
+
+  private static class FakeOngoingRequest implements OngoingRequest {
+
+    private final Request request;
+    private volatile Response<ByteString> reply = null;
+
+    FakeOngoingRequest(Request request) {
+      this.request = request;
+    }
+
+    @Override
+    public Request request() {
+      return request;
+    }
+
+    @Override
+    public void reply(Response<ByteString> response) {
+      reply = response;
+    }
+
+    @Override
+    public void drop() {
+    }
+
+    @Override
+    public boolean isExpired() {
+      return false;
+    }
+
+    @Override
+    public RequestMetadata metadata() {
+      return RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty());
+    }
+
+    public Response<ByteString> getReply() {
+      return reply;
     }
   }
 }

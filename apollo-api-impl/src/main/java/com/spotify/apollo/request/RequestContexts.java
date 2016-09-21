@@ -24,6 +24,7 @@ import com.google.auto.value.AutoValue;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
+import com.spotify.apollo.RequestMetadata;
 
 import java.util.Map;
 
@@ -31,15 +32,19 @@ import java.util.Map;
 public abstract class RequestContexts implements RequestContext {
 
   public static RequestContext create(
-      Request request, Client client, Map<String, String> pathArgs) {
-    return create(request, client, pathArgs, System.nanoTime());
+      Request request,
+      Client client,
+      Map<String, String> pathArgs,
+      long arrivalTimeNanos,
+      RequestMetadata metadata) {
+    return new AutoValue_RequestContexts(request, client, pathArgs, arrivalTimeNanos, metadata);
   }
 
-  public static RequestContext create(
-      Request request, Client client, Map<String, String> pathArgs, long arrivalTimeNanos) {
-    return new AutoValue_RequestContexts(request, client, pathArgs, arrivalTimeNanos);
-  }
+  // override default methods from interface to ensure AutoValue generates fields
 
   @Override
   public abstract long arrivalTimeNanos();
+
+  @Override
+  public abstract RequestMetadata metadata();
 }

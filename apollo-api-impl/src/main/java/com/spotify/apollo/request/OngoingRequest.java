@@ -20,9 +20,12 @@
 package com.spotify.apollo.request;
 
 import com.spotify.apollo.Request;
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.Response;
 
 import java.net.InetSocketAddress;
+import java.time.Instant;
+import java.util.Optional;
 
 import okio.ByteString;
 
@@ -79,5 +82,12 @@ public interface OngoingRequest {
     // This is not a good default for real implementations. It is simply a catch-all
     // default to not break existing implementations.
     return System.nanoTime();
+  }
+
+  /**
+   * Returns the metadata available for this request.
+   */
+  default RequestMetadata metadata() {
+    return RequestMetadataImpl.create(Instant.now(), Optional.empty(), Optional.empty());
   }
 }

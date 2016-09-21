@@ -28,6 +28,7 @@ import com.spotify.apollo.dispatch.EndpointInfo;
 import com.spotify.apollo.request.EndpointRunnableFactory;
 import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestContexts;
+import com.spotify.apollo.request.RequestMetadataImpl;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,12 +38,16 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.time.Instant;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import okio.ByteString;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,7 +78,9 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
   @Before
   public void setUp() throws Exception {
     request = Request.forUri("hm://foo");
-    requestContext = RequestContexts.create(request, client, Collections.emptyMap());
+    requestContext = RequestContexts.create(request, client, Collections.emptyMap(),
+                                            0L,
+                                            RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty()));
 
     when(metrics.metricsForEndpointCall(any())).thenReturn(requestStats);
 
@@ -149,5 +156,14 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
     ongoingRequestCaptor.getValue().drop();
 
     verify(requestStats).drop();
+  }
+
+  @Test
+  public void shouldCopyMetadataFromIncomingRequestContext() throws Exception {
+    decorated.create(ongoingRequest, requestContext, endpoint).run();
+
+    RequestContext copied = requestContextCaptor.getValue();
+
+    assertThat(copied.metadata(), is(requestContext.metadata()));
   }
 }

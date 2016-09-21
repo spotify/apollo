@@ -19,7 +19,9 @@
  */
 package com.spotify.apollo;
 
+import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * This object contains all the needed information related to an incoming request.
@@ -70,5 +72,27 @@ public interface RequestContext {
     // This is not a good default for real implementations. It is simply a catch-all
     // default to not break existing implementations.
     return System.nanoTime();
+  }
+
+  /**
+   * Returns the metadata available for this request.
+   */
+  default RequestMetadata metadata() {
+    return new RequestMetadata() {
+      @Override
+      public Instant arrivalTime() {
+        return Instant.now();
+      }
+
+      @Override
+      public Optional<HostAndPort> localAddress() {
+        return Optional.empty();
+      }
+
+      @Override
+      public Optional<HostAndPort> remoteAddress() {
+        return Optional.empty();
+      }
+    };
   }
 }
