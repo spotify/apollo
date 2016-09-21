@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 
 import com.spotify.apollo.Request;
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.ServerInfo;
 
@@ -35,6 +36,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -76,9 +78,15 @@ class ApolloRequestHandler extends AbstractHandler {
     final long arrivalTime = System.nanoTime();
     final AsyncContext asyncContext = baseRequest.startAsync();
 
+    Map<String, String> metadata = extractMetadata(req);
+
     AsyncContextOngoingRequest ongoingRequest =
-        new AsyncContextOngoingRequest(serverInfo, asApolloRequest(req), asyncContext, arrivalTime,
-                                       logger);
+        new AsyncContextOngoingRequest(serverInfo,
+                                       asApolloRequest(req),
+                                       asyncContext,
+                                       arrivalTime,
+                                       logger,
+                                       metadata);
 
     asyncContext.setTimeout(requestTimeout.toMillis());
     asyncContext.addListener(TimeoutListener.create(ongoingRequest));
@@ -86,6 +94,15 @@ class ApolloRequestHandler extends AbstractHandler {
     requestHandler.handle(ongoingRequest);
 
     baseRequest.setHandled(true);
+  }
+
+  private Map<String, String> extractMetadata(HttpServletRequest req) {
+    return ImmutableMap.of(
+        JettyHttpRequestMetadata.PROTOCOL_VERSION.name(), req.getProtocol(),
+        JettyHttpRequestMetadata.REMOTE_ADDRESS.name(), req.getRemoteAddr(),
+        JettyHttpRequestMetadata.REMOTE_PORT.name(), String.valueOf(req.getRemotePort()),
+        RequestMetadata.METADATA_SOURCE, this.getClass().getName()
+    );
   }
 
   @VisibleForTesting

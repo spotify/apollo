@@ -21,20 +21,42 @@ package com.spotify.apollo.httpservice;
 
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Environment;
+import com.spotify.apollo.RequestMetadata;
+import com.spotify.apollo.Response;
 import com.spotify.apollo.core.Service;
+import com.spotify.apollo.http.server.JettyHttpRequestMetadata;
+import com.spotify.apollo.route.AsyncHandler;
+import com.spotify.apollo.route.Route;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
+import okio.ByteString;
+
+import static com.spotify.apollo.http.server.JettyHttpRequestMetadata.PROTOCOL_VERSION;
+import static com.spotify.apollo.http.server.JettyHttpRequestMetadata.REMOTE_ADDRESS;
+import static com.spotify.apollo.http.server.JettyHttpRequestMetadata.REMOTE_PORT;
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 public class HttpServiceTest {
@@ -45,6 +67,8 @@ public class HttpServiceTest {
 
   @Rule
   public ExpectedException exception = ExpectedException.none();
+
+  private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
   @Before
   public void setUp() throws Exception {
@@ -89,6 +113,54 @@ public class HttpServiceTest {
 
     exception.expect(LoadingException.class);
     HttpService.boot(service, "run", "foo");
+  }
+
+  @Test
+  public void shouldPopulateRequestMetadata() throws Exception {
+    AtomicReference<Map<String, String>> metadataReference = new AtomicReference<>();
+
+    final InstanceWaiter waiter = new InstanceWaiter();
+
+    Future<?> future = executorService.submit(() -> {
+      try {
+        HttpService.boot(environment -> {
+                           environment.routingEngine()
+                               .registerRoute(Route.async("GET", "/meta", trackMeta(metadataReference)));
+                         },
+                         "metadatatest",
+                         waiter);
+      } catch (LoadingException e) {
+        throw new RuntimeException(e);
+      }
+    });
+
+    final Service.Instance instance = waiter.waitForInstance();
+
+    Request httpRequest = new Request.Builder()
+        .url("http://localhost:29432/meta")
+        .build();
+
+    new OkHttpClient().newCall(httpRequest).execute();
+
+    Map<String, String> metadata = metadataReference.get();
+    assertThat(metadata, is(notNullValue()));
+    assertThat(metadata.keySet(),
+               hasItems(PROTOCOL_VERSION.name(),
+                        REMOTE_ADDRESS.name(),
+                        REMOTE_PORT.name(),
+                        RequestMetadata.METADATA_SOURCE));
+
+    instance.getSignaller().signalShutdown();
+    instance.waitForShutdown();
+    future.get();
+  }
+
+  private AsyncHandler<Response<ByteString>> trackMeta(AtomicReference<Map<String, String>> metadata) {
+    return requestContext -> {
+      System.out.println("meta: " + requestContext.metadata());
+      metadata.set(requestContext.metadata());
+      return CompletableFuture.completedFuture(Response.<ByteString>ok());
+    };
   }
 
   static class BrokenService implements AppInit {

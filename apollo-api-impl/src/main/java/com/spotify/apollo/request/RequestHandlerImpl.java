@@ -85,7 +85,11 @@ class RequestHandlerImpl implements RequestHandler {
     final Map<String, String> parsedPathArguments = match.parsedPathArguments();
     final Client requestScopedClient = client.wrapRequest(request.request());
     final RequestContext requestContext =
-        RequestContexts.create(request.request(), requestScopedClient, parsedPathArguments, request.arrivalTimeNanos());
+        RequestContexts.create(request.request(),
+                               requestScopedClient,
+                               parsedPathArguments,
+                               request.arrivalTimeNanos(),
+                               request.metadata());
 
     erf.create(request, requestContext, endpoint)
         .run();
