@@ -24,6 +24,7 @@ import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.request.RequestContexts;
+import com.spotify.apollo.request.RequestMetadataImpl;
 import com.spotify.apollo.route.Route.DocString;
 
 import org.junit.Before;
@@ -64,7 +65,8 @@ public class RouteEndpointTest {
     asyncHandler = mock(AsyncHandler.class);
 
     Request request = Request.forUri("http://foo");
-    requestContext = RequestContexts.create(request, mock(Client.class), pathArgs);
+    requestContext = RequestContexts.create(request, mock(Client.class), pathArgs,
+                                            RequestMetadataImpl.create(getClass(), 0L, "floop", Optional.empty()));
 
     theData = ByteString.encodeUtf8("theString");
     response = Response.forPayload(theData);

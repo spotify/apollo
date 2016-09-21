@@ -25,6 +25,7 @@ import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.dispatch.Endpoint;
 import com.spotify.apollo.request.RequestContexts;
+import com.spotify.apollo.request.RequestMetadataImpl;
 
 import org.junit.experimental.theories.DataPoint;
 import org.junit.experimental.theories.DataPoints;
@@ -113,14 +114,16 @@ public class RouteRuleBuilderTest {
 
     return endpoint.invoke(
         RequestContexts.create(
-            requestContext.request(), requestContext.requestScopedClient(), parsedPathArguments)
+            requestContext.request(), requestContext.requestScopedClient(), parsedPathArguments,
+            RequestMetadataImpl.create(getClass(), 0L, "non", Optional.empty()))
     ).toCompletableFuture().get();
   }
 
   private Request request(String method, String uri) {
     client = mock(Client.class);
     message = Request.forUri(BASE_URI + uri, method);
-    requestContext = RequestContexts.create(message, client, Collections.emptyMap());
+    requestContext = RequestContexts.create(message, client, Collections.emptyMap(),
+                                            RequestMetadataImpl.create(getClass(), 0L, "nonee", Optional.empty()));
 
     return message;
   }

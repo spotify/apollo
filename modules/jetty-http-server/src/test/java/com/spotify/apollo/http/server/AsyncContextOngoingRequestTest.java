@@ -23,6 +23,7 @@ import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.request.OngoingRequest;
+import com.spotify.apollo.request.RequestMetadataImpl;
 import com.spotify.apollo.request.ServerInfo;
 
 import org.junit.Before;
@@ -109,8 +110,8 @@ public class AsyncContextOngoingRequestTest {
         SERVER_INFO,
         REQUEST,
         asyncContext,
-        ARRIVAL_TIME_NANOS,
-        logger);
+        logger,
+        RequestMetadataImpl.create(getClass(), ARRIVAL_TIME_NANOS, "proto", Optional.empty()));
   }
 
   // note: this test may fail when running in IntelliJ, due to
@@ -183,7 +184,7 @@ public class AsyncContextOngoingRequestTest {
 
   @Test
   public void shouldNotAllowOverridingDropHandling() throws Exception {
-    OngoingRequest ongoingRequest = new Subclassed(SERVER_INFO, REQUEST, asyncContext, ARRIVAL_TIME_NANOS, logger);
+    OngoingRequest ongoingRequest = new Subclassed(SERVER_INFO, REQUEST, asyncContext, logger);
 
     ongoingRequest.drop();
 
@@ -194,9 +195,10 @@ public class AsyncContextOngoingRequestTest {
 
 
     Subclassed(ServerInfo serverInfo, Request request,
-               AsyncContext asyncContext, long arrivalTimeNanos,
+               AsyncContext asyncContext,
                RequestOutcomeConsumer logger) {
-      super(serverInfo, request, asyncContext, arrivalTimeNanos, logger);
+      super(serverInfo, request, asyncContext, logger,
+            RequestMetadataImpl.create(Subclassed.class, ARRIVAL_TIME_NANOS, "subproto", Optional.empty()));
     }
 
     @Override

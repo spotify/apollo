@@ -2,7 +2,7 @@
  * -\-\-
  * Spotify Apollo API Interfaces
  * --
- * Copyright (C) 2013 - 2015 Spotify AB
+ * Copyright (C) 2013 - 2016 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,26 +21,13 @@ package com.spotify.apollo.route;
 
 import com.google.auto.value.AutoValue;
 
-import com.spotify.apollo.Client;
-import com.spotify.apollo.Request;
-import com.spotify.apollo.RequestContext;
+import com.spotify.apollo.RequestMetadata;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.Optional;
 
 @AutoValue
-abstract class TestContext implements RequestContext {
-
-  @Override
-  public Client requestScopedClient() {
-    throw new UnsupportedOperationException("no client available");
-  }
-
-  static RequestContext empty() {
-    return new AutoValue_TestContext(Request.forUri("/"), Collections.emptyMap(), TestRequestMetadata.empty());
-  }
-
-  static RequestContext forPathArgs(Map<String, String> pathArgs) {
-    return new AutoValue_TestContext(Request.forUri("/"), pathArgs, TestRequestMetadata.empty());
+abstract class TestRequestMetadata implements RequestMetadata {
+  static RequestMetadata empty() {
+    return new AutoValue_TestRequestMetadata(TestRequestMetadata.class, 0L, "test", Optional.empty());
   }
 }

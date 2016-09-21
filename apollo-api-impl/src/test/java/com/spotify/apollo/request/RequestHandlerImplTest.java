@@ -21,6 +21,7 @@ package com.spotify.apollo.request;
 
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.dispatch.Endpoint;
 import com.spotify.apollo.dispatch.EndpointInfo;
@@ -73,11 +74,15 @@ public class RequestHandlerImplTest {
 
   RequestHandlerImpl requestHandler;
 
+  private RequestMetadata requestMetadata;
+
   @Before
   public void setUp() throws Exception {
     IncomingRequestAwareClient client = new NoopClient();
 
-    when(ongoingRequest.arrivalTimeNanos()).thenReturn(ARRIVAL_TIME_NANOS);
+    requestMetadata = RequestMetadataImpl.create(getClass(), ARRIVAL_TIME_NANOS, "floop", Optional.empty());
+
+    when(ongoingRequest.metadata()).thenReturn(requestMetadata);
     when(ongoingRequest.request()).thenReturn(Request.forUri("http://foo"));
     when(requestFactory.create(any())).thenReturn(requestRunnable);
     when(endpointFactory.create(eq(ongoingRequest), requestContextCaptor.capture(), eq(endpoint)))
@@ -120,7 +125,7 @@ public class RequestHandlerImplTest {
   }
 
   @Test
-  public void shouldSetRequestContextArrivalTime() throws Exception {
+  public void shouldSetRequestContextMetadata() throws Exception {
     requestHandler.handle(ongoingRequest);
 
     verify(requestRunnable).run(continuationCaptor.capture());
@@ -129,7 +134,7 @@ public class RequestHandlerImplTest {
         .accept(ongoingRequest, match);
 
     final RequestContext requestContext = requestContextCaptor.getValue();
-    assertThat(requestContext.arrivalTimeNanos(), is(ARRIVAL_TIME_NANOS));
+    assertThat(requestContext.metadata(), is(requestMetadata));
   }
 
   private static class NoopClient implements IncomingRequestAwareClient {

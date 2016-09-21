@@ -21,30 +21,47 @@ package com.spotify.apollo.httpservice;
 
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Environment;
+import com.spotify.apollo.RequestMetadata;
+import com.spotify.apollo.Response;
 import com.spotify.apollo.core.Service;
+import com.spotify.apollo.route.AsyncHandler;
+import com.spotify.apollo.route.Route;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
+import okio.ByteString;
+
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 public class HttpServiceTest {
 
   // we need a static counter in order to be able to use the Class overload of
   // HttpService.boot
-  static final AtomicInteger counter = new AtomicInteger();
+  private static final AtomicInteger counter = new AtomicInteger();
 
   @Rule
   public ExpectedException exception = ExpectedException.none();
+
+  private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
   @Before
   public void setUp() throws Exception {
@@ -91,7 +108,48 @@ public class HttpServiceTest {
     HttpService.boot(service, "run", "foo");
   }
 
-  static class BrokenService implements AppInit {
+  @Test
+  public void shouldPopulateRequestMetadata() throws Exception {
+    AtomicReference<RequestMetadata> metadataReference = new AtomicReference<>();
+
+    final InstanceWaiter waiter = new InstanceWaiter();
+
+    Future<?> future = executorService.submit(() -> {
+      try {
+        HttpService.boot(environment ->
+                             environment.routingEngine()
+                                 .registerRoute(Route.async("GET", "/meta", trackMeta(metadataReference))),
+                         "metadatatest",
+                         waiter);
+      } catch (LoadingException e) {
+        throw new RuntimeException(e);
+      }
+    });
+
+    final Service.Instance instance = waiter.waitForInstance();
+
+    Request httpRequest = new Request.Builder()
+        .url("http://localhost:29432/meta")
+        .build();
+
+    new OkHttpClient().newCall(httpRequest).execute();
+
+    assertThat(metadataReference.get().protocol(), is("HTTP/1.1"));
+
+    instance.getSignaller().signalShutdown();
+    instance.waitForShutdown();
+    future.get();
+  }
+
+  private AsyncHandler<Response<ByteString>> trackMeta(AtomicReference<RequestMetadata> metadata) {
+    return requestContext -> {
+      System.out.println("meta: " + requestContext.metadata());
+      metadata.set(requestContext.metadata());
+      return CompletableFuture.completedFuture(Response.<ByteString>ok());
+    };
+  }
+
+  private static class BrokenService implements AppInit {
 
     @Override
     public void create(Environment environment) {
@@ -99,7 +157,7 @@ public class HttpServiceTest {
     }
   }
 
-  static class InstanceWaiter implements InstanceListener {
+  private static class InstanceWaiter implements InstanceListener {
 
     private final CountDownLatch latch = new CountDownLatch(1);
 

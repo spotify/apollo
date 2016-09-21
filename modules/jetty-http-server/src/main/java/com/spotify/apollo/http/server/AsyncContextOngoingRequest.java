@@ -20,6 +20,7 @@
 package com.spotify.apollo.http.server;
 
 import com.spotify.apollo.Request;
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.StatusType;
@@ -48,19 +49,20 @@ class AsyncContextOngoingRequest implements OngoingRequest {
   private static final Logger LOGGER = LoggerFactory.getLogger(AsyncContextOngoingRequest.class);
 
   private final ServerInfo serverInfo;
-  private final long arrivalTimeNanos;
   private final Request request;
   private final AsyncContext asyncContext;
   private final RequestOutcomeConsumer logger;
   private final AtomicBoolean replied = new AtomicBoolean(false);
+  private final RequestMetadata metadata;
 
   AsyncContextOngoingRequest(ServerInfo serverInfo, Request request, AsyncContext asyncContext,
-                             long arrivalTimeNanos, RequestOutcomeConsumer logger) {
+                             RequestOutcomeConsumer logger,
+                             RequestMetadata metadata) {
     this.serverInfo = serverInfo;
     this.request = requireNonNull(request);
     this.asyncContext = requireNonNull(asyncContext);
-    this.arrivalTimeNanos = arrivalTimeNanos;
     this.logger = requireNonNull(logger);
+    this.metadata = requireNonNull(metadata);
   }
 
   @Override
@@ -116,7 +118,7 @@ class AsyncContextOngoingRequest implements OngoingRequest {
   }
 
   @Override
-  public long arrivalTimeNanos() {
-    return arrivalTimeNanos;
+  public RequestMetadata metadata() {
+    return metadata;
   }
 }

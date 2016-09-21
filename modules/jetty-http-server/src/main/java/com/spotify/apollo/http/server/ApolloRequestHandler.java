@@ -23,7 +23,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 
 import com.spotify.apollo.Request;
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.request.RequestHandler;
+import com.spotify.apollo.request.RequestMetadataImpl;
 import com.spotify.apollo.request.ServerInfo;
 
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -73,12 +75,16 @@ class ApolloRequestHandler extends AbstractHandler {
       HttpServletRequest req,
       HttpServletResponse resp) throws IOException, ServletException {
 
-    final long arrivalTime = System.nanoTime();
     final AsyncContext asyncContext = baseRequest.startAsync();
 
+    RequestMetadata metadata = extractMetadata(req);
+
     AsyncContextOngoingRequest ongoingRequest =
-        new AsyncContextOngoingRequest(serverInfo, asApolloRequest(req), asyncContext, arrivalTime,
-                                       logger);
+        new AsyncContextOngoingRequest(serverInfo,
+                                       asApolloRequest(req),
+                                       asyncContext,
+                                       logger,
+                                       metadata);
 
     asyncContext.setTimeout(requestTimeout.toMillis());
     asyncContext.addListener(TimeoutListener.create(ongoingRequest));
@@ -86,6 +92,14 @@ class ApolloRequestHandler extends AbstractHandler {
     requestHandler.handle(ongoingRequest);
 
     baseRequest.setHandled(true);
+  }
+
+  private RequestMetadata extractMetadata(HttpServletRequest req) {
+    return RequestMetadataImpl.create(
+        getClass(),
+        System.nanoTime(),
+        req.getProtocol(),
+        Optional.of(RequestMetadataImpl.hostAndPort(req.getRemoteHost(), req.getRemotePort())));
   }
 
   @VisibleForTesting
