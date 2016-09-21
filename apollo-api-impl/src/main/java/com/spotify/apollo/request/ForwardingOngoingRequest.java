@@ -20,6 +20,7 @@
 package com.spotify.apollo.request;
 
 import com.spotify.apollo.Request;
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.Response;
 
 import java.util.Objects;
@@ -65,5 +66,10 @@ public abstract class ForwardingOngoingRequest implements OngoingRequest {
   @Override
   public long arrivalTimeNanos() {
     return delegate.arrivalTimeNanos();
+  }
+
+  @Override
+  public RequestMetadata metadata() {
+    return delegate.metadata();
   }
 }

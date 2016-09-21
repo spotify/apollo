@@ -23,8 +23,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 
 import com.spotify.apollo.Request;
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.request.RequestHandler;
-import com.spotify.apollo.request.ServerInfo;
+import com.spotify.apollo.request.RequestMetadataImpl;
 
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
@@ -32,6 +33,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -54,11 +56,11 @@ import static java.util.Optional.of;
 class ApolloRequestHandler extends AbstractHandler {
 
   private final RequestHandler requestHandler;
-  private final ServerInfo serverInfo;
+  private final RequestMetadata.HostAndPort serverInfo;
   private final Duration requestTimeout;
   private final RequestOutcomeConsumer logger;
 
-  ApolloRequestHandler(ServerInfo serverInfo, RequestHandler requestHandler,
+  ApolloRequestHandler(RequestMetadata.HostAndPort serverInfo, RequestHandler requestHandler,
                        Duration requestTimeout, RequestOutcomeConsumer logger) {
     this.requestHandler = requireNonNull(requestHandler);
     this.serverInfo = requireNonNull(serverInfo);
@@ -73,12 +75,15 @@ class ApolloRequestHandler extends AbstractHandler {
       HttpServletRequest req,
       HttpServletResponse resp) throws IOException, ServletException {
 
-    final long arrivalTime = System.nanoTime();
     final AsyncContext asyncContext = baseRequest.startAsync();
 
+    RequestMetadata metadata = extractMetadata(req);
+
     AsyncContextOngoingRequest ongoingRequest =
-        new AsyncContextOngoingRequest(serverInfo, asApolloRequest(req), asyncContext, arrivalTime,
-                                       logger);
+        new AsyncContextOngoingRequest(asApolloRequest(req),
+                                       asyncContext,
+                                       logger,
+                                       metadata);
 
     asyncContext.setTimeout(requestTimeout.toMillis());
     asyncContext.addListener(TimeoutListener.create(ongoingRequest));
@@ -86,6 +91,15 @@ class ApolloRequestHandler extends AbstractHandler {
     requestHandler.handle(ongoingRequest);
 
     baseRequest.setHandled(true);
+  }
+
+  private RequestMetadata extractMetadata(HttpServletRequest req) {
+    return HttpRequestMetadata.create(
+        Instant.now(),
+        Optional.of(serverInfo),
+        Optional.of(RequestMetadataImpl.hostAndPort(req.getRemoteHost(), req.getRemotePort())),
+        req.getProtocol()
+    );
   }
 
   @VisibleForTesting

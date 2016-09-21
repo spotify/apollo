@@ -20,6 +20,7 @@
 package com.spotify.apollo.logging.extra;
 
 import com.spotify.apollo.Request;
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.request.OngoingRequest;
 
@@ -99,6 +100,11 @@ public class OutcomeReportingOngoingRequestTest {
     @Override
     public boolean isExpired() {
       return false;
+    }
+
+    @Override
+    public RequestMetadata metadata() {
+      return null;
     }
   }
 }

@@ -20,9 +20,13 @@
 package com.spotify.apollo.test;
 
 import com.spotify.apollo.Request;
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.request.OngoingRequest;
+import com.spotify.apollo.request.RequestMetadataImpl;
 
+import java.time.Instant;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -63,6 +67,11 @@ public class FakeOngoingRequest implements OngoingRequest {
   @Override
   public boolean isExpired() {
     return false;
+  }
+
+  @Override
+  public RequestMetadata metadata() {
+    return RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty());
   }
 
   /**
