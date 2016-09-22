@@ -21,6 +21,7 @@ package com.spotify.apollo.request;
 
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.dispatch.Endpoint;
 import com.spotify.apollo.dispatch.EndpointInfo;
@@ -36,6 +37,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
@@ -55,8 +57,6 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class RequestHandlerImplTest {
 
-  private static final long ARRIVAL_TIME_NANOS = 4711L;
-
   @Mock RequestRunnableFactory requestFactory;
   @Mock EndpointRunnableFactory endpointFactory;
 
@@ -73,11 +73,15 @@ public class RequestHandlerImplTest {
 
   RequestHandlerImpl requestHandler;
 
+  private RequestMetadata requestMetadata;
+
   @Before
   public void setUp() throws Exception {
     IncomingRequestAwareClient client = new NoopClient();
 
-    when(ongoingRequest.arrivalTimeNanos()).thenReturn(ARRIVAL_TIME_NANOS);
+    requestMetadata = RequestMetadataImpl.create(getClass(), Instant.ofEpochSecond(4711L), "floop", Optional.empty(), Optional.empty());
+
+    when(ongoingRequest.metadata()).thenReturn(requestMetadata);
     when(ongoingRequest.request()).thenReturn(Request.forUri("http://foo"));
     when(requestFactory.create(any())).thenReturn(requestRunnable);
     when(endpointFactory.create(eq(ongoingRequest), requestContextCaptor.capture(), eq(endpoint)))
@@ -120,7 +124,7 @@ public class RequestHandlerImplTest {
   }
 
   @Test
-  public void shouldSetRequestContextArrivalTime() throws Exception {
+  public void shouldSetRequestContextMetadata() throws Exception {
     requestHandler.handle(ongoingRequest);
 
     verify(requestRunnable).run(continuationCaptor.capture());
@@ -129,7 +133,7 @@ public class RequestHandlerImplTest {
         .accept(ongoingRequest, match);
 
     final RequestContext requestContext = requestContextCaptor.getValue();
-    assertThat(requestContext.arrivalTimeNanos(), is(ARRIVAL_TIME_NANOS));
+    assertThat(requestContext.metadata(), is(requestMetadata));
   }
 
   private static class NoopClient implements IncomingRequestAwareClient {

@@ -1,8 +1,8 @@
 /*
  * -\-\-
- * Spotify Apollo API Implementations
+ * Spotify Apollo API Interfaces
  * --
- * Copyright (C) 2013 - 2015 Spotify AB
+ * Copyright (C) 2013 - 2016 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,18 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.request;
+package com.spotify.apollo.route;
 
-import java.net.InetSocketAddress;
+import com.google.auto.value.AutoValue;
 
-/**
- * A value type containing information about a server that is listening to some
- * {@link InetSocketAddress}.
- */
-public interface ServerInfo {
+import com.spotify.apollo.RequestMetadata;
 
-  /**
-   * @return An identifier for this server
-   */
-  String id();
+import java.time.Instant;
+import java.util.Optional;
 
-  /**
-   * @return The socket address that this server is listening to
-   */
-  InetSocketAddress socketAddress();
+@AutoValue
+abstract class TestRequestMetadata implements RequestMetadata {
+  static RequestMetadata empty() {
+    return new AutoValue_TestRequestMetadata(TestRequestMetadata.class, Instant.EPOCH, "test", Optional.empty(), Optional.empty());
+  }
 }

@@ -58,7 +58,8 @@ class MetricsCollectingEndpointRunnableFactoryDecorator implements EndpointRunna
           RequestContexts.create(
               requestContext.request(),
               instrumentingClient,
-              requestContext.pathArgs());
+              requestContext.pathArgs(),
+              requestContext.metadata());
 
       return delegate.create(trackedRequest, instrumentingContext, endpoint);
     };

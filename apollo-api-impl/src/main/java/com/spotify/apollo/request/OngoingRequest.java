@@ -20,9 +20,8 @@
 package com.spotify.apollo.request;
 
 import com.spotify.apollo.Request;
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.Response;
-
-import java.net.InetSocketAddress;
 
 import okio.ByteString;
 
@@ -31,20 +30,10 @@ import okio.ByteString;
  */
 public interface OngoingRequest {
 
-  InetSocketAddress PORT_ZERO = new InetSocketAddress(0);
-  ServerInfo UNKNOWN_SERVER_INFO = ServerInfos.create("unknown", PORT_ZERO);
-
   /**
    * Returns the {@link Request}.
    */
   Request request();
-
-  /**
-   * Returns an identifier for the server where this request originated.
-   */
-  default ServerInfo serverInfo() {
-    return UNKNOWN_SERVER_INFO;
-  }
 
   /**
    * Reply to the request with a {@link Response}.
@@ -60,24 +49,5 @@ public interface OngoingRequest {
 
   boolean isExpired();
 
-  /**
-   * Get the arrival time of the incoming request in nanoseconds. Note that this is not
-   * unix epoch as the time is provided by {@link System#nanoTime()}. To get unix epoch
-   * time, do something like:
-   *
-   * <pre>
-   * {@code
-   * long processingTimeNanos = System.nanoTime() - requestContext.arrivalTimeNanos();
-   * long arrivalTimeUnixEpochMillis = System.currentTimeMillis() +
-   *                                   TimeUnit.NANOSECONDS.toMillis(processingTimeNanos);
-   * }
-   * </pre>
-   *
-   * @see System#nanoTime()
-   */
-  default long arrivalTimeNanos() {
-    // This is not a good default for real implementations. It is simply a catch-all
-    // default to not break existing implementations.
-    return System.nanoTime();
-  }
+  RequestMetadata metadata();
 }
