@@ -44,7 +44,10 @@ public interface OngoingRequest {
 
   /**
    * Returns an identifier for the server where this request originated.
+   *
+   * @deprecated  - prefer using the {@link #metadata()} method to get this information
    */
+  @Deprecated
   default ServerInfo serverInfo() {
     return UNKNOWN_SERVER_INFO;
   }
@@ -77,7 +80,9 @@ public interface OngoingRequest {
    * </pre>
    *
    * @see System#nanoTime()
+   * @deprecated - prefer using the {@link #metadata()} to get this information
    */
+  @Deprecated
   default long arrivalTimeNanos() {
     // This is not a good default for real implementations. It is simply a catch-all
     // default to not break existing implementations.

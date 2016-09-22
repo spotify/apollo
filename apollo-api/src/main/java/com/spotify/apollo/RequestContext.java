@@ -67,7 +67,10 @@ public interface RequestContext {
    * </pre>
    *
    * @see System#nanoTime()
+   * @deprecated - prefer using the {@link #metadata()} to get this information. This method will be
+   *               removed in the next major release.
    */
+  @Deprecated
   default long arrivalTimeNanos() {
     // This is not a good default for real implementations. It is simply a catch-all
     // default to not break existing implementations.
@@ -81,7 +84,7 @@ public interface RequestContext {
     return new RequestMetadata() {
       @Override
       public Instant arrivalTime() {
-        return Instant.now();
+        return Instant.EPOCH;
       }
 
       @Override
