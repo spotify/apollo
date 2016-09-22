@@ -42,6 +42,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -273,7 +274,7 @@ public class ApolloEnvironmentModuleTest {
 
     @Override
     public RequestMetadata metadata() {
-      return RequestMetadataImpl.create(getClass(), 0L, "fake-request", Optional.empty(), Optional.empty());
+      return RequestMetadataImpl.create(getClass(), Instant.EPOCH, "fake-request", Optional.empty(), Optional.empty());
     }
 
     public Response<ByteString> getReply() {

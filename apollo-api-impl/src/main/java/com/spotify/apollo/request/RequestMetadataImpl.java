@@ -23,6 +23,7 @@ import com.google.auto.value.AutoValue;
 
 import com.spotify.apollo.RequestMetadata;
 
+import java.time.Instant;
 import java.util.Optional;
 
 /**
@@ -33,11 +34,11 @@ import java.util.Optional;
 public abstract class RequestMetadataImpl implements RequestMetadata {
 
   public static RequestMetadata create(Class<?> sourceClass,
-                                       long arrivalTimeNanos,
+                                       Instant arrivalTime,
                                        String protocol,
                                        Optional<HostAndPort> localAddress,
                                        Optional<HostAndPort> remoteAddress) {
-    return new AutoValue_RequestMetadataImpl(sourceClass, arrivalTimeNanos, protocol, localAddress, remoteAddress);
+    return new AutoValue_RequestMetadataImpl(sourceClass, arrivalTime, protocol, localAddress, remoteAddress);
   }
 
   public static HostAndPort hostAndPort(String host, int port) {

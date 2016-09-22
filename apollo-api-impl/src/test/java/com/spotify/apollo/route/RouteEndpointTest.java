@@ -30,6 +30,7 @@ import com.spotify.apollo.route.Route.DocString;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
@@ -66,7 +67,7 @@ public class RouteEndpointTest {
 
     Request request = Request.forUri("http://foo");
     requestContext = RequestContexts.create(request, mock(Client.class), pathArgs,
-                                            RequestMetadataImpl.create(getClass(), 0L, "floop", Optional.empty(), Optional.empty()));
+                                            RequestMetadataImpl.create(getClass(), Instant.EPOCH, "floop", Optional.empty(), Optional.empty()));
 
     theData = ByteString.encodeUtf8("theString");
     response = Response.forPayload(theData);

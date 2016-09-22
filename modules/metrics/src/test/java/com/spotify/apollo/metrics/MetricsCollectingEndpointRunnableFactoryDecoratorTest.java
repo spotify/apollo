@@ -38,6 +38,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -78,7 +79,7 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
   public void setUp() throws Exception {
     request = Request.forUri("hm://foo");
     requestContext = RequestContexts.create(request, client, Collections.emptyMap(),
-                                            RequestMetadataImpl.create(getClass(), 0L, "none", Optional.empty(), Optional.empty()));
+                                            RequestMetadataImpl.create(getClass(), Instant.EPOCH, "none", Optional.empty(), Optional.empty()));
 
     when(metrics.metricsForEndpointCall(any())).thenReturn(requestStats);
 

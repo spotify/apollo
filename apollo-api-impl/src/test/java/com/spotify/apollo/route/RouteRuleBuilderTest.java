@@ -33,6 +33,7 @@ import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -115,7 +116,7 @@ public class RouteRuleBuilderTest {
     return endpoint.invoke(
         RequestContexts.create(
             requestContext.request(), requestContext.requestScopedClient(), parsedPathArguments,
-            RequestMetadataImpl.create(getClass(), 0L, "non", Optional.empty(), Optional.empty()))
+            RequestMetadataImpl.create(getClass(), Instant.EPOCH, "non", Optional.empty(), Optional.empty()))
     ).toCompletableFuture().get();
   }
 
@@ -123,7 +124,7 @@ public class RouteRuleBuilderTest {
     client = mock(Client.class);
     message = Request.forUri(BASE_URI + uri, method);
     requestContext = RequestContexts.create(message, client, Collections.emptyMap(),
-                                            RequestMetadataImpl.create(getClass(), 0L, "nonee", Optional.empty(), Optional.empty()));
+                                            RequestMetadataImpl.create(getClass(), Instant.EPOCH, "nonee", Optional.empty(), Optional.empty()));
 
     return message;
   }

@@ -39,6 +39,7 @@ import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 import uk.org.lidalia.slf4jtest.TestLoggerFactoryResetRule;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -64,7 +65,6 @@ import static org.mockito.Mockito.when;
 public class AsyncContextOngoingRequestTest {
 
   private static final Request REQUEST = Request.forUri("http://localhost:888");
-  private static final int ARRIVAL_TIME_NANOS = 9123;
   private static final Response<ByteString>
       DROPPED = Response.forStatus(INTERNAL_SERVER_ERROR.withReasonPhrase("dropped"));
 
@@ -97,7 +97,7 @@ public class AsyncContextOngoingRequestTest {
         REQUEST,
         asyncContext,
         logger,
-        RequestMetadataImpl.create(getClass(), ARRIVAL_TIME_NANOS, "proto", Optional.empty(), Optional.empty()));
+        RequestMetadataImpl.create(getClass(), Instant.EPOCH, "proto", Optional.empty(), Optional.empty()));
   }
 
   // note: this test may fail when running in IntelliJ, due to
@@ -184,7 +184,7 @@ public class AsyncContextOngoingRequestTest {
                AsyncContext asyncContext,
                RequestOutcomeConsumer logger) {
       super(request, asyncContext, logger,
-            RequestMetadataImpl.create(Subclassed.class, ARRIVAL_TIME_NANOS, "subproto", Optional.empty(), Optional.empty()));
+            RequestMetadataImpl.create(Subclassed.class, Instant.EPOCH, "subproto", Optional.empty(), Optional.empty()));
     }
 
     @Override

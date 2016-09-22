@@ -37,6 +37,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
@@ -55,8 +56,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RequestHandlerImplTest {
-
-  private static final long ARRIVAL_TIME_NANOS = 4711L;
 
   @Mock RequestRunnableFactory requestFactory;
   @Mock EndpointRunnableFactory endpointFactory;
@@ -80,7 +79,7 @@ public class RequestHandlerImplTest {
   public void setUp() throws Exception {
     IncomingRequestAwareClient client = new NoopClient();
 
-    requestMetadata = RequestMetadataImpl.create(getClass(), ARRIVAL_TIME_NANOS, "floop", Optional.empty(), Optional.empty());
+    requestMetadata = RequestMetadataImpl.create(getClass(), Instant.ofEpochSecond(4711L), "floop", Optional.empty(), Optional.empty());
 
     when(ongoingRequest.metadata()).thenReturn(requestMetadata);
     when(ongoingRequest.request()).thenReturn(Request.forUri("http://foo"));

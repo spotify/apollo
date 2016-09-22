@@ -33,6 +33,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -95,7 +96,7 @@ class ApolloRequestHandler extends AbstractHandler {
   private RequestMetadata extractMetadata(HttpServletRequest req) {
     return RequestMetadataImpl.create(
         getClass(),
-        System.nanoTime(),
+        Instant.now(),
         req.getProtocol(),
         Optional.of(serverInfo),
         Optional.of(RequestMetadataImpl.hostAndPort(req.getRemoteHost(), req.getRemotePort())));
