@@ -26,7 +26,6 @@ import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.RequestMetadataImpl;
-import com.spotify.apollo.request.ServerInfo;
 
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
@@ -56,11 +55,11 @@ import static java.util.Optional.of;
 class ApolloRequestHandler extends AbstractHandler {
 
   private final RequestHandler requestHandler;
-  private final ServerInfo serverInfo;
+  private final RequestMetadata.HostAndPort serverInfo;
   private final Duration requestTimeout;
   private final RequestOutcomeConsumer logger;
 
-  ApolloRequestHandler(ServerInfo serverInfo, RequestHandler requestHandler,
+  ApolloRequestHandler(RequestMetadata.HostAndPort serverInfo, RequestHandler requestHandler,
                        Duration requestTimeout, RequestOutcomeConsumer logger) {
     this.requestHandler = requireNonNull(requestHandler);
     this.serverInfo = requireNonNull(serverInfo);
@@ -80,8 +79,7 @@ class ApolloRequestHandler extends AbstractHandler {
     RequestMetadata metadata = extractMetadata(req);
 
     AsyncContextOngoingRequest ongoingRequest =
-        new AsyncContextOngoingRequest(serverInfo,
-                                       asApolloRequest(req),
+        new AsyncContextOngoingRequest(asApolloRequest(req),
                                        asyncContext,
                                        logger,
                                        metadata);
@@ -99,6 +97,7 @@ class ApolloRequestHandler extends AbstractHandler {
         getClass(),
         System.nanoTime(),
         req.getProtocol(),
+        Optional.of(serverInfo),
         Optional.of(RequestMetadataImpl.hostAndPort(req.getRemoteHost(), req.getRemotePort())));
   }
 

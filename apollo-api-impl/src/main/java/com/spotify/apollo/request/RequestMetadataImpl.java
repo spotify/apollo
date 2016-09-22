@@ -26,16 +26,18 @@ import com.spotify.apollo.RequestMetadata;
 import java.util.Optional;
 
 /**
- * TODO: document!
+ * Immutable value object for request metadata.
  */
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @AutoValue
 public abstract class RequestMetadataImpl implements RequestMetadata {
 
   public static RequestMetadata create(Class<?> sourceClass,
                                        long arrivalTimeNanos,
                                        String protocol,
+                                       Optional<HostAndPort> localAddress,
                                        Optional<HostAndPort> remoteAddress) {
-    return new AutoValue_RequestMetadataImpl(sourceClass, arrivalTimeNanos, protocol, remoteAddress);
+    return new AutoValue_RequestMetadataImpl(sourceClass, arrivalTimeNanos, protocol, localAddress, remoteAddress);
   }
 
   public static HostAndPort hostAndPort(String host, int port) {

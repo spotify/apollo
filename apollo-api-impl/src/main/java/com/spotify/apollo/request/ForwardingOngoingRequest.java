@@ -59,11 +59,6 @@ public abstract class ForwardingOngoingRequest implements OngoingRequest {
   }
 
   @Override
-  public ServerInfo serverInfo() {
-    return delegate.serverInfo();
-  }
-
-  @Override
   public RequestMetadata metadata() {
     return delegate.metadata();
   }

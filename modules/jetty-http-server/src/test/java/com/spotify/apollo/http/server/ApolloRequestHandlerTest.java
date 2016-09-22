@@ -26,8 +26,6 @@ import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.RequestMetadataImpl;
-import com.spotify.apollo.request.ServerInfo;
-import com.spotify.apollo.request.ServerInfos;
 
 import org.eclipse.jetty.server.HttpChannel;
 import org.eclipse.jetty.server.HttpInput;
@@ -38,7 +36,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.LinkedList;
@@ -93,7 +90,7 @@ public class ApolloRequestHandlerTest {
 
     delegate = new FakeRequestHandler();
     response = new MockHttpServletResponse();
-    ServerInfo serverInfo = ServerInfos.create("id", InetSocketAddress.createUnresolved("localhost", 80));
+    RequestMetadata.HostAndPort serverInfo = RequestMetadataImpl.hostAndPort("localhost", 80);
 
     requestTimeout = Duration.ofMillis(8275523);
     requestHandler = new ApolloRequestHandler(serverInfo, delegate, requestTimeout, logger);

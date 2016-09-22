@@ -115,7 +115,7 @@ public class RouteRuleBuilderTest {
     return endpoint.invoke(
         RequestContexts.create(
             requestContext.request(), requestContext.requestScopedClient(), parsedPathArguments,
-            RequestMetadataImpl.create(getClass(), 0L, "non", Optional.empty()))
+            RequestMetadataImpl.create(getClass(), 0L, "non", Optional.empty(), Optional.empty()))
     ).toCompletableFuture().get();
   }
 
@@ -123,7 +123,7 @@ public class RouteRuleBuilderTest {
     client = mock(Client.class);
     message = Request.forUri(BASE_URI + uri, method);
     requestContext = RequestContexts.create(message, client, Collections.emptyMap(),
-                                            RequestMetadataImpl.create(getClass(), 0L, "nonee", Optional.empty()));
+                                            RequestMetadataImpl.create(getClass(), 0L, "nonee", Optional.empty(), Optional.empty()));
 
     return message;
   }

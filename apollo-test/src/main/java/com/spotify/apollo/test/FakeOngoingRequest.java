@@ -70,7 +70,7 @@ public class FakeOngoingRequest implements OngoingRequest {
 
   @Override
   public RequestMetadata metadata() {
-    return RequestMetadataImpl.create(getClass(), 0L, "fake-request", Optional.empty());
+    return RequestMetadataImpl.create(getClass(), 0L, "fake-request", Optional.empty(), Optional.empty());
   }
 
   /**

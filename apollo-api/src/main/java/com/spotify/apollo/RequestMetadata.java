@@ -57,12 +57,20 @@ public interface RequestMetadata {
   String protocol();
 
   /**
+   * Indicates the local address of the connection which the request was received on.
+   */
+  Optional<HostAndPort> localAddress();
+
+  /**
    * Indicates the remote address of the connection which the request was received on. This may be
    * the address of a proxy address or a direct connection to the caller, depending on the network
    * setup.
    */
   Optional<HostAndPort> remoteAddress();
 
+  /**
+   * For defining addresses
+   */
   interface HostAndPort {
     String host();
     int port();

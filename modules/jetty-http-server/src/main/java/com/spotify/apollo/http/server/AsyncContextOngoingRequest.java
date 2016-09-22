@@ -25,7 +25,6 @@ import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.StatusType;
 import com.spotify.apollo.request.OngoingRequest;
-import com.spotify.apollo.request.ServerInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,17 +47,15 @@ class AsyncContextOngoingRequest implements OngoingRequest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AsyncContextOngoingRequest.class);
 
-  private final ServerInfo serverInfo;
   private final Request request;
   private final AsyncContext asyncContext;
   private final RequestOutcomeConsumer logger;
   private final AtomicBoolean replied = new AtomicBoolean(false);
   private final RequestMetadata metadata;
 
-  AsyncContextOngoingRequest(ServerInfo serverInfo, Request request, AsyncContext asyncContext,
+  AsyncContextOngoingRequest(Request request, AsyncContext asyncContext,
                              RequestOutcomeConsumer logger,
                              RequestMetadata metadata) {
-    this.serverInfo = serverInfo;
     this.request = requireNonNull(request);
     this.asyncContext = requireNonNull(asyncContext);
     this.logger = requireNonNull(logger);
@@ -68,11 +65,6 @@ class AsyncContextOngoingRequest implements OngoingRequest {
   @Override
   public Request request() {
     return request;
-  }
-
-  @Override
-  public ServerInfo serverInfo() {
-    return serverInfo;
   }
 
   @Override

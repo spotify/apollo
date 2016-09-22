@@ -80,7 +80,7 @@ public class RequestHandlerImplTest {
   public void setUp() throws Exception {
     IncomingRequestAwareClient client = new NoopClient();
 
-    requestMetadata = RequestMetadataImpl.create(getClass(), ARRIVAL_TIME_NANOS, "floop", Optional.empty());
+    requestMetadata = RequestMetadataImpl.create(getClass(), ARRIVAL_TIME_NANOS, "floop", Optional.empty(), Optional.empty());
 
     when(ongoingRequest.metadata()).thenReturn(requestMetadata);
     when(ongoingRequest.request()).thenReturn(Request.forUri("http://foo"));
