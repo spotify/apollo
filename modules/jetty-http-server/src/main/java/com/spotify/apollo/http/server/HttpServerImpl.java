@@ -21,9 +21,9 @@ package com.spotify.apollo.http.server;
 
 import com.google.common.io.Closer;
 
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.request.RequestHandler;
-import com.spotify.apollo.request.ServerInfo;
-import com.spotify.apollo.request.ServerInfos;
+import com.spotify.apollo.request.RequestMetadataImpl;
 
 import org.eclipse.jetty.server.Server;
 import org.slf4j.Logger;
@@ -38,7 +38,6 @@ import java.time.Duration;
 class HttpServerImpl implements HttpServer {
 
   private static final Logger LOG = LoggerFactory.getLogger(HttpServer.class);
-  private static final String SERVER_ID = "http";
 
   private final Closer closer;
   private final HttpServerConfig config;
@@ -60,8 +59,8 @@ class HttpServerImpl implements HttpServer {
     LOG.info("Starting Jetty HTTP server on {}:{}", config.address(), config.port());
     final InetSocketAddress serverSocketAddress =
         new InetSocketAddress(config.address(), config.port());
-    final ServerInfo serverInfo =
-        ServerInfos.create(SERVER_ID, serverSocketAddress);
+    final RequestMetadata.HostAndPort serverInfo =
+        RequestMetadataImpl.hostAndPort(config.address(), config.port());
 
     server = new Server(serverSocketAddress);
     server.setHandler(new ApolloRequestHandler(serverInfo, requestHandler,
