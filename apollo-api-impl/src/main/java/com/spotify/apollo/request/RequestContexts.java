@@ -26,10 +26,37 @@ import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.RequestMetadata;
 
+import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 
 @AutoValue
 public abstract class RequestContexts implements RequestContext {
+
+  /**
+   * @deprecated - prefer {@link #create(Request, Client, Map, long, RequestMetadata)} to specify
+   * correct metadata.
+   */
+  @Deprecated
+  public static RequestContext create(
+      Request request, Client client, Map<String, String> pathArgs) {
+    return create(request, client, pathArgs, System.nanoTime());
+  }
+
+  /**
+   * @deprecated - prefer {@link #create(Request, Client, Map, long, RequestMetadata)} to specify
+   * correct metadata.
+   */
+  @Deprecated
+  public static RequestContext create(Request request, Client client, Map<String, String> pathArgs, long arrivalTimeNanos) {
+    return create(
+        request,
+        client,
+        pathArgs,
+        arrivalTimeNanos,
+        RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty())
+    );
+  }
 
   public static RequestContext create(
       Request request,
