@@ -1,8 +1,8 @@
 /*
  * -\-\-
- * Spotify Apollo API Implementations
+ * Spotify Apollo API Interfaces
  * --
- * Copyright (C) 2013 - 2015 Spotify AB
+ * Copyright (C) 2013 - 2016 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,18 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.meta;
+package com.spotify.apollo.route;
 
-import org.junit.Test;
+import com.google.auto.value.AutoValue;
 
-import static org.junit.Assert.assertTrue;
-/*
- * Copyright (c) 2015 Spotify AB
- */
+import com.spotify.apollo.RequestMetadata;
 
-public class MetaDescriptorTest {
+import java.time.Instant;
+import java.util.Optional;
 
-  @Test
-  public void testLoadApolloVersion() throws Exception {
-    ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-    String version = MetaDescriptor.loadApolloVersion(classLoader);
-    assertTrue(version.startsWith("1.3"));
+@AutoValue
+abstract class TestRequestMetadata implements RequestMetadata {
+  static RequestMetadata empty() {
+    return new AutoValue_TestRequestMetadata(Instant.EPOCH, Optional.empty(), Optional.empty());
   }
 }

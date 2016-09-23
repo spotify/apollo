@@ -20,16 +20,19 @@
 package com.spotify.apollo.http.server;
 
 import com.spotify.apollo.Request;
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.StatusType;
 import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.ServerInfo;
+import com.spotify.apollo.request.ServerInfos;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -47,30 +50,24 @@ class AsyncContextOngoingRequest implements OngoingRequest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AsyncContextOngoingRequest.class);
 
-  private final ServerInfo serverInfo;
-  private final long arrivalTimeNanos;
   private final Request request;
   private final AsyncContext asyncContext;
   private final RequestOutcomeConsumer logger;
   private final AtomicBoolean replied = new AtomicBoolean(false);
+  private final RequestMetadata metadata;
 
-  AsyncContextOngoingRequest(ServerInfo serverInfo, Request request, AsyncContext asyncContext,
-                             long arrivalTimeNanos, RequestOutcomeConsumer logger) {
-    this.serverInfo = serverInfo;
+  AsyncContextOngoingRequest(Request request, AsyncContext asyncContext,
+                             RequestOutcomeConsumer logger,
+                             RequestMetadata metadata) {
     this.request = requireNonNull(request);
     this.asyncContext = requireNonNull(asyncContext);
-    this.arrivalTimeNanos = arrivalTimeNanos;
     this.logger = requireNonNull(logger);
+    this.metadata = requireNonNull(metadata);
   }
 
   @Override
   public Request request() {
     return request;
-  }
-
-  @Override
-  public ServerInfo serverInfo() {
-    return serverInfo;
   }
 
   @Override
@@ -116,7 +113,18 @@ class AsyncContextOngoingRequest implements OngoingRequest {
   }
 
   @Override
-  public long arrivalTimeNanos() {
-    return arrivalTimeNanos;
+  public ServerInfo serverInfo() {
+    return ServerInfos.create("http", toSocketAddress(metadata.localAddress()));
+  }
+
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+  private InetSocketAddress toSocketAddress(Optional<RequestMetadata.HostAndPort> hostAndPort) {
+    return hostAndPort.map(hp -> InetSocketAddress.createUnresolved(hp.host(), hp.port()))
+        .orElse(PORT_ZERO);
+  }
+
+  @Override
+  public RequestMetadata metadata() {
+    return metadata;
   }
 }

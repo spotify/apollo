@@ -24,22 +24,54 @@ import com.google.auto.value.AutoValue;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
+import com.spotify.apollo.RequestMetadata;
 
+import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 
 @AutoValue
 public abstract class RequestContexts implements RequestContext {
 
+  /**
+   * @deprecated - prefer {@link #create(Request, Client, Map, long, RequestMetadata)} to specify
+   * correct metadata.
+   */
+  @Deprecated
   public static RequestContext create(
       Request request, Client client, Map<String, String> pathArgs) {
     return create(request, client, pathArgs, System.nanoTime());
   }
 
-  public static RequestContext create(
-      Request request, Client client, Map<String, String> pathArgs, long arrivalTimeNanos) {
-    return new AutoValue_RequestContexts(request, client, pathArgs, arrivalTimeNanos);
+  /**
+   * @deprecated - prefer {@link #create(Request, Client, Map, long, RequestMetadata)} to specify
+   * correct metadata.
+   */
+  @Deprecated
+  public static RequestContext create(Request request, Client client, Map<String, String> pathArgs, long arrivalTimeNanos) {
+    return create(
+        request,
+        client,
+        pathArgs,
+        arrivalTimeNanos,
+        RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty())
+    );
   }
+
+  public static RequestContext create(
+      Request request,
+      Client client,
+      Map<String, String> pathArgs,
+      long arrivalTimeNanos,
+      RequestMetadata metadata) {
+    return new AutoValue_RequestContexts(request, client, pathArgs, arrivalTimeNanos, metadata);
+  }
+
+  // override default methods from interface to ensure AutoValue generates fields
 
   @Override
   public abstract long arrivalTimeNanos();
+
+  @Override
+  public abstract RequestMetadata metadata();
 }

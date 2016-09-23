@@ -23,7 +23,7 @@ import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.request.OngoingRequest;
-import com.spotify.apollo.request.ServerInfo;
+import com.spotify.apollo.request.RequestMetadataImpl;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -39,7 +39,7 @@ import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 import uk.org.lidalia.slf4jtest.TestLoggerFactoryResetRule;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -64,19 +64,7 @@ import static org.mockito.Mockito.when;
 
 public class AsyncContextOngoingRequestTest {
 
-  private static final ServerInfo SERVER_INFO = new ServerInfo() {
-    @Override
-    public String id() {
-      return "14";
-    }
-
-    @Override
-    public InetSocketAddress socketAddress() {
-      return InetSocketAddress.createUnresolved("localhost", 888);
-    }
-  };
   private static final Request REQUEST = Request.forUri("http://localhost:888");
-  private static final int ARRIVAL_TIME_NANOS = 9123;
   private static final Response<ByteString>
       DROPPED = Response.forStatus(INTERNAL_SERVER_ERROR.withReasonPhrase("dropped"));
 
@@ -106,11 +94,10 @@ public class AsyncContextOngoingRequestTest {
     when(asyncContext.getResponse()).thenReturn(response);
 
     ongoingRequest = new AsyncContextOngoingRequest(
-        SERVER_INFO,
         REQUEST,
         asyncContext,
-        ARRIVAL_TIME_NANOS,
-        logger);
+        logger,
+        RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty()));
   }
 
   // note: this test may fail when running in IntelliJ, due to
@@ -183,7 +170,7 @@ public class AsyncContextOngoingRequestTest {
 
   @Test
   public void shouldNotAllowOverridingDropHandling() throws Exception {
-    OngoingRequest ongoingRequest = new Subclassed(SERVER_INFO, REQUEST, asyncContext, ARRIVAL_TIME_NANOS, logger);
+    OngoingRequest ongoingRequest = new Subclassed(REQUEST, asyncContext, logger);
 
     ongoingRequest.drop();
 
@@ -193,10 +180,11 @@ public class AsyncContextOngoingRequestTest {
   private static class Subclassed extends AsyncContextOngoingRequest {
 
 
-    Subclassed(ServerInfo serverInfo, Request request,
-               AsyncContext asyncContext, long arrivalTimeNanos,
+    Subclassed(Request request,
+               AsyncContext asyncContext,
                RequestOutcomeConsumer logger) {
-      super(serverInfo, request, asyncContext, arrivalTimeNanos, logger);
+      super(request, asyncContext, logger,
+            RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty()));
     }
 
     @Override

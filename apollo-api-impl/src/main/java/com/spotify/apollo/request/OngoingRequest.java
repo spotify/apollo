@@ -20,9 +20,12 @@
 package com.spotify.apollo.request;
 
 import com.spotify.apollo.Request;
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.Response;
 
 import java.net.InetSocketAddress;
+import java.time.Instant;
+import java.util.Optional;
 
 import okio.ByteString;
 
@@ -41,7 +44,10 @@ public interface OngoingRequest {
 
   /**
    * Returns an identifier for the server where this request originated.
+   *
+   * @deprecated  - prefer using the {@link #metadata()} method to get this information
    */
+  @Deprecated
   default ServerInfo serverInfo() {
     return UNKNOWN_SERVER_INFO;
   }
@@ -74,10 +80,19 @@ public interface OngoingRequest {
    * </pre>
    *
    * @see System#nanoTime()
+   * @deprecated - prefer using the {@link #metadata()} to get this information
    */
+  @Deprecated
   default long arrivalTimeNanos() {
     // This is not a good default for real implementations. It is simply a catch-all
     // default to not break existing implementations.
     return System.nanoTime();
+  }
+
+  /**
+   * Returns the metadata available for this request.
+   */
+  default RequestMetadata metadata() {
+    return RequestMetadataImpl.create(Instant.now(), Optional.empty(), Optional.empty());
   }
 }
