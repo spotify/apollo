@@ -41,6 +41,7 @@ public class DefaultMetaGathererTest {
 
   private void setUpNoConfig() {
     Model.MetaInfo metaInfo = new MetaInfoBuilder()
+        .componentId("freight-container")
         .buildVersion(buildVersion)
         .containerVersion(containerVersion)
         .build();
@@ -53,6 +54,7 @@ public class DefaultMetaGathererTest {
     Thread.sleep(10);
     Model.MetaInfo metaInfo = gatherer.info();
 
+    assertThat(metaInfo.componentId(), is("freight-container"));
     assertThat(metaInfo.buildVersion(), is(buildVersion));
     assertThat(metaInfo.containerVersion(), is(containerVersion));
     assertThat(metaInfo.serviceUptime(), is(greaterThan(0.0)));

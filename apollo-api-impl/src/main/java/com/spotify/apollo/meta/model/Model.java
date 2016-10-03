@@ -37,6 +37,11 @@ public interface Model {
 
   @AutoMatter
   interface MetaInfo {
+
+    /**
+     * A unique-ish identifier of the running software.
+     */
+    String componentId();
     String buildVersion();
     String containerVersion();
     @Nullable String systemVersion();
