@@ -52,6 +52,7 @@ public class MetaApplicationTest {
   private static final String CONFIG_NO_EXPOSE = "integration-test-no-expose";
 
   private static final MetaInfo META_INFO = new MetaInfoBuilder()
+      .componentId("meta-application")
       .buildVersion(BUILD_VERSION)
       .containerVersion(CONTAINER_VERSION)
       .build();

@@ -46,6 +46,7 @@ class MetaInfoTrackerImpl implements MetaInfoTracker {
       String containerVersion,
       Config configNode) {
     final Model.MetaInfo metaInfo = new MetaInfoBuilder()
+        .componentId(descriptor.serviceName())
         .buildVersion(descriptor.serviceName() + ' ' + descriptor.version())
         .containerVersion(containerVersion)
         .build();
