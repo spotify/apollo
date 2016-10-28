@@ -54,9 +54,14 @@ public class RuleRouter<T> implements ApplicationRouter<T> {
     final String method = message.method();
     final String path = getPath(message);
 
-    if (method == null || path == null) {
-      LOG.warn("Invalid URI sent {} {} by service {}",
-               message.method(), message.uri(), message.service());
+    if (method == null) {
+      LOG.warn("Invalid request for {} sent without method by service {}",
+               message.uri(), message.service().orElse("<unknown>"));
+      throw new InvalidUriException();
+    }
+
+    if (path == null) {
+      // Problem already logged in detail upstream
       throw new InvalidUriException();
     }
 
@@ -128,7 +133,7 @@ public class RuleRouter<T> implements ApplicationRouter<T> {
       return uri.getRawPath();
     } catch (URISyntaxException e) {
       LOG.warn("Invalid URI sent {} {} by service {}",
-               message.method(), message.uri(), message.service(), e);
+               message.method(), message.uri(), message.service().orElse("<unknown>"), e);
       return null;
     }
   }
