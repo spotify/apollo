@@ -3,8 +3,10 @@
 ### Build
 `mvn package`
 
+*Note!* You may need to run `mvn install` in the Apollo root directory before trying to build.
+
 ### Run
-`java -jar target/calculator-service.jar`
+`java -jar target/calculator-example-service.jar`
 
 ### Call
 ```
