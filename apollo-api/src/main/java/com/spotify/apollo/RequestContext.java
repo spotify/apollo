@@ -81,21 +81,6 @@ public interface RequestContext {
    * Returns the metadata available for this request.
    */
   default RequestMetadata metadata() {
-    return new RequestMetadata() {
-      @Override
-      public Instant arrivalTime() {
-        return Instant.EPOCH;
-      }
-
-      @Override
-      public Optional<HostAndPort> localAddress() {
-        return Optional.empty();
-      }
-
-      @Override
-      public Optional<HostAndPort> remoteAddress() {
-        return Optional.empty();
-      }
-    };
+    throw new UnsupportedOperationException("If you implement a RequestContext, you must override this method");
   }
 }
