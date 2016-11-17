@@ -37,10 +37,11 @@ abstract class TestContext implements RequestContext {
   }
 
   static RequestContext empty() {
-    return new AutoValue_TestContext(Request.forUri("/"), Collections.emptyMap());
+    return new AutoValue_TestContext(Request.forUri("/"), Collections.emptyMap(), 0,
+        TestRequestMetadata.empty());
   }
 
   static RequestContext forPathArgs(Map<String, String> pathArgs) {
-    return new AutoValue_TestContext(Request.forUri("/"), pathArgs);
+    return new AutoValue_TestContext(Request.forUri("/"), pathArgs, 0, TestRequestMetadata.empty());
   }
 }
