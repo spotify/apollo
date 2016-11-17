@@ -71,31 +71,10 @@ public interface RequestContext {
    *               removed in the next major release.
    */
   @Deprecated
-  default long arrivalTimeNanos() {
-    // This is not a good default for real implementations. It is simply a catch-all
-    // default to not break existing implementations.
-    return System.nanoTime();
-  }
+  long arrivalTimeNanos();
 
   /**
    * Returns the metadata available for this request.
    */
-  default RequestMetadata metadata() {
-    return new RequestMetadata() {
-      @Override
-      public Instant arrivalTime() {
-        return Instant.EPOCH;
-      }
-
-      @Override
-      public Optional<HostAndPort> localAddress() {
-        return Optional.empty();
-      }
-
-      @Override
-      public Optional<HostAndPort> remoteAddress() {
-        return Optional.empty();
-      }
-    };
-  }
+  RequestMetadata metadata();
 }
