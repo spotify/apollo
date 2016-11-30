@@ -24,12 +24,10 @@ import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestMetadataImpl;
-
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-
 import okio.ByteString;
 
 /**
@@ -38,6 +36,7 @@ import okio.ByteString;
 public class FakeOngoingRequest implements OngoingRequest {
 
   private final Request request;
+  private final RequestMetadata requestMetadata;
   private final CompletableFuture<Response<ByteString>> reply = new CompletableFuture<>();
 
   /**
@@ -47,6 +46,8 @@ public class FakeOngoingRequest implements OngoingRequest {
    */
   public FakeOngoingRequest(Request request) {
     this.request = request;
+    this.requestMetadata =
+        RequestMetadataImpl.create(Instant.now(), Optional.empty(), Optional.empty());
   }
 
   @Override
@@ -71,7 +72,7 @@ public class FakeOngoingRequest implements OngoingRequest {
 
   @Override
   public RequestMetadata metadata() {
-    return RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty());
+    return requestMetadata;
   }
 
   /**
