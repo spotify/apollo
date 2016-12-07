@@ -77,13 +77,46 @@ Examples from [spotify-api-example](examples/spotify-api-example):
 `$ curl http://localhost:8080/_meta/0/endpoints`
 
 ```json
-{"result":{"docstring":null,"endpoints":[{"methodName":"/albums/new[GET]","uri":"/albums/new","method":["GET"],"docstring":"Get the latest albums on Spotify.\n\nUses the public Spotify API https://api.spotify.com to get 'new' albums.","queryParameters":[]},{"methodName":"/ping[GET]","uri":"/ping","method":["GET"],"docstring":"Responds with a 'pong!' if the service is up.\n\nUseful endpoint for doing health checks.","queryParameters":[]},{"methodName":"/albums/hipster[GET]","uri":"/albums/hipster","method":["GET"],"docstring":"Get the hipster albums on Spotify.\n\nUses the public Spotify API https://api.spotify.com to get albums with the keyword 'hipster'.","queryParameters":[]},{"methodName":"/artists/toptracks/<country>[GET]","uri":"/artists/toptracks/<country>","method":["GET"],"docstring":"Get top tracks for a specified country.\n\nUses the public Spotify API at https://api.spotify.com to get the current top tracks for a specific country.","queryParameters":[]}]}}
+{
+  "result": {
+    "docstring": null,
+    "endpoints":[
+      {
+        "docstring": "Get the latest albums on Spotify.\n\nUses the public Spotify API https://api.spotify.com to get 'new' albums.",
+        "method": [
+          "GET"
+        ],
+        "methodName": "/albums/new[GET]",
+        "queryParameters":[],
+        "uri": "/albums/new"
+      },
+      {
+        "docstring": "Responds with a 'pong!' if the service is up.\n\nUseful endpoint for doing health checks.",
+        "method": [
+          "GET"
+        ],
+        "methodName": "/ping[GET]",
+        "queryParameters": [],
+        "uri": "/ping"
+      },
+      ...
+    ]
+  }
+}
 ```
 
 `$ curl http://localhost:8080/_meta/0/info`
 
 ```json
-{"result":{"componentId":"spotify-api-example-service","buildVersion":"spotify-api-example-service 1.3.1","containerVersion":"apollo-http2.0.0-SNAPSHOT","systemVersion":"java 1.8.0_111","serviceUptime":778.249}}
+{
+  "result": {
+    "buildVersion": "spotify-api-example-service 1.3.1",
+    "componentId": "spotify-api-example-service",
+    "containerVersion": "apollo-http2.0.0-SNAPSHOT",
+    "serviceUptime": 778.249,
+    "systemVersion": "java 1.8.0_111"
+  }
+}
 ```
 
 ### Links
