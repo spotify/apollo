@@ -38,9 +38,6 @@ public static void init(Environment environment) {
 }
 ```
 
-> Note that, for an Apollo-based service, you can see the routes defined for a service by querying
-[`/_meta/0/endpoints`](apollo-api-impl/src/main/java/com/spotify/apollo/meta/model).
-
 The apollo-api library provides several ways to help you define your request/reply handlers.
 You can specify how responses should be serialized (such as JSON). Read more about
 this library in the [Apollo API Readme](apollo-api).
@@ -70,6 +67,56 @@ public final class App {
             .registerAutoRoute(Route.sync("GET", "/", rc -> "hello world"));
     }
  }
+```
+
+### Apollo Metadata
+[Metadata](apollo-api-impl/src/main/java/com/spotify/apollo/meta/model) about an Apollo-based service, such as endpoints, is generated at runtime. At Spotify we use this to keep track of our running services. More info can be found [here](https://apidays.nz/slides/iglesias_service_metadata.pdf).
+
+Examples from [spotify-api-example](examples/spotify-api-example):
+
+`$ curl http://localhost:8080/_meta/0/endpoints`
+
+```json
+{
+  "result": {
+    "docstring": null,
+    "endpoints":[
+      {
+        "docstring": "Get the latest albums on Spotify.\n\nUses the public Spotify API https://api.spotify.com to get 'new' albums.",
+        "method": [
+          "GET"
+        ],
+        "methodName": "/albums/new[GET]",
+        "queryParameters":[],
+        "uri": "/albums/new"
+      },
+      {
+        "docstring": "Responds with a 'pong!' if the service is up.\n\nUseful endpoint for doing health checks.",
+        "method": [
+          "GET"
+        ],
+        "methodName": "/ping[GET]",
+        "queryParameters": [],
+        "uri": "/ping"
+      },
+      ...
+    ]
+  }
+}
+```
+
+`$ curl http://localhost:8080/_meta/0/info`
+
+```json
+{
+  "result": {
+    "buildVersion": "spotify-api-example-service 1.3.1",
+    "componentId": "spotify-api-example-service",
+    "containerVersion": "apollo-http2.0.0-SNAPSHOT",
+    "serviceUptime": 778.249,
+    "systemVersion": "java 1.8.0_111"
+  }
+}
 ```
 
 ### Links

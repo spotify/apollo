@@ -44,7 +44,9 @@ public class ArtistResource {
   public Stream<Route<AsyncHandler<Response<ByteString>>>> routes() {
     // The artist resource has one parameterized route.
     return Stream.of(
-        Route.async("GET", "/artists/toptracks/<country>", this::getArtistTopTracks)
+        Route.async("GET", "/artists/toptracks/<country>", this::getArtistTopTracks).withDocString(
+				"Get top tracks for a specified country.", 
+				"Uses the public Spotify API at https://api.spotify.com to get the current top tracks for a specific country.")
           .withMiddleware(JsonSerializerMiddlewares.jsonSerializeResponse(objectWriter))
     );
   }

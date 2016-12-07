@@ -43,8 +43,12 @@ public class AlbumResource {
     // we can map them to the same middleware
     // Note that this could also have been set up as a single route to "/albums/<tag>".
     return Stream.of(
-        Route.async("GET", "/albums/new", context -> getAlbums(context, "new")),
-        Route.async("GET", "/albums/hipster", context -> getAlbums(context, "hipster"))
+        Route.async("GET", "/albums/new", context -> getAlbums(context, "new")).withDocString(
+				"Get the latest albums on Spotify.", 
+				"Uses the public Spotify API https://api.spotify.com to get 'new' albums."),
+        Route.async("GET", "/albums/hipster", context -> getAlbums(context, "hipster")).withDocString(
+				"Get hipster albums on Spotify.", 
+				"Uses the public Spotify API https://api.spotify.com to get albums with the keyword 'hipster'.")
     )
         .map(route -> route.withMiddleware(
             JsonSerializerMiddlewares.jsonSerializeResponse(objectWriter)));
