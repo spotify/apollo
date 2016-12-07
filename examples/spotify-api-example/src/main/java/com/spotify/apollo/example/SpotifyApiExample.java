@@ -30,10 +30,18 @@ final class SpotifyApiExample {
     environment.routingEngine()
         .registerRoutes(albumResource.routes())
         .registerRoutes(artistResource.routes())
-        .registerRoute(Route.sync("GET", "/ping", SpotifyApiExample::ping));
+        .registerRoute(Route.sync("GET", "/ping", SpotifyApiExample::ping).withDocString(
+        		"Responds with a 'pong!' if the service is up.",
+        		"Useful endpoint for doing health checks."));
   }
-
-  public static Response<ByteString> ping(RequestContext requestContext) {
+  
+/**
+ * Responds with a "pong!" if the service is up.
+ * 
+ * @param requestContext The default request context.
+ * @return "pong!" if the service is up.
+ */
+public static Response<ByteString> ping(RequestContext requestContext) {
     return Response.ok().withPayload(ByteString.encodeUtf8("pong!"));
   }
 }

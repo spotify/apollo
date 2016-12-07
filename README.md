@@ -38,9 +38,6 @@ public static void init(Environment environment) {
 }
 ```
 
-> Note that, for an Apollo-based service, you can see the routes defined for a service by querying
-[`/_meta/0/endpoints`](apollo-api-impl/src/main/java/com/spotify/apollo/meta/model).
-
 The apollo-api library provides several ways to help you define your request/reply handlers.
 You can specify how responses should be serialized (such as JSON). Read more about
 this library in the [Apollo API Readme](apollo-api).
@@ -70,6 +67,23 @@ public final class App {
             .registerAutoRoute(Route.sync("GET", "/", rc -> "hello world"));
     }
  }
+```
+
+### Apollo Metadata
+[Metadata](apollo-api-impl/src/main/java/com/spotify/apollo/meta/model) about an Apollo-based service, such as endpoints, is generated at runtime. At Spotify we use this to keep track of our running services. More info can be found [here](https://apidays.nz/slides/iglesias_service_metadata.pdf).
+
+Examples from [spotify-api-example](examples/spotify-api-example):
+
+`$ curl http://localhost:8080/_meta/0/endpoints`
+
+```json
+{"result":{"docstring":null,"endpoints":[{"methodName":"/albums/new[GET]","uri":"/albums/new","method":["GET"],"docstring":"Get the latest albums on Spotify.\n\nUses the public Spotify API https://api.spotify.com to get 'new' albums.","queryParameters":[]},{"methodName":"/ping[GET]","uri":"/ping","method":["GET"],"docstring":"Responds with a 'pong!' if the service is up.\n\nUseful endpoint for doing health checks.","queryParameters":[]},{"methodName":"/albums/hipster[GET]","uri":"/albums/hipster","method":["GET"],"docstring":"Get the hipster albums on Spotify.\n\nUses the public Spotify API https://api.spotify.com to get albums with the keyword 'hipster'.","queryParameters":[]},{"methodName":"/artists/toptracks/<country>[GET]","uri":"/artists/toptracks/<country>","method":["GET"],"docstring":"Get top tracks for a specified country.\n\nUses the public Spotify API at https://api.spotify.com to get the current top tracks for a specific country.","queryParameters":[]}]}}
+```
+
+`$ curl http://localhost:8080/_meta/0/info`
+
+```json
+{"result":{"componentId":"spotify-api-example-service","buildVersion":"spotify-api-example-service 1.3.1","containerVersion":"apollo-http2.0.0-SNAPSHOT","systemVersion":"java 1.8.0_111","serviceUptime":778.249}}
 ```
 
 ### Links
