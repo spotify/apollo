@@ -4,7 +4,7 @@ Apollo
 [![Circle Status](https://circleci.com/gh/spotify/apollo.svg?style=shield&circle-token=5a9eb086ae3cec87e62fc8b6cdeb783cb318e3b9)](https://circleci.com/gh/spotify/apollo)
 [![Codecov](https://img.shields.io/codecov/c/github/spotify/apollo.svg)](https://codecov.io/gh/spotify/apollo)
 [![Maven Central](https://img.shields.io/maven-central/v/com.spotify/apollo-parent.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.spotify%22%20apollo*)
-[![License](https://img.shields.io/github/license/spotify/apollo.svg)](LICENSE.txt)
+[![License](https://img.shields.io/github/license/spotify/apollo.svg)](LICENSE)
 
 Apollo is a set of Java libraries that we use at Spotify when writing microservices. Apollo includes modules such as an HTTP server and a URI routing system, making it trivial to implement restful API services. 
 
