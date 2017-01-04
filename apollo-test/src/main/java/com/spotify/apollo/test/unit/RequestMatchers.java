@@ -2,7 +2,7 @@
  * -\-\-
  * Spotify Apollo Testing Helpers
  * --
- * Copyright (C) 2013 - 2015 Spotify AB
+ * Copyright (C) 2013 - 2016 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,10 @@ public final class RequestMatchers {
     // prevent instantiation
   }
 
+  public static Matcher<Request> uri(String uri) {
+    return uri(equalTo(uri));
+  }
+
   public static Matcher<Request> uri(Matcher<String> uriMatcher) {
     return new FeatureMatcher<Request, String>(uriMatcher, "uri matches", "uri") {
       @Override
@@ -49,6 +53,19 @@ public final class RequestMatchers {
       @Override
       protected String featureValueOf(Request actual) {
         return actual.method();
+      }
+    };
+  }
+
+  public static Matcher<Request> service(String service) {
+    return service(equalTo(service));
+  }
+
+  public static Matcher<Request> service(Matcher<String> serviceMatcher) {
+    return new FeatureMatcher<Request, String>(serviceMatcher, "service matches", "service") {
+      @Override
+      protected String featureValueOf(final Request actual) {
+        return actual.service().orElse(null);
       }
     };
   }
