@@ -43,7 +43,7 @@ import static java.util.Objects.requireNonNull;
  *  - remote ident is not supported (always '-')
  *  - remote user is not supported (always '-')
  */
-final class CombinedFormatLogger {
+public final class CombinedFormatLogger {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CombinedFormatLogger.class);
   private static final DateTimeFormatter DATE_TIME_FORMATTER = new DateTimeFormatterBuilder()
@@ -80,7 +80,7 @@ final class CombinedFormatLogger {
     // prevent instantiation
   }
 
-  static RequestOutcomeConsumer logger() {
+  public static RequestOutcomeConsumer logger() {
     return LOG_WITH_COMBINED_FORMAT;
   }
 }
