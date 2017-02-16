@@ -24,6 +24,7 @@ import com.spotify.apollo.Request;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 
+import static com.spotify.apollo.test.helper.MatchersHelper.assertDoesNotMatch;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -78,4 +79,45 @@ public class RequestMatchersTest {
     assertThat(request.withService("my-service"), RequestMatchers.service(startsWith("my")));
     assertThat(request.withService("not-my-service"), not(RequestMatchers.service(endsWith("."))));
   }
+
+  @Test
+  public void noHeadersMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasNoHeaders();
+
+    assertThat(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withHeader("k", "v"), sut);
+  }
+
+  @Test
+  public void hasHeaderMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasHeader("k");
+
+    assertThat(Request.forUri("http://hi").withHeader("k", "v"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withHeader("not-k", "v"), sut);
+  }
+
+  @Test
+  public void hasHeaderEqualToMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasHeader("k", "v");
+
+    assertThat(Request.forUri("http://hi").withHeader("k", "v"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withHeader("not-k", "v"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withHeader("k", "not-v"), sut);
+  }
+
+  @Test
+  public void hasHeaderMatchingMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasHeader("k", startsWith("v"));
+
+    assertThat(Request.forUri("http://hi").withHeader("k", "v"), sut);
+    assertThat(Request.forUri("http://hi").withHeader("k", "value"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withHeader("not-k", "v"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withHeader("k", "not-v"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withHeader("k", "not-v"), sut);
+  }
+
+
 }

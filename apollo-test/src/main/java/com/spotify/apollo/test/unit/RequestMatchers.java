@@ -21,9 +21,14 @@ package com.spotify.apollo.test.unit;
 
 import com.spotify.apollo.Request;
 
+import com.spotify.apollo.test.unit.matchers.request.HeaderMatcher;
+import com.spotify.apollo.test.unit.matchers.request.NoHeadersMatcher;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
+import org.hamcrest.core.IsAnything;
 
+import static org.hamcrest.CoreMatchers.any;
+import static org.hamcrest.CoreMatchers.anything;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 /**
@@ -57,16 +62,65 @@ public final class RequestMatchers {
     };
   }
 
+  /**
+   * A matcher checking the {@link Request#service()} field
+   *
+   * @param service The service to check for
+   * @return A {@link Matcher} checking the {@link Request#service()} equals service
+   */
   public static Matcher<Request> service(String service) {
     return service(equalTo(service));
   }
 
+  /**
+   * A matcher for the service field in a request
+   *
+   * @param serviceMatcher A {@link Matcher} for the service
+   * @return A matcher for the service field
+   */
   public static Matcher<Request> service(Matcher<String> serviceMatcher) {
     return new FeatureMatcher<Request, String>(serviceMatcher, "service matches", "service") {
       @Override
-      protected String featureValueOf(final Request actual) {
+      protected String featureValueOf(Request actual) {
         return actual.service().orElse(null);
       }
     };
+  }
+
+  /**
+   * A matcher for a {@link Request} with no headers
+   * @param key The header's key to look for
+   * @param valueMatcher A {@link Matcher} for the value at the key
+   * @return The matcher
+   */
+  public static Matcher<Request> hasNoHeaders() {
+    return new NoHeadersMatcher();
+  }
+
+  /**
+   * A matcher for a {@link Request} with header matching a value
+   * @return The matcher
+   */
+  public static Matcher<Request> hasHeader(String key, Matcher<String> valueMatcher) {
+    return new HeaderMatcher(key, valueMatcher);
+  }
+
+  /**
+   * A matcher for a {@link Request} with header matching a value
+   * @param key The header's key
+   * @param value The expected value of the header
+   * @return The matcher
+   */
+  public static Matcher<Request> hasHeader(String key, String value) {
+    return new HeaderMatcher(key, equalTo(value));
+  }
+
+  /**
+   * A matcher for a {@link Request} with a header present
+   * @param key The
+   * @return
+   */
+  public static Matcher<Request> hasHeader(String key) {
+    return new HeaderMatcher(key, new IsAnything<>());
   }
 }
