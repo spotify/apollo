@@ -21,15 +21,19 @@ package com.spotify.apollo.test.unit;
 
 import com.spotify.apollo.Request;
 
+import com.spotify.apollo.test.unit.matchers.request.HasQueryParameterMatcher;
 import com.spotify.apollo.test.unit.matchers.request.HeaderMatcher;
 import com.spotify.apollo.test.unit.matchers.request.NoHeadersMatcher;
+import org.hamcrest.Description;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.hamcrest.core.IsAnything;
 
-import static org.hamcrest.CoreMatchers.any;
 import static org.hamcrest.CoreMatchers.anything;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 
 /**
  * Provides Hamcrest matcher utilities for matching requests. Intended for use with
@@ -122,5 +126,57 @@ public final class RequestMatchers {
    */
   public static Matcher<Request> hasHeader(String key) {
     return new HeaderMatcher(key, new IsAnything<>());
+  }
+
+  /**
+   * Matches a {@link Request} that has no query parameters
+   * @return A {@link Matcher} matching a request with no query parameters
+   */
+  public static Matcher<Request> hasNoQueryParameters() {
+    return new TypeSafeDiagnosingMatcher<Request>() {
+      @Override
+      protected boolean matchesSafely(Request item, Description mismatchDescription) {
+         if (!item.parameters().isEmpty()) {
+           mismatchDescription.appendText("Request had query parameters: ")
+               .appendValueList("[", ", ", "]", item.parameters().entrySet());
+           return false;
+         }
+         return true;
+      }
+
+      @Override
+      public void describeTo(final Description description) {
+        description.appendText("Request with no query parameters");
+      }
+    };
+  }
+
+  /**
+   * Matches a {@link Request} that has a query parameter with the specified key
+   * @param key The query parameter key the matcher will look for
+   * @return A {@link Matcher} matching a request with a query parameter for the specified key
+   */
+  public static Matcher<Request> hasQueryParameter(String key) {
+    return new HasQueryParameterMatcher(key, new IsAnything<>());
+  }
+
+  /**
+   * Matches a {@link Request} that has a query parameter with the specified value
+   * @param key The query parameter key
+   * @param value The single value of the query parameter
+   * @return A {@link Matcher} matching a request with a query parameter with the specified key and value
+   */
+  public static Matcher<Request> hasQueryParameter(String key, String value) {
+    return new HasQueryParameterMatcher(key, contains(value));
+  }
+
+  /**
+   * Matches a {@link Request} that has a query parameter with the specified values
+   * @param key The query parameter key
+   * @param matcher The matcher used to match match the query parameter values
+   * @return A {@link Matcher} matching a request with a query parameter with the specified key and matching values
+   */
+  public static Matcher<Request> hasQueryParameter(String key, Matcher<Iterable<? extends String>> matcher) {
+    return new HasQueryParameterMatcher(key, matcher);
   }
 }

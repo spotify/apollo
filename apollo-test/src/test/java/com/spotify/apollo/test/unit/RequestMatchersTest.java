@@ -20,8 +20,8 @@
 package com.spotify.apollo.test.unit;
 
 import com.spotify.apollo.Request;
-
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import static com.spotify.apollo.test.helper.MatchersHelper.assertDoesNotMatch;
@@ -119,5 +119,43 @@ public class RequestMatchersTest {
     assertDoesNotMatch(Request.forUri("http://hi").withHeader("k", "not-v"), sut);
   }
 
+  @Test
+  public void hasNoQueryParametersMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasNoQueryParameters();
 
+    assertThat(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?k=v"), sut);
+  }
+
+  @Test
+  public void hasQueryParameterMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasQueryParameter("paramKey");
+
+    assertThat(Request.forUri("http://hi?paramKey=value"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?wrongKey=value"), sut);
+  }
+
+  @Test
+  public void hasQueryParameterMatchingMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasQueryParameter("paramKey", "value");
+
+    assertThat(Request.forUri("http://hi?paramKey=value"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?wrongKey=value"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?paramKey=wrongValue"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?paramKey=value&paramKey=anotherValue"), sut);
+  }
+
+  @Test
+  public void hasQueryParameterMatchingListMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasQueryParameter("key", Matchers.contains("a", "b"));
+
+    assertThat(Request.forUri("http://hi?key=a&key=b"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?wrongKey=value"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?key=a"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?key=a&key=wrong"), sut);
+  }
 }
