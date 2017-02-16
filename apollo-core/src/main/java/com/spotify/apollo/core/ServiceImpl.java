@@ -102,22 +102,18 @@ class ServiceImpl implements Service {
     this.cliHelp = cliHelp;
   }
 
-  @Override
   public String getServiceName() {
     return serviceName;
   }
 
-  @Override
   public Instance start(String[] args) throws IOException {
     return start(args, System.getenv());
   }
 
-  @Override
   public Instance start(String[] args, Map<String, String> env) throws IOException {
     return start(args, ConfigFactory.load(serviceName), env);
   }
 
-  @Override
   public Instance start(final String[] args, final Config config) throws IOException {
     return start(args, config, System.getenv());
   }
