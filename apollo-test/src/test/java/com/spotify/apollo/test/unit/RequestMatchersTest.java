@@ -20,12 +20,14 @@
 package com.spotify.apollo.test.unit;
 
 import com.spotify.apollo.Request;
+import okio.ByteString;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import static com.spotify.apollo.test.helper.MatchersHelper.assertDoesNotMatch;
 import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -142,7 +144,6 @@ public class RequestMatchersTest {
 
     assertThat(Request.forUri("http://hi?paramKey=value"), sut);
     assertDoesNotMatch(Request.forUri("http://hi"), sut);
-    assertDoesNotMatch(Request.forUri("http://hi"), sut);
     assertDoesNotMatch(Request.forUri("http://hi?wrongKey=value"), sut);
     assertDoesNotMatch(Request.forUri("http://hi?paramKey=wrongValue"), sut);
     assertDoesNotMatch(Request.forUri("http://hi?paramKey=value&paramKey=anotherValue"), sut);
@@ -157,5 +158,24 @@ public class RequestMatchersTest {
     assertDoesNotMatch(Request.forUri("http://hi?wrongKey=value"), sut);
     assertDoesNotMatch(Request.forUri("http://hi?key=a"), sut);
     assertDoesNotMatch(Request.forUri("http://hi?key=a&key=wrong"), sut);
+  }
+
+
+  @Test
+  public void hasPayloadMatching() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasPayloadMatching(ByteStringMatchers.utf8(equalTo("hi")));
+
+    assertThat(Request.forUri("http://hi").withPayload(ByteString.encodeUtf8("hi")), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withPayload(ByteString.encodeUtf8("no")), sut);
+  }
+
+  @Test
+  public void hasPayloadUtf8Matching() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasPayloadUtf8Matching(equalTo("hi"));
+
+    assertThat(Request.forUri("http://hi").withPayload(ByteString.encodeUtf8("hi")), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withPayload(ByteString.encodeUtf8("no")), sut);
   }
 }

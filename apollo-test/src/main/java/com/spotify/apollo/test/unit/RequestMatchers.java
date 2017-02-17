@@ -20,19 +20,21 @@
 package com.spotify.apollo.test.unit;
 
 import com.spotify.apollo.Request;
-
+import com.spotify.apollo.test.unit.matchers.request.HasNoQueryParametersMatcher;
 import com.spotify.apollo.test.unit.matchers.request.HasQueryParameterMatcher;
 import com.spotify.apollo.test.unit.matchers.request.HeaderMatcher;
 import com.spotify.apollo.test.unit.matchers.request.NoHeadersMatcher;
+import okio.ByteString;
+import org.hamcrest.Condition;
 import org.hamcrest.Description;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.hamcrest.core.IsAnything;
 
-import static org.hamcrest.CoreMatchers.anything;
+import java.util.Optional;
+
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 
 /**
@@ -133,22 +135,7 @@ public final class RequestMatchers {
    * @return A {@link Matcher} matching a request with no query parameters
    */
   public static Matcher<Request> hasNoQueryParameters() {
-    return new TypeSafeDiagnosingMatcher<Request>() {
-      @Override
-      protected boolean matchesSafely(Request item, Description mismatchDescription) {
-         if (!item.parameters().isEmpty()) {
-           mismatchDescription.appendText("Request had query parameters: ")
-               .appendValueList("[", ", ", "]", item.parameters().entrySet());
-           return false;
-         }
-         return true;
-      }
-
-      @Override
-      public void describeTo(final Description description) {
-        description.appendText("Request with no query parameters");
-      }
-    };
+    return HasNoQueryParametersMatcher.hasNoQueryParameters();
   }
 
   /**
@@ -157,7 +144,7 @@ public final class RequestMatchers {
    * @return A {@link Matcher} matching a request with a query parameter for the specified key
    */
   public static Matcher<Request> hasQueryParameter(String key) {
-    return new HasQueryParameterMatcher(key, new IsAnything<>());
+    return HasQueryParameterMatcher.hasQueryParameter(key, new IsAnything<>());
   }
 
   /**
@@ -167,7 +154,7 @@ public final class RequestMatchers {
    * @return A {@link Matcher} matching a request with a query parameter with the specified key and value
    */
   public static Matcher<Request> hasQueryParameter(String key, String value) {
-    return new HasQueryParameterMatcher(key, contains(value));
+    return HasQueryParameterMatcher.hasQueryParameter(key, contains(value));
   }
 
   /**
@@ -177,6 +164,46 @@ public final class RequestMatchers {
    * @return A {@link Matcher} matching a request with a query parameter with the specified key and matching values
    */
   public static Matcher<Request> hasQueryParameter(String key, Matcher<Iterable<? extends String>> matcher) {
-    return new HasQueryParameterMatcher(key, matcher);
+    return HasQueryParameterMatcher.hasQueryParameter(key, matcher);
   }
+
+  /**
+   * Matches a {@link Request} which has a payload matching the specified {@link Matcher}
+   * @param matcher The matcher the payload should match
+   * @return A {@link Matcher} matching a request with payload matching matcher
+   */
+  public static Matcher<Request> hasPayloadMatching(Matcher<ByteString> matcher) {
+    return new TypeSafeDiagnosingMatcher<Request>() {
+      @Override
+      protected boolean matchesSafely(final Request item, final Description mismatchDescription) {
+        return getPayload(item, mismatchDescription).matching(matcher);
+      }
+
+      private Condition<ByteString> getPayload(final Request item, final Description mismatchDescription) {
+        final Optional<ByteString> payload = item.payload();
+
+        if (payload.isPresent()) {
+            return Condition.matched(payload.get(), mismatchDescription);
+        }
+
+        mismatchDescription.appendText("Request had no payload");
+        return Condition.notMatched();
+      }
+
+      @Override
+      public void describeTo(final Description description) {
+        description.appendText("Request has payload matching ").appendDescriptionOf(matcher);
+      }
+    };
+  }
+
+  /**
+   * Matches a {@link Request} which has a payload with a {@link String} value matching the specified {@link Matcher}
+   * @param matcher The matcher matching the expected {@link String} value
+   * @return A {@link Matcher} matching a {@link Request} with payload string matching the value
+   */
+  public static Matcher<Request> hasPayloadUtf8Matching(Matcher<String> matcher) {
+    return hasPayloadMatching(ByteStringMatchers.utf8(matcher));
+  }
+
 }

@@ -25,15 +25,19 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 import java.util.List;
-import java.util.Optional;
 
 public class HasQueryParameterMatcher extends TypeSafeDiagnosingMatcher<Request> {
   private final String key;
   private final Matcher<Iterable<? extends String>> matcher;
 
-  public HasQueryParameterMatcher(final String key, final Matcher<Iterable<? extends String>> matcher) {
+  private HasQueryParameterMatcher(final String key, final Matcher<Iterable<? extends String>> matcher) {
     this.key = key;
     this.matcher = matcher;
+  }
+
+  public static HasQueryParameterMatcher hasQueryParameter(final String key,
+                                                           final Matcher<Iterable<? extends String>> matcher) {
+    return new HasQueryParameterMatcher(key, matcher);
   }
 
   @Override
@@ -65,4 +69,5 @@ public class HasQueryParameterMatcher extends TypeSafeDiagnosingMatcher<Request>
         .appendText(" matching ")
         .appendDescriptionOf(matcher);
   }
+
 }
