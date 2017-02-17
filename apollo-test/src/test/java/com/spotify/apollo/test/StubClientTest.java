@@ -247,6 +247,19 @@ public class StubClientTest {
   }
 
   @Test
+  public void noMatchingResponseFoundThrownIfNoMapping() throws Throwable {
+    stubClient.addMapping(uri("http://ping"), Response.ok());
+
+    exception.expect(isA(StubClient.NoMatchingResponseFoundException.class));
+    try {
+      getString("http://pong").toCompletableFuture().get();
+    } catch (ExecutionException ee) {
+      throw ee.getCause();
+    }
+    fail("should throw");
+  }
+
+  @Test
   public void shouldDisallowChangingDelayForResponseSource() throws Exception {
     StubClient.StubbedResponseBuilder builder = stubClient.respond(Responses.constant(HELLO_WORLD));
 
