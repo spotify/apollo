@@ -21,6 +21,7 @@ package com.spotify.apollo.logging.extra;
 
 import com.google.inject.Inject;
 
+import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.environment.RequestRunnableFactoryDecorator;
 import com.spotify.apollo.request.RequestRunnableFactory;
 
@@ -45,8 +46,6 @@ import static java.util.Objects.requireNonNull;
  * Known divergences:
  *  - not reporting the protocol version in the request line, because this information isn't
  *    surfaced by underlying Apollo layers
- *  - never reporting the remote address, because this information isn't surfaced by underlying
- *    Apollo layers
  *  - if a request was dropped, a dash ('-') is logged instead of a numeric response code
  *  - remote ident is not supported (always '-')
  *  - remote user is not supported (always '-')
@@ -78,7 +77,10 @@ public class RequestLoggingDecorator implements RequestRunnableFactoryDecorator 
   private static final RequestOutcomeConsumer
       LOG_WITH_COMBINED_FORMAT =
       (ongoingRequest, response) ->
-          LOGGER.info("- - - {} \"{}\" {} {} \"{}\" \"{}\"",
+          LOGGER.info("{} - - {} \"{}\" {} {} \"{}\" \"{}\"",
+                      ongoingRequest.metadata().remoteAddress()
+                          .map(RequestMetadata.HostAndPort::host)
+                          .orElse("-"),
                       DATE_TIME_FORMATTER.format(ZonedDateTime.now()),
                       String.format("%s %s", ongoingRequest.request().method(),
                                     ongoingRequest.request().uri()),
