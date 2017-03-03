@@ -69,6 +69,7 @@ public enum Status implements StatusType {
   EXPECTATION_FAILED(417, "Expectation Failed"),
   IM_A_TEAPOT(418, "I'm a Teapot"),
   UNPROCESSABLE_ENTITY(422, "Unprocessable Entity"),
+  TOO_MANY_REQUESTS(429, "Too Many Requests"),
   INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
   NOT_IMPLEMENTED(501, "Not Implemented"),
   BAD_GATEWAY(502, "Bad Gateway"),
