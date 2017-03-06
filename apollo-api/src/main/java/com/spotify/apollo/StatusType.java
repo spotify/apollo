@@ -45,7 +45,7 @@ public interface StatusType {
    * @return true if code of this equals code of statusType
    */
   default boolean equalCode(StatusType statusType) {
-    return statusType != null && code() == statusType.code();
+    return code() == statusType.code();
   }
 
   /**
@@ -55,7 +55,7 @@ public interface StatusType {
    * @return true if family of this equals family of statusType
    */
   default boolean equalFamily(StatusType statusType) {
-    return statusType != null && family() == statusType.family();
+    return family() == statusType.family();
   }
 
   /**

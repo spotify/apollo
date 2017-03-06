@@ -64,7 +64,6 @@ public class StatusTest {
     assertTrue(Status.OK.equalFamily(Status.OK.withReasonPhrase("okidoki")));
     assertTrue(Status.OK.equalFamily(Status.NO_CONTENT));
     assertFalse(Status.OK.equalFamily(Status.NOT_FOUND));
-    assertFalse(Status.OK.equalFamily(null));
   }
 
   @Test
@@ -73,6 +72,5 @@ public class StatusTest {
     assertTrue(Status.OK.equalCode(Status.OK.withReasonPhrase("okidoki")));
     assertFalse(Status.OK.equalCode(Status.NO_CONTENT));
     assertFalse(Status.OK.equalCode(Status.NOT_FOUND));
-    assertFalse(Status.OK.equalCode(null));
   }
 }
