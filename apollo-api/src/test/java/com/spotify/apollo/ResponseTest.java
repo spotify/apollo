@@ -24,7 +24,10 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.Optional;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
@@ -38,7 +41,7 @@ public class ResponseTest {
         .withHeader("Content-Type", "application/json")
         .withHeader("Content-Type", "application/protobuf");
 
-    assertEquals("application/protobuf", response.headers().get("Content-Type"));
+    assertEquals(Optional.of("application/protobuf"), response.header("Content-Type"));
   }
 
   @Test
@@ -52,9 +55,39 @@ public class ResponseTest {
         .withHeader("Content-Type", "application/json")
         .withHeaders(headers);
 
-    assertEquals("application/protobuf", response.headers().get("Content-Type"));
-    assertEquals("123", response.headers().get("Content-Length"));
+    assertEquals(Optional.of("application/protobuf"), response.header("Content-Type"));
+    assertEquals(Optional.of("123"), response.header("Content-Length"));
+  }
 
+  @Test
+  public void shouldReturnHeaderCaseInsensitive() throws Exception {
+    assertThat(Response.ok().withHeader("hEaDEr", "value").header("HeadeR"),
+        is(Optional.of("value")));
+  }
+
+  @Test
+  public void shouldReturnHeaderEntriesPreservingLetterCase() throws Exception {
+    Iterable<Map.Entry<String, String>> headerEntries = Response.ok().withHeader("HEAder", "value")
+        .headerEntries();
+    assertThat(headerEntries.iterator().next().getKey(),
+        is("HEAder"));
+  }
+
+  @Test
+  public void shouldReturnHeadersMapPreservingLetterCase() throws Exception {
+    Map<String, String> headers = Response.ok().withHeader("HEAder", "value").headers();
+
+    assertThat(headers.get("HEAder"), is("value"));
+  }
+
+  @Test
+  public void allowsOverrideHeaderValuesInHeadersMap() {
+    Response<?> response = Response
+        .forStatus(Status.OK)
+        .withHeader("Content-Type", "application/json")
+        .withHeader("Content-Type", "application/protobuf");
+
+    assertEquals("application/protobuf", response.headers().get("Content-Type"));
   }
 
   @Test

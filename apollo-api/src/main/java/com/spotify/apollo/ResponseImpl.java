@@ -20,9 +20,7 @@
 package com.spotify.apollo;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableMap;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -39,6 +37,25 @@ abstract class ResponseImpl<T> implements Response<T> {
 
   static final Response<?> OK = createInternal(Status.OK, Optional.empty());
 
+  // TODO Make it @Memoized once we upgrade to auto-value 1.4+
+  @Override
+  @Deprecated
+  public Map<String, String> headers() {
+    return internalHeadersImpl().asMap();
+  }
+
+  @Override
+  public Iterable<Map.Entry<String, String>> headerEntries() {
+    return internalHeadersImpl().entries();
+  }
+
+  @Override
+  public Optional<String> header(String name) {
+    return internalHeadersImpl().get(name);
+  }
+
+  abstract Headers internalHeadersImpl();
+
   @Override
   public Response<T> withHeader(String header, String value) {
     // Allow overriding values
@@ -46,7 +63,7 @@ abstract class ResponseImpl<T> implements Response<T> {
     newHeaders.putAll(headers());
     newHeaders.put(header, value);
 
-    return createInternal(status(), ImmutableMap.copyOf(newHeaders), payload());
+    return createInternal(status(), Headers.create(newHeaders), payload());
   }
 
   @Override
@@ -56,12 +73,12 @@ abstract class ResponseImpl<T> implements Response<T> {
     newHeaders.putAll(headers());
     newHeaders.putAll(headers);
 
-    return createInternal(status(), ImmutableMap.copyOf(newHeaders), payload());
+    return createInternal(status(), Headers.create(newHeaders), payload());
   }
 
   @Override
   public <P> Response<P> withPayload(@Nullable P newPayload) {
-    return createInternal(status(), headers(), Optional.ofNullable(newPayload));
+    return createInternal(status(), internalHeadersImpl(), Optional.ofNullable(newPayload));
   }
 
   static <T> Response<T> create(StatusType statusCode) {
@@ -85,17 +102,17 @@ abstract class ResponseImpl<T> implements Response<T> {
   private static <T> Response<T> createInternal(StatusType statusCode, Optional<T> payload) {
     return createInternal(
         statusCode,
-        Collections.emptyMap(),
+        Headers.EMPTY,
         payload);
   }
 
   private static <T> Response<T> createInternal(
       StatusType statusCode,
-      Map<String, String> headers,
+      Headers headers,
       Optional<T> payload) {
     return new AutoValue_ResponseImpl<>(
         statusCode,
-        headers,
-        payload);
+        payload,
+        headers);
   }
 }

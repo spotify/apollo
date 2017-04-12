@@ -19,6 +19,8 @@
  */
 package com.spotify.apollo;
 
+import com.google.common.base.Preconditions;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -40,8 +42,31 @@ public interface Response<T> {
 
   /**
    * The response headers.
+   * Deprecated in favor of {@link Response#headerEntries()}
    */
+  @Deprecated
   Map<String, String> headers();
+
+  /**
+   * The response headers
+   */
+  Iterable<Map.Entry<String, String>> headerEntries();
+
+  /**
+   * A header of the request message, looked up in a case insensitive way,
+   * or empty if no header with that name is found.
+   */
+  default Optional<String> header(String name) {
+    Preconditions.checkArgument(name != null, "Header names cannot be null");
+
+    for (Map.Entry<String, String> headerEntry : headerEntries()) {
+      if (name.equalsIgnoreCase(headerEntry.getKey())) {
+        return Optional.ofNullable(headerEntry.getValue());
+      }
+    }
+
+    return Optional.empty();
+  }
 
   /**
    * The single payload of the response.
@@ -119,4 +144,5 @@ public interface Response<T> {
   static <T> Response<T> of(StatusType statusCode, T payload) {
     return ResponseImpl.create(statusCode, payload);
   }
+
 }

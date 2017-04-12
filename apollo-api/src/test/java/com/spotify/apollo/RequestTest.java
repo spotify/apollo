@@ -99,6 +99,20 @@ public class RequestTest {
   }
 
   @Test
+  public void shouldReturnHeaderCaseInsensitive() throws Exception {
+    assertThat(requestWithHeader("/foo", "hEaDEr", "value").header("HeadeR"),
+               is(Optional.of("value")));
+  }
+
+  @Test
+  public void shouldReturnHeadersPreservingLetterCase() throws Exception {
+    Iterable<Map.Entry<String, String>> headerEntries = requestWithHeader("/foo", "HEAder", "value")
+        .headerEntries();
+    assertThat(headerEntries.iterator().next().getKey(),
+               is("HEAder"));
+  }
+
+  @Test
   public void shouldReturnNoPayload() throws Exception {
     assertThat(request("/foo").payload(),
                is(Optional.empty()));
