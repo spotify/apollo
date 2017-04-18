@@ -48,7 +48,6 @@ import static com.spotify.apollo.Status.NOT_MODIFIED;
 import static com.spotify.apollo.Status.NO_CONTENT;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -168,8 +167,8 @@ public class MiddlewaresTest {
   public void httpShouldSetContentLengthFor200() throws Exception {
     future.complete(Response.of(Status.OK, ByteString.of((byte) 14, (byte) 19)));
 
-    String header = getResult(Middlewares.httpPayloadSemantics(delegate)).headers().get(
-        "Content-Length");
+    String header = getResult(Middlewares.httpPayloadSemantics(delegate)).header(
+        "Content-Length").get();
     assertThat(Integer.parseInt(header), equalTo(2));
   }
 
@@ -192,9 +191,9 @@ public class MiddlewaresTest {
       future.complete(Response.of(status, ByteString.of((byte) 14, (byte) 19)));
 
       Response<ByteString> result = getResult(Middlewares.httpPayloadSemantics(delegate));
-      String header = result.headers().get("Content-Length");
+      Optional<String> header = result.header("Content-Length");
 
-      assertThat("no content-length for " + status, header, is(nullValue()));
+      assertThat("no content-length for " + status, header, is(Optional.empty()));
       assertThat("no payload for " + status, result.payload(), is(Optional.<ByteString>empty()));
     }
   }
@@ -204,8 +203,8 @@ public class MiddlewaresTest {
     when(request.method()).thenReturn("HEAD");
     future.complete(Response.of(Status.OK, ByteString.of((byte) 14, (byte) 19)));
 
-    String header = getResult(Middlewares.httpPayloadSemantics(delegate)).headers().get(
-        "Content-Length");
+    String header = getResult(Middlewares.httpPayloadSemantics(delegate)).header(
+        "Content-Length").get();
     assertThat(Integer.parseInt(header), equalTo(2));
   }
 
@@ -224,8 +223,7 @@ public class MiddlewaresTest {
 
     String contentType = getResult(Middlewares.replyContentType("text/plain")
                                        .apply(serializationDelegate()))
-        .headers()
-        .get("Content-Type");
+        .header("Content-Type").get();
 
     assertThat(contentType, equalTo("text/plain"));
   }
@@ -236,8 +234,7 @@ public class MiddlewaresTest {
 
     String contentType =
         getResult(Middlewares.replyContentType("text/plain").apply(serializationDelegate()))
-            .headers()
-            .get("Content-Type");
+            .header("Content-Type").get();
 
     assertThat(contentType, equalTo("text/plain"));
   }
@@ -277,9 +274,9 @@ public class MiddlewaresTest {
 
     serializationFuture.complete(Response.forPayload(response).withHeader("X-Foo", "Fie"));
 
-    assertThat(getResult(Middlewares.serialize(serializer).apply(serializationDelegate)).headers()
-                   .get("X-Foo"),
-               equalTo("Fie"));
+    Optional<String> header = getResult(Middlewares.serialize(serializer).apply(serializationDelegate))
+        .header("X-Foo");
+    assertThat(header.get(), equalTo("Fie"));
   }
 
   @Test
@@ -306,7 +303,7 @@ public class MiddlewaresTest {
     serializationFuture.complete(response);
 
     String contentType = getResult(Middlewares.serialize(serializer).apply(serializationDelegate))
-        .headers().get("Content-Type");
+        .header("Content-Type").get();
 
     assertThat(contentType, equalTo("coool stuff"));
   }
@@ -320,10 +317,10 @@ public class MiddlewaresTest {
 
     serializationFuture.complete(response);
 
-    String contentType = getResult(Middlewares.serialize(serializer).apply(serializationDelegate))
-        .headers().get("Content-Type");
+    Optional<String> contentType = getResult(Middlewares.serialize(serializer).apply(serializationDelegate))
+        .header("Content-Type");
 
-    assertThat(contentType, is(nullValue()));
+    assertThat(contentType, is(Optional.empty()));
   }
 
   @Test

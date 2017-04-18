@@ -253,11 +253,11 @@ public class StubClientTest {
   @Test
   public void shouldSupportHeadersForResponses() throws Exception {
     stubClient.respond(Response.<ByteString>ok()
-                           .withHeader("foo", "bar"))
+        .withHeader("foo", "bar"))
         .to("http://ping");
 
     Response reply = getResponse("http://ping").toCompletableFuture().get();
-    assertThat(reply.headers().get("foo"), equalTo("bar"));
+    assertThat(reply.header("foo").get(), equalTo("bar"));
   }
 
   @Test

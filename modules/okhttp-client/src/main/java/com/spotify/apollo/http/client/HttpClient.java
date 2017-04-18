@@ -74,7 +74,7 @@ class HttpClient implements IncomingRequestAwareClient {
     });
 
     Headers.Builder headersBuilder = new Headers.Builder();
-    apolloRequest.headers().forEach((k, v) -> headersBuilder.add(k, v));
+    apolloRequest.headerEntries().forEach((e) -> headersBuilder.add(e.getKey(), e.getValue()));
 
     apolloIncomingRequest
         .flatMap(req -> req.header(AUTHORIZATION_HEADER))
