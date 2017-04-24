@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -106,10 +107,10 @@ public class RequestTest {
 
   @Test
   public void shouldReturnHeadersPreservingLetterCase() throws Exception {
-    Iterable<Map.Entry<String, String>> headerEntries = requestWithHeader("/foo", "HEAder", "value")
+    List<Map.Entry<String, String>> headerEntries = requestWithHeader("/foo", "HEAder", "value")
         .headerEntries();
-    assertThat(headerEntries.iterator().next().getKey(),
-               is("HEAder"));
+    assertThat(headerEntries.size(), is(1));
+    assertThat(headerEntries.get(0).getKey(), is("HEAder"));
   }
 
   @Test

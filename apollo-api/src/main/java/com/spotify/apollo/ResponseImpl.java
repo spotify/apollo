@@ -22,6 +22,7 @@ package com.spotify.apollo;
 import com.google.auto.value.AutoValue;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -45,7 +46,7 @@ abstract class ResponseImpl<T> implements Response<T> {
   }
 
   @Override
-  public Iterable<Map.Entry<String, String>> headerEntries() {
+  public List<Map.Entry<String, String>> headerEntries() {
     return internalHeadersImpl().entries();
   }
 

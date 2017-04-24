@@ -20,7 +20,6 @@
 package com.spotify.apollo;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -29,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @AutoValue
@@ -38,12 +38,12 @@ abstract class Headers {
 
   static Headers create(Map<String, String> headers) {
     final List<Map.Entry<String, String>> headersList = new ArrayList<>(headers.size());
-    headers.entrySet().forEach(h -> insertIfAbsent(headersList, h));
+    headers.entrySet().forEach(h -> insertOrReplace(headersList, h));
     return new AutoValue_Headers(ImmutableList.copyOf(headersList));
   }
 
   public Optional<String> get(String name) {
-    Preconditions.checkArgument(name != null, "Header names cannot be null");
+    Objects.requireNonNull(name, "Header names cannot be null");
 
     for (int i = 0; i < entries().size(); i++) {
       final Map.Entry<String, String> headerEntry = entries().get(i);
@@ -63,8 +63,8 @@ abstract class Headers {
 
   public abstract ImmutableList<Map.Entry<String, String>> entries();
 
-  private static void insertIfAbsent(List<Map.Entry<String, String>> headerList,
-                                     Map.Entry<String, String> newHeader) {
+  private static void insertOrReplace(List<Map.Entry<String, String>> headerList,
+                                      Map.Entry<String, String> newHeader) {
 
     // Replace existing header with new key (letter case can be overwritten) and value
     for (int i = 0; i < headerList.size(); i++) {

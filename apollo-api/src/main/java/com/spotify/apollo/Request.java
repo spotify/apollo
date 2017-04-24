@@ -19,11 +19,10 @@
  */
 package com.spotify.apollo;
 
-import com.google.common.base.Preconditions;
-
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import okio.ByteString;
@@ -77,7 +76,7 @@ public interface Request {
   /**
    * All the headers of the request message.
    */
-  Iterable<Map.Entry<String, String>> headerEntries();
+  List<Map.Entry<String, String>> headerEntries();
 
 
   /**
@@ -85,7 +84,7 @@ public interface Request {
    * or empty if no header with that name is found.
    */
   default Optional<String> header(String name) {
-    Preconditions.checkArgument(name != null, "Header names cannot be null");
+    Objects.requireNonNull(name, "Header names cannot be null");
 
     for (Map.Entry<String, String> headerEntry : headerEntries()) {
       if (name.equalsIgnoreCase(headerEntry.getKey())) {

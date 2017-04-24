@@ -24,6 +24,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -36,7 +37,7 @@ public class HeadersTest {
   private static final Map<String, String> TEST_BIG_MAP = createBigMap();
 
   private static Map<String, String> createDuplicateKeysMap() {
-    LinkedHashMap<String, String> testMap = new LinkedHashMap<>(3);
+    Map<String, String> testMap = new LinkedHashMap<>(3);
     testMap.put("first-key", "value1");
     testMap.put("second-key", "other-value");
     testMap.put("FirST-KEy", "value2");
@@ -44,7 +45,7 @@ public class HeadersTest {
   }
 
   private static Map<String, String> createBigMap() {
-    LinkedHashMap<String, String> testMap = new LinkedHashMap<>(100);
+    Map<String, String> testMap = new LinkedHashMap<>(100);
     for (int i = 0; i < 100; i++) {
       String number = String.valueOf(i);
       testMap.put(number, number);
@@ -71,7 +72,7 @@ public class HeadersTest {
   @Test
   public void testAsMapPreservesOrderForOverwrittenKeys() {
     Headers headers = Headers.create(TEST_MAP_DUPLICATE_KEYS);
-    ArrayList<Map.Entry<String, String>> asMapResult = new ArrayList<>(headers.asMap().entrySet());
+    List<Map.Entry<String, String>> asMapResult = new ArrayList<>(headers.asMap().entrySet());
 
     assertThat(headers.asMap().size(), is(2));
 
@@ -88,7 +89,7 @@ public class HeadersTest {
   public void testAsMapPreservesOrderFromConstructor() {
     Headers headers = Headers.create(TEST_BIG_MAP);
 
-    ArrayList<Map.Entry<String, String>> asMapResult = new ArrayList<>(headers.asMap().entrySet());
+    List<Map.Entry<String, String>> asMapResult = new ArrayList<>(headers.asMap().entrySet());
     assertThat(asMapResult.size(), is(TEST_BIG_MAP.size()));
 
     for (int i = 0; i < asMapResult.size(); i++) {
@@ -111,7 +112,7 @@ public class HeadersTest {
   public void testEntriesPreservesOrderForOverwrittenKeys() {
     Headers headers = Headers.create(TEST_MAP_DUPLICATE_KEYS);
 
-    ArrayList<Map.Entry<String, String>> entriesResult = new ArrayList<>(headers.entries());
+    List<Map.Entry<String, String>> entriesResult = new ArrayList<>(headers.entries());
 
     assertThat(headers.entries().size(), is(2));
 
@@ -128,7 +129,7 @@ public class HeadersTest {
   public void testEntriesPreservesOrderFromConstructor() {
     Headers headers = Headers.create(TEST_BIG_MAP);
 
-    ArrayList<Map.Entry<String, String>> entries = new ArrayList<>(headers.entries());
+    List<Map.Entry<String, String>> entries = new ArrayList<>(headers.entries());
     assertThat(entries.size(), is(TEST_BIG_MAP.size()));
 
     for (int i = 0; i < entries.size(); i++) {

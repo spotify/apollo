@@ -74,7 +74,7 @@ abstract class RequestValue implements Request {
   }
 
   @Override
-  public Iterable<Map.Entry<String, String>> headerEntries() {
+  public List<Map.Entry<String, String>> headerEntries() {
     return internalHeadersImpl().entries();
   }
 
