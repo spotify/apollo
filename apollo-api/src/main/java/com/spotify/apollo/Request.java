@@ -22,6 +22,7 @@ package com.spotify.apollo;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import okio.ByteString;
@@ -67,14 +68,31 @@ public interface Request {
 
   /**
    * The headers of the request message.
+   * Deprecated in favor of {@link Request#headerEntries()}
    */
+  @Deprecated
   Map<String, String> headers();
 
   /**
-   * A header of the request message, or empty if no header with that name is found.
+   * All the headers of the request message.
+   */
+  List<Map.Entry<String, String>> headerEntries();
+
+
+  /**
+   * A header of the request message, looked up in a case insensitive way,
+   * or empty if no header with that name is found.
    */
   default Optional<String> header(String name) {
-    return Optional.ofNullable(headers().get(name));
+    Objects.requireNonNull(name, "Header names cannot be null");
+
+    for (Map.Entry<String, String> headerEntry : headerEntries()) {
+      if (name.equalsIgnoreCase(headerEntry.getKey())) {
+        return Optional.ofNullable(headerEntry.getValue());
+      }
+    }
+
+    return Optional.empty();
   }
 
   /**

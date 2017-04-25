@@ -36,6 +36,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -109,7 +110,8 @@ public class RequestRunnableImplTest {
     verify(ongoingRequest).reply(responseArgumentCaptor.capture());
     Response<ByteString> reply = responseArgumentCaptor.getValue();
     assertEquals(reply.status(), Status.METHOD_NOT_ALLOWED);
-    assertEquals(reply.headers(), Collections.singletonMap("Allow", "OPTIONS, POST"));
+    assertEquals(reply.headerEntries(),
+        Collections.singletonList(new SimpleEntry<>("Allow", "OPTIONS, POST")));
   }
 
   @Test
@@ -124,7 +126,8 @@ public class RequestRunnableImplTest {
     verify(ongoingRequest).reply(responseArgumentCaptor.capture());
     Response<ByteString> response = responseArgumentCaptor.getValue();
     assertThat(response.status(), is(Status.NO_CONTENT));
-    assertThat(response.headers(), is(Collections.singletonMap("Allow", "OPTIONS, POST")));
+    assertThat(response.headerEntries(),
+        is(Collections.singletonList(new SimpleEntry<>("Allow", "OPTIONS, POST"))));
   }
 
   @Test

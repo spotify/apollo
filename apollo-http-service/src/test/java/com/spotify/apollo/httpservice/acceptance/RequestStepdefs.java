@@ -97,7 +97,7 @@ public class RequestStepdefs {
   public void the_response_has_a_header_with_value(String headerName, String expectedValue) throws Throwable {
     Response<ByteString> response = getResponseFuture();
 
-    assertThat(response.headers().get(headerName), equalTo(expectedValue));
+    assertThat(response.header(headerName).get(), equalTo(expectedValue));
   }
 
   @And("^the reason phrase is \"([^\"]*)\"$")

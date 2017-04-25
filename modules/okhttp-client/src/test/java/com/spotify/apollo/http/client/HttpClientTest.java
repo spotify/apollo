@@ -34,6 +34,7 @@ import org.mockserver.junit.MockServerRule;
 
 import java.net.SocketTimeoutException;
 import java.time.Duration;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Optional;
 
 import okio.ByteString;
@@ -41,9 +42,9 @@ import okio.ByteString;
 import static java.lang.String.format;
 import static java.util.Optional.empty;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.mockserver.model.HttpCallback.callback;
@@ -104,7 +105,7 @@ public class HttpClientTest {
         .toCompletableFuture().get();
 
     assertThat(response.status(), withCode(200));
-    assertThat(response.headers().get("x-got-the-special-header"), equalTo("yup"));
+    assertThat(response.header("x-got-the-special-header").get(), equalTo("yup"));
   }
 
   @Test
@@ -136,9 +137,9 @@ public class HttpClientTest {
         .toCompletableFuture().get();
 
     assertThat(response.status(), withCode(200));
-    assertThat(response.headers(), allOf(
-                   hasEntry("Content-Type", "application/x-spotify-location"),
-                   hasEntry("Vary", "Content-Type, Accept")
+    assertThat(response.headerEntries(), allOf(
+                   hasItem(new SimpleEntry<>("Content-Type", "application/x-spotify-location")),
+                   hasItem(new SimpleEntry<>("Vary", "Content-Type, Accept"))
                ));
     assertThat(response.payload(), is(Optional.of(ByteString.encodeUtf8("world"))));
   }
@@ -203,7 +204,7 @@ public class HttpClientTest {
         .send(request, Optional.of(originalRequest))
         .toCompletableFuture().get();
 
-    assertThat(response.headers().get("x-auth-was-fine"), equalTo("yes"));
+    assertThat(response.header("x-auth-was-fine").get(), equalTo("yes"));
   }
 
   @Test

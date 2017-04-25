@@ -46,7 +46,7 @@ public final class ResponseMatchers {
     return new TypeSafeMatcher<Response<T>>() {
       @Override
       protected boolean matchesSafely(Response<T> item) {
-        return item.headers().isEmpty();
+        return !item.headerEntries().iterator().hasNext();
       }
 
       @Override
@@ -56,7 +56,7 @@ public final class ResponseMatchers {
 
       @Override
       protected void describeMismatchSafely(Response<T> item, Description mismatchDescription) {
-        mismatchDescription.appendText("it contained headers ").appendValue(item.headers());
+        mismatchDescription.appendText("it contained headers ").appendValue(item.headerEntries());
       }
     };
   }
@@ -74,7 +74,7 @@ public final class ResponseMatchers {
 
       @Override
       protected String featureValueOf(Response<T> actual) {
-        return actual.headers().get(header);
+        return actual.header(header).orElse(null);
       }
     };
   }
@@ -88,7 +88,7 @@ public final class ResponseMatchers {
     return new TypeSafeMatcher<Response<T>>() {
       @Override
       protected boolean matchesSafely(Response<T> item) {
-        return item.headers().get(header) == null;
+        return !item.header(header).isPresent();
       }
 
       @Override
@@ -99,7 +99,7 @@ public final class ResponseMatchers {
       @Override
       protected void describeMismatchSafely(Response<T> item, Description mismatchDescription) {
         mismatchDescription.appendText("it contained the header ");
-        mismatchDescription.appendValueList("{", ":", "}", header, item.headers().get(header));
+        mismatchDescription.appendValueList("{", ":", "}", header, item.header(header));
       }
 
     };

@@ -91,7 +91,8 @@ class AsyncContextOngoingRequest implements OngoingRequest {
       final StatusType status = response.status();
       httpResponse.setStatus(status.code(), status.reasonPhrase());
 
-      response.headers().forEach(httpResponse::addHeader);
+      response.headerEntries().forEach(entry ->
+          httpResponse.addHeader(entry.getKey(), entry.getValue()));
 
       response.payload().ifPresent(payload -> {
         try {
