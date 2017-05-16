@@ -1,11 +1,9 @@
 # Middleware
 
-> This section talks a lot about route handlers, so make sure to read the [Routes]
-> (/apollo-api/docs/routes.md) doc first.
+> This section talks a lot about route handlers, so make sure to read the [Routes](/apollo-api/docs/routes.md) doc first.
 >
-> It also make heavy use of Java 8 lambdas. To get a bit more familiar with lambdas and how they
-> relate to object oriented programming in this setting, read the [Classes to Lambdas README]
-> (/apollo-api/docs/class-to-lambda.md).
+> It also makes heavy use of Java 8 lambdas. To get a bit more familiar with lambdas and how they
+> relate to object oriented programming in this setting, read the [Classes to Lambdas README](/apollo-api/docs/class-to-lambda.md).
 
 Middlewares are functions that can be used to decorate the behavior of a route handler. This
 can be used to add common functionality to several routes avoiding code duplication.
@@ -23,7 +21,7 @@ A middleware can:
 * Decide not to call the inner handler and instead respond to the request directly
  * ACL checks
  * Request validation
-* After calling the inner handler modify the response before replying
+* After calling the inner handler, modify the response before replying
  * Add caching headers
  * Selecting response representation of a payload based on request headers
 * Call the inner handler after modifying the request context in some way
