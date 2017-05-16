@@ -27,10 +27,10 @@ where you can specify extra information about the reply (see
 
 The matrix of sync/async and plain/response combinations looks like this:
 
-                  | `SyncHandler<T>` | `AsyncHandler<T>`
-:---------------: | ---------------- | -----------------
-     **`T`**      | `T` - A plain synchronous payload replied with status code `200 OK` | `CompletionStage<T>` - A plain asynchronous payload replied with status code `200 OK`
-**`Response<T>`** | `Response<T>` - A synchronous payload with custom status code and headers | `CompletionStage<Response<T>>` - An asynchronous payload with custom status code and headers
+|      Type        | `SyncHandler<T>` | `AsyncHandler<T>` |
+|:---------------: | -------------- | --------------- |
+|     **`T`**      | `T` - A plain synchronous payload replied with status code `200 OK` | `CompletionStage<T>` - A plain asynchronous payload replied with status code `200 OK` |
+| **`Response<T>`** | `Response<T>` - A synchronous payload with custom status code and headers | `CompletionStage<Response<T>>` - An asynchronous payload with custom status code and headers |
 
 ## Route providers
 
