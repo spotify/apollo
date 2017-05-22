@@ -30,6 +30,7 @@ import com.codahale.metrics.RatioGauge;
 import com.codahale.metrics.RatioGauge.Ratio;
 import com.codahale.metrics.Timer;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.StatusType;
 import com.spotify.apollo.metrics.RequestMetrics;
 import com.spotify.apollo.metrics.ServiceMetrics;
 import com.spotify.metrics.core.MetricId;
@@ -190,6 +191,7 @@ class SemanticServiceMetrics implements ServiceMetrics {
         .meter(id.tagged(
             "what", ENDPOINT_REQUEST_RATE.tag(),
             "unit", "request",
+            "status-family", StatusType.Family.familyOf(code).rangeName(),
             "status-code", String.valueOf(code)));
   }
 

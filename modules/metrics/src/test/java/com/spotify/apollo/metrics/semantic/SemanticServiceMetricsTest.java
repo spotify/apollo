@@ -27,6 +27,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
 import com.spotify.apollo.metrics.RequestMetrics;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
@@ -122,12 +123,33 @@ public class SemanticServiceMetricsTest {
                 hasEntry("service", "test-service"),
                 hasEntry("what", "endpoint-request-rate"),
                 hasEntry("endpoint", "hm://foo/<bar>"),
+                hasEntry("status-family", "3xx"),
                 hasEntry("status-code", "302"),
                 hasEntry("unit", "request")
             ))
         )
     );
   }
+
+  @Test
+  public void shouldTrackRequestRateForUnknownStatusCode() throws Exception {
+    requestMetrics.response(Response.forStatus(Status.createForCode(999)));
+
+    assertThat(
+        metricRegistry.getMetrics(),
+        hasKey(
+            hasProperty("tags", allOf(
+                hasEntry("service", "test-service"),
+                hasEntry("what", "endpoint-request-rate"),
+                hasEntry("endpoint", "hm://foo/<bar>"),
+                hasEntry("status-family", "unknown"),
+                hasEntry("status-code", "999"),
+                hasEntry("unit", "request")
+            ))
+        )
+    );
+  }
+
 
   @Test
   public void shouldTrackRequestDuration() throws Exception {
