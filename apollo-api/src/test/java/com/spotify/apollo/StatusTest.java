@@ -25,7 +25,9 @@ import org.junit.rules.ExpectedException;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class StatusTest {
 
@@ -54,5 +56,21 @@ public class StatusTest {
   public void shouldReplaceControlCharsInReasonPhrase() throws Exception {
     StatusType statusType = Status.ACCEPTED.withReasonPhrase("with control\7");
     assertThat(statusType.reasonPhrase(), is("with control "));
+  }
+
+  @Test
+  public void shouldHaveEqualFamily() throws Exception {
+    assertTrue(Status.OK.equalFamily(Status.OK));
+    assertTrue(Status.OK.equalFamily(Status.OK.withReasonPhrase("okidoki")));
+    assertTrue(Status.OK.equalFamily(Status.NO_CONTENT));
+    assertFalse(Status.OK.equalFamily(Status.NOT_FOUND));
+  }
+
+  @Test
+  public void shouldHaveEqualCode() throws Exception {
+    assertTrue(Status.OK.equalCode(Status.OK));
+    assertTrue(Status.OK.equalCode(Status.OK.withReasonPhrase("okidoki")));
+    assertFalse(Status.OK.equalCode(Status.NO_CONTENT));
+    assertFalse(Status.OK.equalCode(Status.NOT_FOUND));
   }
 }

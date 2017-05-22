@@ -39,6 +39,26 @@ public interface StatusType {
   StatusType withReasonPhrase(String reasonPhrase);
 
   /**
+   * Convenience method for comparing the code of two StatusType instances.
+   *
+   * @param statusType the instance to compare this to
+   * @return true if code of this equals code of statusType
+   */
+  default boolean equalCode(StatusType statusType) {
+    return code() == statusType.code();
+  }
+
+  /**
+   * Convenience method for comparing the family of two StatusType instances.
+   *
+   * @param statusType the instance to compare this to
+   * @return true if family of this equals family of statusType
+   */
+  default boolean equalFamily(StatusType statusType) {
+    return family() == statusType.family();
+  }
+
+  /**
    * Defines classes of status codes as described in
    * http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html, using the name Family since 'class'
    * is overloaded in Java.
