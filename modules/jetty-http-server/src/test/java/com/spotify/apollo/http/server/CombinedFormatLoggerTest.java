@@ -1,8 +1,8 @@
 /*
  * -\-\-
- * Spotify Apollo Extra
+ * Spotify Apollo Jetty HTTP Server Module
  * --
- * Copyright (C) 2013 - 2016 Spotify AB
+ * Copyright (C) 2013 - 2017 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,17 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.logging.extra;
+package com.spotify.apollo.http.server;
 
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.Response;
-import com.spotify.apollo.dispatch.Endpoint;
 import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestMetadataImpl;
-import com.spotify.apollo.request.RequestRunnableFactory;
-import com.spotify.apollo.route.RuleMatch;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -46,39 +42,27 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import okio.ByteString;
 
 import static okio.ByteString.encodeUtf8;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-public class RequestLoggingDecoratorTest {
+public class CombinedFormatLoggerTest {
 
   private static final String MAGIC_TIMESTAMP = "TIMESTAMP";
-  private static final BiConsumer<OngoingRequest, RuleMatch<Endpoint>>
-      EMPTY_CONTINUATION = (ongoingRequest1, endpointRuleMatch) -> { };
-  public static final String REMOTE_IP = "1.2.3.4";
-  private RequestLoggingDecorator decorator;
+  private static final String REMOTE_IP = "1.2.3.4";
+  private final RequestOutcomeConsumer consumer = CombinedFormatLogger.logger();
 
-  private RequestRunnableFactory delegateFactory;
-  private final Request request = Request.forUri("http://tessting");
+  private final Request request = Request.forUri("http://testing");
   private OngoingRequest ongoingRequest = new FakeRequest(request);
 
-  private TestLogger testLogger = TestLoggerFactory.getTestLogger(RequestLoggingDecorator.class);
+  private final TestLogger testLogger = TestLoggerFactory.getTestLogger(CombinedFormatLogger.class);
 
   @Rule
   public TestLoggerFactoryResetRule resetRule = new TestLoggerFactoryResetRule();
-
-  @Before
-  public void setUp() throws Exception {
-    decorator = new RequestLoggingDecorator();
-
-    delegateFactory = ongoingRequest -> matchContinuation -> ongoingRequest.reply(Response.ok());
-  }
 
   @Test
   public void shouldLogRequestAndResponseByDefault() throws Exception {
@@ -87,7 +71,7 @@ public class RequestLoggingDecoratorTest {
     assertThat(events,
         is(singleEventMatching("{} - - {} \"{}\" {} {} \"{}\" \"{}\"",
             REMOTE_IP, MAGIC_TIMESTAMP,
-            "GET http://tessting", "200", "-", "-", "-")));
+            "GET http://testing", "200", "-", "-", "-")));
   }
 
   @Test
@@ -111,41 +95,23 @@ public class RequestLoggingDecoratorTest {
   }
 
   @Test
-  public void shouldSendRequestAndResponseToConsumerIfConfigured() throws Exception {
-    AtomicReference<Request> reference = new AtomicReference<>();
-    decorator.setLogger((request, response) -> reference.set(request.request()));
-
-    decorator.apply(delegateFactory).create(ongoingRequest).run(EMPTY_CONTINUATION);
-
-    assertThat(reference.get(), is(request));
-  }
-
-  @Test
   public void shouldLogSizeInBytesIfPresent() throws Exception {
-    delegateFactory = ongoingRequest ->
-        matchContinuation -> ongoingRequest.reply(Response.forPayload(encodeUtf8("7 bytes")));
-
-    List<LoggingEvent> events = collectLoggingEventsForRequest(ongoingRequest);
+    List<LoggingEvent> events = collectLoggingEventsForRequest(ongoingRequest, Response.forPayload(encodeUtf8("7 bytes")));
 
     assertThat(events,
         is(singleEventMatching("{} - - {} \"{}\" {} {} \"{}\" \"{}\"",
             REMOTE_IP, MAGIC_TIMESTAMP,
-            "GET http://tessting", "200", "7", "-", "-")));
-
+            "GET http://testing", "200", "7", "-", "-")));
   }
 
   @Test
   public void shouldLogDashIfNoReply() throws Exception {
-    delegateFactory = ongoingRequest ->
-        matchContinuation -> ongoingRequest.drop();
-
-    List<LoggingEvent> events = collectLoggingEventsForRequest(ongoingRequest);
+    List<LoggingEvent> events = collectLoggingEventsForRequest(ongoingRequest, null);
 
     assertThat(events,
         is(singleEventMatching("{} - - {} \"{}\" {} {} \"{}\" \"{}\"",
             REMOTE_IP, MAGIC_TIMESTAMP,
-            "GET http://tessting", "-", "-", "-", "-")));
-
+            "GET http://testing", "-", "-", "-", "-")));
   }
 
   private Matcher<List<LoggingEvent>> singleEventMatching(String message, String... args) {
@@ -153,8 +119,8 @@ public class RequestLoggingDecoratorTest {
       @Override
       protected boolean matchesSafely(List<LoggingEvent> events) {
         return events.size() == 1 &&
-               events.get(0).getMessage().equals(message) &&
-               argsMatch(events.get(0).getArguments(), Arrays.asList(args));
+            events.get(0).getMessage().equals(message) &&
+            argsMatch(events.get(0).getArguments(), Arrays.asList(args));
       }
 
       private boolean argsMatch(List<Object> actual, List<String> expected) {
@@ -183,15 +149,18 @@ public class RequestLoggingDecoratorTest {
       @Override
       public void describeTo(Description description) {
         description.appendText("A single logging event with message \"" + message + "\" and args " +
-                               Arrays.toString(args));
+            Arrays.toString(args));
       }
     };
   }
 
   private List<LoggingEvent> collectLoggingEventsForRequest(OngoingRequest ongoingRequest) {
-    RequestRunnableFactory decorated = decorator.apply(delegateFactory);
+    return collectLoggingEventsForRequest(ongoingRequest, Response.ok());
+  }
 
-    decorated.create(ongoingRequest).run(EMPTY_CONTINUATION);
+  private List<LoggingEvent> collectLoggingEventsForRequest(OngoingRequest ongoingRequest,
+                                                            Response<ByteString> response) {
+    consumer.accept(ongoingRequest, Optional.ofNullable(response));
 
     return testLogger.getLoggingEvents().stream()
         .filter(event -> event.getLevel() == Level.INFO)
