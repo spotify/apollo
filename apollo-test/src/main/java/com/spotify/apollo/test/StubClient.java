@@ -21,7 +21,6 @@ package com.spotify.apollo.test;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
-
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
@@ -29,11 +28,13 @@ import com.spotify.apollo.environment.IncomingRequestAwareClient;
 import com.spotify.apollo.test.response.ResponseSource;
 import com.spotify.apollo.test.response.ResponseWithDelay;
 import com.spotify.apollo.test.response.Responses;
-
+import okio.ByteString;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.StringDescription;
 import org.hamcrest.TypeSafeMatcher;
 
+import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -45,10 +46,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nullable;
-
-import okio.ByteString;
-
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -59,7 +56,7 @@ import static java.util.stream.Collectors.toList;
  * doesn't hold when using the deprecated {@link #respond(ResponseSource)} and
  * {@link #respond(Response)} methods to map responses to incoming requests - for those methods,
  * matchers are applied in the same order as they are added.
- *
+ * <p>
  * Use the {@link #clear()} method to clear previous request/response mappings.
  */
 public class StubClient implements Client, Closeable {
@@ -138,6 +135,7 @@ public class StubClient implements Client, Closeable {
 
   /**
    * Find a response source that matches an incoming request.
+   *
    * @return a response source for this request, or null if none was found.
    */
   private ResponseSource responseSource(Request request) {
@@ -177,6 +175,32 @@ public class StubClient implements Client, Closeable {
   }
 
   /**
+   * Checks that all request mappings were sent at least once
+   * @throws AssertionError if there is a request mapping not sent
+   */
+  public void verifyAllMappingsSent() {
+    List<Matcher<Request>> unmatchedRequestMatchers = mappings
+        .stream()
+        .map(p -> p.requestMatcher)
+        .filter(requestMatcher -> sentRequests().stream().noneMatch(requestMatcher::matches))
+        .collect(toList());
+
+    if (!unmatchedRequestMatchers.isEmpty()) {
+      StringBuilder errorMessage = new StringBuilder("At least one expected request was not sent: \n");
+      for (Matcher<Request> unmatchedRequestMatcher : unmatchedRequestMatchers) {
+        errorMessage.append('\t').append(getDescriptionOf(unmatchedRequestMatcher)).append("\n");
+      }
+      throw new AssertionError(errorMessage.toString());
+    }
+  }
+
+  private static String getDescriptionOf(final Matcher<?> matcher) {
+    final StringDescription description = new StringDescription();
+    matcher.describeTo(description);
+    return description.toString();
+  }
+
+  /**
    * Clears the requests and responses tracked by this client.
    */
   public void clearRequests() {
@@ -201,7 +225,7 @@ public class StubClient implements Client, Closeable {
    * Configure a constant (i.e., all matching requests will always result in the same response)
    * response for some request. The returned builder allows configuration of payload (default
    * no payload) and delay before the response is sent (default 0).
-   *
+   * <p>
    * When using this method to define request to response mappings, the mappings will be evaluated
    * in the order which they were added.
    *
@@ -218,7 +242,7 @@ public class StubClient implements Client, Closeable {
    * Configure a response source for matching requests. Each time a request is sent that matches
    * the to-be-specified criteria, the supplied ResponseSource will be invoked and its result
    * returned as a response.
-   *
+   * <p>
    * When using this method to define request to response mappings, the mappings will be evaluated
    * in the order which they were added.
    *
@@ -234,10 +258,10 @@ public class StubClient implements Client, Closeable {
   /**
    * Configure a response for matching requests. Each time a request is sent that matches
    * the supplied matcher, the supplied Response will be used.
-   *
+   * <p>
    * Request to response mappings defined using this method will be applied in reverse order of
    * addition, meaning that you can override previous choices in test code.
-   *
+   * <p>
    * This is equivalent to calling {@link #addMapping(Matcher, ResponseSource)} with
    * {@code Responses.constant(ResponseWithDelay.forResponse(response))}.
    */
@@ -248,7 +272,7 @@ public class StubClient implements Client, Closeable {
   /**
    * Configure a response for matching requests. Each time a request is sent that matches
    * the supplied matcher, the to-be-specified Response or ResponseSource will be used.
-   *
+   * <p>
    * Request to response mappings defined using this method will be applied in reverse order of
    * addition, meaning that you can override previous choices in test code.
    */
@@ -331,6 +355,7 @@ public class StubClient implements Client, Closeable {
   @AutoValue
   public static abstract class RequestResponsePair {
     public abstract Request request();
+
     public abstract Response<ByteString> response();
 
     public static RequestResponsePair create(Request request, Response<ByteString> response) {

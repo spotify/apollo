@@ -364,4 +364,41 @@ public class StubClientTest {
     assertThat(getResponse("http://pingpong"),
                hasPayload(equalTo(ByteString.encodeUtf8("a game"))));
   }
+
+  @Test
+  public void verifyAllMappingsSentAssertsIfNoRequestSent() throws Exception {
+    stubClient.addMapping(uri("http://ping"), Response.ok());
+
+    exception.expect(AssertionError.class);
+    exception.expectMessage(containsString("uri matches \"http://ping\""));
+    stubClient.verifyAllMappingsSent();
+  }
+
+  @Test
+  public void verifyAllMappingsSentDoesNotThrowWithNoMappings() throws Exception {
+    stubClient.verifyAllMappingsSent();
+  }
+
+  @Test
+  public void verifyAllMappingsSentDoesNotThrowIfAllMappingsMatched() throws Exception {
+    stubClient.addMapping(uri("http://ping"), Response.ok());
+    stubClient.addMapping(uri("http://pong"), Response.ok());
+
+    stubClient.send(Request.forUri("http://ping"));
+    stubClient.send(Request.forUri("http://pong"));
+
+    stubClient.verifyAllMappingsSent();
+  }
+
+  @Test
+  public void verifyAllMappingsSentThrowsIfOnlySubsetSent() throws Exception {
+    stubClient.addMapping(uri("http://ping"), Response.ok());
+    stubClient.addMapping(uri("http://pong"), Response.ok());
+
+    stubClient.send(Request.forUri("http://pong"));
+
+    exception.expect(AssertionError.class);
+    exception.expectMessage(containsString("uri matches \"http://ping\""));
+    stubClient.verifyAllMappingsSent();
+  }
 }
