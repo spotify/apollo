@@ -17,7 +17,7 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.test.unit.matchers.request;
+package com.spotify.apollo.test.unit;
 
 import com.spotify.apollo.Request;
 import org.hamcrest.Description;
@@ -26,11 +26,11 @@ import org.hamcrest.TypeSafeMatcher;
 
 import java.util.Optional;
 
-public class HeaderMatcher extends TypeSafeMatcher<Request> {
+class HeaderMatcher extends TypeSafeMatcher<Request> {
   private final String key;
   private final Matcher<String> valueMatcher;
 
-  public HeaderMatcher(final String key, final Matcher<String> valueMatcher) {
+  HeaderMatcher(final String key, final Matcher<String> valueMatcher) {
     this.key = key;
     this.valueMatcher = valueMatcher;
   }

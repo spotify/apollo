@@ -17,7 +17,7 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.test.unit.matchers.request;
+package com.spotify.apollo.test.unit;
 
 import com.spotify.apollo.Request;
 import org.hamcrest.Description;
@@ -26,7 +26,7 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 import java.util.List;
 
-public class HasQueryParameterMatcher extends TypeSafeDiagnosingMatcher<Request> {
+class HasQueryParameterMatcher extends TypeSafeDiagnosingMatcher<Request> {
   private final String key;
   private final Matcher<Iterable<? extends String>> matcher;
 
@@ -35,8 +35,8 @@ public class HasQueryParameterMatcher extends TypeSafeDiagnosingMatcher<Request>
     this.matcher = matcher;
   }
 
-  public static HasQueryParameterMatcher hasQueryParameter(final String key,
-                                                           final Matcher<Iterable<? extends String>> matcher) {
+  static HasQueryParameterMatcher hasQueryParameter(final String key,
+                                                    final Matcher<Iterable<? extends String>> matcher) {
     return new HasQueryParameterMatcher(key, matcher);
   }
 

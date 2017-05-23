@@ -20,10 +20,6 @@
 package com.spotify.apollo.test.unit;
 
 import com.spotify.apollo.Request;
-import com.spotify.apollo.test.unit.matchers.request.HasNoQueryParametersMatcher;
-import com.spotify.apollo.test.unit.matchers.request.HasQueryParameterMatcher;
-import com.spotify.apollo.test.unit.matchers.request.HeaderMatcher;
-import com.spotify.apollo.test.unit.matchers.request.NoHeadersMatcher;
 import okio.ByteString;
 import org.hamcrest.Condition;
 import org.hamcrest.Description;

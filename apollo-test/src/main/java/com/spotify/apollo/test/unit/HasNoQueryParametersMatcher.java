@@ -17,26 +17,34 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.test.unit.matchers.request;
+package com.spotify.apollo.test.unit;
 
 import com.spotify.apollo.Request;
 import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
 
-public class NoHeadersMatcher extends TypeSafeMatcher<Request> {
-  @Override
-  protected boolean matchesSafely(final Request item) {
-    return item.headers().asMap().isEmpty();
+class HasNoQueryParametersMatcher extends TypeSafeDiagnosingMatcher<Request> {
+  private static final HasNoQueryParametersMatcher INSTANCE = new HasNoQueryParametersMatcher();
+
+  static HasNoQueryParametersMatcher hasNoQueryParameters() {
+    return INSTANCE;
+  }
+
+  private HasNoQueryParametersMatcher() {
   }
 
   @Override
-  protected void describeMismatchSafely(final Request item, final Description mismatchDescription) {
-    mismatchDescription.appendText("the request had headers: ")
-        .appendValueList("[", ", ", "]", item.headers().asMap().entrySet());
+  protected boolean matchesSafely(Request item, Description mismatchDescription) {
+     if (!item.parameters().isEmpty()) {
+       mismatchDescription.appendText("Request had query parameters: ")
+           .appendValueList("[", ", ", "]", item.parameters().entrySet());
+       return false;
+     }
+     return true;
   }
 
   @Override
   public void describeTo(final Description description) {
-    description.appendText("a request with no headers");
+    description.appendText("Request with no query parameters");
   }
 }
