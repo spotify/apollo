@@ -20,11 +20,14 @@
 package com.spotify.apollo.test.unit;
 
 import com.spotify.apollo.Request;
-
+import okio.ByteString;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
+import static com.spotify.apollo.test.helper.MatchersHelper.assertDoesNotMatch;
 import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -77,5 +80,102 @@ public class RequestMatchersTest {
     assertThat(request, RequestMatchers.service(nullValue(String.class)));
     assertThat(request.withService("my-service"), RequestMatchers.service(startsWith("my")));
     assertThat(request.withService("not-my-service"), not(RequestMatchers.service(endsWith("."))));
+  }
+
+  @Test
+  public void noHeadersMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasNoHeaders();
+
+    assertThat(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withHeader("k", "v"), sut);
+  }
+
+  @Test
+  public void hasHeaderMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasHeader("k");
+
+    assertThat(Request.forUri("http://hi").withHeader("k", "v"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withHeader("not-k", "v"), sut);
+  }
+
+  @Test
+  public void hasHeaderEqualToMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasHeader("k", "v");
+
+    assertThat(Request.forUri("http://hi").withHeader("k", "v"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withHeader("not-k", "v"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withHeader("k", "not-v"), sut);
+  }
+
+  @Test
+  public void hasHeaderMatchingMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasHeader("k", startsWith("v"));
+
+    assertThat(Request.forUri("http://hi").withHeader("k", "v"), sut);
+    assertThat(Request.forUri("http://hi").withHeader("k", "value"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withHeader("not-k", "v"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withHeader("k", "not-v"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withHeader("k", "not-v"), sut);
+  }
+
+  @Test
+  public void hasNoQueryParametersMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasNoQueryParameters();
+
+    assertThat(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?k=v"), sut);
+  }
+
+  @Test
+  public void hasQueryParameterMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasQueryParameter("paramKey");
+
+    assertThat(Request.forUri("http://hi?paramKey=value"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?wrongKey=value"), sut);
+  }
+
+  @Test
+  public void hasQueryParameterMatchingMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasQueryParameter("paramKey", "value");
+
+    assertThat(Request.forUri("http://hi?paramKey=value"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?wrongKey=value"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?paramKey=wrongValue"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?paramKey=value&paramKey=anotherValue"), sut);
+  }
+
+  @Test
+  public void hasQueryParameterMatchingListMatcher() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasQueryParameter("key", Matchers.contains("a", "b"));
+
+    assertThat(Request.forUri("http://hi?key=a&key=b"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?wrongKey=value"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?key=a"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi?key=a&key=wrong"), sut);
+  }
+
+
+  @Test
+  public void hasPayloadMatching() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasPayloadMatching(ByteStringMatchers.utf8(equalTo("hi")));
+
+    assertThat(Request.forUri("http://hi").withPayload(ByteString.encodeUtf8("hi")), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withPayload(ByteString.encodeUtf8("no")), sut);
+  }
+
+  @Test
+  public void hasPayloadUtf8Matching() throws Exception {
+    final Matcher<Request> sut = RequestMatchers.hasPayloadUtf8Matching(equalTo("hi"));
+
+    assertThat(Request.forUri("http://hi").withPayload(ByteString.encodeUtf8("hi")), sut);
+    assertDoesNotMatch(Request.forUri("http://hi"), sut);
+    assertDoesNotMatch(Request.forUri("http://hi").withPayload(ByteString.encodeUtf8("no")), sut);
   }
 }
