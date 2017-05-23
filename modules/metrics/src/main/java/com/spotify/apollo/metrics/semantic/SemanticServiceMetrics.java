@@ -50,10 +50,14 @@ import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO;
 import static com.spotify.apollo.metrics.semantic.What.REQUEST_FANOUT_FACTOR;
 import static com.spotify.apollo.metrics.semantic.What.REQUEST_PAYLOAD_SIZE;
 import static com.spotify.apollo.metrics.semantic.What.RESPONSE_PAYLOAD_SIZE;
+import static java.lang.Math.max;
 import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 class SemanticServiceMetrics implements ServiceMetrics {
+
+  // Minimum reply rate at which we consider the error ratio to make sense.
+  private static final double ERROR_GAUGE_MINIMUM_REPLY_RATE = 1e-3;
 
   private final SemanticMetricRegistry metricRegistry;
   private final MetricId metricId;
@@ -107,14 +111,14 @@ class SemanticServiceMetrics implements ServiceMetrics {
     Meter sentErrors = new Meter();
 
     if (enabledMetrics.test(ERROR_RATIO)) {
-      registerRatioGauge(id, "1m", () -> Ratio.of(sentErrors.getOneMinuteRate(),
-                                                  sentReplies.getOneMinuteRate()),
+      registerRatioGauge(id, "1m", errorRatioSupplier(sentErrors::getOneMinuteRate,
+                                                      sentReplies::getOneMinuteRate),
                          metricRegistry);
-      registerRatioGauge(id, "5m", () -> Ratio.of(sentErrors.getFiveMinuteRate(),
-                                                  sentReplies.getFiveMinuteRate()),
+      registerRatioGauge(id, "5m", errorRatioSupplier(sentErrors::getFiveMinuteRate,
+                                                      sentReplies::getFiveMinuteRate),
                          metricRegistry);
-      registerRatioGauge(id, "15m", () -> Ratio.of(sentErrors.getFifteenMinuteRate(),
-                                                   sentReplies.getFifteenMinuteRate()),
+      registerRatioGauge(id, "15m", errorRatioSupplier(sentErrors::getFifteenMinuteRate,
+                                                       sentReplies::getFifteenMinuteRate),
                          metricRegistry);
     }
 
@@ -201,6 +205,18 @@ class SemanticServiceMetrics implements ServiceMetrics {
             return ratioSupplier.get();
           }
         });
+  }
+
+  private Supplier<Ratio> errorRatioSupplier(Supplier<Double> errorRateSupplier,
+                                             Supplier<Double> replyRateSupplier) {
+    // If a service is drained of traffic (for instance by moving traffic to another host or site),
+    // the meter values will decay exponentially towards zero. If left for some time (hours),
+    // rounding errors will cause the values of the meters to approach each other, thus skewing
+    // the ratio. If an alert is tied to this ratio, it may trigger falsely. To fix this, we set a
+    // minimum for the denominator in the ratio, effectively making sure it will be be bigger than
+    // the error rate as both rates goes towards zero.
+    return () -> Ratio.of(errorRateSupplier.get(),
+                          max(replyRateSupplier.get(), ERROR_GAUGE_MINIMUM_REPLY_RATE));
   }
 
   private static class CachedMeters {
