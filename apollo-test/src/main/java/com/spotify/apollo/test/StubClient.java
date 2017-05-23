@@ -31,8 +31,10 @@ import com.spotify.apollo.test.response.Responses;
 import okio.ByteString;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.hamcrest.StringDescription;
 import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.core.AnyOf;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -85,7 +87,7 @@ public class StubClient implements Client, Closeable {
     final ResponseSource responseSource = responseSource(request);
     if (responseSource == null) {
       final NoMatchingResponseFoundException notFound =
-          new NoMatchingResponseFoundException("Could not find any mapping for " + request.uri());
+          new NoMatchingResponseFoundException(formatRequestNotMatchedExceptionMessage(request));
       final CompletableFuture<Response<ByteString>> notFoundFuture = new CompletableFuture<>();
       notFoundFuture.completeExceptionally(notFound);
       return notFoundFuture;
@@ -109,6 +111,19 @@ public class StubClient implements Client, Closeable {
     }
 
     return future;
+  }
+
+  private String formatRequestNotMatchedExceptionMessage(final Request request) {
+    final AnyOf<Request> anyOfMatcher = Matchers.anyOf(mappings.stream().map(p -> p.requestMatcher).collect(toList()));
+    final Description description = new StringDescription();
+    anyOfMatcher.describeTo(description);
+
+    final Description mismatchDescription = new StringDescription();
+    anyOfMatcher.describeMismatch(request, mismatchDescription);
+
+    return "Could not find any mapping for " + request.uri() + "\n"
+        + "Expected: " + description + "\n"
+        + "but: " +  mismatchDescription.toString();
   }
 
   /**
