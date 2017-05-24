@@ -82,7 +82,7 @@ class RequestRunnableImpl implements RequestRunnable {
     try {
       match = applicationRouter.match(request);
     } catch (InvalidUriException e) {
-      LOG.warn("bad uri {} {} {}", request.method(), request.uri(), BAD_REQUEST, e);
+      LOG.debug("bad uri {} {} {}", request.method(), request.uri(), BAD_REQUEST, e);
       ongoingRequest.reply(forStatus(BAD_REQUEST));
       return;
     }
@@ -90,7 +90,7 @@ class RequestRunnableImpl implements RequestRunnable {
     if (!match.isPresent()) {
       Collection<String> methods = applicationRouter.getMethodsForValidRules(request);
       if (methods.isEmpty()) {
-        LOG.warn("not found {} {} {}", request.method(), request.uri(), NOT_FOUND);
+        LOG.debug("not found {} {} {}", request.method(), request.uri(), NOT_FOUND);
         ongoingRequest.reply(forStatus(NOT_FOUND));
       } else {
         StatusType statusCode;
@@ -98,7 +98,7 @@ class RequestRunnableImpl implements RequestRunnable {
           statusCode = NO_CONTENT;
         } else {
           statusCode = METHOD_NOT_ALLOWED;
-          LOG.warn("wrong method {} {} {}", request.method(), request.uri(), statusCode);
+          LOG.debug("wrong method {} {} {}", request.method(), request.uri(), statusCode);
         }
         methods = Sets.newTreeSet(methods);
         methods.add("OPTIONS");
