@@ -32,8 +32,7 @@ import java.util.function.Consumer;
 
 import okio.ByteString;
 
-import static com.spotify.apollo.StatusType.Family.INFORMATIONAL;
-import static com.spotify.apollo.StatusType.Family.SUCCESSFUL;
+import static com.spotify.apollo.StatusType.Family.SERVER_ERROR;
 import static java.util.Objects.requireNonNull;
 
 // Optional fields are fine; they enable the use of the 'ifPresent' idiom which is more readable
@@ -93,7 +92,7 @@ class SemanticRequestMetrics implements RequestMetrics {
     timerContext.ifPresent(Timer.Context::stop);
 
     StatusType.Family family = response.status().family();
-    if (family != INFORMATIONAL && family != SUCCESSFUL) {
+    if (family == SERVER_ERROR) {
       sentErrors.mark();
     }
   }
