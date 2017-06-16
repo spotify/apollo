@@ -56,7 +56,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.iterableWithSize;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -162,6 +161,16 @@ public class ApolloRequestHandlerTest {
     httpServletRequest = mockRequest("PUT",
                                      "http://somehost/a/b?q=abc&b=adf&q=def",
                                      ImmutableMap.of("X-Calling-Service", "testservice"));
+
+    assertThat(requestHandler.asApolloRequest(httpServletRequest).service(),
+               is(Optional.of("testservice")));
+  }
+
+  @Test
+  public void shouldExtractCallingServiceFromHeaderLowerCase() throws Exception {
+    httpServletRequest = mockRequest("PUT",
+                                     "http://somehost/a/b?q=abc&b=adf&q=def",
+                                     ImmutableMap.of("x-calling-service", "testservice"));
 
     assertThat(requestHandler.asApolloRequest(httpServletRequest).service(),
                is(Optional.of("testservice")));
