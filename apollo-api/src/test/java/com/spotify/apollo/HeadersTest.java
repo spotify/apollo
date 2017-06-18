@@ -19,16 +19,13 @@
  */
 package com.spotify.apollo;
 
-import com.google.common.collect.ImmutableMap;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.Optional;
-
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+
+import com.google.common.collect.ImmutableMap;
+import java.util.Optional;
+import org.junit.Before;
+import org.junit.Test;
 
 public class HeadersTest {
 
@@ -40,13 +37,22 @@ public class HeadersTest {
   }
 
   @Test
-  public void shouldConvertHeaderNamesToLowerCase() throws Exception {
-    assertThat(headers.asMap(),
-               equalTo(ImmutableMap.of("fie", "fie", "foo-fupp", "Fum")));
+  public void shouldSupportUpperCaseLookup() throws Exception {
+    assertThat(headers.get("FIE"), is(Optional.of("fie")));
   }
 
   @Test
-  public void shouldSupportUpperCaseLookup() throws Exception {
-    assertThat(headers.get("FIE"), is(Optional.of("fie")));
+  public void shouldSupportLowerCaseLookup() throws Exception {
+    assertThat(headers.get("fie"), is(Optional.of("fie")));
+  }
+
+  @Test
+  public void shouldSupportUpperCaseLookupAsMap() throws Exception {
+    assertThat(headers.asMap().get("FIE"), is("fie"));
+  }
+
+  @Test
+  public void shouldSupportLowerCaseLookupAsMap() throws Exception {
+    assertThat(headers.asMap().get("fie"), is("fie"));
   }
 }

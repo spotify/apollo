@@ -19,10 +19,10 @@
  */
 package com.spotify.apollo;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-
 import javax.annotation.Nonnull;
 
 /**
@@ -51,7 +51,7 @@ public interface Headers {
    * @return the contents of this object as a map
    */
   @Nonnull
-  Map<String, String> asMap();
+  ImmutableMap<String, String> asMap();
 
   @Nonnull
   static Headers of(Map<String, String> headers) {
