@@ -34,6 +34,7 @@ import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.spotify.metrics.ffwd.FastForwardReporter;
 import com.spotify.metrics.jvm.CpuGaugeSet;
+import com.spotify.metrics.jvm.FileDescriptorGaugeSet;
 import com.spotify.metrics.jvm.GarbageCollectorMetricSet;
 import com.spotify.metrics.jvm.MemoryUsageGaugeSet;
 import com.spotify.metrics.jvm.ThreadStatesMetricSet;
@@ -42,7 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Named;
@@ -91,6 +91,7 @@ public class MetricsModule extends AbstractApolloModule {
     metricRegistry.register(MetricId.EMPTY, new GarbageCollectorMetricSet());
     metricRegistry.register(MetricId.EMPTY, new ThreadStatesMetricSet());
     metricRegistry.register(MetricId.EMPTY, CpuGaugeSet.create());
+    metricRegistry.register(MetricId.EMPTY, new FileDescriptorGaugeSet());
 
     return metricRegistry;
   }
