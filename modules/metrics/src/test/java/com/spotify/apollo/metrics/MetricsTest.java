@@ -24,7 +24,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Names;
 
-import com.codahale.metrics.Metric;
 import com.spotify.apollo.core.Services;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricFilter;
@@ -64,6 +63,9 @@ public class MetricsTest extends AbstractModule {
 
     assertFalse("Expected CpuGaugeSet metrics to be registered with registry",
                 metricRegistry.getGauges(filterByTag("what", "process-cpu-load-percentage")).isEmpty());
+
+    assertFalse("Expected FileDescriptorRatioGaugeSet metrics to be registered with registry",
+                metricRegistry.getGauges(filterByTag("what", "file-descriptor-ratio")).isEmpty());
   }
 
   private SemanticMetricFilter filterByTag(final String tagName, final String tagValue){
