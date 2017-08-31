@@ -19,6 +19,10 @@
  */
 package com.spotify.apollo.core;
 
+import static com.google.common.collect.ImmutableList.of;
+import static com.google.common.collect.Iterables.concat;
+import static com.spotify.apollo.core.Services.CommonConfigKeys;
+
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
@@ -34,16 +38,10 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.name.Names;
-
 import com.spotify.apollo.module.ApolloModule;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -58,16 +56,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-
 import joptsimple.BuiltinHelpFormatter;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-
-import static com.google.common.collect.ImmutableList.of;
-import static com.google.common.collect.Iterables.concat;
-import static com.spotify.apollo.core.Services.CommonConfigKeys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class ServiceImpl implements Service {
 
@@ -208,9 +203,15 @@ class ServiceImpl implements Service {
 
     for (Key<?> key : keysToLoad) {
       Object obj = injector.getInstance(key);
-      if (Closeable.class.isAssignableFrom(obj.getClass())) {
+      if (AutoCloseable.class.isAssignableFrom(obj.getClass())) {
         LOG.info("Managing lifecycle of {}", key.getTypeLiteral());
-        closer.register(Closeable.class.cast(obj));
+        closer.register(() -> {
+          try {
+            AutoCloseable.class.cast(obj).close();
+          } catch (final Exception ex) {
+            LOG.error("Could not close " + key, ex);
+          }
+        });
       }
     }
 
