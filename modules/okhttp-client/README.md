@@ -17,6 +17,7 @@ key | type | required | note
 `http.client.writeTimeout` | int | optional | milliseconds; defaults to 10000
 `http.client.maxIdleConnections` | int | optional | maximum number of idle connections to keep in the connection pool; defaults to system property `http.maxConnections` if set, else 5
 `http.client.keepAliveDuration` | int | optional | Time in milliseconds to keep the connection alive in the pool before closing it; defaults to system property `http.keepAliveDuration` if set, else 5 minutes
+`http.client.followRedirects` | boolean | optional | Explicitly enable or disable following http redirect responses, default is behavior is to follow redirects (true)
 `http.client.async.maxRequests` | int | optional | maximum number of asynchronous requests to execute concurrently; defaults to 64. Above this requests queue in memory, waiting for the running calls to complete.
 `http.client.async.maxRequestsPerHost` | int | optional | Set the maximum number of requests for each host to execute concurrently. This limits requests by the URL's host name. Defaults to 5
 
