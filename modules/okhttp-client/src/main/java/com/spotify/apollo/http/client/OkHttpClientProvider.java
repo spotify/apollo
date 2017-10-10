@@ -31,6 +31,7 @@ import com.typesafe.config.Config;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import static com.spotify.apollo.environment.ConfigUtil.optionalBoolean;
 import static com.spotify.apollo.environment.ConfigUtil.optionalInt;
 
 class OkHttpClientProvider implements Provider<OkHttpClient> {
@@ -71,6 +72,8 @@ class OkHttpClientProvider implements Provider<OkHttpClient> {
     config.maxAsyncRequestsPerHost().ifPresent(
         max -> client.getDispatcher().setMaxRequestsPerHost(max));
 
+    config.followRedirects().ifPresent(client::setFollowRedirects);
+
     closer.register(ExecutorServiceCloser.of(client.getDispatcher().getExecutorService()));
 
     return client;
@@ -110,6 +113,10 @@ class OkHttpClientProvider implements Provider<OkHttpClient> {
 
     Optional<Integer> maxAsyncRequestsPerHost() {
       return optionalInt(config, "http.client.async.maxRequestsPerHost");
+    }
+
+    Optional<Boolean> followRedirects() {
+      return optionalBoolean(config, "http.client.followRedirects");
     }
   }
 }

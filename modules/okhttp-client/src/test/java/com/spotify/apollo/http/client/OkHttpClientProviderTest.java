@@ -64,4 +64,10 @@ public class OkHttpClientProviderTest {
     final OkHttpClient client = buildClient("http.client.async.maxRequestsPerHost: 79");
     assertEquals(79, client.getDispatcher().getMaxRequestsPerHost());
   }
+
+  @Test
+  public void testFollowRedirects() {
+    final OkHttpClient client = buildClient("http.client.followRedirects: false");
+    assertEquals(false, client.getFollowRedirects());
+  }
 }
