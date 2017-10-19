@@ -19,15 +19,13 @@
  */
 package com.spotify.apollo.http.client;
 
-import com.google.common.io.Closer;
+import static org.junit.Assert.assertEquals;
 
-import com.squareup.okhttp.OkHttpClient;
+import com.google.common.io.Closer;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-
+import okhttp3.OkHttpClient;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 public class OkHttpClientProviderTest {
 
@@ -40,34 +38,34 @@ public class OkHttpClientProviderTest {
 
   @Test
   public void testConnectTimeout() {
-    assertEquals(1234, buildClient("http.client.connectTimeout: 1234").getConnectTimeout());
+    assertEquals(1234, buildClient("http.client.connectTimeout: 1234").connectTimeoutMillis());
   }
 
   @Test
   public void testReadTimeout() {
-    assertEquals(444, buildClient("http.client.readTimeout: 444").getReadTimeout());
+    assertEquals(444, buildClient("http.client.readTimeout: 444").readTimeoutMillis());
   }
 
   @Test
   public void testWriteTimeout() {
-    assertEquals(5555, buildClient("http.client.writeTimeout: 5555").getWriteTimeout());
+    assertEquals(5555, buildClient("http.client.writeTimeout: 5555").writeTimeoutMillis());
   }
 
   @Test
   public void testMaxRequests() {
     final OkHttpClient client = buildClient("http.client.async.maxRequests: 72");
-    assertEquals(72, client.getDispatcher().getMaxRequests());
+    assertEquals(72, client.dispatcher().getMaxRequests());
   }
 
   @Test
   public void testMaxRequestsPerHost() {
     final OkHttpClient client = buildClient("http.client.async.maxRequestsPerHost: 79");
-    assertEquals(79, client.getDispatcher().getMaxRequestsPerHost());
+    assertEquals(79, client.dispatcher().getMaxRequestsPerHost());
   }
 
   @Test
   public void testFollowRedirects() {
     final OkHttpClient client = buildClient("http.client.followRedirects: false");
-    assertEquals(false, client.getFollowRedirects());
+    assertEquals(false, client.followRedirects());
   }
 }
