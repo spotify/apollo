@@ -21,12 +21,6 @@ package com.spotify.apollo.http.client;
 
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
 
-import com.squareup.okhttp.Headers;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -34,6 +28,11 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import okio.ByteString;
 
 class HttpClient implements IncomingRequestAwareClient {
@@ -90,11 +89,14 @@ class HttpClient implements IncomingRequestAwareClient {
         new CompletableFuture<>();
 
     //https://github.com/square/okhttp/wiki/Recipes#per-call-configuration
-    OkHttpClient finalClient = client;
+    final OkHttpClient finalClient;
     if (apolloRequest.ttl().isPresent()
-        && client.getReadTimeout() != apolloRequest.ttl().get().toMillis()) {
-      finalClient = client.clone();
-      finalClient.setReadTimeout(apolloRequest.ttl().get().toMillis(), TimeUnit.MILLISECONDS);
+        && client.readTimeoutMillis() != apolloRequest.ttl().get().toMillis()) {
+      finalClient = client.newBuilder()
+          .readTimeout(apolloRequest.ttl().get().toMillis(), TimeUnit.MILLISECONDS)
+          .build();
+    } else {
+      finalClient = client;
     }
 
     finalClient.newCall(request).enqueue(TransformingCallback.create(result));

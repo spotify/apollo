@@ -23,12 +23,13 @@ import com.google.common.io.Closer;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import com.squareup.okhttp.ConnectionPool;
-import com.squareup.okhttp.OkHttpClient;
 import com.typesafe.config.Config;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import okhttp3.ConnectionPool;
+import okhttp3.OkHttpClient;
 
 import static com.spotify.apollo.environment.ConfigUtil.optionalBoolean;
 import static com.spotify.apollo.environment.ConfigUtil.optionalInt;
@@ -46,34 +47,37 @@ class OkHttpClientProvider implements Provider<OkHttpClient> {
 
   @Override
   public OkHttpClient get() {
-    final OkHttpClient client = new OkHttpClient();
+    final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
 
     //timeouts settings
     config.connectTimeoutMillis().ifPresent(
-        millis -> client.setConnectTimeout(millis, TimeUnit.MILLISECONDS));
+        millis -> clientBuilder.connectTimeout(millis, TimeUnit.MILLISECONDS));
 
     config.readTimeoutMillis().ifPresent(
-        millis -> client.setReadTimeout(millis, TimeUnit.MILLISECONDS));
+        millis -> clientBuilder.readTimeout(millis, TimeUnit.MILLISECONDS));
 
     config.writeTimeoutMillis().ifPresent(
-        millis -> client.setWriteTimeout(millis, TimeUnit.MILLISECONDS));
+        millis -> clientBuilder.writeTimeout(millis, TimeUnit.MILLISECONDS));
 
     // connection pool settings
-    client.setConnectionPool(new ConnectionPool(
+    clientBuilder.connectionPool(new ConnectionPool(
         // defaults that come from com.squareup.okhttp.ConnectionPool
         config.maxIdleConnections().orElse(5),
-        config.connectionKeepAliveDurationMillis().orElse(5 * 60 * 1000)
+        config.connectionKeepAliveDurationMillis().orElse(5 * 60 * 1000),
+        TimeUnit.MILLISECONDS
     ));
 
+    config.followRedirects().ifPresent(clientBuilder::followRedirects);
+
+    final OkHttpClient client = clientBuilder.build();
+
     // async dispatcher settings
-    config.maxAsyncRequests().ifPresent(max -> client.getDispatcher().setMaxRequests(max));
+    config.maxAsyncRequests().ifPresent(max -> client.dispatcher().setMaxRequests(max));
 
     config.maxAsyncRequestsPerHost().ifPresent(
-        max -> client.getDispatcher().setMaxRequestsPerHost(max));
+        max -> client.dispatcher().setMaxRequestsPerHost(max));
 
-    config.followRedirects().ifPresent(client::setFollowRedirects);
-
-    closer.register(() -> client.getDispatcher().getExecutorService().shutdown());
+    closer.register(() -> client.dispatcher().executorService().shutdown());
 
     return client;
   }

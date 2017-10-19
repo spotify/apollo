@@ -19,19 +19,20 @@
  */
 package com.spotify.apollo.http.client;
 
+import com.google.inject.Injector;
+import com.google.inject.Key;
+
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.ClientDecorator;
-
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.squareup.okhttp.OkHttpClient;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import org.junit.Test;
 
 import java.util.Set;
+
+import okhttp3.OkHttpClient;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -72,7 +73,7 @@ public class HttpClientModuleTest {
     try (Service.Instance i = service.start(new String[] {}, config)) {
 
       final OkHttpClient underlying = i.resolve(OkHttpClient.class);
-      assertThat(underlying.getConnectTimeout(), is(7982));
+      assertThat(underlying.connectTimeoutMillis(), is(7982));
     }
 
   }

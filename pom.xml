@@ -240,6 +240,10 @@
                                 <ignoreDestinationPackage>
                                     <package>com.jcraft.jzlib</package>
                                 </ignoreDestinationPackage>
+                                <!-- okhttp3 references this for Android platform -->
+                                <ignoreDestinationPackage>
+                                    <package>android.util</package>
+                                </ignoreDestinationPackage>
                             </ignoreDestinationPackages>
                             <ignoreSourcePackages>
                                 <ignoreSourcePackage>
