@@ -19,6 +19,13 @@
  */
 package com.spotify.apollo.httpservice;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.RequestMetadata;
@@ -27,14 +34,6 @@ import com.spotify.apollo.core.Service;
 import com.spotify.apollo.http.server.HttpRequestMetadata;
 import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Route;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -43,15 +42,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okio.ByteString;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class HttpServiceTest {
 

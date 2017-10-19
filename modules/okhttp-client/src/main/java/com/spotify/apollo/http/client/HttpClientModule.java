@@ -25,7 +25,7 @@ import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.module.ApolloModule;
 
 import com.google.inject.multibindings.Multibinder;
-import com.squareup.okhttp.OkHttpClient;
+import okhttp3.OkHttpClient;
 
 public class HttpClientModule extends AbstractApolloModule {
 

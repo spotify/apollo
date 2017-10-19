@@ -20,20 +20,17 @@
 package com.spotify.apollo.http.client;
 
 import com.google.common.base.Joiner;
-
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.StatusType;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-
+import okhttp3.Call;
+import okhttp3.Callback;
 import okio.ByteString;
 
 class TransformingCallback implements Callback {
@@ -52,18 +49,18 @@ class TransformingCallback implements Callback {
   }
 
   @Override
-  public void onFailure(Request request, IOException e) {
-    final String message = MessageFormat.format("Request {0} failed", request);
+  public void onFailure(Call call, IOException e) {
+    final String message = MessageFormat.format("Request {0} failed", call.request());
     final IOException exception = new IOException(message, e);
     future.completeExceptionally(exception);
   }
 
   @Override
-  public void onResponse(com.squareup.okhttp.Response response) throws IOException {
+  public void onResponse(Call call, okhttp3.Response response) throws IOException {
     future.complete(transformResponse(response));
   }
 
-  static Response<ByteString> transformResponse(com.squareup.okhttp.Response response)
+  static Response<ByteString> transformResponse(okhttp3.Response response)
       throws IOException {
 
     final StatusType status =
