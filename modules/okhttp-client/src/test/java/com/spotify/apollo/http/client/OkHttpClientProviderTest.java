@@ -19,13 +19,16 @@
  */
 package com.spotify.apollo.http.client;
 
-import static org.junit.Assert.assertEquals;
-
 import com.google.common.io.Closer;
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import okhttp3.OkHttpClient;
+
 import org.junit.Test;
+
+import okhttp3.OkHttpClient;
+
+import static org.junit.Assert.assertEquals;
 
 public class OkHttpClientProviderTest {
 
