@@ -19,18 +19,21 @@
  */
 package com.spotify.apollo.http.client;
 
-import static com.spotify.apollo.environment.ConfigUtil.optionalBoolean;
-import static com.spotify.apollo.environment.ConfigUtil.optionalInt;
-
 import com.google.common.io.Closer;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.spotify.apollo.concurrent.ExecutorServiceCloser;
 import com.typesafe.config.Config;
+
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
+
+import static com.spotify.apollo.environment.ConfigUtil.optionalBoolean;
+import static com.spotify.apollo.environment.ConfigUtil.optionalInt;
 
 class OkHttpClientProvider implements Provider<OkHttpClient> {
 

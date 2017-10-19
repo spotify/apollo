@@ -20,15 +20,18 @@
 package com.spotify.apollo.http.client;
 
 import com.google.common.base.Joiner;
+
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.StatusType;
+
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okio.ByteString;

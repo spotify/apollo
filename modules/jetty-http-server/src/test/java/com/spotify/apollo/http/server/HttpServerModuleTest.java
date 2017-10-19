@@ -19,6 +19,29 @@
  */
 package com.spotify.apollo.http.server;
 
+import com.google.common.collect.Lists;
+
+import com.spotify.apollo.Response;
+import com.spotify.apollo.core.Service;
+import com.spotify.apollo.core.Services;
+import com.spotify.apollo.request.OngoingRequest;
+import com.spotify.apollo.request.RequestHandler;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.Socket;
+import java.util.List;
+import java.util.Optional;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+
 import static com.spotify.apollo.Status.IM_A_TEAPOT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
@@ -27,25 +50,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import com.google.common.collect.Lists;
-import com.spotify.apollo.Response;
-import com.spotify.apollo.core.Service;
-import com.spotify.apollo.core.Services;
-import com.spotify.apollo.request.OngoingRequest;
-import com.spotify.apollo.request.RequestHandler;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.Socket;
-import java.util.List;
-import java.util.Optional;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class HttpServerModuleTest {
 
