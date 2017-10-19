@@ -207,6 +207,29 @@ public class HttpClientTest {
   }
 
   @Test
+  public void testNoDuplicatedAuthContext() throws Exception {
+    mockServerClient.when(
+        request().withHeader("Authorization", "Basic dXNlcjpwYXNz")
+    ).respond(
+        response().withHeader("x-auth-was-fine", "yes")
+    );
+
+    String uri = format("http://localhost:%d/foo.php", mockServerRule.getHttpPort());
+    Request request = Request.forUri(uri, "GET")
+        .withHeader("Authorization", "Basic foobar");
+
+    Request originalRequest = Request
+        .forUri("http://original.uri/")
+        .withHeader("Authorization", "Basic dXNlcjpwYXNz");
+
+    final Response<ByteString> response = HttpClient.createUnconfigured()
+        .send(request, Optional.of(originalRequest))
+        .toCompletableFuture().get();
+
+    assertThat(response.headers().get("x-auth-was-fine"), equalTo(Optional.of("yes")));
+  }
+
+  @Test
   public void testSendWeirdStatus() throws Exception {
     mockServerClient.when(
         request()
