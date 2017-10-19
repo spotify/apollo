@@ -21,12 +21,6 @@ package com.spotify.apollo.http.client;
 
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
 
-import okhttp3.Headers;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -34,6 +28,11 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import okio.ByteString;
 
 class HttpClient implements IncomingRequestAwareClient {
