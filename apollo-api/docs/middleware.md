@@ -78,6 +78,29 @@ the handler type our middleware is defined to work on. In the end we apply the
 `Middleware::syncToAsync` middleware (defined in apollo-api) which turns the route handler into an
 `AsyncHandler<T>` which the framework can call._
 
+### Decorating a RequestContext
+
+If you need to decorate a request before passing invoking your inner handlers, you will need to
+create a new decorated `RequestContext`. This is how you can decorate a request with a custom
+header:
+
+```java
+private RequestContext decorateRequestContext(RequestContext originalRequestContext) {
+  Map<String, String> decoratedRequestHeaders = originalRequestContext.request().headers();
+  decoratedRequestHeaders.put("Custom-Header", "Custom value");
+
+  Request decoratedRequest = originalRequestContext.request()
+      .withHeaders(decoratedRequestHeaders);
+
+  return RequestContexts
+      .create(decoratedRequest,
+              originalRequestContext.requestScopedClient(),
+              originalRequestContext.pathArgs(),
+              originalRequestContext.metadata().arrivalTime().getNano(),
+              originalRequestContext.metadata());
+}
+```
+
 ## Advanced: Creating custom context types
 
 In our application, we'll have a mechanism for paging and authenticating requests. We'll model it
