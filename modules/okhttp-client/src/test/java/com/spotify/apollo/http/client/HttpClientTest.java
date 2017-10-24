@@ -216,11 +216,11 @@ public class HttpClientTest {
 
     String uri = format("http://localhost:%d/foo.php", mockServerRule.getHttpPort());
     Request request = Request.forUri(uri, "GET")
-        .withHeader("Authorization", "Basic foobar");
+        .withHeader("Authorization", "Basic dXNlcjpwYXNz");
 
     Request originalRequest = Request
         .forUri("http://original.uri/")
-        .withHeader("Authorization", "Basic dXNlcjpwYXNz");
+        .withHeader("Authorization", "Basic foobar");
 
     final Response<ByteString> response = HttpClient.createUnconfigured()
         .send(request, Optional.of(originalRequest))
