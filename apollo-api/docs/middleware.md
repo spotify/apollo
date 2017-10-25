@@ -80,13 +80,13 @@ the handler type our middleware is defined to work on. In the end we apply the
 
 ### Decorating a RequestContext
 
-If you need to decorate a request before passing invoking your inner handlers, you will need to
+If you need to decorate a request before invoking your inner handlers, you will need to
 create a new decorated `RequestContext`. This is how you can decorate a request with a custom
 header:
 
 ```java
 private RequestContext decorateRequestContext(RequestContext originalRequestContext) {
-  Map<String, String> decoratedRequestHeaders = originalRequestContext.request().headers();
+  Map<String, String> decoratedRequestHeaders = originalRequestContext.request().headerEntries();
   decoratedRequestHeaders.put("Custom-Header", "Custom value");
 
   Request decoratedRequest = originalRequestContext.request()
