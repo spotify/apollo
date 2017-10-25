@@ -148,7 +148,12 @@ public enum Status implements StatusType {
     public abstract Family family();
 
     public static WithReasonPhrase create(int statusCode, String reasonPhrase) {
-      String safeReasonPhrase = ILLEGAL_REASONPHRASE_CHARS.replaceFrom(reasonPhrase, ' ');
+      String safeReasonPhrase;
+      if (reasonPhrase == null) {
+        safeReasonPhrase = "";
+      } else {
+        safeReasonPhrase = ILLEGAL_REASONPHRASE_CHARS.replaceFrom(reasonPhrase, ' ');
+      }
       return new AutoValue_Status_WithReasonPhrase(statusCode, safeReasonPhrase, Family.familyOf(statusCode));
     }
 
