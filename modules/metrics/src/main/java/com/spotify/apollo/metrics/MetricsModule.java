@@ -23,7 +23,6 @@ import com.google.auto.service.AutoService;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
-
 import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.EndpointRunnableFactoryDecorator;
 import com.spotify.apollo.metrics.semantic.MetricsConfig;
@@ -32,20 +31,19 @@ import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.module.ApolloModule;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
+import com.spotify.metrics.core.SemanticMetricSet;
 import com.spotify.metrics.ffwd.FastForwardReporter;
 import com.spotify.metrics.jvm.CpuGaugeSet;
 import com.spotify.metrics.jvm.FileDescriptorGaugeSet;
 import com.spotify.metrics.jvm.GarbageCollectorMetricSet;
 import com.spotify.metrics.jvm.MemoryUsageGaugeSet;
 import com.spotify.metrics.jvm.ThreadStatesMetricSet;
-
+import java.io.IOException;
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Named;
 
 /**
  * Provides bindings to {@link SemanticMetricRegistry} and {@link MetricsFactory}.
@@ -91,7 +89,19 @@ public class MetricsModule extends AbstractApolloModule {
     metricRegistry.register(MetricId.EMPTY, new GarbageCollectorMetricSet());
     metricRegistry.register(MetricId.EMPTY, new ThreadStatesMetricSet());
     metricRegistry.register(MetricId.EMPTY, CpuGaugeSet.create());
-    metricRegistry.register(MetricId.EMPTY, new FileDescriptorGaugeSet());
+    // FIXME(staffan): FileDescriptorGaugeSet is broken in Java 9 (it throws an exception).
+    // This is a temporary workaround to make it work. We catch and handle the exception here -- a
+    // more proper fix would be to fix this upstream (ideally in codFileDescriptorGaugeSetahale
+    // metrics, possibly in semantic-metrics).
+    final FileDescriptorGaugeSet fileDescriptorGaugeSet = new FileDescriptorGaugeSet();
+    metricRegistry.register(MetricId.EMPTY, (SemanticMetricSet) () -> {
+      try {
+        return fileDescriptorGaugeSet.getMetrics();
+      } catch (Exception ex) {
+        LOG.debug("Failed to get metrics for FileDescriptorGaugeSet", ex);
+        return Collections.emptyMap();
+      }
+    });
 
     return metricRegistry;
   }
