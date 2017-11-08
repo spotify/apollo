@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.spotify</groupId>
         <artifactId>apollo-parent</artifactId>
-        <version>1.5.1-SNAPSHOT</version>
+        <version>1.6.0</version>
     </parent>
 
     <name>Spotify Apollo API Interfaces</name>
@@ -17,7 +17,7 @@
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-bom</artifactId>
-                <version>1.5.1-SNAPSHOT</version>
+                <version>1.6.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
