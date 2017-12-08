@@ -47,6 +47,8 @@ import static com.spotify.apollo.metrics.semantic.What.DROPPED_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO;
+import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO_4XX;
+import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO_5XX;
 import static com.spotify.apollo.metrics.semantic.What.REQUEST_FANOUT_FACTOR;
 import static com.spotify.apollo.metrics.semantic.What.REQUEST_PAYLOAD_SIZE;
 import static com.spotify.apollo.metrics.semantic.What.RESPONSE_PAYLOAD_SIZE;
@@ -96,7 +98,9 @@ class SemanticServiceMetrics implements ServiceMetrics {
         meters.requestDurationTimer.map(Timer::time),
         meters.droppedRequests,
         meters.sentReplies,
-        meters.sentErrors);
+        meters.sentErrors,
+        meters.sentErrors4xx,
+        meters.sentErrors5xx);
   }
 
   private CachedMeters metersForEndpoint(String endpoint) {
@@ -109,17 +113,50 @@ class SemanticServiceMetrics implements ServiceMetrics {
 
     Meter sentReplies = new Meter();
     Meter sentErrors = new Meter();
+    Meter sentErrors4xx = new Meter();
+    Meter sentErrors5xx = new Meter();
 
     if (enabledMetrics.test(ERROR_RATIO)) {
       registerRatioGauge(id, "1m", errorRatioSupplier(sentErrors::getOneMinuteRate,
                                                       sentReplies::getOneMinuteRate),
-                         metricRegistry);
+                         metricRegistry,
+                         ERROR_RATIO);
       registerRatioGauge(id, "5m", errorRatioSupplier(sentErrors::getFiveMinuteRate,
                                                       sentReplies::getFiveMinuteRate),
-                         metricRegistry);
+                         metricRegistry,
+                         ERROR_RATIO);
       registerRatioGauge(id, "15m", errorRatioSupplier(sentErrors::getFifteenMinuteRate,
                                                        sentReplies::getFifteenMinuteRate),
-                         metricRegistry);
+                         metricRegistry,
+                         ERROR_RATIO);
+    }
+    if (enabledMetrics.test(ERROR_RATIO_4XX)) {
+      registerRatioGauge(id, "1m", errorRatioSupplier(sentErrors4xx::getOneMinuteRate,
+                                                      sentReplies::getOneMinuteRate),
+                         metricRegistry,
+                         ERROR_RATIO_4XX);
+      registerRatioGauge(id, "5m", errorRatioSupplier(sentErrors4xx::getFiveMinuteRate,
+                                                      sentReplies::getFiveMinuteRate),
+                         metricRegistry,
+                         ERROR_RATIO_4XX);
+      registerRatioGauge(id, "15m", errorRatioSupplier(sentErrors4xx::getFifteenMinuteRate,
+                                                       sentReplies::getFifteenMinuteRate),
+                         metricRegistry,
+                         ERROR_RATIO_4XX);
+    }
+    if (enabledMetrics.test(ERROR_RATIO_5XX)) {
+      registerRatioGauge(id, "1m", errorRatioSupplier(sentErrors5xx::getOneMinuteRate,
+                                                      sentReplies::getOneMinuteRate),
+                         metricRegistry,
+                         ERROR_RATIO_5XX);
+      registerRatioGauge(id, "5m", errorRatioSupplier(sentErrors5xx::getFiveMinuteRate,
+                                                      sentReplies::getFiveMinuteRate),
+                         metricRegistry,
+                         ERROR_RATIO_5XX);
+      registerRatioGauge(id, "15m", errorRatioSupplier(sentErrors5xx::getFifteenMinuteRate,
+                                                       sentReplies::getFifteenMinuteRate),
+                         metricRegistry,
+                         ERROR_RATIO_5XX);
     }
 
     return new CachedMeters(
@@ -130,7 +167,9 @@ class SemanticServiceMetrics implements ServiceMetrics {
         requestDurationTimer(id),
         droppedRequests(id),
         sentReplies,
-        sentErrors);
+        sentErrors,
+        sentErrors4xx,
+        sentErrors5xx);
   }
 
   private Optional<Meter> droppedRequests(MetricId id) {
@@ -196,9 +235,10 @@ class SemanticServiceMetrics implements ServiceMetrics {
   private void registerRatioGauge(MetricId metricId,
                                   String stat,
                                   Supplier<Ratio> ratioSupplier,
-                                  SemanticMetricRegistry metricRegistry) {
+                                  SemanticMetricRegistry metricRegistry,
+                                  What what) {
     metricRegistry.register(
-        metricId.tagged("what", ERROR_RATIO.tag(), "stat", stat),
+        metricId.tagged("what", what.tag(), "stat", stat),
         new RatioGauge() {
           @Override
           protected Ratio getRatio() {
@@ -229,6 +269,8 @@ class SemanticServiceMetrics implements ServiceMetrics {
     private final Optional<Meter> droppedRequests;
     private final Meter sentReplies;
     private final Meter sentErrors;
+    private final Meter sentErrors4xx;
+    private final Meter sentErrors5xx;
 
 
     private CachedMeters(Optional<Consumer<Response<ByteString>>> requestRateCounter,
@@ -237,7 +279,8 @@ class SemanticServiceMetrics implements ServiceMetrics {
                          Optional<Histogram> requestSizeHistogram,
                          Optional<Timer> requestDurationTimer,
                          Optional<Meter> droppedRequests,
-                         Meter sentReplies, Meter sentErrors) {
+                         Meter sentReplies, Meter sentErrors,
+                         Meter sentErrors4xx, Meter sentErrors5xx) {
       this.requestRateCounter = requestRateCounter;
       this.fanoutHistogram = fanoutHistogram;
       this.requestSizeHistogram = requestSizeHistogram;
@@ -246,6 +289,8 @@ class SemanticServiceMetrics implements ServiceMetrics {
       this.droppedRequests = droppedRequests;
       this.sentReplies = sentReplies;
       this.sentErrors = sentErrors;
+      this.sentErrors4xx = sentErrors4xx;
+      this.sentErrors5xx = sentErrors5xx;
     }
   }
 }

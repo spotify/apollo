@@ -49,6 +49,7 @@ import okio.ByteString;
 
 import static com.spotify.apollo.Status.FOUND;
 import static com.spotify.apollo.Status.INTERNAL_SERVER_ERROR;
+import static com.spotify.apollo.Status.BAD_REQUEST;
 import static com.spotify.apollo.metrics.semantic.What.DROPPED_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
@@ -208,6 +209,78 @@ public class SemanticServiceMetricsTest {
   }
 
   @Test
+  public void shouldTrackOneMinErrorRatio4xx() throws Exception {
+    requestMetrics.response(Response.ok());
+
+    assertThat(metricRegistry.getGauges(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("error-ratio-4xx") &&
+            metricId.getTags().get("stat").equals("1m"))
+            .values(),
+        iterableWithSize(1));
+  }
+
+  @Test
+  public void shouldTrackFiveMinErrorRatio4xx() throws Exception {
+    requestMetrics.response(Response.ok());
+
+    assertThat(metricRegistry.getGauges(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("error-ratio-4xx") &&
+            metricId.getTags().get("stat").equals("5m"))
+            .values(),
+        iterableWithSize(1));
+  }
+
+  @Test
+  public void shouldTrackFifteenMinErrorRatio4xx() throws Exception {
+    requestMetrics.response(Response.ok());
+
+    assertThat(metricRegistry.getGauges(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("error-ratio-4xx") &&
+            metricId.getTags().get("stat").equals("15m"))
+            .values(),
+        iterableWithSize(1));
+  }
+
+  @Test
+  public void shouldTrackOneMinErrorRatio5xx() throws Exception {
+    requestMetrics.response(Response.ok());
+
+    assertThat(metricRegistry.getGauges(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("error-ratio-5xx") &&
+            metricId.getTags().get("stat").equals("1m"))
+            .values(),
+        iterableWithSize(1));
+  }
+
+  @Test
+  public void shouldTrackFiveMinErrorRatio5xx() throws Exception {
+    requestMetrics.response(Response.ok());
+
+    assertThat(metricRegistry.getGauges(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("error-ratio-5xx") &&
+            metricId.getTags().get("stat").equals("5m"))
+            .values(),
+        iterableWithSize(1));
+  }
+
+  @Test
+  public void shouldTrackFifteenMinErrorRatio5xx() throws Exception {
+    requestMetrics.response(Response.ok());
+
+    assertThat(metricRegistry.getGauges(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("error-ratio-5xx") &&
+            metricId.getTags().get("stat").equals("15m"))
+            .values(),
+        iterableWithSize(1));
+  }
+
+  @Test
   public void shouldCalculateOneMinErrorRatio() throws Exception {
     requestMetrics.response(Response.ok());
     requestMetrics.response(Response.forStatus(INTERNAL_SERVER_ERROR));
@@ -217,6 +290,40 @@ public class SemanticServiceMetricsTest {
     Gauge oneMin = metricRegistry.getGauges(
         (metricId, metric) ->
             metricId.getTags().get("what").equals("error-ratio") &&
+            metricId.getTags().get("stat").equals("1m"))
+        .values().stream().findFirst().get();
+
+    // semantic metrics Meters take some time to update
+    await().atMost(15, TimeUnit.SECONDS).until(() -> (Double) oneMin.getValue() > 0.3 && (Double) oneMin.getValue() < 0.7);
+  }
+
+  @Test
+  public void shouldCalculateOneMinErrorRatio4xx() throws Exception {
+    requestMetrics.response(Response.ok());
+    requestMetrics.response(Response.forStatus(BAD_REQUEST));
+
+    //noinspection OptionalGetWithoutIsPresent
+    // the test above will fail if there's not exactly 1 such element
+    Gauge oneMin = metricRegistry.getGauges(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("error-ratio-4xx") &&
+            metricId.getTags().get("stat").equals("1m"))
+        .values().stream().findFirst().get();
+
+    // semantic metrics Meters take some time to update
+    await().atMost(15, TimeUnit.SECONDS).until(() -> (Double) oneMin.getValue() > 0.3 && (Double) oneMin.getValue() < 0.7);
+  }
+
+  @Test
+  public void shouldCalculateOneMinErrorRatio5xx() throws Exception {
+    requestMetrics.response(Response.ok());
+    requestMetrics.response(Response.forStatus(INTERNAL_SERVER_ERROR));
+
+    //noinspection OptionalGetWithoutIsPresent
+    // the test above will fail if there's not exactly 1 such element
+    Gauge oneMin = metricRegistry.getGauges(
+        (metricId, metric) ->
+            metricId.getTags().get("what").equals("error-ratio-5xx") &&
             metricId.getTags().get("stat").equals("1m"))
         .values().stream().findFirst().get();
 
