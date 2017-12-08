@@ -32,7 +32,11 @@ import java.util.function.Consumer;
 
 import okio.ByteString;
 
+import static com.spotify.apollo.StatusType.Family.INFORMATIONAL;
 import static com.spotify.apollo.StatusType.Family.SERVER_ERROR;
+import static com.spotify.apollo.StatusType.Family.SUCCESSFUL;
+import static com.spotify.apollo.StatusType.Family.CLIENT_ERROR;
+import static com.spotify.apollo.StatusType.Family.REDIRECTION;
 import static java.util.Objects.requireNonNull;
 
 // Optional fields are fine; they enable the use of the 'ifPresent' idiom which is more readable
@@ -48,6 +52,8 @@ class SemanticRequestMetrics implements RequestMetrics {
   private final Optional<Meter> droppedRequests;
   private final Meter sentReplies;
   private final Meter sentErrors;
+  private final Meter sentErrors4xx;
+  private final Meter sentErrors5xx;
 
   SemanticRequestMetrics(
       Optional<Consumer<Response<ByteString>>> requestRateCounter,
@@ -57,7 +63,9 @@ class SemanticRequestMetrics implements RequestMetrics {
       Optional<Timer.Context> timerContext,
       Optional<Meter> droppedRequests,
       Meter sentReplies,
-      Meter sentErrors) {
+      Meter sentErrors,
+      Meter sentErrors4xx,
+      Meter sentErrors5xx) {
 
     this.requestRateCounter = requireNonNull(requestRateCounter);
     this.fanoutHistogram = requireNonNull(fanoutHistogram);
@@ -67,6 +75,8 @@ class SemanticRequestMetrics implements RequestMetrics {
     this.droppedRequests = requireNonNull(droppedRequests);
     this.sentReplies = requireNonNull(sentReplies);
     this.sentErrors = requireNonNull(sentErrors);
+    this.sentErrors4xx = requireNonNull(sentErrors4xx);
+    this.sentErrors5xx = requireNonNull(sentErrors5xx);
   }
 
   @Override
@@ -92,8 +102,14 @@ class SemanticRequestMetrics implements RequestMetrics {
     timerContext.ifPresent(Timer.Context::stop);
 
     StatusType.Family family = response.status().family();
-    if (family == SERVER_ERROR) {
+    if (family != INFORMATIONAL && family != SUCCESSFUL) {
       sentErrors.mark();
+    }
+    if (family == CLIENT_ERROR) {
+      sentErrors4xx.mark();
+    }
+    if (family == SERVER_ERROR) {
+      sentErrors5xx.mark();
     }
   }
 
