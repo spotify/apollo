@@ -29,7 +29,9 @@ public enum What {
   REQUEST_PAYLOAD_SIZE("request-payload-size"),
   RESPONSE_PAYLOAD_SIZE("response-payload-size"),
   ENDPOINT_REQUEST_DURATION("endpoint-request-duration"),
-  ERROR_RATIO("error-ratio")
+  ERROR_RATIO("error-ratio"),
+  ERROR_RATIO_4XX("error-ratio-4xx"),
+  ERROR_RATIO_5XX("error-ratio-5xx")
   ;
 
   private final String tag;
