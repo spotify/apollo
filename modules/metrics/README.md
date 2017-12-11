@@ -66,29 +66,35 @@ A Histogram metric, tagged with:
 
 ### Error ratios
 
-Three groups of gauges, tagged with: 
+Three groups of gauges:
 
 | tag         | value                      | comment                                              |
 |-------------|----------------------------|------------------------------------------------------|
 | what        | "error-ratio"              | Enable/disable with ERROR_RATIO                      |
 | stat        | "1m", "5m", "15m"          | indicates the time interval in minutes               |
+
+A response is classified as successful if its status code is in the INFORMATIONAL or SUCCESSFUL
+status families. (See the `Family` enum in
+[`StatusType`](../../apollo-api/src/main/java/com/spotify/apollo/StatusType.java)).
+
+| tag         | value                      | comment                                              |
+|-------------|----------------------------|------------------------------------------------------|
 | what        | "error-ratio-4xx           | Enable/disable with ERROR_RATIO_4XX                  |
 | stat        | "1m", "5m", "15m"          | indicates the time interval in minutes               |
-| what        | "error-ratio-5xx"          | Enable/disable with ERROR_RATIO_5xx                  |
+
+A response is classified as successful if its status code is _not_ in the CLIENT_ERROR
+status family.
+
+| tag         | value                      | comment                                              |
+|-------------|----------------------------|------------------------------------------------------|
+| what        | "error-ratio-5xx"          | Enable/disable with ERROR_RATIO_5XX                  |
 | stat        | "1m", "5m", "15m"          | indicates the time interval in minutes               |
 
-The '1m' value shows the error ratio in the last minute, the '5m' value shows the ratio in 
-the last 5 minutes, etc. The metrics are defined as follows:
-* `error_ratio`: a response is classified as successful if its status code 
-is in the INFORMATIONAL or SUCCESSFUL status families.
-* `error_ratio_4xx`: a response is classified as successful if its status code is _not_ in the CLIENT_ERROR
-status family.
-* `error_ratio_5xx`: a response is classified as successful if its status code is _not_ in the SERVER_ERROR
+A response is classified as successful if its status code is _not_ in the SERVER_ERROR
 status family.
 
-(See the `Family` enum in [`StatusType`](../../apollo-api/src/main/java/com/spotify/apollo/StatusType.java)).
-
-The metrics do not include dropped requests
+The '1m' value shows the error ratio in the last minute, the '5m' value shows the ratio in
+the last 5 minutes, etc. The metrics do not include dropped requests.
 
 ### Dropped Requests
 
