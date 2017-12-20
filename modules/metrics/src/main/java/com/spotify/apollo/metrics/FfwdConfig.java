@@ -19,40 +19,131 @@
  */
 package com.spotify.apollo.metrics;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-
-import java.util.Optional;
-
-import javax.inject.Inject;
-
 import static com.spotify.apollo.environment.ConfigUtil.optionalInt;
 import static com.spotify.apollo.environment.ConfigUtil.optionalString;
 
-class FfwdConfig {
+import com.spotify.ffwd.http.HttpClient;
+import com.spotify.metrics.core.MetricId;
+import com.spotify.metrics.core.SemanticMetricRegistry;
+import com.spotify.metrics.ffwd.FastForwardReporter;
+import com.spotify.metrics.ffwdhttp.FastForwardHttpReporter;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
-  private static final int DEFAULT_INTERVAL = 30;
+interface FfwdConfig {
+  int DEFAULT_INTERVAL = 30;
 
-  private final Config configNode;
+  /**
+   * Build a ffwd reporter, returning a lifecycle to be managed by Apollo.
+   */
+  Callable<FastForwardLifecycle> setup(
+      final SemanticMetricRegistry metricRegistry, final MetricId metricId,
+      final String searchDomain
+  );
 
-  @Inject
-  FfwdConfig(Config config) {
-    if (config.hasPath("ffwd")) {
-      this.configNode = config.getConfig("ffwd");
-    } else {
-      this.configNode = ConfigFactory.empty();
+  static FfwdConfig fromConfig(final Config root) {
+    final Config config = root.hasPath("ffwd") ? root.getConfig("ffwd") : ConfigFactory.empty();
+
+    final String type = optionalString(config, "type").orElse("agent");
+
+    final int interval = optionalInt(config, "interval").orElse(DEFAULT_INTERVAL);
+
+    switch (type) {
+      case "agent":
+        final Optional<String> host = optionalString(config, "host");
+        final Optional<Integer> port = optionalInt(config, "port");
+        return new Agent(interval, host, port);
+      case "http":
+        final DiscoveryConfig discovery = DiscoveryConfig.fromConfig(config.getConfig("discovery"));
+        return new Http(interval, discovery);
+      default:
+        throw new RuntimeException("Unrecognized ffwd type: " + type);
     }
   }
 
-  int getInterval() {
-    return optionalInt(configNode, "interval").orElse(DEFAULT_INTERVAL);
+  class Agent implements FfwdConfig {
+    private final int interval;
+    private final Optional<String> host;
+    private final Optional<Integer> port;
+
+    Agent(final int interval, final Optional<String> host, final Optional<Integer> port) {
+      this.interval = interval;
+      this.host = host;
+      this.port = port;
+    }
+
+    int getInterval() {
+      return interval;
+    }
+
+    Optional<String> getHost() {
+      return host;
+    }
+
+    Optional<Integer> getPort() {
+      return port;
+    }
+
+    @Override
+    public Callable<FastForwardLifecycle> setup(
+        final SemanticMetricRegistry metricRegistry, final MetricId metricId,
+        final String searchDomain
+    ) {
+      final FastForwardReporter.Builder builder = FastForwardReporter
+          .forRegistry(metricRegistry)
+          .schedule(TimeUnit.SECONDS, interval)
+          .prefix(metricId);
+
+      host.ifPresent(builder::host);
+      port.ifPresent(builder::port);
+
+      return () -> {
+        final FastForwardReporter reporter = builder.build();
+        reporter.start();
+        return reporter::stop;
+      };
+    }
   }
 
-  Optional<String> host() {
-    return optionalString(configNode, "host");
-  }
+  class Http implements FfwdConfig {
+    private final int interval;
+    private final DiscoveryConfig discovery;
 
-  Optional<Integer> port() {
-    return optionalInt(configNode, "port");
+    Http(final int interval, final DiscoveryConfig discovery) {
+      this.interval = interval;
+      this.discovery = discovery;
+    }
+
+    int getInterval() {
+      return interval;
+    }
+
+    DiscoveryConfig getDiscovery() {
+      return discovery;
+    }
+
+    @Override
+    public Callable<FastForwardLifecycle> setup(
+        final SemanticMetricRegistry metricRegistry, final MetricId metricId,
+        final String searchDomain
+    ) {
+      final HttpClient.Builder httpClient = new HttpClient.Builder();
+      httpClient.discovery(discovery.toHttpDiscovery());
+      httpClient.searchDomain(searchDomain);
+
+      final FastForwardHttpReporter.Builder builder = FastForwardHttpReporter
+          .forRegistry(metricRegistry, httpClient.build())
+          .schedule(interval, TimeUnit.SECONDS)
+          .prefix(metricId);
+
+      return () -> {
+        final FastForwardHttpReporter reporter = builder.build();
+        reporter.start();
+        return reporter::stop;
+      };
+    }
   }
 }
