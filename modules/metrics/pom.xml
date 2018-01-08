@@ -14,7 +14,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <semantic-metrics.version>0.9.0</semantic-metrics.version>
+        <semantic-metrics.version>0.11.2</semantic-metrics.version>
     </properties>
 
     <dependencyManagement>
@@ -46,6 +46,11 @@
         <dependency>
             <groupId>com.spotify.metrics</groupId>
             <artifactId>semantic-metrics-ffwd-reporter</artifactId>
+            <version>${semantic-metrics.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify.metrics</groupId>
+            <artifactId>semantic-metrics-ffwd-http-reporter</artifactId>
             <version>${semantic-metrics.version}</version>
         </dependency>
 

@@ -121,9 +121,7 @@ key | type | required | note
 --- | ---- | -------- | ----
 `metrics.server` | string list | optional | list of [`What`](src/main/java/com/spotify/apollo/metrics/semantic/What.java) names to enable; defaults to [ENDPOINT_REQUEST_RATE, ENDPOINT_REQUEST_DURATION, DROPPED_REQUEST_RATE, ERROR_RATIO]
 `metrics.precreate-codes` | int list | optional | list of status codes to precreate request-rate meters for, default empty
-`ffwd.interval` | int | optional | interval in seconds of reporting metrics to ffwd; default 30
-`ffwd.host` | string | optional | host where ffwd is running; default localhost
-`ffwd.port` | int | optional | port where ffwd is running; default 19091
+`ffwd.type` | string | optional | indicates which type of ffwd reporter to use. Available types are `agent` and `http`. see below for details. default is `agent`.
 
 You may not want to enable all the metrics Apollo can create, since some of them can be expensive 
 (in particular on the alerting and graphing side), hence the ability to configure which
@@ -135,6 +133,75 @@ seen. This can lead to strange effects when, for instance, an error shows up
 for the first time after a restart. Pre-creating meters for status codes you 
 want to alert on makes it less likely to get false positives, since Apollo
 will then emit a '0' value until the first time a certain status code shows up.
+
+### ffwd.type = `agent`
+
+key | type | required | note
+--- | ---- | -------- | ----
+`ffwd.interval` | int | optional | interval in seconds of reporting metrics to ffwd; default 30
+`ffwd.host` | string | optional | host where the ffwd agent is running. default `localhost`
+`ffwd.port` | int | optional | port where the ffwd agent is running. default `19091`
+
+#### Example
+
+```
+ffwd.type = agent
+ffwd.interval = 30
+ffwd.host = "localhost"
+ffwd.port = 19091
+```
+
+### ffwd.type = `http`
+
+key | type | required | note
+--- | ---- | -------- | ----
+`ffwd.interval` | int | optional | interval in seconds of reporting metrics to ffwd; default 30
+`ffwd.discovery.type` | string | required | indicates how to discovery http endpoints. Available options are `static` and `srv`. See below for details.
+
+#### Example
+
+```
+ffwd.type = http
+ffwd.interval = 30
+ffwd.discovery = {
+  type = "srv"
+  record = "_metrics-api._http.example.com."
+}
+```
+
+### ffwd.discovery.type = `static`
+
+Provides a "hardcoded" endpoint to send metrics to. This is primarily useful during testing since it doesn't provide any fallback mechanisms in case a remote endpoint goes down.
+
+key | type | required | note
+--- | ---- | -------- | ----
+`ffwd.discovery.host` | string | required | host to send metric batches to.
+`ffwd.discovery.port` | int | required | port to send metric batches to.
+
+#### Example
+
+```
+ffwd.discovery = {
+  type = static
+  host = "localhost"
+  port = "8080"
+}
+```
+
+### ffwd.discovery.type = `srv`
+
+key | type | required | note
+--- | ---- | -------- | ----
+`ffwd.discovery.record` | string | required | SRV record to use when looking up http endpoints. if this _does not_ end with a dot (`.`), it will use `apollo.domain` as a search domain.
+
+#### Example
+
+```
+ffwd.discovery = {
+  type = srv
+  record = "_metrics-api._http.example.com."
+}
+```
 
 ## Custom Metrics
 

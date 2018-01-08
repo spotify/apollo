@@ -245,6 +245,9 @@
                                 <ignoreSourcePackage>
                                     <package>io.netty.util.internal</package>
                                 </ignoreSourcePackage>
+                                <ignoreSourcePackage>
+                                    <package>com.spotify.ffwd.http.okhttp3.internal.platform</package>
+                                </ignoreSourcePackage>
                             </ignoreSourcePackages>
                         </configuration>
                         <executions>

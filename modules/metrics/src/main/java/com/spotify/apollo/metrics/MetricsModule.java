@@ -28,6 +28,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.spotify.apollo.core.Services;
+import com.spotify.apollo.environment.ApolloConfig;
 import com.spotify.apollo.environment.EndpointRunnableFactoryDecorator;
 import com.spotify.apollo.metrics.semantic.MetricsConfig;
 import com.spotify.apollo.metrics.semantic.SemanticMetricsFactory;
@@ -41,11 +42,10 @@ import com.spotify.metrics.jvm.CpuGaugeSet;
 import com.spotify.metrics.jvm.GarbageCollectorMetricSet;
 import com.spotify.metrics.jvm.MemoryUsageGaugeSet;
 import com.spotify.metrics.jvm.ThreadStatesMetricSet;
-import java.io.IOException;
+import com.typesafe.config.Config;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,16 +74,18 @@ public class MetricsModule extends AbstractApolloModule {
 
   @Override
   protected void configure() {
-    bind(FfwdConfig.class);
     bind(MetricsConfig.class);
 
-    Multibinder.newSetBinder(binder(), EndpointRunnableFactoryDecorator.class)
-        .addBinding().to(MetricsCollectingEndpointRunnableFactoryDecorator.class);
+    Multibinder
+        .newSetBinder(binder(), EndpointRunnableFactoryDecorator.class)
+        .addBinding()
+        .to(MetricsCollectingEndpointRunnableFactoryDecorator.class);
 
-    manageLifecycle(FastForwardReporter.class);
+    manageLifecycle(FastForwardLifecycle.class);
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   public SemanticMetricRegistry semanticMetricRegistry() {
     final SemanticMetricRegistry metricRegistry = new SemanticMetricRegistry();
     LOG.info("Creating SemanticMetricRegistry");
@@ -122,39 +124,40 @@ public class MetricsModule extends AbstractApolloModule {
     return metricRegistry;
   }
 
-  @Provides @Singleton
-  public MetricsFactory apolloMetrics(SemanticMetricRegistry metricRegistry,
-                                      MetricsConfig metricsConfig) {
-    return new SemanticMetricsFactory(metricRegistry,
-                                      what -> metricsConfig.serverMetrics().contains(what),
-                                      metricsConfig.precreateCodes());
+  @Provides
+  @Singleton
+  public MetricsFactory apolloMetrics(
+      SemanticMetricRegistry metricRegistry, MetricsConfig metricsConfig
+  ) {
+    return new SemanticMetricsFactory(
+        metricRegistry,
+        what -> metricsConfig.serverMetrics().contains(what),
+        metricsConfig.precreateCodes()
+    );
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   public ServiceMetrics apolloMetrics(
-      MetricsFactory metricsFactory,
-      @Named(Services.INJECT_SERVICE_NAME) String serviceName) {
+      MetricsFactory metricsFactory, @Named(Services.INJECT_SERVICE_NAME) String serviceName
+  ) {
     return metricsFactory.createForService(serviceName);
   }
 
-  @Provides @Singleton
-  public FastForwardReporter fastForwardReporter(SemanticMetricRegistry metricRegistry,
-                                                 MetricId metricId,
-                                                 FfwdConfig ffwdConfig) {
-    try {
-      final FastForwardReporter.Builder builder = FastForwardReporter.forRegistry(metricRegistry)
-          .schedule(TimeUnit.SECONDS, ffwdConfig.getInterval())
-          .prefix(metricId);
+  @Provides
+  @Singleton
+  public FfwdConfig ffwdConfig(Config config) {
+    return FfwdConfig.fromConfig(config);
+  }
 
-      ffwdConfig.host().ifPresent(builder::host);
-      ffwdConfig.port().ifPresent(builder::port);
-
-      final FastForwardReporter reporter = builder.build();
-      reporter.start();
-      return reporter;
-    } catch (IOException e) {
-      throw new IllegalStateException("Failed to start ffwd reporter", e);
-    }
+  @Provides
+  @Singleton
+  public FastForwardLifecycle fastForwardReporter(
+      SemanticMetricRegistry metricRegistry, MetricId metricId, FfwdConfig ffwdConfig,
+      ApolloConfig apolloConfig
+  ) throws Exception {
+    final String searchDomain = apolloConfig.backend();
+    return ffwdConfig.setup(metricRegistry, metricId, searchDomain).call();
   }
 
   @Override
