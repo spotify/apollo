@@ -138,8 +138,8 @@ public class HttpClientTest {
 
     assertThat(response.status(), withCode(200));
     assertThat(response.headerEntries(), allOf(
-                   hasItem(new SimpleEntry<>("Content-Type", "application/x-spotify-location")),
-                   hasItem(new SimpleEntry<>("Vary", "Content-Type, Accept"))
+                   hasItem(new SimpleEntry<>("content-type", "application/x-spotify-location")),
+                   hasItem(new SimpleEntry<>("vary", "Content-Type, Accept"))
                ));
     assertThat(response.payload(), is(Optional.of(ByteString.encodeUtf8("world"))));
   }
