@@ -73,7 +73,7 @@ static void init(Environment environment) {
 }
 ```
 
-_Note the we need to use `Route.<SyncHandler<String>>create()` to obtain a `SyncHandler<T>` which is
+_Note: we need to use `Route.<SyncHandler<String>>create()` to obtain a `SyncHandler<T>` which is
 the handler type our middleware is defined to work on. In the end we apply the
 `Middleware::syncToAsync` middleware (defined in apollo-api) which turns the route handler into an
 `AsyncHandler<T>` which the framework can call._
