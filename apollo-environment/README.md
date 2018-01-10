@@ -54,8 +54,7 @@ public static void main(String... args) {
 }
 ```
 
-For a runnable example, see [`MinimalRunner`]
-(../apollo-http-service/src/test/java/com/spotify/apollo/httpservice/MinimalRunner.java)
+For a runnable example, see [`MinimalRunner`](../apollo-http-service/src/test/java/com/spotify/apollo/httpservice/MinimalRunner.java)
 
 
 ## Extending incoming/outgoing request handling
