@@ -8,12 +8,18 @@ jobs:
       - checkout
       - restore_cache:
           key: v1-deps-{{ checksum "pom.xml" }}
-      - run: mvn -Pcoverage -Pmissinglink --fail-never dependency:go-offline clean compile || true
+      - run:
+          command: mvn -Pcoverage -Pmissinglink --fail-never dependency:go-offline clean compile || true
+          environment:
+            MAVEN_OPTS: -Xmx512m
       - save_cache:
           key: v1-deps-{{ checksum "pom.xml" }}
           paths:
             - ~/.m2
-      - run: mvn -Pcoverage -Pmissinglink verify
+      - run:
+          command: mvn -Pcoverage -Pmissinglink verify
+          environment:
+            MAVEN_OPTS: -Xmx512m
       - run:
           name: Save test results
           command: |
@@ -41,7 +47,7 @@ jobs:
       - run:
           command: mvn verify
           environment:
-            MAVEN_OPTS: --add-modules java.xml.bind
+            MAVEN_OPTS: -Xmx512m --add-modules java.xml.bind
 
 workflows:
   version: 2
