@@ -38,7 +38,10 @@ jobs:
           key: v1-deps-jdk9-{{ checksum "pom.xml" }}
           paths:
             - ~/.m2
-      - run: mvn verify
+      - run:
+          command: mvn verify
+          environment:
+            MAVEN_OPTS: --add-modules java.xml.bind
 
 workflows:
   version: 2
