@@ -26,6 +26,7 @@ import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Middleware;
 import com.spotify.apollo.route.SyncHandler;
 
+import java.util.concurrent.CompletionStage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,7 +152,7 @@ class CodecEntityMiddleware implements EntityMiddleware {
       Class<? extends E> entityClass) {
     //noinspection unchecked
     return rc -> deserialize(rc, entityClass)
-        .map(inner.apply(rc))
+        .<Response<R>>map(inner.apply(rc))
         .getOrElseGet(left -> (Response<R>) left);
   }
 
@@ -160,7 +161,7 @@ class CodecEntityMiddleware implements EntityMiddleware {
       Class<? extends E> entityClass) {
     //noinspection unchecked
     return rc -> deserialize(rc, entityClass)
-        .map(inner.apply(rc))
+        .<CompletionStage<Response<R>>>map(inner.apply(rc))
         .getOrElseGet(left -> completedFuture((Response<R>) left));
   }
 
