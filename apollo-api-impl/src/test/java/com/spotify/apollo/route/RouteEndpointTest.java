@@ -34,7 +34,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
-import autovalue.shaded.com.google.common.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap;
 import okio.ByteString;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;

@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import java.util.EnumSet;
 
-import autovalue.shaded.com.google.common.common.collect.Sets;
+import com.google.common.collect.Sets;
 
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
