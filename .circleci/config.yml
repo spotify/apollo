@@ -1,0 +1,48 @@
+version: 2
+jobs:
+  jdk8:
+    working_directory: ~/apollo
+    docker:
+      - image: maven:3.5.2-jdk-8
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-deps-{{ checksum "pom.xml" }}
+      - run: mvn -Pcoverage -Pmissinglink --fail-never dependency:go-offline clean compile || true
+      - save_cache:
+          key: v1-deps-{{ checksum "pom.xml" }}
+          paths:
+            - ~/.m2
+      - run: mvn -Pcoverage -Pmissinglink verify
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/junit/
+            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/junit
+      - store_artifacts:
+          path: ~/junit
+      - run: bash <(curl -s https://codecov.io/bash)
+  jdk9:
+    working_directory: ~/apollo
+    docker:
+      - image: maven:3.5.2-jdk-9-slim
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-deps-jdk9-{{ checksum "pom.xml" }}
+      - run: mvn dependency:go-offline clean compile || true
+      - save_cache:
+          key: v1-deps-jdk9-{{ checksum "pom.xml" }}
+          paths:
+            - ~/.m2
+      - run: mvn verify
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - jdk8
+      - jdk9
