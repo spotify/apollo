@@ -21,14 +21,18 @@ package com.spotify.apollo.http.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-
+import com.google.common.io.ByteStreams;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.RequestMetadataImpl;
-
+import okio.ByteString;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,16 +45,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import okio.ByteString;
-
 import static java.util.Objects.requireNonNull;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 
 class ApolloRequestHandler extends AbstractHandler {
 
@@ -108,10 +103,6 @@ class ApolloRequestHandler extends AbstractHandler {
     final String method = req.getMethod();
     final int contentLength = req.getContentLength();
 
-    final Optional<ByteString> payload = (contentLength > -1)
-        ? of(readPayload(req, contentLength))
-        : empty();
-
     final ImmutableMap.Builder<String, String> headersBuilder = ImmutableMap.builder();
     toStream(req.getHeaderNames())
         .forEachOrdered(
@@ -121,24 +112,33 @@ class ApolloRequestHandler extends AbstractHandler {
 
     final ImmutableMap<String, String> headers = headersBuilder.build();
 
-    Request result = Request.forUri(uri, method)
-        .withHeaders(headers);
+    Request request = Request.forUri(uri, method).withHeaders(headers);
 
-    final Optional<String> callingService = result.header("X-Calling-Service");
+    final Optional<String> callingService = request.header("X-Calling-Service");
     if (callingService.isPresent() && !callingService.get().isEmpty()) {
-      result = result.withService(callingService.get());
+      request = request.withService(callingService.get());
     }
+
+    Optional<ByteString> payload = readPayload(req, contentLength);
 
     if (payload.isPresent()) {
-      result = result.withPayload(payload.get());
+      request = request.withPayload(payload.get());
     }
 
-    return result;
+    return request;
   }
 
-  private ByteString readPayload(HttpServletRequest req, int contentLength) throws IOException {
+  private Optional<ByteString> readPayload(HttpServletRequest req, int contentLength) throws IOException {
     final InputStream input = new BufferedInputStream(req.getInputStream());
-    return ByteString.read(input, contentLength);
+    if (contentLength < 0) {
+      // contentLength = -1 may be returned when using Transfer-Encoding: chunked
+      // (RFC 7230, section 3.3.1: Transfer-Encoding) even though data is being transferred in a series of chunks.
+      // In that case try read this data before concluding that there is no payload.
+      final ByteString byteString = ByteString.of(ByteStreams.toByteArray(input));
+      return byteString.size() == 0 ? Optional.empty() : Optional.of(byteString);
+    } else {
+      return Optional.of(ByteString.read(input, contentLength));
+    }
   }
 
   private static <T> Stream<T> toStream(Enumeration<T> enumeration) {
