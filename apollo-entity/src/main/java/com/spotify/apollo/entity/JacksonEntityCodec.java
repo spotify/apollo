@@ -30,7 +30,7 @@ import okio.ByteString;
  * Codec for writing and reading values using a Jackson {@link ObjectMapper}.
  */
 @Exploratory
-public class JacksonEntityCodec implements Codec, EntityCodec {
+public class JacksonEntityCodec implements Codec {
 
   private static final String APPLICATION_JSON = "application/json";
 
@@ -40,31 +40,8 @@ public class JacksonEntityCodec implements Codec, EntityCodec {
     this.objectMapper = Objects.requireNonNull(objectMapper);
   }
 
-  /**
-   * @deprecated Use {@link #create}
-   */
-  @Deprecated
-  public static EntityCodec forMapper(ObjectMapper objectMapper) {
-    return new JacksonEntityCodec(objectMapper);
-  }
-
   public static Codec create(ObjectMapper objectMapper) {
     return new JacksonEntityCodec(objectMapper);
-  }
-
-  @Override
-  public String defaultContentType() {
-    return APPLICATION_JSON;
-  }
-
-  @Override
-  public <E> ByteString write(E entity, Class<? extends E> clazz) throws IOException {
-    return ByteString.of(objectMapper.writeValueAsBytes(entity));
-  }
-
-  @Override
-  public <E> E read(ByteString data, Class<? extends E> clazz) throws IOException {
-    return objectMapper.readValue(data.toByteArray(), clazz);
   }
 
   @Override

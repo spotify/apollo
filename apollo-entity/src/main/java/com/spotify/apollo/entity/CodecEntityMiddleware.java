@@ -27,12 +27,10 @@ import com.spotify.apollo.Status;
 import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Middleware;
 import com.spotify.apollo.route.SyncHandler;
-import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import javaslang.control.Either;
-import javax.annotation.Nullable;
 import okio.ByteString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,20 +50,8 @@ class CodecEntityMiddleware implements EntityMiddleware {
 
   private final Codec codec;
 
-  // This is kept for backwards compatibility, will override value in EncodedResponse#contentType
-  // todo: remove in 2.0
-  @Nullable
-  private final String contentType;
-
   CodecEntityMiddleware(Codec codec) {
     this.codec = Objects.requireNonNull(codec);
-    this.contentType = null;
-  }
-
-  @Deprecated
-  CodecEntityMiddleware(Codec codec, String contentType) {
-    this.codec = Objects.requireNonNull(codec);
-    this.contentType = Objects.requireNonNull(contentType);
   }
 
   @Override
@@ -246,11 +232,9 @@ class CodecEntityMiddleware implements EntityMiddleware {
       }
 
       final Response<ByteString> result = response.withPayload(encoded.data());
-      return contentType != null
-          ? result.withHeader(CONTENT_TYPE, contentType)
-          : encoded.contentType().isPresent()
-              ? result.withHeader(CONTENT_TYPE, encoded.contentType().get())
-              : result;
+      return encoded.contentType().isPresent()
+          ? result.withHeader(CONTENT_TYPE, encoded.contentType().get())
+          : result;
     };
   }
 }

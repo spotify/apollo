@@ -35,10 +35,10 @@ import com.spotify.apollo.AppInit;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
-import com.spotify.apollo.entity.EntityCodecsTest.Entity;
 import com.spotify.apollo.route.Middleware;
 import com.spotify.apollo.route.Route;
 import com.spotify.apollo.test.ServiceHelper;
+import io.norberg.automatter.AutoMatter;
 import io.norberg.automatter.jackson.AutoMatterModule;
 import okio.ByteString;
 import org.junit.Test;
@@ -140,6 +140,11 @@ public class EntityMiddlewareCodecTest {
 
   String stringEndpoint(String entity) {
     return entity + "Middleware";
+  }
+
+  @AutoMatter
+  interface Entity {
+    String namingConventionUsed();
   }
 
   private final class StringCodec implements Codec {
