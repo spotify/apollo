@@ -2,7 +2,7 @@
  * -\-\-
  * Spotify Apollo Entity Middleware
  * --
- * Copyright (C) 2013 - 2016 Spotify AB
+ * Copyright (C) 2013 - 2018 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +19,21 @@
  */
 package com.spotify.apollo.entity;
 
+import com.spotify.apollo.Exploratory;
+import com.spotify.apollo.RequestContext;
 import java.io.IOException;
 import okio.ByteString;
 
 /**
- * Interface for serializing and de-serializing entity types.
+ * Interface for serializing and de-serializing entities to and from a {@link ByteString}.
  *
- * @deprecated Use {@link Codec} which allows access to the
- * {@link com.spotify.apollo.RequestContext} to implement dynamic serialization.
+ * <p>A {@link Codec} can be used by a {@link EntityMiddleware} to do the actual entity
+ * serialization.
  */
-@Deprecated
-public interface EntityCodec {
+@Exploratory
+public interface Codec {
 
-  String defaultContentType();
+  <E> EncodedResponse write(E entity, Class<? extends E> cls, RequestContext ctx) throws IOException;
 
-  <E> ByteString write(E entity, Class<? extends E> clazz) throws IOException;
-
-  <E> E read(ByteString data, Class<? extends E> clazz) throws IOException;
+  <E> E read(ByteString data, Class<? extends E> cls, RequestContext ctx) throws IOException;
 }
