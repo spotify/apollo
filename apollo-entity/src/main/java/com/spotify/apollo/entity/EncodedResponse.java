@@ -2,7 +2,7 @@
  * -\-\-
  * Spotify Apollo Entity Middleware
  * --
- * Copyright (C) 2013 - 2016 Spotify AB
+ * Copyright (C) 2013 - 2018 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +19,27 @@
  */
 package com.spotify.apollo.entity;
 
+import com.google.auto.value.AutoValue;
 import com.spotify.apollo.Exploratory;
-
-import java.io.IOException;
-
+import java.util.Optional;
 import okio.ByteString;
 
 /**
- * Interface for serializing and de-serializing entity types.
+ * A value type representing a serialized result from a {@link Codec#write} call, containing an
+ * optional value for the Content-Type header.
  */
+@AutoValue
 @Exploratory
-public interface EntityCodec {
+public abstract class EncodedResponse {
 
-  String defaultContentType();
+  public abstract ByteString data();
+  public abstract Optional<String> contentType();
 
-  <E> ByteString write(E entity, Class<? extends E> clazz) throws IOException;
+  public static EncodedResponse create(ByteString data) {
+    return new AutoValue_EncodedResponse(data, Optional.empty());
+  }
 
-  <E> E read(ByteString data, Class<? extends E> clazz) throws IOException;
+  public static EncodedResponse create(ByteString data, String contentType) {
+    return new AutoValue_EncodedResponse(data, Optional.of(contentType));
+  }
 }

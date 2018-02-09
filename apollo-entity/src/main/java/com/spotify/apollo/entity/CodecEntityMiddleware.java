@@ -19,32 +19,28 @@
  */
 package com.spotify.apollo.entity;
 
+import static java.util.concurrent.CompletableFuture.completedFuture;
+
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Middleware;
 import com.spotify.apollo.route.SyncHandler;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-
 import javaslang.control.Either;
 import okio.ByteString;
-
-import static java.util.concurrent.CompletableFuture.completedFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A factory for creating middlewares that can be used to create routes that deal directly
  * with an api entity.
  *
- * A {@link EntityCodec} is used to define how to go between a {@link ByteString} and the
- * entity type used in your route handlers.
+ * A {@link Codec} is used to define how to go between a {@link ByteString} and the entity type
+ * used in your route handlers.
  */
 class CodecEntityMiddleware implements EntityMiddleware {
 
@@ -52,46 +48,56 @@ class CodecEntityMiddleware implements EntityMiddleware {
 
   private static final String CONTENT_TYPE = "Content-Type";
 
-  private final EntityCodec codec;
-  private final String contentType;
+  private final Codec codec;
 
-  CodecEntityMiddleware(EntityCodec codec) {
-    this(codec, codec.defaultContentType());
-  }
-
-  CodecEntityMiddleware(EntityCodec codec, String contentType) {
+  CodecEntityMiddleware(Codec codec) {
     this.codec = Objects.requireNonNull(codec);
-    this.contentType = Objects.requireNonNull(contentType);
   }
 
   @Override
   public <R> Middleware<SyncHandler<R>, SyncHandler<Response<ByteString>>>
   serializerDirect(Class<? extends R> responseEntityClass) {
-    return inner -> inner
-        .map(Response::forPayload)
-        .map(serialize(responseEntityClass));
+    return inner -> rc -> {
+      final SyncHandler<Response<ByteString>> serializingHandler = inner
+          .map(Response::forPayload)
+          .map(serialize(rc, responseEntityClass));
+
+      return serializingHandler.invoke(rc);
+    };
   }
 
   @Override
   public <R> Middleware<SyncHandler<Response<R>>, SyncHandler<Response<ByteString>>>
   serializerResponse(Class<? extends R> responseEntityClass) {
-    return inner -> inner
-        .map(serialize(responseEntityClass));
+    return inner -> rc -> {
+      final SyncHandler<Response<ByteString>> serializingHandler = inner
+          .map(serialize(rc, responseEntityClass));
+
+      return serializingHandler.invoke(rc);
+    };
   }
 
   @Override
   public <R> Middleware<AsyncHandler<R>, AsyncHandler<Response<ByteString>>>
   asyncSerializerDirect(Class<? extends R> responseEntityClass) {
-    return inner -> inner
-        .map(Response::forPayload)
-        .map(serialize(responseEntityClass));
+    return inner -> rc -> {
+      final AsyncHandler<Response<ByteString>> serializingHandler = inner
+          .map(Response::forPayload)
+          .map(serialize(rc, responseEntityClass));
+
+      return serializingHandler.invoke(rc);
+    };
   }
 
   @Override
   public <R> Middleware<AsyncHandler<Response<R>>, AsyncHandler<Response<ByteString>>>
   asyncSerializerResponse(Class<? extends R> responseEntityClass) {
-    return inner -> inner
-        .map(serialize(responseEntityClass));
+    return inner -> rc -> {
+      final AsyncHandler<Response<ByteString>> serializingHandler = inner
+          .map(serialize(rc, responseEntityClass));
+
+      return serializingHandler.invoke(rc);
+    };
   }
 
   @Override
@@ -103,8 +109,13 @@ class CodecEntityMiddleware implements EntityMiddleware {
   @Override
   public <E, R> Middleware<EntityHandler<E, R>, SyncHandler<Response<ByteString>>>
   direct(Class<? extends E> requestEntityClass, Class<? extends R> responseEntityClass) {
-    return inner -> withEntity(inner.asResponseHandler(), requestEntityClass)
-        .map(serialize(responseEntityClass));
+    return inner -> rc -> {
+      final SyncHandler<Response<ByteString>> serializingHandler =
+          withEntity(inner.asResponseHandler(), requestEntityClass)
+              .map(serialize(rc, responseEntityClass));
+
+      return serializingHandler.invoke(rc);
+    };
   }
 
   @Override
@@ -116,8 +127,13 @@ class CodecEntityMiddleware implements EntityMiddleware {
   @Override
   public <E, R> Middleware<EntityResponseHandler<E, R>, SyncHandler<Response<ByteString>>>
   response(Class<? extends E> requestEntityClass, Class<? extends R> responseEntityClass) {
-    return inner -> withEntity(inner, requestEntityClass)
-        .map(serialize(responseEntityClass));
+    return inner -> rc -> {
+      final SyncHandler<Response<ByteString>> serializingHandler =
+          withEntity(inner, requestEntityClass)
+              .map(serialize(rc, responseEntityClass));
+
+      return serializingHandler.invoke(rc);
+    };
   }
 
   @Override
@@ -129,8 +145,13 @@ class CodecEntityMiddleware implements EntityMiddleware {
   @Override
   public <E, R> Middleware<EntityAsyncHandler<E, R>, AsyncHandler<Response<ByteString>>>
   asyncDirect(Class<? extends E> requestEntityClass, Class<? extends R> responseEntityClass) {
-    return inner -> withEntityAsync(inner.asResponseHandler(), requestEntityClass)
-        .map(serialize(responseEntityClass));
+    return inner -> rc -> {
+      final AsyncHandler<Response<ByteString>> serializingHandler =
+          withEntityAsync(inner.asResponseHandler(), requestEntityClass)
+              .map(serialize(rc, responseEntityClass));
+
+      return serializingHandler.invoke(rc);
+    };
   }
 
   @Override
@@ -142,8 +163,13 @@ class CodecEntityMiddleware implements EntityMiddleware {
   @Override
   public <E, R> Middleware<EntityAsyncResponseHandler<E, R>, AsyncHandler<Response<ByteString>>>
   asyncResponse(Class<? extends E> requestEntityClass, Class<? extends R> responseEntityClass) {
-    return inner -> withEntityAsync(inner, requestEntityClass)
-        .map(serialize(responseEntityClass));
+    return inner -> rc -> {
+      final AsyncHandler<Response<ByteString>> serializingHandler =
+          withEntityAsync(inner, requestEntityClass)
+              .map(serialize(rc, responseEntityClass));
+
+      return serializingHandler.invoke(rc);
+    };
   }
 
   private <E, R> SyncHandler<Response<R>> withEntity(
@@ -174,8 +200,8 @@ class CodecEntityMiddleware implements EntityMiddleware {
 
     final E entity;
     try {
-      entity = codec.read(payloadOpt.get(), entityClass);
-    } catch (IOException e) {
+      entity = codec.read(payloadOpt.get(), entityClass, rc);
+    } catch (Throwable e) {
       LOG.warn("error", e);
       return Either.left(Response.forStatus(
           Status.BAD_REQUEST
@@ -185,7 +211,8 @@ class CodecEntityMiddleware implements EntityMiddleware {
     return Either.right(entity);
   }
 
-  private <R> Function<Response<R>, Response<ByteString>> serialize(Class<? extends R> entityClass) {
+  private <R> Function<Response<R>, Response<ByteString>> serialize(
+      RequestContext rc, Class<? extends R> entityClass) {
     return response -> {
       final Optional<R> entityOpt = response.payload();
 
@@ -194,18 +221,20 @@ class CodecEntityMiddleware implements EntityMiddleware {
         return (Response<ByteString>) response;
       }
 
-      final ByteString bytes;
+      final EncodedResponse encoded;
       try {
-        bytes = codec.write(entityOpt.get(), entityClass);
-      } catch (IOException e) {
+        encoded = codec.write(entityOpt.get(), entityClass, rc);
+      } catch (Throwable e) {
         LOG.error("error", e);
         return Response.forStatus(
             Status.INTERNAL_SERVER_ERROR
                 .withReasonPhrase("Payload serialization failed: " + e.getMessage()));
       }
 
-      return response.withPayload(bytes)
-          .withHeader(CONTENT_TYPE, contentType);
+      final Response<ByteString> result = response.withPayload(encoded.data());
+      return encoded.contentType().isPresent()
+          ? result.withHeader(CONTENT_TYPE, encoded.contentType().get())
+          : result;
     };
   }
 }

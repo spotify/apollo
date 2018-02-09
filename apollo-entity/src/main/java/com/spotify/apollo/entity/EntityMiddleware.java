@@ -25,10 +25,8 @@ import com.spotify.apollo.Response;
 import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Middleware;
 import com.spotify.apollo.route.SyncHandler;
-
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
-
 import okio.ByteString;
 
 /**
@@ -37,12 +35,8 @@ import okio.ByteString;
 @Exploratory
 public interface EntityMiddleware {
 
-  static EntityMiddleware forCodec(EntityCodec codec) {
+  static EntityMiddleware forCodec(Codec codec) {
     return new CodecEntityMiddleware(codec);
-  }
-
-  static EntityMiddleware forCodec(EntityCodec codec, String contentType) {
-    return new CodecEntityMiddleware(codec, contentType);
   }
 
   <E> Middleware<EntityHandler<E, E>, SyncHandler<Response<ByteString>>>

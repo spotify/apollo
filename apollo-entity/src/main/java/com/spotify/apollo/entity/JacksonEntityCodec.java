@@ -21,19 +21,18 @@ package com.spotify.apollo.entity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spotify.apollo.Exploratory;
-
+import com.spotify.apollo.RequestContext;
 import java.io.IOException;
 import java.util.Objects;
-
 import okio.ByteString;
 
 /**
  * Codec for writing and reading values using a Jackson {@link ObjectMapper}.
  */
 @Exploratory
-public class JacksonEntityCodec implements EntityCodec {
+public class JacksonEntityCodec implements Codec {
 
-  private static final String DEFAULT_CONTENT_TYPE = "application/json";
+  private static final String APPLICATION_JSON = "application/json";
 
   private final ObjectMapper objectMapper;
 
@@ -41,22 +40,21 @@ public class JacksonEntityCodec implements EntityCodec {
     this.objectMapper = Objects.requireNonNull(objectMapper);
   }
 
-  public static EntityCodec forMapper(ObjectMapper objectMapper) {
+  public static Codec create(ObjectMapper objectMapper) {
     return new JacksonEntityCodec(objectMapper);
   }
 
   @Override
-  public String defaultContentType() {
-    return DEFAULT_CONTENT_TYPE;
+  public <E> EncodedResponse write(E entity, Class<? extends E> cls, RequestContext ctx)
+      throws IOException {
+    return EncodedResponse.create(
+        ByteString.of(objectMapper.writeValueAsBytes(entity)),
+        APPLICATION_JSON);
   }
 
   @Override
-  public <E> ByteString write(E entity, Class<? extends E> clazz) throws IOException {
-    return ByteString.of(objectMapper.writeValueAsBytes(entity));
-  }
-
-  @Override
-  public <E> E read(ByteString data, Class<? extends E> clazz) throws IOException {
-    return objectMapper.readValue(data.toByteArray(), clazz);
+  public <E> E read(ByteString data, Class<? extends E> cls, RequestContext ctx)
+      throws IOException {
+    return objectMapper.readValue(data.toByteArray(), cls);
   }
 }
