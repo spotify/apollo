@@ -19,22 +19,6 @@
  */
 package com.spotify.apollo.entity;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.spotify.apollo.AppInit;
-import com.spotify.apollo.Response;
-import com.spotify.apollo.Status;
-import com.spotify.apollo.route.Middleware;
-import com.spotify.apollo.route.Route;
-import com.spotify.apollo.test.ServiceHelper;
-
-import org.junit.Test;
-
-import java.io.IOException;
-
-import io.norberg.automatter.AutoMatter;
-import io.norberg.automatter.jackson.AutoMatterModule;
-import okio.ByteString;
-
 import static com.fasterxml.jackson.databind.PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES;
 import static com.spotify.apollo.entity.EntityMiddlewareTest.await;
 import static com.spotify.apollo.entity.JsonMatchers.asStr;
@@ -46,7 +30,20 @@ import static com.spotify.apollo.test.unit.StatusTypeMatchers.withCode;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-public class EntityCodecsTest {
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spotify.apollo.AppInit;
+import com.spotify.apollo.RequestContext;
+import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
+import com.spotify.apollo.entity.EntityCodecsTest.Entity;
+import com.spotify.apollo.route.Middleware;
+import com.spotify.apollo.route.Route;
+import com.spotify.apollo.test.ServiceHelper;
+import io.norberg.automatter.jackson.AutoMatterModule;
+import okio.ByteString;
+import org.junit.Test;
+
+public class EntityMiddlewareCodecTest {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
       .setPropertyNamingStrategy(CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES)
@@ -58,9 +55,12 @@ public class EntityCodecsTest {
   private static final ByteString ENTITY = ByteString.of(
       new byte[] {0x45, 0X6e, 0X74, 0X69, 0X74, 0X79});
 
+  private RequestContext lastSeenReadContext;
+  private RequestContext lastSeenWriteContext;
+
   @Test
   public void testWithCustomJacksonMapper() throws Exception {
-    EntityMiddleware e = EntityMiddleware.forCodec(JacksonEntityCodec.forMapper(OBJECT_MAPPER));
+    EntityMiddleware e = EntityMiddleware.forCodec(JacksonEntityCodec.create(OBJECT_MAPPER));
 
     ServiceHelper service = ServiceHelper.create(entityApp(e), "entity-test");
     service.start();
@@ -68,23 +68,6 @@ public class EntityCodecsTest {
     Response<ByteString> resp = await(service.request("GET", "/", JSON));
     assertThat(resp, hasStatus(withCode(Status.OK)));
     assertThat(resp, hasHeader("Content-Type", equalTo("application/json")));
-    assertThat(resp, hasPayload(asStr(hasJsonPath("naming_convention_used", equalTo("override")))));
-
-    service.close();
-  }
-
-  @Test
-  public void testWithCustomContentType() throws Exception {
-    EntityMiddleware e = EntityMiddleware.forCodec(
-        JacksonEntityCodec.forMapper(OBJECT_MAPPER),
-        "application/vnd+spotify.test+json");
-
-    ServiceHelper service = ServiceHelper.create(entityApp(e), "entity-test");
-    service.start();
-
-    Response<ByteString> resp = await(service.request("GET", "/", JSON));
-    assertThat(resp, hasStatus(withCode(Status.OK)));
-    assertThat(resp, hasHeader("Content-Type", equalTo("application/vnd+spotify.test+json")));
     assertThat(resp, hasPayload(asStr(hasJsonPath("naming_convention_used", equalTo("override")))));
 
     service.close();
@@ -107,8 +90,7 @@ public class EntityCodecsTest {
 
   @Test
   public void testWithCustomCodecContentType() throws Exception {
-    EntityMiddleware e = EntityMiddleware.forCodec(
-        new StringCodec(), "text/vnd+spotify.test+plain");
+    EntityMiddleware e = EntityMiddleware.forCodec(new StringCodec("text/vnd+spotify.test+plain"));
 
     ServiceHelper service =ServiceHelper.create(stringApp(e), "entity-test");
     service.start();
@@ -117,6 +99,20 @@ public class EntityCodecsTest {
     assertThat(resp, hasStatus(withCode(Status.OK)));
     assertThat(resp, hasHeader("Content-Type", equalTo("text/vnd+spotify.test+plain")));
     assertThat(resp, hasPayload(asStr(equalTo("EntityMiddleware"))));
+
+    service.close();
+  }
+
+  @Test
+  public void testRequestContextIsPassedToCodec() throws Exception {
+    EntityMiddleware e = EntityMiddleware.forCodec(new StringCodec());
+
+    ServiceHelper service =ServiceHelper.create(stringApp(e), "entity-test");
+    service.start();
+
+    Response<ByteString> resp = await(service.request("GET", "/", ENTITY));
+    assertThat(lastSeenReadContext.request().payload().get(), equalTo(ENTITY));
+    assertThat(lastSeenWriteContext.request().payload().get(), equalTo(ENTITY));
 
     service.close();
   }
@@ -146,32 +142,38 @@ public class EntityCodecsTest {
     return entity + "Middleware";
   }
 
-  @AutoMatter
-  interface Entity {
-    String namingConventionUsed();
-  }
+  private final class StringCodec implements Codec {
 
-  private static final class StringCodec implements EntityCodec {
+    private final String contentType;
 
-    @Override
-    public String defaultContentType() {
-      return "text/plain";
+    private StringCodec() {
+      this.contentType = "text/plain";
+    }
+
+    private StringCodec(String contentType) {
+      this.contentType = contentType;
     }
 
     @Override
-    public <E> ByteString write(E entity, Class<? extends E> clazz) throws IOException {
-      if (!String.class.equals(clazz)) {
+    public <E> EncodedResponse write(E entity, Class<? extends E> cls, RequestContext ctx) {
+      if (!String.class.equals(cls)) {
         throw new UnsupportedOperationException("Can only encode strings");
       }
 
-      return ByteString.encodeUtf8((String) entity);
+      lastSeenWriteContext = ctx;
+
+      return EncodedResponse.create(
+          ByteString.encodeUtf8((String) entity),
+          contentType);
     }
 
     @Override
-    public <E> E read(ByteString data, Class<? extends E> clazz) throws IOException {
-      if (!String.class.equals(clazz)) {
+    public <E> E read(ByteString data, Class<? extends E> cls, RequestContext ctx) {
+      if (!String.class.equals(cls)) {
         throw new UnsupportedOperationException("Can only encode strings");
       }
+
+      lastSeenReadContext = ctx;
 
       //noinspection unchecked
       return (E) data.utf8();

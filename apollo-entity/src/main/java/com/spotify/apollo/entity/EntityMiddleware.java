@@ -37,12 +37,24 @@ import okio.ByteString;
 @Exploratory
 public interface EntityMiddleware {
 
-  static EntityMiddleware forCodec(EntityCodec codec) {
+  static EntityMiddleware forCodec(Codec codec) {
     return new CodecEntityMiddleware(codec);
   }
 
+  /**
+   * @deprecated Use {@link #forCodec(Codec)}
+   */
+  @Deprecated
+  static EntityMiddleware forCodec(EntityCodec codec) {
+    return new CodecEntityMiddleware(new CodecAdapter(codec), codec.defaultContentType());
+  }
+
+  /**
+   * @deprecated Use {@link #forCodec(Codec)}
+   */
+  @Deprecated
   static EntityMiddleware forCodec(EntityCodec codec, String contentType) {
-    return new CodecEntityMiddleware(codec, contentType);
+    return new CodecEntityMiddleware(new CodecAdapter(codec), contentType);
   }
 
   <E> Middleware<EntityHandler<E, E>, SyncHandler<Response<ByteString>>>
