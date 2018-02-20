@@ -58,6 +58,8 @@ class SemanticServiceMetrics implements ServiceMetrics {
 
   // Minimum reply rate at which we consider the error ratio to make sense.
   private static final double ERROR_GAUGE_MINIMUM_REPLY_RATE = 1e-3;
+  // If a ratio is below this value, report it as zero
+  private static final double ERROR_RATIO_MINIMUM = 1e-15;
 
   private final SemanticMetricRegistry metricRegistry;
   private final MetricId metricId;
@@ -209,14 +211,28 @@ class SemanticServiceMetrics implements ServiceMetrics {
 
   private Supplier<Ratio> errorRatioSupplier(Supplier<Double> errorRateSupplier,
                                              Supplier<Double> replyRateSupplier) {
+    // We limit both the denominator and the resulting ratio when calculating error ratios.
+    //
+    // The ratio is limited in order to avoid producing ratios that are arbitrarily close to zero
+    // but not quite zero. Them being close to but not quite zero is not a problem per se but it
+    // distorts the apparent meaning of graphs in some monitoring tools - when the ratio goes
+    // from e.g. 1e-316 to 1e-300 it can look like a huge increase indicating that something
+    // sinister is in the works even though the error ratio is basically nil.
+    //
+    // The denominator is limited to avoid noise in the ratio when the total reply rate is low,
+    // dividing by a EWMA-computed rate can cause ratios that are higher than the true ratio due to
+    // computational noise in the EWMA computations.
     // If a service is drained of traffic (for instance by moving traffic to another host or site),
     // the meter values will decay exponentially towards zero. If left for some time (hours),
     // rounding errors will cause the values of the meters to approach each other, thus skewing
     // the ratio. If an alert is tied to this ratio, it may trigger falsely. To fix this, we set a
     // minimum for the denominator in the ratio, effectively making sure it will be be bigger than
     // the error rate as both rates goes towards zero.
-    return () -> Ratio.of(errorRateSupplier.get(),
-                          max(replyRateSupplier.get(), ERROR_GAUGE_MINIMUM_REPLY_RATE));
+    return () -> {
+      final double denominator = max(replyRateSupplier.get(), ERROR_GAUGE_MINIMUM_REPLY_RATE);
+      final Ratio ratio = Ratio.of(errorRateSupplier.get(), denominator);
+      return ratio.getValue() > ERROR_RATIO_MINIMUM ? ratio : Ratio.of(0, denominator);
+    };
   }
 
   private static class CachedMeters {
