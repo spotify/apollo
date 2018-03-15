@@ -21,12 +21,12 @@ package com.spotify.apollo.http.server;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
 import com.spotify.apollo.RequestMetadata;
 import com.spotify.apollo.request.OngoingRequest;
 import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.RequestMetadataImpl;
-
+import io.netty.handler.codec.http.QueryStringDecoder;
+import okio.ByteString;
 import org.eclipse.jetty.server.HttpChannel;
 import org.eclipse.jetty.server.HttpInput;
 import org.junit.Before;
@@ -36,6 +36,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import javax.servlet.AsyncContext;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.LinkedList;
@@ -43,24 +44,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.servlet.AsyncContext;
-
-import io.netty.handler.codec.http.QueryStringDecoder;
-import okio.ByteString;
-
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.iterableWithSize;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class ApolloRequestHandlerTest {
   private ApolloRequestHandler requestHandler;
@@ -155,6 +146,38 @@ public class ApolloRequestHandlerTest {
     assertThat(requestHandler.asApolloRequest(httpServletRequest).payload(),
                is(Optional.of(ByteString.encodeUtf8("hi there"))));
   }
+
+  @Test
+  public void shouldReturnPayloadWhenPresentOnChunkedRequest() throws Exception {
+    ChunkedMockRequest chunkedMockRequest = new ChunkedMockRequest("POST", "http://somehost/a/b?q=abc&b=adf&q=def");
+
+    assertThat(requestHandler.asApolloRequest(chunkedMockRequest).payload(),
+            is(Optional.of(ByteString.encodeUtf8("hi there"))));
+  }
+
+  /*
+   * When using Transfer-Encoding: chunked (see RFC 7230, section 3.3.1: Transfer-Encoding), a request may return -1
+   * when getting its content length since it is unknown, even though there is content being transmitted as a series
+   * of chunks. This means that we cannot conclude whether the request bears a payload or not purely on the content
+   * length check.
+   *
+   * MockHttpServletRequest does not provide support to test Transfer-Encoding. The following class emulates this
+   * behaviour by setting a content and returning a -1 as its length, so that we can test this functionality.
+   */
+  private class ChunkedMockRequest extends MockHttpServletRequest {
+
+    ChunkedMockRequest(String method, String path) {
+      super(method, path);
+      this.setContent("hi there".getBytes(StandardCharsets.UTF_8));
+      this.addHeader("Transfer-Encoding", "chunked");
+    }
+
+    @Override
+    public int getContentLength() {
+      return -1;
+    }
+  }
+
 
   @Test
   public void shouldExtractCallingServiceFromHeader() throws Exception {
