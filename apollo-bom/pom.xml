@@ -16,7 +16,7 @@
     <properties>
         <cucumber.version>1.2.4</cucumber.version>
         <auto-matter.version>0.11.0</auto-matter.version>
-        <logback.version>1.2.1</logback.version>
+        <logback.version>1.2.3</logback.version>
     </properties>
 
     <dependencyManagement>
@@ -186,7 +186,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.24</version>
+                <version>1.7.25</version>
             </dependency>
 
             <dependency>
