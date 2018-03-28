@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.spotify</groupId>
         <artifactId>apollo-parent</artifactId>
-        <version>1.6.4</version>
+        <version>1.6.5-SNAPSHOT</version>
     </parent>
 
     <name>Spotify Apollo Bill of Materials</name>
@@ -24,71 +24,71 @@
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-core</artifactId>
-                <version>1.6.4</version>
+                <version>1.6.5-SNAPSHOT</version>
             </dependency>
 
             <!-- modules -->
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-okhttp-client</artifactId>
-                <version>1.6.4</version>
+                <version>1.6.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-jetty-http-server</artifactId>
-                <version>1.6.4</version>
+                <version>1.6.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-slack</artifactId>
-                <version>1.6.4</version>
+                <version>1.6.5-SNAPSHOT</version>
             </dependency>
 
             <!-- api & http service -->
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-api</artifactId>
-                <version>1.6.4</version>
+                <version>1.6.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-api-impl</artifactId>
-                <version>1.6.4</version>
+                <version>1.6.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-environment</artifactId>
-                <version>1.6.4</version>
+                <version>1.6.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-route</artifactId>
-                <version>1.6.4</version>
+                <version>1.6.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-extra</artifactId>
-                <version>1.6.4</version>
+                <version>1.6.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-entity</artifactId>
-                <version>1.6.4</version>
+                <version>1.6.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-metrics</artifactId>
-                <version>1.6.4</version>
+                <version>1.6.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-http-service</artifactId>
-                <version>1.6.4</version>
+                <version>1.6.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-test</artifactId>
-                <version>1.6.4</version>
+                <version>1.6.5-SNAPSHOT</version>
             </dependency>
 
             <dependency>
