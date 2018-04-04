@@ -31,6 +31,8 @@ import com.spotify.apollo.metrics.RequestMetrics;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -52,6 +54,7 @@ import static com.spotify.apollo.Status.INTERNAL_SERVER_ERROR;
 import static com.spotify.apollo.Status.BAD_REQUEST;
 import static com.spotify.apollo.metrics.semantic.What.DROPPED_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION;
+import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION_THRESHOLD_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO;
 import static com.spotify.apollo.metrics.semantic.What.REQUEST_FANOUT_FACTOR;
@@ -66,6 +69,7 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.iterableWithSize;
+import static org.hamcrest.Matchers.not;
 
 public class SemanticServiceMetricsTest {
 
@@ -79,19 +83,21 @@ public class SemanticServiceMetricsTest {
   }
 
   private void setupWithPredicate(Predicate<What> predicate) {
-    setupWith(predicate, Collections.emptySet());
+    setupWith(predicate, Collections.emptySet(), DurationThresholdConfig.parseConfig
+        (ConfigFactory.empty()));
   }
 
-  private void setupWith(Predicate<What> predicate, Set<Integer> precreateCodes) {
+  private void setupWith(Predicate<What> predicate, Set<Integer> precreateCodes, DurationThresholdConfig config) {
     metricRegistry = new SemanticMetricRegistry();
     SemanticServiceMetrics serviceMetrics = new SemanticServiceMetrics(
         metricRegistry,
         MetricId.EMPTY
             .tagged("service", "test-service"),
         precreateCodes,
-        predicate);
-
-    requestMetrics = serviceMetrics.metricsForEndpointCall("hm://foo/<bar>");
+        predicate,
+        config
+    );
+    requestMetrics = serviceMetrics.metricsForEndpointCall("GET:/bar");
   }
 
   @Test
@@ -105,7 +111,7 @@ public class SemanticServiceMetricsTest {
             hasProperty("tags", allOf(
                 hasEntry("service", "test-service"),
                 hasEntry("what", "request-fanout-factor"),
-                hasEntry("endpoint", "hm://foo/<bar>"),
+                hasEntry("endpoint", "GET:/bar"),
                 hasEntry("unit", "request/request")
             ))
         )
@@ -122,7 +128,7 @@ public class SemanticServiceMetricsTest {
             hasProperty("tags", allOf(
                 hasEntry("service", "test-service"),
                 hasEntry("what", "endpoint-request-rate"),
-                hasEntry("endpoint", "hm://foo/<bar>"),
+                hasEntry("endpoint", "GET:/bar"),
                 hasEntry("status-code", "302"),
                 hasEntry("unit", "request")
             ))
@@ -138,7 +144,7 @@ public class SemanticServiceMetricsTest {
             hasProperty("tags", allOf(
                 hasEntry("service", "test-service"),
                 hasEntry("what", "endpoint-request-duration"),
-                hasEntry("endpoint", "hm://foo/<bar>")
+                hasEntry("endpoint", "GET:/bar")
             ))
         )
     );
@@ -438,7 +444,8 @@ public class SemanticServiceMetricsTest {
 
   @Test
   public void shouldPrecreateMetersForDefinedStatusCodes() throws Exception {
-    setupWith(what -> true, ImmutableSet.of(200, 503));
+    setupWith(what -> true, ImmutableSet.of(200, 503), DurationThresholdConfig.parseConfig
+        (ConfigFactory.empty()));
 
     Map<MetricId, Meter> meters = metricRegistry.getMeters(
         (metricId, metric) ->
@@ -448,6 +455,72 @@ public class SemanticServiceMetricsTest {
     assertThat(meters.size(), is(2));
     assertThat(meters.keySet(), containsInAnyOrder(meterWithTag("status-code", "200"),
                                                    meterWithTag("status-code", "503")));
+  }
+
+  @Test
+  public void shouldTrackDurationThresholdIndividual() throws Exception {
+    final Config config = ConfigFactory.parseString("endpoint-duration-goal./bar.GET = 200");
+    setupWith(what -> true, Collections.emptySet(), DurationThresholdConfig.parseConfig(config));
+    assertThat(
+        metricRegistry.getMetrics(),
+        hasKey(
+            hasProperty("tags", allOf(
+                hasEntry("service", "test-service"),
+                hasEntry("what", ENDPOINT_REQUEST_DURATION_THRESHOLD_RATE.tag()),
+                hasEntry("endpoint", "GET:/bar"),
+                hasEntry("threshold", "200")
+            ))
+        )
+    );
+  }
+
+  @Test
+  public void shouldTrackDurationThresholdGlobal() throws Exception {
+    final Config config = ConfigFactory.parseString("endpoint-duration-goal.all-endpoints = 400");
+    setupWith(what -> true, Collections.emptySet(), DurationThresholdConfig.parseConfig(config));
+    assertThat(
+        metricRegistry.getMetrics(),
+        hasKey(
+            hasProperty("tags", allOf(
+                hasEntry("service", "test-service"),
+                hasEntry("what", ENDPOINT_REQUEST_DURATION_THRESHOLD_RATE.tag()),
+                hasEntry("endpoint", "GET:/bar"),
+                hasEntry("threshold", "400")
+            ))
+        )
+    );
+  }
+
+  @Test
+  public void shouldNotTrackDurationThresholdWrongEndpoint() throws Exception {
+    final Config config = ConfigFactory.parseString("endpoint-duration-goal.fake-endpoint.GET = 400");
+    setupWith(what -> true, Collections.emptySet(), DurationThresholdConfig.parseConfig(config));
+    assertThat(
+        metricRegistry.getMetrics(),
+        not(hasKey(
+            hasProperty("tags", allOf(
+                hasEntry("service", "test-service"),
+                hasEntry("what", ENDPOINT_REQUEST_DURATION_THRESHOLD_RATE.tag()),
+                hasEntry("endpoint", "GET:/bar"),
+                hasEntry("threshold", "400")
+            ))
+        ))
+    );
+  }
+
+  @Test
+  public void shouldNotTrackDurationThresholdNoConfig() throws Exception {
+    assertThat(
+        metricRegistry.getMetrics(),
+        not(hasKey(
+            hasProperty("tags", allOf(
+                hasEntry("service", "test-service"),
+                hasEntry("what", ENDPOINT_REQUEST_DURATION_THRESHOLD_RATE.tag()),
+                hasEntry("endpoint", "GET:/bar"),
+                hasEntry("threshold", "400")
+            ))
+        ))
+    );
   }
 
   private Matcher<MetricId> meterWithTag(String tag, String value) {

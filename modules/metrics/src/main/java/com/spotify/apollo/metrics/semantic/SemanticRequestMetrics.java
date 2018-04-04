@@ -28,6 +28,7 @@ import com.spotify.apollo.StatusType;
 import com.spotify.apollo.metrics.RequestMetrics;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import okio.ByteString;
@@ -53,6 +54,7 @@ class SemanticRequestMetrics implements RequestMetrics {
   private final Meter sentErrors;
   private final Meter sentErrors4xx;
   private final Meter sentErrors5xx;
+  private final Optional<DurationThresholdTracker> durationThresholdTracker;
 
   SemanticRequestMetrics(
       Optional<Consumer<Response<ByteString>>> requestRateCounter,
@@ -64,7 +66,8 @@ class SemanticRequestMetrics implements RequestMetrics {
       Meter sentReplies,
       Meter sentErrors,
       Meter sentErrors4xx,
-      Meter sentErrors5xx) {
+      Meter sentErrors5xx,
+      Optional<DurationThresholdTracker> durationThresholdTracker) {
 
     this.requestRateCounter = requireNonNull(requestRateCounter);
     this.fanoutHistogram = requireNonNull(fanoutHistogram);
@@ -76,6 +79,7 @@ class SemanticRequestMetrics implements RequestMetrics {
     this.sentErrors = requireNonNull(sentErrors);
     this.sentErrors4xx = requireNonNull(sentErrors4xx);
     this.sentErrors5xx = requireNonNull(sentErrors5xx);
+    this.durationThresholdTracker = requireNonNull(durationThresholdTracker);
   }
 
   @Override
@@ -98,7 +102,13 @@ class SemanticRequestMetrics implements RequestMetrics {
             .ifPresent(payload -> histogram.update(payload.size())));
 
     sentReplies.mark();
-    timerContext.ifPresent(Timer.Context::stop);
+    timerContext.ifPresent(timer -> {
+      final long duration = timer.stop();
+      final long durationMs = TimeUnit.NANOSECONDS.toMillis(duration);
+      durationThresholdTracker.ifPresent(counter -> {
+        counter.markDurationThresholds(durationMs);
+      });
+    });
 
     StatusType.Family family = response.status().family();
     if (family != INFORMATIONAL && family != SUCCESSFUL) {

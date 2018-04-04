@@ -127,12 +127,12 @@ public class MetricsModule extends AbstractApolloModule {
   @Provides
   @Singleton
   public MetricsFactory apolloMetrics(
-      SemanticMetricRegistry metricRegistry, MetricsConfig metricsConfig
-  ) {
+      SemanticMetricRegistry metricRegistry, MetricsConfig metricsConfig) {
     return new SemanticMetricsFactory(
         metricRegistry,
         what -> metricsConfig.serverMetrics().contains(what),
-        metricsConfig.precreateCodes()
+        metricsConfig.precreateCodes(),
+        metricsConfig.durationThresholdConfig()
     );
   }
 

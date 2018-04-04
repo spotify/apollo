@@ -21,6 +21,7 @@ package com.spotify.apollo.metrics.semantic;
 
 import com.typesafe.config.Config;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -31,6 +32,7 @@ import javax.inject.Inject;
 
 import static com.spotify.apollo.metrics.semantic.What.DROPPED_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION;
+import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION_THRESHOLD_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO;
 
@@ -42,11 +44,13 @@ public class MetricsConfig {
       EnumSet.of(
           ENDPOINT_REQUEST_RATE,
           ENDPOINT_REQUEST_DURATION,
+          ENDPOINT_REQUEST_DURATION_THRESHOLD_RATE,
           DROPPED_REQUEST_RATE,
           ERROR_RATIO);
 
   private final Set<What> enabledMetrics;
   private final Set<Integer> precreateCodes;
+  private final DurationThresholdConfig durationThresholdConfig;
 
   @Inject
   MetricsConfig(Config config) {
@@ -61,6 +65,7 @@ public class MetricsConfig {
     } else {
       precreateCodes = Collections.emptySet();
     }
+    durationThresholdConfig = DurationThresholdConfig.parseConfig(config);
   }
 
   private Set<What> parseConfig(List<String> metrics) {
@@ -72,6 +77,8 @@ public class MetricsConfig {
 
     return result;
   }
+
+  public DurationThresholdConfig durationThresholdConfig() { return durationThresholdConfig; }
 
   public Set<What> serverMetrics() {
     return enabledMetrics;

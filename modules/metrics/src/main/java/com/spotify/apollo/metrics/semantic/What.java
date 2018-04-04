@@ -31,7 +31,8 @@ public enum What {
   ENDPOINT_REQUEST_DURATION("endpoint-request-duration"),
   ERROR_RATIO("error-ratio"),
   ERROR_RATIO_4XX("error-ratio-4xx"),
-  ERROR_RATIO_5XX("error-ratio-5xx")
+  ERROR_RATIO_5XX("error-ratio-5xx"),
+  ENDPOINT_REQUEST_DURATION_THRESHOLD_RATE("endpoint-request-duration-threshold-rate")
   ;
 
   private final String tag;
