@@ -57,14 +57,10 @@ public class DurationThresholdConfig {
   }
 
   private static Optional<Integer> parseAllEndpoints(final Config config) {
-    final Optional<Integer> allEndpoints;
-    final Config durationGoalConfig = config.getObject("endpoint-duration-goal").toConfig();
-    if (durationGoalConfig.hasPath("all-endpoints")) {
-      allEndpoints = Optional.of(durationGoalConfig.getInt("all-endpoints"));
-    } else {
-      allEndpoints = Optional.empty();
+    if (config.hasPath("endpoint-duration-goal.all-endpoints")) {
+      return Optional.of(config.getInt("endpoint-duration-goal.all-endpoints"));
     }
-    return allEndpoints;
+    return Optional.empty();
   }
 
   public static DurationThresholdConfig parseConfig(final Config config) {

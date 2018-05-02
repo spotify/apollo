@@ -118,7 +118,8 @@ A Meter, tagged with:
 | what        | "endpoint-request-duration-threshold-rate"     | Enable/disable with endpoint-duration-goal config           |
 | threshold   | *                 | The request duration goal, in milliseconds                   |
 
-If a duration goal is set in configuration (`endpoint-duration-goal`), this meter will be marked when a request meets its goal.
+This meter will only be created if a duration goal is set in the configuration (`endpoint-duration-goal`). The meter will be marked when a request meets its goal.
+
 
 ## [ffwd](https://github.com/spotify/ffwd) reporter
 
@@ -220,12 +221,15 @@ key | type | required | note
 --- | ---- | -------- | ----
 `endpoint-duration-goal.{endpoint}.{method}` | int | required | Duration threshold in milliseconds for an endpoint/method combination
 
+**Note** If an endpoint has a parameter it needs to be included. For example a route defined as `GET:/example/<name>` would have
+be configured as `/v1/example-b/<name>.GET`
+
 #### Example
 
 ```
 endpoint-duration-goal = {
-  /v1/test-a.GET = 200 # meter marked every time this endpoint resolves in under 200 ms
-  /v1/test-b.GET = 100 # meter marked every time this endpoint resolves in under 100 ms
+  /v1/example-a.GET        = 200 # meter marked every time this endpoint resolves in under 200 ms
+  /v1/example-b/<name>.GET = 100 # meter marked every time this endpoint with a named parameter resolves in under 100 ms
 }
 ```
 
