@@ -23,7 +23,6 @@ import com.spotify.apollo.metrics.MetricsFactory;
 import com.spotify.apollo.metrics.ServiceMetrics;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
-
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -33,19 +32,22 @@ public class SemanticMetricsFactory implements MetricsFactory {
   private final MetricId metricId;
   private final Predicate<What> enabledMetrics;
   private final Set<Integer> precreateCodes;
+  private final DurationThresholdConfig durationThresholdConfig;
 
   public SemanticMetricsFactory(final SemanticMetricRegistry metricRegistry,
                                 Predicate<What> enabledMetrics,
-                                Set<Integer> precreateCodes) {
+                                Set<Integer> precreateCodes,
+                                DurationThresholdConfig durationThresholdConfig) {
     this.metricRegistry = metricRegistry;
     this.metricId = MetricId.build();
     this.enabledMetrics = enabledMetrics;
     this.precreateCodes = precreateCodes;
+    this.durationThresholdConfig = durationThresholdConfig;
   }
 
   @Override
   public ServiceMetrics createForService(String serviceName) {
     final MetricId id = metricId.tagged("service", serviceName);
-    return new SemanticServiceMetrics(metricRegistry, id, precreateCodes, enabledMetrics);
+    return new SemanticServiceMetrics(metricRegistry, id, precreateCodes, enabledMetrics, durationThresholdConfig);
   }
 }

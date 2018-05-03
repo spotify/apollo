@@ -68,16 +68,19 @@ class SemanticServiceMetrics implements ServiceMetrics {
   private final Predicate<What> enabledMetrics;
   private final Set<Integer> precreateCodes;
   private final LoadingCache<String, CachedMeters> metersCache;
+  private final DurationThresholdConfig durationThresholdConfig;
 
   SemanticServiceMetrics(SemanticMetricRegistry metricRegistry,
                          MetricId id,
                          Set<Integer> precreateCodes,
-                         Predicate<What> enabledMetrics) {
+                         Predicate<What> enabledMetrics,
+                         DurationThresholdConfig durationThresholdConfig) {
     this.metricRegistry = requireNonNull(metricRegistry);
     // Already tagged with 'application' and 'service'
     this.metricId = requireNonNull(id);
     this.enabledMetrics = requireNonNull(enabledMetrics);
     this.precreateCodes = ImmutableSet.copyOf(precreateCodes);
+    this.durationThresholdConfig = durationThresholdConfig;
 
     metersCache = CacheBuilder.<String, CachedMeters>newBuilder()
         .build(new CacheLoader<String, CachedMeters>() {
@@ -102,7 +105,8 @@ class SemanticServiceMetrics implements ServiceMetrics {
         meters.sentReplies,
         meters.sentErrors,
         meters.sentErrors4xx,
-        meters.sentErrors5xx);
+        meters.sentErrors5xx,
+        meters.requestDurationThresholdTracker);
   }
 
   private CachedMeters metersForEndpoint(String endpoint) {
@@ -167,6 +171,7 @@ class SemanticServiceMetrics implements ServiceMetrics {
         responseSizeHistogram(id),
         requestSizeHistogram(id),
         requestDurationTimer(id),
+        requestDurationThresholdTracker(id, endpoint),
         droppedRequests(id),
         sentReplies,
         sentErrors,
@@ -187,8 +192,21 @@ class SemanticServiceMetrics implements ServiceMetrics {
   private Optional<Timer> requestDurationTimer(MetricId id) {
     return enabledMetrics.test(ENDPOINT_REQUEST_DURATION) ?
            Optional.of(metricRegistry
-                           .timer(id.tagged("what", ENDPOINT_REQUEST_DURATION.tag()))) :
+               .timer(id.tagged("what", ENDPOINT_REQUEST_DURATION.tag()))) :
            Optional.empty();
+  }
+
+  /**
+   * Checks for endpoint-duration-goal configuration options and sets up
+   * metrics that track how many requests meet a certain duration threshold goal.
+   *
+   * @param endpoint formatted as METHOD:URI
+   */
+  private Optional<DurationThresholdTracker> requestDurationThresholdTracker(MetricId id,
+                                                                             String endpoint) {
+    return durationThresholdConfig.getDurationThresholdForEndpoint(endpoint)
+        .map(threshold -> Optional.of(new DurationThresholdTracker(id, metricRegistry, threshold)))
+        .orElse(Optional.empty());
   }
 
   private Optional<Histogram> requestSizeHistogram(MetricId id) {
@@ -282,6 +300,7 @@ class SemanticServiceMetrics implements ServiceMetrics {
     private final Optional<Histogram> responseSizeHistogram;
     private final Optional<Histogram> requestSizeHistogram;
     private final Optional<Timer> requestDurationTimer;
+    private final Optional<DurationThresholdTracker> requestDurationThresholdTracker;
     private final Optional<Meter> droppedRequests;
     private final Meter sentReplies;
     private final Meter sentErrors;
@@ -294,6 +313,7 @@ class SemanticServiceMetrics implements ServiceMetrics {
                          Optional<Histogram> responseSizeHistogram,
                          Optional<Histogram> requestSizeHistogram,
                          Optional<Timer> requestDurationTimer,
+                         Optional<DurationThresholdTracker> requestDurationThresholdTracker,
                          Optional<Meter> droppedRequests,
                          Meter sentReplies, Meter sentErrors,
                          Meter sentErrors4xx, Meter sentErrors5xx) {
@@ -302,6 +322,7 @@ class SemanticServiceMetrics implements ServiceMetrics {
       this.requestSizeHistogram = requestSizeHistogram;
       this.responseSizeHistogram = responseSizeHistogram;
       this.requestDurationTimer = requestDurationTimer;
+      this.requestDurationThresholdTracker = requestDurationThresholdTracker;
       this.droppedRequests = droppedRequests;
       this.sentReplies = sentReplies;
       this.sentErrors = sentErrors;
