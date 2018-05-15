@@ -271,3 +271,10 @@ for some description of how to do request handling decorations.
 For client-side metrics, wrap the ```Client``` you get from the ```RequestContext``` in a similar
 way to how ```DecoratingClient``` is implemented. In your wrapper, ensure that the right metrics
 are tracked.
+
+## Custom Tags
+
+Metrics can be decorated with custom tags by setting environment variables.
+
+- `FFWD_TAG_environment=production` will append `environment: production` to all metrics.
+- `FFWD_TAG_foo=bar` will tag metrics with `foo: bar`
