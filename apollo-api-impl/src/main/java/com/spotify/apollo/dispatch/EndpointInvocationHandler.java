@@ -26,6 +26,8 @@ import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.request.EndpointRunnableFactory;
 import com.spotify.apollo.request.OngoingRequest;
 
+import okio.ByteString;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,6 +92,7 @@ public class EndpointInvocationHandler implements EndpointRunnableFactory {
     LOG.warn("Got Exception {} when invoking endpoint for request: {}",
              message, ongoingRequest.request(), e);
 
-    ongoingRequest.reply(forStatus(INTERNAL_SERVER_ERROR.withReasonPhrase(message)));
+    ongoingRequest.reply(
+        forStatus(INTERNAL_SERVER_ERROR).withPayload(ByteString.encodeUtf8(message)));
   }
 }

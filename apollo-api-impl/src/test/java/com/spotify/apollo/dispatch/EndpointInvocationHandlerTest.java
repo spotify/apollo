@@ -125,7 +125,7 @@ public class EndpointInvocationHandlerTest {
 
     verify(ongoingRequest).reply(messageArgumentCaptor.capture());
 
-    assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
+    assertThat(messageArgumentCaptor.getValue().payload().get().utf8(),
                containsString(exception.getMessage()));
   }
 
@@ -158,15 +158,15 @@ public class EndpointInvocationHandlerTest {
 
     verify(ongoingRequest).reply(messageArgumentCaptor.capture());
 
-    assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
+    assertThat(messageArgumentCaptor.getValue().payload().get().utf8(),
                containsString("expected"));
-    assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
+    assertThat(messageArgumentCaptor.getValue().payload().get().utf8(),
                containsString("with multiple"));
-    assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
+    assertThat(messageArgumentCaptor.getValue().payload().get().utf8(),
                containsString("lines"));
-    assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
+    assertThat(messageArgumentCaptor.getValue().payload().get().utf8(),
                not(containsString("\r")));
-    assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
+    assertThat(messageArgumentCaptor.getValue().payload().get().utf8(),
                not(containsString("\n")));
   }
 
@@ -180,7 +180,7 @@ public class EndpointInvocationHandlerTest {
 
     verify(ongoingRequest).reply(messageArgumentCaptor.capture());
 
-    assertThat(messageArgumentCaptor.getValue().status().reasonPhrase(),
+    assertThat(messageArgumentCaptor.getValue().payload().get().utf8(),
         containsString(exception.getMessage()));
   }
 
