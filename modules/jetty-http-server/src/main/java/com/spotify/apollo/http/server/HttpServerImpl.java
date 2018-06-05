@@ -19,6 +19,7 @@
  */
 package com.spotify.apollo.http.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Closer;
 
 import com.spotify.apollo.RequestMetadata;
@@ -26,6 +27,7 @@ import com.spotify.apollo.request.RequestHandler;
 import com.spotify.apollo.request.RequestMetadataImpl;
 
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +46,8 @@ class HttpServerImpl implements HttpServer {
   private final Runnable onClose;
   private final RequestOutcomeConsumer logger;
 
-  private Server server;
+  @VisibleForTesting
+  Server server;
 
   HttpServerImpl(Closer closer, HttpServerConfig config, Runnable onClose,
                  RequestOutcomeConsumer logger) {
@@ -63,6 +66,8 @@ class HttpServerImpl implements HttpServer {
         RequestMetadataImpl.hostAndPort(config.address(), config.port());
 
     server = new Server(serverSocketAddress);
+    ((QueuedThreadPool) server.getThreadPool()).setMaxThreads(config.maxThreads());
+
     server.setHandler(new ApolloRequestHandler(serverInfo, requestHandler,
                                                Duration.ofMillis(config.ttlMillis()), logger));
     try {

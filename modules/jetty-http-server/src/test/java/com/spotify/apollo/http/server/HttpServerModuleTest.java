@@ -19,13 +19,10 @@
  */
 package com.spotify.apollo.http.server;
 
-import com.google.common.collect.Lists;
-
-import com.spotify.apollo.Response;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.core.Services;
+import com.spotify.apollo.http.common.TestHandler;
 import com.spotify.apollo.request.OngoingRequest;
-import com.spotify.apollo.request.RequestHandler;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -36,7 +33,6 @@ import org.junit.rules.ExpectedException;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
-import java.util.List;
 import java.util.Optional;
 
 import okhttp3.OkHttpClient;
@@ -79,8 +75,8 @@ public class HttpServerModuleTest {
       okhttp3.Response response = okHttpClient.newCall(request).execute();
       assertThat(response.code(), is(IM_A_TEAPOT.code()));
 
-      assertThat(testHandler.requests.size(), is(1));
-      OngoingRequest incomingRequest = testHandler.requests.get(0);
+      assertThat(testHandler.getRequests().size(), is(1));
+      OngoingRequest incomingRequest = testHandler.getRequests().get(0);
       assertThat(incomingRequest.request().uri(), is("/hello/world"));
 
       server.close();
@@ -104,8 +100,8 @@ public class HttpServerModuleTest {
       okhttp3.Response response = okHttpClient.newCall(httpRequest).execute();
       assertThat(response.code(), is(IM_A_TEAPOT.code()));
 
-      assertThat(testHandler.requests.size(), is(1));
-      final com.spotify.apollo.Request apolloRequest = testHandler.requests.get(0).request();
+      assertThat(testHandler.getRequests().size(), is(1));
+      final com.spotify.apollo.Request apolloRequest = testHandler.getRequests().get(0).request();
       assertThat(apolloRequest.uri(), is("/query?a=foo&b=bar&b=baz"));
       assertThat(apolloRequest.parameter("a"), is(Optional.of("foo")));
       assertThat(apolloRequest.parameter("b"), is(Optional.of("bar")));
@@ -133,8 +129,8 @@ public class HttpServerModuleTest {
       okhttp3.Response response = okHttpClient.newCall(httpRequest).execute();
       assertThat(response.code(), is(IM_A_TEAPOT.code()));
 
-      assertThat(testHandler.requests.size(), is(1));
-      final com.spotify.apollo.Request apolloRequest = testHandler.requests.get(0).request();
+      assertThat(testHandler.getRequests().size(), is(1));
+      final com.spotify.apollo.Request apolloRequest = testHandler.getRequests().get(0).request();
       assertThat(apolloRequest.uri(), is("/headers"));
       assertThat(apolloRequest.header("Foo"), is(Optional.of("bar")));
       assertThat(apolloRequest.header("Repeat"), is(Optional.of("once,twice")));
@@ -169,17 +165,6 @@ public class HttpServerModuleTest {
       fail();
     } catch (ConnectException e) {
       assertThat(e.getMessage(), containsString("Connection refused"));
-    }
-  }
-
-  private static class TestHandler implements RequestHandler {
-
-    List<OngoingRequest> requests = Lists.newLinkedList();
-
-    @Override
-    public void handle(OngoingRequest request) {
-      requests.add(request);
-      request.reply(Response.forStatus(IM_A_TEAPOT));
     }
   }
 }
