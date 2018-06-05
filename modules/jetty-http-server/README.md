@@ -9,6 +9,7 @@ key | type | required | note
 `http.server.port` | int | optional | ie 8080
 `http.server.address` | string | optional | default 0.0.0.0
 `http.server.ttlMillis` | int | optional | default 30000, determines how long before an error response is sent
+`http.server.maxThreads` | int | optional | default 200, determines the maximum number of threads in the server thread pool 
 
 ## Special request headers
 
