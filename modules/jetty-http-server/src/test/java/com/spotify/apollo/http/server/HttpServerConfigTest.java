@@ -48,6 +48,15 @@ public class HttpServerConfigTest {
     assertEquals(ttlMillis, http.ttlMillis());
   }
 
+  @Test
+  public void canConfigureMaxThreads() {
+    long maxThreads = 3900;
+    String json = "{\"http\":{\"server\":{\"maxThreads\": 3900}}}";
+
+    HttpServerConfig http = conf(json);
+    assertEquals(maxThreads, http.maxThreads());
+  }
+
   private static HttpServerConfig conf(String json) {
     return new HttpServerConfig(ConfigFactory.parseString(json));
   }

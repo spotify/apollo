@@ -31,6 +31,7 @@ class HttpServerConfig {
   private static final String CONFIG_BASE_NAME = "http.server";
   private static final String DEFAULT_HTTP_ADDRESS = "0.0.0.0";
   private static final int DEFAULT_TTL_MILLIS = 30000;
+  private static final int DEFAULT_MAX_THREADS = 200;
 
   private final Config config;
 
@@ -49,5 +50,9 @@ class HttpServerConfig {
 
   public long ttlMillis() {
     return optionalInt(config, CONFIG_BASE_NAME + ".ttlMillis").orElse(DEFAULT_TTL_MILLIS);
+  }
+
+  public int maxThreads() {
+    return optionalInt(config, CONFIG_BASE_NAME + ".maxThreads").orElse(DEFAULT_MAX_THREADS);
   }
 }
