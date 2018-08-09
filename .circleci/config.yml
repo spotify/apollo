@@ -3,7 +3,7 @@ jobs:
   jdk8:
     working_directory: ~/apollo
     docker:
-      - image: maven:3.5.2-jdk-8
+      - image: maven:3.5.4-jdk-8
     steps:
       - checkout
       - restore_cache:
@@ -31,17 +31,17 @@ jobs:
       - store_artifacts:
           path: ~/junit
       - run: bash <(curl -s https://codecov.io/bash)
-  jdk9:
+  jdk10:
     working_directory: ~/apollo
     docker:
-      - image: maven:3.5.2-jdk-9-slim
+      - image: maven:3.5.4-jdk-10-slim
     steps:
       - checkout
       - restore_cache:
-          key: v1-deps-jdk9-{{ checksum "pom.xml" }}
+          key: v1-deps-jdk10-{{ checksum "pom.xml" }}
       - run: mvn dependency:go-offline clean compile || true
       - save_cache:
-          key: v1-deps-jdk9-{{ checksum "pom.xml" }}
+          key: v1-deps-jdk10-{{ checksum "pom.xml" }}
           paths:
             - ~/.m2
       - run:
@@ -54,4 +54,4 @@ workflows:
   build:
     jobs:
       - jdk8
-      - jdk9
+      - jdk10
