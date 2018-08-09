@@ -15,7 +15,7 @@
 
     <properties>
         <cucumber.version>1.2.4</cucumber.version>
-        <auto-matter.version>0.14.1</auto-matter.version>
+        <auto-matter.version>0.15.0</auto-matter.version>
         <logback.version>1.2.3</logback.version>
     </properties>
 
@@ -104,12 +104,12 @@
             <dependency>
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
-                <version>4.1.0</version>
+                <version>4.2.0</version>
             </dependency>
             <dependency>
                 <groupId>com.google.inject.extensions</groupId>
                 <artifactId>guice-multibindings</artifactId>
-                <version>4.1.0</version>
+                <version>4.2.0</version>
             </dependency>
             <dependency>
                 <groupId>net.sf.jopt-simple</groupId>
@@ -240,7 +240,7 @@
             <dependency>
                 <groupId>com.google.auto.value</groupId>
                 <artifactId>auto-value</artifactId>
-                <version>1.5.3</version>
+                <version>1.6.2</version>
             </dependency>
 
             <!-- test dependencies -->
