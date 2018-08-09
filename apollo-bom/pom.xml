@@ -15,7 +15,7 @@
 
     <properties>
         <cucumber.version>1.2.4</cucumber.version>
-        <auto-matter.version>0.11.0</auto-matter.version>
+        <auto-matter.version>0.15.0</auto-matter.version>
         <logback.version>1.2.3</logback.version>
     </properties>
 
@@ -135,7 +135,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>18.0</version>
+                <version>19.0</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.core</groupId>
