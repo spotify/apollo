@@ -27,7 +27,6 @@ import com.spotify.apollo.Status;
 import com.spotify.apollo.route.AsyncHandler;
 import com.spotify.apollo.route.Middleware;
 import com.spotify.apollo.route.SyncHandler;
-
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
