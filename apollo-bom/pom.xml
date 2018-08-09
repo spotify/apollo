@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.spotify</groupId>
         <artifactId>apollo-parent</artifactId>
-        <version>1.6.3-SNAPSHOT</version>
+        <version>1.7.1-SNAPSHOT</version>
     </parent>
 
     <name>Spotify Apollo Bill of Materials</name>
@@ -16,7 +16,7 @@
     <properties>
         <cucumber.version>1.2.4</cucumber.version>
         <auto-matter.version>0.14.1</auto-matter.version>
-        <logback.version>1.2.1</logback.version>
+        <logback.version>1.2.3</logback.version>
     </properties>
 
     <dependencyManagement>
@@ -24,71 +24,71 @@
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-core</artifactId>
-                <version>1.6.3-SNAPSHOT</version>
+                <version>1.7.1-SNAPSHOT</version>
             </dependency>
 
             <!-- modules -->
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-okhttp-client</artifactId>
-                <version>1.6.3-SNAPSHOT</version>
+                <version>1.7.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-jetty-http-server</artifactId>
-                <version>1.6.3-SNAPSHOT</version>
+                <version>1.7.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-slack</artifactId>
-                <version>1.6.3-SNAPSHOT</version>
+                <version>1.7.1-SNAPSHOT</version>
             </dependency>
 
             <!-- api & http service -->
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-api</artifactId>
-                <version>1.6.3-SNAPSHOT</version>
+                <version>1.7.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-api-impl</artifactId>
-                <version>1.6.3-SNAPSHOT</version>
+                <version>1.7.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-environment</artifactId>
-                <version>1.6.3-SNAPSHOT</version>
+                <version>1.7.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-route</artifactId>
-                <version>1.6.3-SNAPSHOT</version>
+                <version>1.7.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-extra</artifactId>
-                <version>1.6.3-SNAPSHOT</version>
+                <version>1.7.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-entity</artifactId>
-                <version>1.6.3-SNAPSHOT</version>
+                <version>1.7.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-metrics</artifactId>
-                <version>1.6.3-SNAPSHOT</version>
+                <version>1.7.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-http-service</artifactId>
-                <version>1.6.3-SNAPSHOT</version>
+                <version>1.7.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-test</artifactId>
-                <version>1.6.3-SNAPSHOT</version>
+                <version>1.7.1-SNAPSHOT</version>
             </dependency>
 
             <dependency>
@@ -186,7 +186,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.24</version>
+                <version>1.7.25</version>
             </dependency>
 
             <dependency>

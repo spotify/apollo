@@ -60,22 +60,27 @@ class SemanticServiceMetrics implements ServiceMetrics {
 
   // Minimum reply rate at which we consider the error ratio to make sense.
   private static final double ERROR_GAUGE_MINIMUM_REPLY_RATE = 1e-3;
+  // If a ratio is below this value, report it as zero
+  private static final double ERROR_RATIO_MINIMUM = 1e-15;
 
   private final SemanticMetricRegistry metricRegistry;
   private final MetricId metricId;
   private final Predicate<What> enabledMetrics;
   private final Set<Integer> precreateCodes;
   private final LoadingCache<String, CachedMeters> metersCache;
+  private final DurationThresholdConfig durationThresholdConfig;
 
   SemanticServiceMetrics(SemanticMetricRegistry metricRegistry,
                          MetricId id,
                          Set<Integer> precreateCodes,
-                         Predicate<What> enabledMetrics) {
+                         Predicate<What> enabledMetrics,
+                         DurationThresholdConfig durationThresholdConfig) {
     this.metricRegistry = requireNonNull(metricRegistry);
     // Already tagged with 'application' and 'service'
     this.metricId = requireNonNull(id);
     this.enabledMetrics = requireNonNull(enabledMetrics);
     this.precreateCodes = ImmutableSet.copyOf(precreateCodes);
+    this.durationThresholdConfig = durationThresholdConfig;
 
     metersCache = CacheBuilder.<String, CachedMeters>newBuilder()
         .build(new CacheLoader<String, CachedMeters>() {
@@ -100,7 +105,8 @@ class SemanticServiceMetrics implements ServiceMetrics {
         meters.sentReplies,
         meters.sentErrors,
         meters.sentErrors4xx,
-        meters.sentErrors5xx);
+        meters.sentErrors5xx,
+        meters.requestDurationThresholdTracker);
   }
 
   private CachedMeters metersForEndpoint(String endpoint) {
@@ -165,6 +171,7 @@ class SemanticServiceMetrics implements ServiceMetrics {
         responseSizeHistogram(id),
         requestSizeHistogram(id),
         requestDurationTimer(id),
+        requestDurationThresholdTracker(id, endpoint),
         droppedRequests(id),
         sentReplies,
         sentErrors,
@@ -185,8 +192,21 @@ class SemanticServiceMetrics implements ServiceMetrics {
   private Optional<Timer> requestDurationTimer(MetricId id) {
     return enabledMetrics.test(ENDPOINT_REQUEST_DURATION) ?
            Optional.of(metricRegistry
-                           .timer(id.tagged("what", ENDPOINT_REQUEST_DURATION.tag()))) :
+               .timer(id.tagged("what", ENDPOINT_REQUEST_DURATION.tag()))) :
            Optional.empty();
+  }
+
+  /**
+   * Checks for endpoint-duration-goal configuration options and sets up
+   * metrics that track how many requests meet a certain duration threshold goal.
+   *
+   * @param endpoint formatted as METHOD:URI
+   */
+  private Optional<DurationThresholdTracker> requestDurationThresholdTracker(MetricId id,
+                                                                             String endpoint) {
+    return durationThresholdConfig.getDurationThresholdForEndpoint(endpoint)
+        .map(threshold -> Optional.of(new DurationThresholdTracker(id, metricRegistry, threshold)))
+        .orElse(Optional.empty());
   }
 
   private Optional<Histogram> requestSizeHistogram(MetricId id) {
@@ -249,14 +269,28 @@ class SemanticServiceMetrics implements ServiceMetrics {
 
   private Supplier<Ratio> errorRatioSupplier(Supplier<Double> errorRateSupplier,
                                              Supplier<Double> replyRateSupplier) {
+    // We limit both the denominator and the resulting ratio when calculating error ratios.
+    //
+    // The ratio is limited in order to avoid producing ratios that are arbitrarily close to zero
+    // but not quite zero. Them being close to but not quite zero is not a problem per se but it
+    // distorts the apparent meaning of graphs in some monitoring tools - when the ratio goes
+    // from e.g. 1e-316 to 1e-300 it can look like a huge increase indicating that something
+    // sinister is in the works even though the error ratio is basically nil.
+    //
+    // The denominator is limited to avoid noise in the ratio when the total reply rate is low,
+    // dividing by a EWMA-computed rate can cause ratios that are higher than the true ratio due to
+    // computational noise in the EWMA computations.
     // If a service is drained of traffic (for instance by moving traffic to another host or site),
     // the meter values will decay exponentially towards zero. If left for some time (hours),
     // rounding errors will cause the values of the meters to approach each other, thus skewing
     // the ratio. If an alert is tied to this ratio, it may trigger falsely. To fix this, we set a
     // minimum for the denominator in the ratio, effectively making sure it will be be bigger than
     // the error rate as both rates goes towards zero.
-    return () -> Ratio.of(errorRateSupplier.get(),
-                          max(replyRateSupplier.get(), ERROR_GAUGE_MINIMUM_REPLY_RATE));
+    return () -> {
+      final double denominator = max(replyRateSupplier.get(), ERROR_GAUGE_MINIMUM_REPLY_RATE);
+      final Ratio ratio = Ratio.of(errorRateSupplier.get(), denominator);
+      return ratio.getValue() > ERROR_RATIO_MINIMUM ? ratio : Ratio.of(0, denominator);
+    };
   }
 
   private static class CachedMeters {
@@ -266,6 +300,7 @@ class SemanticServiceMetrics implements ServiceMetrics {
     private final Optional<Histogram> responseSizeHistogram;
     private final Optional<Histogram> requestSizeHistogram;
     private final Optional<Timer> requestDurationTimer;
+    private final Optional<DurationThresholdTracker> requestDurationThresholdTracker;
     private final Optional<Meter> droppedRequests;
     private final Meter sentReplies;
     private final Meter sentErrors;
@@ -278,6 +313,7 @@ class SemanticServiceMetrics implements ServiceMetrics {
                          Optional<Histogram> responseSizeHistogram,
                          Optional<Histogram> requestSizeHistogram,
                          Optional<Timer> requestDurationTimer,
+                         Optional<DurationThresholdTracker> requestDurationThresholdTracker,
                          Optional<Meter> droppedRequests,
                          Meter sentReplies, Meter sentErrors,
                          Meter sentErrors4xx, Meter sentErrors5xx) {
@@ -286,6 +322,7 @@ class SemanticServiceMetrics implements ServiceMetrics {
       this.requestSizeHistogram = requestSizeHistogram;
       this.responseSizeHistogram = responseSizeHistogram;
       this.requestDurationTimer = requestDurationTimer;
+      this.requestDurationThresholdTracker = requestDurationThresholdTracker;
       this.droppedRequests = droppedRequests;
       this.sentReplies = sentReplies;
       this.sentErrors = sentErrors;

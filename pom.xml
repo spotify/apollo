@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>apollo-parent</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.7.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>Java libraries for writing composable microservices</description>

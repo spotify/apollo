@@ -27,6 +27,7 @@ import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.spotify.metrics.ffwd.FastForwardReporter;
 import com.spotify.metrics.ffwdhttp.FastForwardHttpReporter;
+import com.spotify.metrics.tags.EnvironmentTagExtractor;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.util.Optional;
@@ -95,6 +96,7 @@ interface FfwdConfig {
       final FastForwardReporter.Builder builder = FastForwardReporter
           .forRegistry(metricRegistry)
           .schedule(TimeUnit.SECONDS, interval)
+          .tagExtractor(new EnvironmentTagExtractor())
           .prefix(metricId);
 
       host.ifPresent(builder::host);
@@ -136,6 +138,7 @@ interface FfwdConfig {
 
       final FastForwardHttpReporter.Builder builder = FastForwardHttpReporter
           .forRegistry(metricRegistry, httpClient.build())
+          .tagExtractor(new EnvironmentTagExtractor())
           .schedule(interval, TimeUnit.SECONDS)
           .prefix(metricId);
 
