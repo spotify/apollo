@@ -15,7 +15,7 @@
 
     <properties>
         <cucumber.version>1.2.4</cucumber.version>
-        <auto-matter.version>0.11.0</auto-matter.version>
+        <auto-matter.version>0.15.0</auto-matter.version>
         <logback.version>1.2.3</logback.version>
     </properties>
 
@@ -104,12 +104,12 @@
             <dependency>
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
-                <version>4.0</version>
+                <version>4.2.0</version>
             </dependency>
             <dependency>
                 <groupId>com.google.inject.extensions</groupId>
                 <artifactId>guice-multibindings</artifactId>
-                <version>4.0</version>
+                <version>4.2.0</version>
             </dependency>
             <dependency>
                 <groupId>net.sf.jopt-simple</groupId>
@@ -135,7 +135,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>18.0</version>
+                <version>23.6-jre</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.core</groupId>
@@ -202,7 +202,7 @@
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
-                <version>3.0.0</version>
+                <version>3.0.2</version>
             </dependency>
 
             <dependency>
@@ -230,7 +230,7 @@
             <dependency>
                 <groupId>com.google.auto.service</groupId>
                 <artifactId>auto-service</artifactId>
-                <version>1.0-rc2</version>
+                <version>1.0-rc4</version>
             </dependency>
             <dependency>
                 <groupId>io.norberg</groupId>
@@ -240,7 +240,7 @@
             <dependency>
                 <groupId>com.google.auto.value</groupId>
                 <artifactId>auto-value</artifactId>
-                <version>1.1</version>
+                <version>1.5.4</version>
             </dependency>
 
             <!-- test dependencies -->

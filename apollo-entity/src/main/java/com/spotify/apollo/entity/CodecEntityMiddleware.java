@@ -30,6 +30,7 @@ import com.spotify.apollo.route.SyncHandler;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import javaslang.control.Either;
 import javax.annotation.Nullable;
@@ -191,7 +192,7 @@ class CodecEntityMiddleware implements EntityMiddleware {
       Class<? extends E> entityClass) {
     //noinspection unchecked
     return rc -> deserialize(rc, entityClass)
-        .map(inner.apply(rc))
+        .<Response<R>>map(inner.apply(rc))
         .getOrElseGet(left -> (Response<R>) left);
   }
 
@@ -200,7 +201,7 @@ class CodecEntityMiddleware implements EntityMiddleware {
       Class<? extends E> entityClass) {
     //noinspection unchecked
     return rc -> deserialize(rc, entityClass)
-        .map(inner.apply(rc))
+        .<CompletionStage<Response<R>>>map(inner.apply(rc))
         .getOrElseGet(left -> completedFuture((Response<R>) left));
   }
 

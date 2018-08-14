@@ -58,7 +58,7 @@
         <dependency>
             <groupId>io.norberg</groupId>
             <artifactId>auto-matter</artifactId>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.norberg</groupId>
