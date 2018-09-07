@@ -48,6 +48,23 @@ jobs:
           command: mvn verify
           environment:
             MAVEN_OPTS: -Xmx512m --add-modules java.xml.bind
+  jdk11:
+    working_directory: ~/apollo
+    docker:
+      - image: maven:3.5.4-jdk-11-slim
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-deps-jdk11-{{ checksum "pom.xml" }}
+      - run: mvn dependency:go-offline clean compile || true
+      - save_cache:
+          key: v1-deps-jdk11-{{ checksum "pom.xml" }}
+          paths:
+            - ~/.m2
+      - run:
+          command: mvn verify
+          environment:
+            MAVEN_OPTS: -Xmx512m --add-modules java.xml.bind
 
 workflows:
   version: 2
@@ -55,3 +72,4 @@ workflows:
     jobs:
       - jdk8
       - jdk10
+      - jdk11
