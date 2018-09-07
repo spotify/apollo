@@ -64,7 +64,7 @@ jobs:
       - run:
           command: mvn verify
           environment:
-            MAVEN_OPTS: -Xmx512m --add-modules java.xml.bind
+            MAVEN_OPTS: -Xmx512m
 
 workflows:
   version: 2
