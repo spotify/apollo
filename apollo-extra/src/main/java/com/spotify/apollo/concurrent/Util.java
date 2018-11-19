@@ -19,6 +19,8 @@
  */
 package com.spotify.apollo.concurrent;
 
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -49,7 +51,8 @@ public final class Util {
                           public void onFailure(Throwable t) {
                             completableFuture.completeExceptionally(t);
                           }
-                        });
+                        },
+                        directExecutor());
 
     return completableFuture;
   }
