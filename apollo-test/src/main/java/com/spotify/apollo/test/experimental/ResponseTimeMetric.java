@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.util.concurrent.Futures.addCallback;
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static java.lang.System.nanoTime;
 
 public class ResponseTimeMetric {
@@ -66,7 +67,7 @@ public class ResponseTimeMetric {
   }
 
   public <T> void track(final ListenableFuture<T> future, final long t0, final int rate) {
-    addCallback(future, createCallback(t0, rate));
+    addCallback(future, createCallback(t0, rate), directExecutor());
   }
 
   private <T> FutureCallback<T> createCallback(final long t0, final int rate) {

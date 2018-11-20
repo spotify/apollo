@@ -25,6 +25,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import static com.google.common.util.concurrent.Futures.addCallback;
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 
 /**
@@ -59,7 +60,8 @@ public interface Middleware<H, T> extends Function<H, T> {
             public void onFailure(Throwable t) {
               future.completeExceptionally(t);
             }
-          });
+          },
+          directExecutor());
 
       return future;
     };
