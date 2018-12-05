@@ -19,22 +19,21 @@
  */
 package com.spotify.apollo.metrics.semantic;
 
-import com.typesafe.config.Config;
-
-import java.time.Duration;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
+import static com.spotify.apollo.environment.ConfigUtil.optionalInt;
 import static com.spotify.apollo.metrics.semantic.What.DROPPED_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION_THRESHOLD_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO;
+
+import com.typesafe.config.Config;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
 
 public class MetricsConfig {
 
@@ -48,12 +47,17 @@ public class MetricsConfig {
           DROPPED_REQUEST_RATE,
           ERROR_RATIO);
 
+  static final int DEFAULT_TTL_SECONDS = (int) TimeUnit.MINUTES.toSeconds(5);
+
   private final Set<What> enabledMetrics;
   private final Set<Integer> precreateCodes;
   private final DurationThresholdConfig durationThresholdConfig;
+  private Config config;
 
   @Inject
   MetricsConfig(Config config) {
+    this.config = config;
+
     if (config.hasPath("metrics.server")) {
       enabledMetrics = parseConfig(config.getStringList("metrics.server"));
     } else {
@@ -65,7 +69,9 @@ public class MetricsConfig {
     } else {
       precreateCodes = Collections.emptySet();
     }
+
     durationThresholdConfig = DurationThresholdConfig.parseConfig(config);
+
   }
 
   private Set<What> parseConfig(List<String> metrics) {
@@ -86,5 +92,9 @@ public class MetricsConfig {
 
   public Set<Integer> precreateCodes() {
     return precreateCodes;
+  }
+
+  public int reservoirTtl() {
+    return optionalInt(config, "metrics.reservoir-ttl").orElse(DEFAULT_TTL_SECONDS);
   }
 }
