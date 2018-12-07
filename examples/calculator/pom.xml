@@ -100,6 +100,9 @@
                             <classpathPrefix>lib/</classpathPrefix>
                             <mainClass>com.spotify.apollo.example.CalculatorApp</mainClass>
                         </manifest>
+                        <manifestEntries>
+                            <Automatic-Module-Name>com.spotify.apollo.example.calculator</Automatic-Module-Name>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>

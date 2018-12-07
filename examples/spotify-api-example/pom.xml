@@ -104,6 +104,9 @@
                             <classpathPrefix>lib/</classpathPrefix>
                             <mainClass>com.spotify.apollo.example.SpotifyApiExample</mainClass>
                         </manifest>
+                        <manifestEntries>
+                            <Automatic-Module-Name>com.spotify.apollo.example.api</Automatic-Module-Name>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
