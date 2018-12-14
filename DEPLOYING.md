@@ -16,8 +16,8 @@ Once you've got that in place, you should be able to do deployment using the fol
 mvn clean deploy # -Prelease to test signing
 
 # make and deploy a release
-mvn release:clean release:prepare -Prelease
-mvn release:perform -Prelease
+mvn release:clean release:prepare -Prelease -DautoVersionSubmodules=true
+mvn release:perform -Prelease -DretryFailedDeploymentCount=3
 ```
 
 Then update https://github.com/spotify/apollo/releases with release notes!
