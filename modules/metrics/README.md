@@ -6,6 +6,10 @@ with the Apollo request/response handling facilities.
 Including this this module in your assembly means that Apollo will add some metrics tracking
 requests per endpoint.
 
+
+A *note* on histograms. This metrics module now uses a [ReservoirWithTtl](https://github.com/spotify/semantic-metrics/tree/9b51f4f6febe7ca251c9410592324645bdb87d6a#histogram-with-ttl) as the **default** reservoir for histograms. This eliminates the impact of latencies like p99 being stuck when instances are drained of traffic or the request throughput of a service or endpoint are low.
+
+
 ## Metrics
 
 All metrics will be tagged with the following tags:
@@ -121,6 +125,7 @@ A Meter, tagged with:
 This meter will only be created if a duration goal is set in the configuration (`endpoint-duration-goal`). The meter will be marked when a request meets its goal.
 
 
+
 ## [ffwd](https://github.com/spotify/ffwd) reporter
 
 The metrics module includes the [ffwd reporter](https://github.com/spotify/semantic-metrics#provided-plugins)
@@ -132,6 +137,7 @@ key | type | required | note
 --- | ---- | -------- | ----
 `metrics.server` | string list | optional | list of [`What`](src/main/java/com/spotify/apollo/metrics/semantic/What.java) names to enable; defaults to [ENDPOINT_REQUEST_RATE, ENDPOINT_REQUEST_DURATION, DROPPED_REQUEST_RATE, ERROR_RATIO]
 `metrics.precreate-codes` | int list | optional | list of status codes to precreate request-rate meters for, default empty
+`metrics.reservoir-ttl` | int | optional | When to purge old values from the histogram, defaults to 300 seconds. Note, setting this to a large value will increase the amount of memory used to keep track samples.
 `ffwd.type` | string | optional | indicates which type of ffwd reporter to use. Available types are `agent` and `http`. see below for details. default is `agent`.
 `endpoint-duration-goal`  | int map  | optional |  sets request duration thresholds in milliseconds to track how many requests meet a duration objective
 

@@ -19,22 +19,30 @@
  */
 package com.spotify.apollo.metrics.semantic;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-
-import org.junit.Test;
-
-import java.util.EnumSet;
-
-import com.google.common.collect.Sets;
-
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.REQUEST_PAYLOAD_SIZE;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.google.common.collect.Sets;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import java.util.EnumSet;
+import org.junit.Test;
+
 public class MetricsConfigTest {
+
+  @Test
+  public void testDefaultreservoirTtl() {
+    assertThat(new MetricsConfig(ConfigFactory.empty()).reservoirTtl(), is(300));
+  }
+
+  @Test
+  public void testOverrideDefaultreservoirTtl() {
+    assertThat(new MetricsConfig(ConfigFactory.parseString(
+      "metrics.reservoir-ttl: 30")).reservoirTtl(), is(30));
+  }
 
   @Test
   public void shouldReturnDefaultIfNoConfig() throws Exception {

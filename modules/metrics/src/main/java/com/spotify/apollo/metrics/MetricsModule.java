@@ -35,6 +35,7 @@ import com.spotify.apollo.metrics.semantic.SemanticMetricsFactory;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.module.ApolloModule;
 import com.spotify.metrics.core.MetricId;
+import com.spotify.metrics.core.ReservoirWithTtl;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.spotify.metrics.core.SemanticMetricSet;
 import com.spotify.metrics.ffwd.FastForwardReporter;
@@ -86,8 +87,11 @@ public class MetricsModule extends AbstractApolloModule {
 
   @Provides
   @Singleton
-  public SemanticMetricRegistry semanticMetricRegistry() {
-    final SemanticMetricRegistry metricRegistry = new SemanticMetricRegistry();
+  public SemanticMetricRegistry semanticMetricRegistry(MetricsConfig metricsConfig) {
+    final SemanticMetricRegistry metricRegistry = new SemanticMetricRegistry(
+      () -> new ReservoirWithTtl(metricsConfig.reservoirTtl()));
+
+
     LOG.info("Creating SemanticMetricRegistry");
 
     // register JVM metricSets, using an empty MetricId as the FastForwardReporter will prepend
