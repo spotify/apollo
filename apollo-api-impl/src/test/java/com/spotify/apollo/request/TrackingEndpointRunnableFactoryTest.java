@@ -19,7 +19,6 @@
  */
 package com.spotify.apollo.request;
 
-import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.dispatch.Endpoint;
 import com.spotify.apollo.dispatch.EndpointInfo;
@@ -29,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -54,10 +53,6 @@ public class TrackingEndpointRunnableFactoryTest {
 
   @Before
   public void setUp() throws Exception {
-    when(ongoingRequest.request()).thenReturn(Request.forUri("http://foo"));
-    when(endpoint.info()).thenReturn(info);
-    when(info.getName()).thenReturn("foo");
-
     when(delegate.create(any(), any(), any())).thenReturn(delegateRunnable);
 
     endpointRunnableFactory = new TrackingEndpointRunnableFactory(

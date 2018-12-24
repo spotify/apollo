@@ -26,6 +26,7 @@ import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO;
 
+import com.google.inject.Inject;
 import com.typesafe.config.Config;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -33,7 +34,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import javax.inject.Inject;
 
 public class MetricsConfig {
 

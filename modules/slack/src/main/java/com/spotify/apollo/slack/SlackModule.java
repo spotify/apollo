@@ -21,10 +21,9 @@ package com.spotify.apollo.slack;
 
 import com.google.auto.service.AutoService;
 
+import com.google.inject.Provider;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.module.ApolloModule;
-
-import javax.inject.Provider;
 
 @AutoService(ApolloModule.class)
 public class SlackModule extends AbstractApolloModule {

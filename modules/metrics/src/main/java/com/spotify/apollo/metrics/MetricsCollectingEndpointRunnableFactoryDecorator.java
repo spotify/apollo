@@ -19,14 +19,13 @@
  */
 package com.spotify.apollo.metrics;
 
+import com.google.inject.Inject;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.environment.EndpointRunnableFactoryDecorator;
 import com.spotify.apollo.request.EndpointRunnableFactory;
 import com.spotify.apollo.request.RequestContexts;
 import com.spotify.apollo.request.TrackedOngoingRequest;
-
-import javax.inject.Inject;
 
 /**
  * An {@link EndpointRunnableFactory} that collects metrics

@@ -25,7 +25,6 @@ import com.spotify.apollo.Status;
 import com.spotify.apollo.dispatch.Endpoint;
 import com.spotify.apollo.dispatch.EndpointInfo;
 import com.spotify.apollo.route.ApplicationRouter;
-import com.spotify.apollo.route.Rule;
 import com.spotify.apollo.route.RuleMatch;
 
 import org.junit.Before;
@@ -34,7 +33,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
@@ -73,9 +72,6 @@ public class RequestRunnableImplTest {
   @Before
   public void setUp() throws Exception {
     when(applicationRouter.match(any(Request.class))).thenReturn(Optional.of(match));
-    when(match.getRule()).thenReturn(Rule.fromUri("http://foo", "GET", endpoint));
-    when(endpoint.info()).thenReturn(info);
-    when(info.getName()).thenReturn("foo");
     when(ongoingRequest.request()).thenReturn(message);
 
     requestRunnable = new RequestRunnableImpl(ongoingRequest, applicationRouter);

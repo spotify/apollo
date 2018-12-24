@@ -21,6 +21,7 @@ package com.spotify.apollo.environment;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import com.spotify.apollo.core.Services;
@@ -29,8 +30,6 @@ import com.spotify.apollo.meta.MetaInfoTracker;
 import com.typesafe.config.Config;
 
 import java.io.IOException;
-
-import javax.inject.Singleton;
 
 /**
  * Module for setting up service metadata collection objects.
