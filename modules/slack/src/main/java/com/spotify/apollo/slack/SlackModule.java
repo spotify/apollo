@@ -31,7 +31,7 @@ public class SlackModule extends AbstractApolloModule {
 
   private final Class<? extends Provider<? extends Slack>> slackProvider;
 
-  // Visible for SPI support
+  // Should not be used, only here to be visible for SPI support.
   public SlackModule() {
     slackProvider = SlackProvider.class;
   }
