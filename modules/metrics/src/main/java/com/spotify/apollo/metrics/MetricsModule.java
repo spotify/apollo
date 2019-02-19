@@ -65,7 +65,7 @@ public class MetricsModule extends AbstractApolloModule {
 
   private static final Logger LOG = LoggerFactory.getLogger(MetricsModule.class);
 
-  // Visible for SPI support
+  // Should not be used, only here to be visible for SPI support.
   public MetricsModule() {
   }
 
