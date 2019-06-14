@@ -28,6 +28,10 @@
     <dependencies>
         <dependency>
             <groupId>com.spotify</groupId>
+            <artifactId>apollo-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify</groupId>
             <artifactId>apollo-core</artifactId>
         </dependency>
         <dependency>
@@ -35,17 +39,33 @@
             <artifactId>apollo-api-impl</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.inject.extensions</groupId>
-            <artifactId>guice-multibindings</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.norberg</groupId>
-            <artifactId>auto-matter-jackson</artifactId>
+            <groupId>com.spotify</groupId>
+            <artifactId>apollo-route</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
 
         <!-- provided scope -->

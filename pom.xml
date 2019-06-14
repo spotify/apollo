@@ -47,10 +47,26 @@
         <cucumber.version>1.2.4</cucumber.version>
         <auto-matter.version>0.15.0</auto-matter.version>
         <logback.version>1.2.3</logback.version>
+        <jackson.version>2.9.9</jackson.version>
+        <semantic-metrics.version>1.0.2</semantic-metrics.version>
+        <guava.version>26.0-jre</guava.version>
+        <protobuf.version>3.7.1</protobuf.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.squareup.okhttp</groupId>
                 <artifactId>okhttp</artifactId>
@@ -81,21 +97,20 @@
                 <artifactId>argparse4j</artifactId>
                 <version>0.5.0</version>
             </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>2.8.11.1</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>2.8.11</version>
-            </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>26.0-jre</version>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+                <version>2.3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>animal-sniffer-annotations</artifactId>
+                <version>1.17</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.core</groupId>
@@ -159,10 +174,14 @@
                 <artifactId>jsr305</artifactId>
                 <version>3.0.2</version>
             </dependency>
-
             <dependency>
                 <groupId>io.norberg</groupId>
                 <artifactId>auto-matter-jackson</artifactId>
+                <version>${auto-matter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.norberg</groupId>
+                <artifactId>auto-matter-annotation</artifactId>
                 <version>${auto-matter.version}</version>
             </dependency>
             <dependency>
@@ -179,6 +198,16 @@
                 <groupId>com.spotify</groupId>
                 <artifactId>dns</artifactId>
                 <version>3.1.5</version>
+            </dependency>
+            <dependency>
+                <groupId>com.spotify.metrics</groupId>
+                <artifactId>semantic-metrics-api</artifactId>
+                <version>${semantic-metrics.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.spotify.metrics</groupId>
+                <artifactId>semantic-metrics-core</artifactId>
+                <version>${semantic-metrics.version}</version>
             </dependency>
 
             <!-- provided scope -->
@@ -212,6 +241,11 @@
             <dependency>
                 <groupId>info.cukes</groupId>
                 <artifactId>cucumber-junit</artifactId>
+                <version>${cucumber.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cukes</groupId>
+                <artifactId>cucumber-core</artifactId>
                 <version>${cucumber.version}</version>
             </dependency>
             <dependency>
@@ -249,6 +283,11 @@
                 <artifactId>awaitility</artifactId>
                 <version>2.0.0</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>uk.org.lidalia</groupId>
+                <artifactId>lidalia-slf4j-ext</artifactId>
+                <version>1.0.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

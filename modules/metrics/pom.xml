@@ -32,6 +32,14 @@
     <dependencies>
         <dependency>
             <groupId>com.spotify</groupId>
+            <artifactId>apollo-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>apollo-api-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify</groupId>
             <artifactId>apollo-core</artifactId>
         </dependency>
         <dependency>
@@ -44,6 +52,36 @@
             <version>${semantic-metrics.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-jvm</artifactId>
+            <version>4.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify.metrics</groupId>
+            <artifactId>semantic-metrics-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify.ffwd</groupId>
+            <artifactId>ffwd-http-client</artifactId>
+            <version>0.4.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.spotify.metrics</groupId>
             <artifactId>semantic-metrics-ffwd-reporter</artifactId>
             <version>${semantic-metrics.version}</version>
@@ -52,6 +90,15 @@
             <groupId>com.spotify.metrics</groupId>
             <artifactId>semantic-metrics-ffwd-http-reporter</artifactId>
             <version>${semantic-metrics.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>1</version>
         </dependency>
 
         <dependency>

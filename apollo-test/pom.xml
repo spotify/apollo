@@ -31,6 +31,10 @@
         </dependency>
         <dependency>
             <groupId>com.spotify</groupId>
+            <artifactId>apollo-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify</groupId>
             <artifactId>apollo-api-impl</artifactId>
         </dependency>
         <dependency>
@@ -45,6 +49,35 @@
             <groupId>com.spotify</groupId>
             <artifactId>apollo-metrics</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.spotify.metrics</groupId>
+            <artifactId>semantic-metrics-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify.metrics</groupId>
+            <artifactId>semantic-metrics-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value</artifactId>
