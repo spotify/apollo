@@ -13,10 +13,6 @@
     <artifactId>apollo-metrics</artifactId>
     <packaging>jar</packaging>
 
-    <properties>
-        <semantic-metrics.version>1.0.2</semantic-metrics.version>
-    </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -49,12 +45,10 @@
         <dependency>
             <groupId>com.spotify.metrics</groupId>
             <artifactId>semantic-metrics-core</artifactId>
-            <version>${semantic-metrics.version}</version>
         </dependency>
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-jvm</artifactId>
-            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.spotify.metrics</groupId>
@@ -79,17 +73,14 @@
         <dependency>
             <groupId>com.spotify.ffwd</groupId>
             <artifactId>ffwd-http-client</artifactId>
-            <version>0.4.0</version>
         </dependency>
         <dependency>
             <groupId>com.spotify.metrics</groupId>
             <artifactId>semantic-metrics-ffwd-reporter</artifactId>
-            <version>${semantic-metrics.version}</version>
         </dependency>
         <dependency>
             <groupId>com.spotify.metrics</groupId>
             <artifactId>semantic-metrics-ffwd-http-reporter</artifactId>
-            <version>${semantic-metrics.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
