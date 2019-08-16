@@ -13,16 +13,12 @@
     <artifactId>apollo-metrics</artifactId>
     <packaging>jar</packaging>
 
-    <properties>
-        <semantic-metrics.version>1.0.2</semantic-metrics.version>
-    </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-bom</artifactId>
-                <version>1.11.1-SNAPSHOT</version>
+                <version>${project.parent.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -30,6 +26,14 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>apollo-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>apollo-api-impl</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>apollo-core</artifactId>
@@ -41,17 +45,54 @@
         <dependency>
             <groupId>com.spotify.metrics</groupId>
             <artifactId>semantic-metrics-core</artifactId>
-            <version>${semantic-metrics.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-jvm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify.metrics</groupId>
+            <artifactId>semantic-metrics-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify.ffwd</groupId>
+            <artifactId>ffwd-http-client</artifactId>
         </dependency>
         <dependency>
             <groupId>com.spotify.metrics</groupId>
             <artifactId>semantic-metrics-ffwd-reporter</artifactId>
-            <version>${semantic-metrics.version}</version>
         </dependency>
         <dependency>
             <groupId>com.spotify.metrics</groupId>
             <artifactId>semantic-metrics-ffwd-http-reporter</artifactId>
-            <version>${semantic-metrics.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
         </dependency>
 
         <dependency>
@@ -72,18 +113,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-library</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
+            <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

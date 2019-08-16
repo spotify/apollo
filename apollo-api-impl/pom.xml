@@ -17,7 +17,7 @@
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-bom</artifactId>
-                <version>1.11.1-SNAPSHOT</version>
+                <version>${project.parent.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -44,31 +44,39 @@
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
+            <artifactId>jackson-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
         </dependency>
         <dependency>
             <groupId>com.squareup.okio</groupId>
             <artifactId>okio</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
-
-        <!-- provided scope -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+        </dependency>
         <dependency>
             <groupId>io.norberg</groupId>
             <artifactId>auto-matter</artifactId>
-            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.norberg</groupId>
+            <artifactId>auto-matter-annotation</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <!--test scope-->
@@ -79,12 +87,12 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
+            <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -97,18 +105,21 @@
             <artifactId>slf4j-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>uk.org.lidalia</groupId>
+            <artifactId>lidalia-slf4j-ext</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- for com.spotify.apollo.meta.model.benchmark.GathererBenchmark -->
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
-            <version>1.21</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
-            <version>1.21</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

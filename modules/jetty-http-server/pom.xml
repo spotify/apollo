@@ -18,7 +18,7 @@
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-bom</artifactId>
-                <version>1.11.1-SNAPSHOT</version>
+                <version>${project.parent.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -68,18 +68,21 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>4.2.3.RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-codec-http</artifactId>
-            <version>4.0.33.Final</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>uk.org.lidalia</groupId>
             <artifactId>slf4j-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -17,7 +17,7 @@
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-bom</artifactId>
-                <version>1.11.1-SNAPSHOT</version>
+                <version>${project.parent.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -32,10 +32,6 @@
         <dependency>
             <groupId>com.squareup.okio</groupId>
             <artifactId>okio</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.typesafe</groupId>
@@ -67,11 +63,6 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>uk.org.lidalia</groupId>
-            <artifactId>slf4j-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -17,7 +17,7 @@
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-bom</artifactId>
-                <version>1.11.1-SNAPSHOT</version>
+                <version>${project.parent.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -28,6 +28,10 @@
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>apollo-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>apollo-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.spotify</groupId>
@@ -45,6 +49,35 @@
             <groupId>com.spotify</groupId>
             <artifactId>apollo-metrics</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.spotify.metrics</groupId>
+            <artifactId>semantic-metrics-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify.metrics</groupId>
+            <artifactId>semantic-metrics-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value</artifactId>
@@ -66,16 +99,15 @@
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
         </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
 
         <!--test dependencies-->
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
+            <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
