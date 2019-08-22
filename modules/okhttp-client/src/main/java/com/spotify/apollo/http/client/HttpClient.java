@@ -36,7 +36,7 @@ import javax.inject.Inject;
 
 import okio.ByteString;
 
-class HttpClient implements IncomingRequestAwareClient {
+public class HttpClient implements IncomingRequestAwareClient {
 
   private static final MediaType DEFAULT_CONTENT_TYPE = MediaType.parse("application/octet-stream");
   private static final String AUTHORIZATION_HEADER = "Authorization";
