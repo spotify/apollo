@@ -25,12 +25,14 @@ key | type | required | note
 
 ```java
 public static void main(String[] args) throws Exception {
+
   Service service = Services.usingName("test")
       .withModule(HttpClientModule.create())
+      .withModule(ApolloEnvironmentModule.create())
       .build();
 
   try (Service.Instance instance = service.start(args)) {
-    HttpClient httpClient = instance.resolve(HttpClient.class);
+    Client httpClient = instance.resolve(ApolloEnvironment.class).environment().client();
     RequestHandler handler = new ProxyHandler(httpClient);
     HttpServer httpServer = HttpServerModule.server(instance);
 
@@ -41,9 +43,9 @@ public static void main(String[] args) throws Exception {
 
 /** Proxies requests to another service */
 public static class ProxyHandler implements RequestHandler {
-  private final HttpClient httpClient;
+  private final Client httpClient;
 
-  public Handler(HttpClient httpClient) {
+  public Handler(Client httpClient) {
     this.httpClient = httpClient;
   }
 
