@@ -53,7 +53,6 @@
         <netty.version>4.1.38.Final</netty.version>
         <jetty.version>9.4.19.v20190610</jetty.version>
         <protobuf.version>3.9.1</protobuf.version>
-        <maven.compiler.release>8</maven.compiler.release>
     </properties>
 
     <dependencyManagement>
@@ -646,6 +645,28 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>jdk8</id>
+            <activation>
+                <jdk>1.8</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.source>1.8</maven.compiler.source>
+                <maven.compiler.target>1.8</maven.compiler.target>
+            </properties>
+        </profile>
+        <profile>
+            <id>jdk9+</id>
+            <activation>
+                <jdk>[9,)</jdk>
+            </activation>
+            <properties>
+            <!-- Javac introduced the "release" option only in Java 9+.  It
+                properly sets up source, target and boot classpath for the best
+                compatibility with different versions of Java. -->
+                <maven.compiler.release>8</maven.compiler.release>
+            </properties>
         </profile>
     </profiles>
 
