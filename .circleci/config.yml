@@ -3,7 +3,7 @@ jobs:
   jdk8:
     working_directory: ~/apollo
     docker:
-      - image: maven:3.5.4-jdk-8
+      - image: maven:3-jdk-8
     steps:
       - checkout
       - restore_cache:
@@ -31,27 +31,10 @@ jobs:
       - store_artifacts:
           path: ~/junit
       - run: bash <(curl -s https://codecov.io/bash)
-  jdk10:
-    working_directory: ~/apollo
-    docker:
-      - image: maven:3.5.4-jdk-10-slim
-    steps:
-      - checkout
-      - restore_cache:
-          key: v1-deps-jdk10-{{ checksum "pom.xml" }}
-      - run: mvn dependency:go-offline clean compile || true
-      - save_cache:
-          key: v1-deps-jdk10-{{ checksum "pom.xml" }}
-          paths:
-            - ~/.m2
-      - run:
-          command: mvn verify
-          environment:
-            MAVEN_OPTS: -Xmx512m --add-modules java.xml.bind
   jdk11:
     working_directory: ~/apollo
     docker:
-      - image: maven:3.5.4-jdk-11-slim
+      - image: maven:3-jdk-11
     steps:
       - checkout
       - restore_cache:
@@ -65,11 +48,28 @@ jobs:
           command: mvn verify
           environment:
             MAVEN_OPTS: -Xmx512m
+  jdk13:
+    working_directory: ~/apollo
+    docker:
+      - image: maven:3-jdk-13
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-deps-jdk13-{{ checksum "pom.xml" }}
+      - run: mvn dependency:go-offline clean compile || true
+      - save_cache:
+          key: v1-deps-jdk13-{{ checksum "pom.xml" }}
+          paths:
+            - ~/.m2
+      - run:
+          command: mvn verify
+          environment:
+            MAVEN_OPTS: -Xmx512m
 
 workflows:
   version: 2
   build:
     jobs:
       - jdk8
-      - jdk10
       - jdk11
+      - jdk13
