@@ -22,13 +22,12 @@ package com.spotify.apollo.http.server;
 import com.google.common.io.Closer;
 import com.google.inject.Inject;
 
+import com.google.inject.Provider;
+import com.google.inject.name.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-
-import javax.inject.Named;
-import javax.inject.Provider;
 
 import static java.util.Objects.requireNonNull;
 

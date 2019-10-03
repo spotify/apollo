@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.helpers.MessageFormatter;
 
 import uk.org.lidalia.slf4jext.Level;
@@ -85,7 +85,6 @@ public class EndpointInvocationHandlerTest {
     Request requestMessage = Request.forUri("http://foo/bar").withService("nameless-registry");
 
     when(ongoingRequest.request()).thenReturn(requestMessage);
-    when(requestContext.request()).thenReturn(requestMessage);
     future = new CompletableFuture<>();
   }
 

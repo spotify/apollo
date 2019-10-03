@@ -19,6 +19,7 @@
  */
 package com.spotify.apollo.http.client;
 
+import com.google.inject.Inject;
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
 
 import com.squareup.okhttp.Headers;
@@ -31,8 +32,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
 
 import okio.ByteString;
 

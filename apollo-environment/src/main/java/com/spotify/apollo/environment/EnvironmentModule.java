@@ -23,6 +23,7 @@ import com.google.common.io.Closer;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import com.spotify.apollo.Client;
@@ -34,8 +35,6 @@ import com.spotify.apollo.meta.MetaInfoTracker;
 import com.typesafe.config.Config;
 
 import java.util.Set;
-
-import javax.inject.Singleton;
 
 import static com.spotify.apollo.environment.ApolloEnvironmentModule.foldDecorators;
 

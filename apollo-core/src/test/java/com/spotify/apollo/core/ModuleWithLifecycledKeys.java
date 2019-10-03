@@ -20,6 +20,7 @@
 package com.spotify.apollo.core;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
 import com.spotify.apollo.module.AbstractApolloModule;
@@ -27,8 +28,6 @@ import com.spotify.apollo.module.AbstractApolloModule;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.inject.Named;
 
 class ModuleWithLifecycledKeys extends AbstractApolloModule {
 

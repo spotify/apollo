@@ -27,6 +27,7 @@ import com.google.auto.service.AutoService;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Named;
 import com.spotify.apollo.core.Services;
 import com.spotify.apollo.environment.ApolloConfig;
 import com.spotify.apollo.environment.EndpointRunnableFactoryDecorator;
@@ -47,7 +48,6 @@ import com.typesafe.config.Config;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

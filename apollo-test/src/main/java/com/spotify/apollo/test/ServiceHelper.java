@@ -26,6 +26,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Provides;
 
+import com.google.inject.Singleton;
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Environment;
@@ -67,8 +68,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-
-import javax.inject.Singleton;
 
 import okio.ByteString;
 
