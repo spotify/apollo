@@ -25,11 +25,10 @@ package com.spotify.apollo.httpservice;
 
 import com.google.inject.Provides;
 
+import com.google.inject.Singleton;
 import com.spotify.apollo.meta.MetaDescriptor;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.metrics.core.MetricId;
-
-import javax.inject.Singleton;
 
 class MetricIdModule extends AbstractApolloModule {
 

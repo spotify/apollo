@@ -20,14 +20,13 @@
 package com.spotify.apollo.http.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.module.AbstractApolloModule;
 
 import java.util.Objects;
-
-import javax.inject.Singleton;
 
 public class HttpServerModule extends AbstractApolloModule {
 

@@ -22,6 +22,7 @@ package com.spotify.apollo.environment;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Closer;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 
 import com.spotify.apollo.AppInit;
@@ -46,8 +47,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 import java.util.function.Function;
-
-import javax.inject.Singleton;
 
 import static com.spotify.apollo.request.Handlers.endpointRunnableFactory;
 import static com.spotify.apollo.request.Handlers.requestHandler;

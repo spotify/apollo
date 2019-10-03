@@ -35,7 +35,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -88,8 +88,6 @@ public class RequestHandlerImplTest {
         .thenReturn(runnable);
 
     when(match.getRule()).thenReturn(Rule.fromUri("http://foo", "GET", endpoint));
-    when(endpoint.info()).thenReturn(info);
-    when(info.getName()).thenReturn("foo");
 
     requestHandler = new RequestHandlerImpl(requestFactory, endpointFactory, client);
   }

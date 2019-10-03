@@ -19,10 +19,9 @@
  */
 package com.spotify.apollo.http.client;
 
+import com.google.inject.Inject;
 import com.spotify.apollo.environment.ClientDecorator;
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
-
-import javax.inject.Inject;
 
 class HttpClientDecorator implements ClientDecorator {
 

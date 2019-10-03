@@ -19,12 +19,11 @@
  */
 package com.spotify.apollo.environment;
 
+import com.google.inject.Inject;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import java.util.Objects;
-
-import javax.inject.Inject;
 
 import static com.spotify.apollo.environment.ConfigUtil.either;
 import static com.spotify.apollo.environment.ConfigUtil.optionalBoolean;

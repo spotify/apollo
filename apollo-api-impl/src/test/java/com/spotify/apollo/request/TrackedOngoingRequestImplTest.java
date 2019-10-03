@@ -19,19 +19,16 @@
  */
 package com.spotify.apollo.request;
 
-import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TrackedOngoingRequestImplTest {
@@ -40,12 +37,6 @@ public class TrackedOngoingRequestImplTest {
   @Mock RequestTracker requestTracker;
 
   RequestTracker tracker = new RequestTracker();
-
-  @Before
-  public void setUp() throws Exception {
-    when(ongoingRequest.request()).thenReturn(Request.forUri("http://service/path"));
-    when(ongoingRequest.isExpired()).thenReturn(false);
-  }
 
   @Test
   public void shouldRegisterWithRequestTracker() throws Exception {

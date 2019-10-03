@@ -19,9 +19,8 @@
  */
 package com.spotify.apollo.http.server;
 
+import com.google.inject.Inject;
 import com.typesafe.config.Config;
-
-import javax.inject.Inject;
 
 import static com.spotify.apollo.environment.ConfigUtil.optionalInt;
 import static com.spotify.apollo.environment.ConfigUtil.optionalString;
