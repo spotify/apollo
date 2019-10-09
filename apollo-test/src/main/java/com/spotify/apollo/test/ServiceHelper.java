@@ -302,6 +302,16 @@ public class ServiceHelper implements TestRule, Closeable {
   }
 
   /**
+   * Get the running service instance.
+   *
+   * @return the service instance
+   */
+  public Service.Instance getInstance() {
+    Preconditions.checkNotNull(instance, "Service not started.");
+    return instance;
+  }
+
+  /**
    * Determines whether to forward requests for which nothing has been stubbed. The default is
    * true. If false, requests that don't match stubs will fail.
    *
