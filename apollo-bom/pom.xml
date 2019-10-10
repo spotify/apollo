@@ -32,11 +32,6 @@
                 <artifactId>apollo-jetty-http-server</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.spotify</groupId>
-                <artifactId>apollo-slack</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
 
             <!-- api & http service -->
             <dependency>

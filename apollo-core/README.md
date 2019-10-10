@@ -180,4 +180,3 @@ Modules can be found under [modules](../modules):
 
 * [Http Server](../modules/jetty-http-server)
 * [Http Client](../modules/okhttp-client)
-* [Slack integration](../modules/slack)
