@@ -10,6 +10,8 @@ release.properties
 *.iml
 *~
 .idea/*
+.factorypath
+.settings
 
 # Mac OS X Finder
 .DS_Store
