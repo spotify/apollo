@@ -62,10 +62,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -163,7 +163,7 @@ public class ServiceHelper implements TestRule, Closeable {
   // scheme      = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
   private static final Pattern SCHEME_RE = Pattern.compile("[a-zA-Z][a-zA-Z0-9+.-]*");
 
-  private final CountDownLatch started = new CountDownLatch(1);
+  private final Semaphore started = new Semaphore(0);
 
   private final AppInit appInit;
   private final String serviceName;
@@ -375,7 +375,7 @@ public class ServiceHelper implements TestRule, Closeable {
    * @return A future of the response
    */
   public CompletionStage<Response<ByteString>> request(Request request) {
-    if (started.getCount() != 0) {
+    if (requestHandler == null) {
       throw new IllegalStateException(
           "ServiceHelper not started. This can be solved setting it up as a JUnit @Rule or calling the start() method.");
     }
@@ -522,10 +522,10 @@ public class ServiceHelper implements TestRule, Closeable {
         }
       } catch (Throwable e) {
         LOG.error("Failed to start service", e);
-        started.countDown();
+        started.release();
       }
     });
-    if (!started.await(timeoutSeconds, TimeUnit.SECONDS)) {
+    if (!started.tryAcquire(timeoutSeconds, TimeUnit.SECONDS)) {
       currentHelperFuture.cancel(true);
       currentHelperFuture = null;
       throw new IllegalStateException("Service did not start within a reasonable time");
@@ -545,7 +545,7 @@ public class ServiceHelper implements TestRule, Closeable {
     LOG.info("Got instance {}", instance);
     this.instance = instance;
     this.requestHandler = requestHandler;
-    started.countDown();
+    started.release();
   }
 
   private void shutdown() {
@@ -555,6 +555,7 @@ public class ServiceHelper implements TestRule, Closeable {
       instance = null;
       Futures.getUnchecked(currentHelperFuture);
       currentHelperFuture = null;
+      started.drainPermits();
     }
   }
 

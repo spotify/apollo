@@ -283,6 +283,17 @@ public class ServiceHelperTest {
     serviceHelper.start();
   }
 
+  @Test
+  public void shouldWorkAfterRestart() throws Exception {
+    when(someService.thatDoesThings()).thenReturn(TEST_THING);
+
+    serviceHelper.close();
+    serviceHelper.start();
+
+    String response = doGet();
+    assertThat(response, is(TEST_THING));
+  }
+
   private void resolveRegistry(Environment environment) {
     assertThat(environment.resolve(SemanticMetricRegistry.class), is(notNullValue()));
   }
