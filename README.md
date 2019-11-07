@@ -8,7 +8,7 @@ Apollo
 
 ## Status: Bug-fix only
 
-Apollo is heavily used within Spotify but most if its development is currently done internally leveraging Apollo's module system. We want to signal this current state to the community by putting the project in maintenance mode.   
+Apollo is heavily used within Spotify, however, most of its development is currently done internally leveraging Apollo's module system. We want to signal this current state to the community by putting the project in maintenance mode.   
 This project will no longer have new features or accept PRs for new features. We will continue to accept bug fixes and update dependencies. 
 
 
