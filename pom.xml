@@ -383,7 +383,7 @@
                 <plugin>
                     <groupId>com.spotify</groupId>
                     <artifactId>missinglink-maven-plugin</artifactId>
-                    <version>0.1.2</version>
+                    <version>0.2.0</version>
                     <configuration>
                         <failOnConflicts>true</failOnConflicts>
                     </configuration>
@@ -590,7 +590,7 @@
                     <plugin>
                         <groupId>com.spotify</groupId>
                         <artifactId>missinglink-maven-plugin</artifactId>
-                        <version>0.1.2</version>
+                        <version>0.2.0</version>
                         <configuration>
                             <failOnConflicts>true</failOnConflicts>
                             <ignoreDestinationPackages>
