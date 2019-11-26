@@ -84,7 +84,7 @@
             <dependency>
                 <groupId>com.squareup.okhttp</groupId>
                 <artifactId>okhttp</artifactId>
-                <version>2.5.0</version>
+                <version>2.7.5</version>
             </dependency>
             <dependency>
                 <groupId>com.squareup.okio</groupId>
@@ -383,7 +383,7 @@
                 <plugin>
                     <groupId>com.spotify</groupId>
                     <artifactId>missinglink-maven-plugin</artifactId>
-                    <version>0.1.2</version>
+                    <version>0.2.0</version>
                     <configuration>
                         <failOnConflicts>true</failOnConflicts>
                     </configuration>
@@ -590,7 +590,7 @@
                     <plugin>
                         <groupId>com.spotify</groupId>
                         <artifactId>missinglink-maven-plugin</artifactId>
-                        <version>0.1.2</version>
+                        <version>0.2.0</version>
                         <configuration>
                             <failOnConflicts>true</failOnConflicts>
                             <ignoreDestinationPackages>
@@ -621,6 +621,10 @@
                                 </ignoreSourcePackage>
                                 <ignoreSourcePackage>
                                     <package>com.spotify.ffwd.http.okhttp3.internal.platform</package>
+                                </ignoreSourcePackage>
+                                <!-- optional references to Android -->
+                                <ignoreSourcePackage>
+                                    <package>com.squareup.okhttp.internal</package>
                                 </ignoreSourcePackage>
                                 <ignoreSourcePackage>
                                     <package>ch.qos.logback.classic.spi</package>
