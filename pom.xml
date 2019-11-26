@@ -622,6 +622,10 @@
                                 <ignoreSourcePackage>
                                     <package>com.spotify.ffwd.http.okhttp3.internal.platform</package>
                                 </ignoreSourcePackage>
+                                <!-- optional references to Android -->
+                                <ignoreSourcePackage>
+                                    <package>com.squareup.okhttp.internal</package>
+                                </ignoreSourcePackage>
                                 <ignoreSourcePackage>
                                     <package>ch.qos.logback.classic.spi</package>
                                 </ignoreSourcePackage>
