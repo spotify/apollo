@@ -48,10 +48,9 @@
         <logback.version>1.2.3</logback.version>
         <jackson.version>2.10.0</jackson.version>
         <semantic-metrics.version>1.0.2</semantic-metrics.version>
-        <guava.version>28.0-jre</guava.version>
+        <guava.version>28.1-jre</guava.version>
         <netty.version>4.1.38.Final</netty.version>
         <jetty.version>9.4.19.v20190610</jetty.version>
-        <protobuf.version>3.9.1</protobuf.version>
     </properties>
 
     <dependencyManagement>
@@ -75,11 +74,6 @@
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http</artifactId>
                 <version>${netty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.protobuf</groupId>
-                <artifactId>protobuf-java</artifactId>
-                <version>${protobuf.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.squareup.okhttp</groupId>
@@ -162,11 +156,6 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
                 <version>${logback.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.spotify</groupId>
-                <artifactId>proto2json</artifactId>
-                <version>0.4.2</version>
             </dependency>
             <dependency>
                 <groupId>com.yammer.metrics</groupId>
