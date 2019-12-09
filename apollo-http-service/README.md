@@ -218,7 +218,7 @@ To send this to an access log file, use a configuration similar to:
 To customise the logging implementation using [Guice optional injections](https://github.com/google/guice/wiki/Injections#optional-injections),
 do something along the lines of this:
 
-```
+```java
 public class MyModule extends AbstractModule {
   // ...
   protected void configure() {
