@@ -51,6 +51,7 @@
         <guava.version>28.1-jre</guava.version>
         <netty.version>4.1.38.Final</netty.version>
         <jetty.version>9.4.19.v20190610</jetty.version>
+        <junit.version>5.5.2</junit.version>
     </properties>
 
     <dependencyManagement>
@@ -274,9 +275,14 @@
 
             <!-- test dependencies -->
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.12</version>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.vintage</groupId>
+                <artifactId>junit-vintage-engine</artifactId>
+                <version>${junit.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cukes</groupId>
