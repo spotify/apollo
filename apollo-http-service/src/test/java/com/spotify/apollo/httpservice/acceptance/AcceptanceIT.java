@@ -19,12 +19,11 @@
  */
 package com.spotify.apollo.httpservice.acceptance;
 
+import io.cucumber.junit.Cucumber;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import cucumber.api.junit.Cucumber;
 
 @RunWith(Cucumber.class)
 public class AcceptanceIT {

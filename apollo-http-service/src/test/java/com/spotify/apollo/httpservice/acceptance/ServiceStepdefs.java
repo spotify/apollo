@@ -19,23 +19,19 @@
  */
 package com.spotify.apollo.httpservice.acceptance;
 
-import com.google.common.base.Splitter;
-
-import com.spotify.apollo.AppInit;
-import com.spotify.apollo.test.ServiceHelper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
-
-import cucumber.api.java.After;
-import cucumber.api.java.en.And;
-import cucumber.api.java.en.Given;
-
 import static com.google.common.collect.Iterables.toArray;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import com.google.common.base.Splitter;
+import com.spotify.apollo.AppInit;
+import com.spotify.apollo.test.ServiceHelper;
+import io.cucumber.java.After;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ServiceStepdefs {
 

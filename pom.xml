@@ -43,7 +43,7 @@
     </scm>
 
     <properties>
-        <cucumber.version>1.2.5</cucumber.version>
+        <cucumber.version>4.8.0</cucumber.version>
         <auto-matter.version>0.15.3</auto-matter.version>
         <logback.version>1.2.3</logback.version>
         <jackson.version>2.10.0</jackson.version>
@@ -285,18 +285,13 @@
                 <version>${junit.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cukes</groupId>
+                <groupId>io.cucumber</groupId>
                 <artifactId>cucumber-java</artifactId>
                 <version>${cucumber.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cukes</groupId>
+                <groupId>io.cucumber</groupId>
                 <artifactId>cucumber-junit</artifactId>
-                <version>${cucumber.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cukes</groupId>
-                <artifactId>cucumber-core</artifactId>
                 <version>${cucumber.version}</version>
             </dependency>
             <dependency>
