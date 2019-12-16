@@ -19,13 +19,14 @@
  */
 package com.spotify.apollo.test;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Provides;
-
 import com.google.inject.Singleton;
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Client;
@@ -46,14 +47,6 @@ import com.spotify.metrics.core.MetricId;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
-
-import org.junit.Rule;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
@@ -68,10 +61,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-
 import okio.ByteString;
-
-import static com.google.common.base.Preconditions.checkState;
+import org.junit.Rule;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>A JUnit {@link TestRule} for running tests against an apollo service. It is built around
@@ -153,7 +149,7 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * <p>See {@link StubClient} for more docs on how to set up mocked request replies.</p>
  */
-public class ServiceHelper implements TestRule, Closeable {
+public class ServiceHelper implements ServerHelperSetup<ServiceHelper>, TestRule, Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(ServiceHelper.class);
   public static final String[] NO_ARGS = new String[0];
@@ -231,6 +227,7 @@ public class ServiceHelper implements TestRule, Closeable {
    * @param domain  The domain to use
    * @return This ServiceHelper instance
    */
+  @Override
   public ServiceHelper domain(String domain) {
     return conf(Services.CommonConfigKeys.APOLLO_DOMAIN.getKey(), domain);
   }
@@ -240,6 +237,7 @@ public class ServiceHelper implements TestRule, Closeable {
    *
    * @return This ServiceHelper instance
    */
+  @Override
   public ServiceHelper disableMetaApi() {
     return conf("apollo.metaApi", "false");
   }
@@ -250,6 +248,7 @@ public class ServiceHelper implements TestRule, Closeable {
    * @param args  The program arguments to use
    * @return This ServiceHelper instance
    */
+  @Override
   public ServiceHelper args(String... args) {
     this.args = args;
     return this;
@@ -264,6 +263,7 @@ public class ServiceHelper implements TestRule, Closeable {
    * @param value  The value to associate with the key
    * @return This ServiceHelper instance
    */
+  @Override
   public ServiceHelper conf(String key, String value) {
     conf = conf.withValue(
         key,
@@ -283,6 +283,7 @@ public class ServiceHelper implements TestRule, Closeable {
    *              java.lang.Object, java.lang.String)}
    * @return      This ServiceHelper instance
    */
+  @Override
   public ServiceHelper conf(String key, Object value) {
     conf = conf.withValue(
         key,
@@ -296,6 +297,7 @@ public class ServiceHelper implements TestRule, Closeable {
    * @param key The path to unset
    * @return    This ServiceHelper instance
    */
+  @Override
   public ServiceHelper resetConf(String key) {
     conf = conf.withoutPath(key);
     return this;
@@ -317,6 +319,7 @@ public class ServiceHelper implements TestRule, Closeable {
    *
    * @param forward whether to enable forwarding
    */
+  @Override
   public ServiceHelper forwardingNonStubbedRequests(boolean forward) {
     this.forwardNonStubbedRequests = forward;
     return this;
@@ -325,11 +328,13 @@ public class ServiceHelper implements TestRule, Closeable {
   /**
    * Set the time to wait for the service to start before giving up. The default value is 5.
    */
+  @Override
   public ServiceHelper startTimeoutSeconds(int timeoutSeconds) {
     this.timeoutSeconds = timeoutSeconds;
     return this;
   }
 
+  @Override
   public ServiceHelper withModule(ApolloModule module) {
     this.additionalModules.add(module);
     return this;
@@ -343,6 +348,7 @@ public class ServiceHelper implements TestRule, Closeable {
    * @param scheme The scheme to be used for relative request uris (without "://")
    * @return      This ServiceHelper instance
    */
+  @Override
   public ServiceHelper scheme(String scheme) {
     Preconditions.checkArgument(
         SCHEME_RE.matcher(scheme).matches(),
