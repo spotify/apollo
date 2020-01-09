@@ -43,7 +43,7 @@
     </scm>
 
     <properties>
-        <cucumber.version>1.2.5</cucumber.version>
+        <cucumber.version>4.8.0</cucumber.version>
         <auto-matter.version>0.15.3</auto-matter.version>
         <logback.version>1.2.3</logback.version>
         <jackson.version>2.10.0</jackson.version>
@@ -51,6 +51,8 @@
         <guava.version>28.1-jre</guava.version>
         <netty.version>4.1.38.Final</netty.version>
         <jetty.version>9.4.19.v20190610</jetty.version>
+        <junit.version>5.5.2</junit.version>
+        <junit.testkit.version>1.5.2</junit.testkit.version>
     </properties>
 
     <dependencyManagement>
@@ -274,23 +276,28 @@
 
             <!-- test dependencies -->
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.12</version>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${junit.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cukes</groupId>
+                <groupId>org.junit.vintage</groupId>
+                <artifactId>junit-vintage-engine</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-testkit</artifactId>
+                <version>${junit.testkit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.cucumber</groupId>
                 <artifactId>cucumber-java</artifactId>
                 <version>${cucumber.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cukes</groupId>
+                <groupId>io.cucumber</groupId>
                 <artifactId>cucumber-junit</artifactId>
-                <version>${cucumber.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cukes</groupId>
-                <artifactId>cucumber-core</artifactId>
                 <version>${cucumber.version}</version>
             </dependency>
             <dependency>

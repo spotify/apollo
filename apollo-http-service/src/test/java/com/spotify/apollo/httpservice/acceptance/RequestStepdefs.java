@@ -19,20 +19,6 @@
  */
 package com.spotify.apollo.httpservice.acceptance;
 
-import com.spotify.apollo.Request;
-import com.spotify.apollo.Response;
-import com.spotify.apollo.Status;
-
-import java.io.File;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
-import cucumber.api.java.en.And;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
-import okio.ByteString;
-
 import static com.spotify.apollo.test.unit.StatusTypeMatchers.withCode;
 import static com.spotify.apollo.test.unit.StatusTypeMatchers.withReasonPhrase;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -43,6 +29,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+
+import com.spotify.apollo.Request;
+import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+import java.io.File;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+import okio.ByteString;
 
 public class RequestStepdefs {
 

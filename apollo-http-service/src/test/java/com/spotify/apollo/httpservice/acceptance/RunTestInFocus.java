@@ -19,13 +19,12 @@
  */
 package com.spotify.apollo.httpservice.acceptance;
 
+import io.cucumber.junit.Cucumber;
+import io.cucumber.junit.CucumberOptions;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import cucumber.api.CucumberOptions;
-import cucumber.api.junit.Cucumber;
 
 @RunWith(Cucumber.class)
 @CucumberOptions(tags = {"@Focus"})

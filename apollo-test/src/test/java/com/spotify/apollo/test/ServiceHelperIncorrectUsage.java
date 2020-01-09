@@ -1,6 +1,6 @@
 /*
  * -\-\-
- * Spotify Apollo HTTP Service
+ * Spotify Apollo Testing Helpers
  * --
  * Copyright (C) 2013 - 2015 Spotify AB
  * --
@@ -17,21 +17,17 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.httpservice.acceptance;
+package com.spotify.apollo.test;
 
-import io.cucumber.junit.Cucumber;
-import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-@RunWith(Cucumber.class)
-public class AcceptanceIT {
+@ExtendWith(ServiceHelperExtension.class)
+class ServiceHelperIncorrectUsage {
 
-  private static final Logger log = LoggerFactory.getLogger(AcceptanceIT.class);
+  @Test
+  void emptyTest() {}
 
-  @BeforeClass
-  public static synchronized void start() throws Exception {
-    log.info("AcceptanceIT start()");
-  }
+  @Test
+  void testWithParameter(ServiceHelper ignore) {}
 }
