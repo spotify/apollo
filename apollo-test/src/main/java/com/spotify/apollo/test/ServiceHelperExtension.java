@@ -20,6 +20,8 @@
 package com.spotify.apollo.test;
 
 import com.spotify.apollo.AppInit;
+import com.spotify.apollo.Environment;
+import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.module.ApolloModule;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -30,6 +32,102 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+/**
+ * A JUnit 5 extension for running tests against an apollo service. It is built around the {@link
+ * AppInit} setup mechanism and can be used to start a service configured in a way appropriate for
+ * the test scenario.
+ *
+ * <p>Typical usage would use {@link #create(AppInit, String)} together with a {@link
+ * RegisterExtension} annotation. Further configuration like config key overrides, running domain
+ * and additional program arguments can be set up using {@link #conf(String, String)}, {@link
+ * #domain(String)} and {@link #args(String...)} respectively. The created {@link ServiceHelper}
+ * could be accessed from a test method using a getter method {@link #getServiceHelper()}. This
+ * extension also implements {@link ParameterResolver} and can inject {@link ServiceHelper}
+ * instances into test methods via parameter injection.
+ *
+ * <p><b>Declarative extension registration via {@link ExtendWith} is not supported.</b> An
+ * exception will be thrown if this extension is registered declaratively. Only programmatic
+ * extension registration via {@link RegisterExtension} is supported.
+ *
+ * <p>Requests can be sent to the running application using any of {@link ServiceHelper#request}
+ * methods.
+ *
+ * <h2>Example usage for testing a route provider</h2>
+ *
+ * <pre><code>
+ * class MyServiceTest {
+ *
+ *  {@literal @}RegisterExtension
+ *   static final ServiceHelperExtension serviceHelperExtension =
+ *       ServiceHelperExtension.create(MyServiceTest::appInit, "my-service")
+ *                             .conf("some.key", "some-value")
+ *                             .args("-v")
+ *                             .startTimeoutSeconds(30);
+ *
+ *   static void appInit(Environment environment) {
+ *     SomeObject someObject = new SomeObject();
+ *     // Implements resource "/endpoint" using someObject
+ *     RouteProvider endpointResource = new EndpointResource(someObject);
+ *     environment.routingEngine()
+ *                .registerAutoRoutes(endpointResource);
+ *   }
+ *
+ *  {@literal @}Test
+ *   void testRequest() throws Exception {
+ *     // access the {@link ServiceHelper} via a getter
+ *     // see the next example for parameter injection
+ *     ServiceHelper serviceHelper = serviceHelperExtension.getServiceHelper();
+ *
+ *     when(someObject.thatDoesThings()).thenReturn("a test string");
+ *
+ *     String response = Futures.getUnchecked(serviceHelper.request("GET", "/endpoint"))
+ *         .getPayloads().get(0).toStringUtf8();
+ *
+ *     assertThat(response, is("a test string"));
+ *   }
+ * }
+ * </code></pre>
+ *
+ * <h2>Example usage for system or acceptance tests</h2>
+ *
+ * <pre><code>
+ * class MyServiceTest {
+ *
+ *   // Implements {@link AppInit}
+ *   static final MyService myService = new MyService();
+ *
+ *  {@literal @}RegisterExtension
+ *   static final ServiceHelperExtension serviceHelperExtension =
+ *       ServiceHelperExtension.create(myService, "my-service")
+ *                             .conf("some.key", "some-value")
+ *                             .args("-v")
+ *                             .startTimeoutSeconds(30);
+ *
+ *  {@literal @}Test
+ *   void testRequest(ServiceHelper serviceHelper) throws Exception {
+ *     String response = Futures.getUnchecked(serviceHelper.request("GET", "/ping"))
+ *         .getPayloads().get(0).toStringUtf8();
+ *
+ *     assertThat(response, is("pong"));
+ *   }
+ * }
+ * </code></pre>
+ *
+ * <h2>Faking outgoing request responses</h2>
+ *
+ * <p>The created service helper instance will contain a {@link StubClient} that can be accessed
+ * through {@link ServiceHelper#stubClient()}. This can be used to setup mocked replies on outgoing
+ * requests. Requests made by the application will first try to match against requests set up in the
+ * {@link StubClient}. But if none is found the request will be delegated to the underlying client
+ * that is normally available to the application through {@link Environment#client()} or {@link
+ * RequestContext#requestScopedClient()}.
+ *
+ * <p>See {@link StubClient} for more docs on how to set up mocked request replies.
+ *
+ * @see ServiceHelper
+ * @see RegisterExtension
+ * @see ParameterResolver
+ */
 public final class ServiceHelperExtension
     implements ServerHelperSetup<ServiceHelperExtension>,
     BeforeEachCallback,
