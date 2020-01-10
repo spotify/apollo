@@ -70,29 +70,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>A JUnit {@link TestRule} for running tests against an apollo service. It is built around
- * the {@link AppInit} setup mechanism and can be used to start a service configured in a way
- * appropriate for the test scenario.</p>
+ * A JUnit 4 {@link TestRule} for running tests against an apollo service. It is built around the
+ * {@link AppInit} setup mechanism and can be used to start a service configured in a way
+ * appropriate for the test scenario.
  *
- * <p>Typical usage would use {@link #create(AppInit, String)} together with a
- * {@link Rule} annotation. Further configuration like config key overrides, running domain and
- * additional program arguments can be set up using {@link #conf(String, String)},
- * {@link #domain(String)} and {@link #args(String...)} respectively.</p>
+ * <p><b>See {@link ServiceHelperExtension} when testing Apollo services using JUnit 5.</b>
  *
- * <p>Requests can be sent to the running application using any of {@link #request} methods.</p>
+ * <p>Typical usage would use {@link #create(AppInit, String)} together with a {@link Rule}
+ * annotation. Further configuration like config key overrides, running domain and additional
+ * program arguments can be set up using {@link #conf(String, String)}, {@link #domain(String)} and
+ * {@link #args(String...)} respectively.
+ *
+ * <p>Requests can be sent to the running application using any of {@link #request} methods.
  *
  * <h2>Example usage for testing a route provider</h2>
+ *
  * <pre><code>
  * {@literal @}RunWith(MockitoJUnitRunner.class)
  * class MyServiceTest {
  *
- *   {@literal @}Rule
+ *  {@literal @}Rule
  *   public ServiceHelper serviceHelper = ServiceHelper.create(this::appInit, "my-service")
  *       .conf("some.key", "some-value")
  *       .args("-v")
  *       .startTimeoutSeconds(30);
  *
- *   {@literal @}Mock
+ *  {@literal @}Mock
  *   SomeObject someObject;
  *
  *   void appInit(Environment environment) {
@@ -102,7 +105,7 @@ import org.slf4j.LoggerFactory;
  *         .registerAutoRoutes(endpointResource);
  *   }
  *
- *   {@literal @}Test
+ *  {@literal @}Test
  *   public void testRequest() throws Exception {
  *     when(someObject.thatDoesThings()).thenReturn("a test string");
  *
@@ -115,6 +118,7 @@ import org.slf4j.LoggerFactory;
  * </code></pre>
  *
  * <h2>Example usage for system or acceptance tests</h2>
+ *
  * <pre><code>
  * {@literal @}RunWith(MockitoJUnitRunner.class)
  * class MyServiceTest {
@@ -122,13 +126,13 @@ import org.slf4j.LoggerFactory;
  *   // Implements {@link AppInit}
  *   MyService myService = new MyService();
  *
- *   {@literal @}Rule
+ *  {@literal @}Rule
  *   public ServiceHelper serviceHelper = ServiceHelper.create(myService, "my-service")
  *       .conf("some.key", "some-value")
  *       .args("-v")
  *       .startTimeoutSeconds(30);
  *
- *   {@literal @}Test
+ *  {@literal @}Test
  *   public void testRequest() throws Exception {
  *     String response = Futures.getUnchecked(serviceHelper.request("GET", "/ping"))
  *         .getPayloads().get(0).toStringUtf8();
@@ -138,16 +142,18 @@ import org.slf4j.LoggerFactory;
  * }
  * </code></pre>
  *
- * <h1>Faking outgoing request responses</h1>
+ * <h2>Faking outgoing request responses</h2>
  *
- * <p>The service helper instance will contain a {@link StubClient} that can be accessed
- * through {@link #stubClient()}. This can be used to setup mocked replies on outgoing requests.
- * Requests made by the application will first try to match against requests set up in the
- * {@link StubClient}. But if none is found the request will be delegated to the underlying
- * client that is normally available to the application through {@link Environment#client()} or
- * {@link RequestContext#requestScopedClient()}.</p>
+ * <p>The service helper instance will contain a {@link StubClient} that can be accessed through
+ * {@link #stubClient()}. This can be used to setup mocked replies on outgoing requests. Requests
+ * made by the application will first try to match against requests set up in the {@link
+ * StubClient}. But if none is found the request will be delegated to the underlying client that is
+ * normally available to the application through {@link Environment#client()} or {@link
+ * RequestContext#requestScopedClient()}.
  *
- * <p>See {@link StubClient} for more docs on how to set up mocked request replies.</p>
+ * <p>See {@link StubClient} for more docs on how to set up mocked request replies.
+ *
+ * @see ServiceHelperExtension
  */
 public class ServiceHelper implements ServerHelperSetup<ServiceHelper>, TestRule, Closeable {
 
