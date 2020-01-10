@@ -51,7 +51,6 @@
         <guava.version>28.1-jre</guava.version>
         <netty.version>4.1.38.Final</netty.version>
         <jetty.version>9.4.19.v20190610</jetty.version>
-        <junit.version>5.5.2</junit.version>
         <junit.testkit.version>1.5.2</junit.testkit.version>
     </properties>
 
@@ -276,14 +275,11 @@
 
             <!-- test dependencies -->
             <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-engine</artifactId>
-                <version>${junit.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.vintage</groupId>
-                <artifactId>junit-vintage-engine</artifactId>
-                <version>${junit.version}</version>
+              <groupId>org.junit</groupId>
+              <artifactId>junit-bom</artifactId>
+              <version>5.5.2</version>
+              <scope>import</scope>
+              <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>org.junit.platform</groupId>
