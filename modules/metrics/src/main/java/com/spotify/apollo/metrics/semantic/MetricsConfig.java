@@ -2,7 +2,7 @@
  * -\-\-
  * Spotify Apollo Metrics Module
  * --
- * Copyright (C) 2013 - 2016 Spotify AB
+ * Copyright (C) 2013 - 2020 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION_THRESHOLD_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO;
+import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO_5XX;
 
 import com.google.inject.Inject;
 import com.typesafe.config.Config;
@@ -45,7 +46,8 @@ public class MetricsConfig {
           ENDPOINT_REQUEST_DURATION,
           ENDPOINT_REQUEST_DURATION_THRESHOLD_RATE,
           DROPPED_REQUEST_RATE,
-          ERROR_RATIO);
+          ERROR_RATIO,
+          ERROR_RATIO_5XX);
 
   static final int DEFAULT_TTL_SECONDS = (int) TimeUnit.MINUTES.toSeconds(5);
 
