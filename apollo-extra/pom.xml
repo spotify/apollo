@@ -125,6 +125,18 @@
                     </classpathDependencyExcludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <!-- note: apollo-extra splits some packages with apollo-api -->
+                            <Automatic-Module-Name>com.spotify.apollo.extra</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
