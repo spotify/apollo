@@ -135,7 +135,7 @@ easily configurable from the apollo service configuration.
 
 key | type | required | note
 --- | ---- | -------- | ----
-`metrics.server` | string list | optional | list of [`What`](src/main/java/com/spotify/apollo/metrics/semantic/What.java) names to enable; defaults to [ENDPOINT_REQUEST_RATE, ENDPOINT_REQUEST_DURATION, DROPPED_REQUEST_RATE, ERROR_RATIO]
+`metrics.server` | string list | optional | list of [`What`](src/main/java/com/spotify/apollo/metrics/semantic/What.java) names to enable; defaults to [ENDPOINT_REQUEST_RATE, ENDPOINT_REQUEST_DURATION, ENDPOINT_REQUEST_DURATION_THRESHOLD_RATE, DROPPED_REQUEST_RATE, ERROR_RATIO, ERROR_RATIO_4XX, ERROR_RATIO_5XX]
 `metrics.precreate-codes` | int list | optional | list of status codes to precreate request-rate meters for, default empty
 `metrics.reservoir-ttl` | int | optional | When to purge old values from the histogram, defaults to 300 seconds. Note, setting this to a large value will increase the amount of memory used to keep track samples.
 `ffwd.type` | string | optional | indicates which type of ffwd reporter to use. Available types are `agent` and `http`. see below for details. default is `agent`.

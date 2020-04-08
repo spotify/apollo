@@ -25,6 +25,7 @@ import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_DURATION_THRESHOLD_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ENDPOINT_REQUEST_RATE;
 import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO;
+import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO_4XX;
 import static com.spotify.apollo.metrics.semantic.What.ERROR_RATIO_5XX;
 
 import com.google.inject.Inject;
@@ -47,6 +48,7 @@ public class MetricsConfig {
           ENDPOINT_REQUEST_DURATION_THRESHOLD_RATE,
           DROPPED_REQUEST_RATE,
           ERROR_RATIO,
+          ERROR_RATIO_4XX,
           ERROR_RATIO_5XX);
 
   static final int DEFAULT_TTL_SECONDS = (int) TimeUnit.MINUTES.toSeconds(5);
