@@ -5,7 +5,7 @@
     <parent>
         <artifactId>apollo-parent</artifactId>
         <groupId>com.spotify</groupId>
-        <version>1.15.4-SNAPSHOT</version>
+        <version>1.15.4</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
