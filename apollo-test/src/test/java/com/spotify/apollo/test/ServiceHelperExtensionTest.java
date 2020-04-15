@@ -19,35 +19,27 @@
  */
 package com.spotify.apollo.test;
 
-import static org.junit.jupiter.engine.descriptor.JupiterEngineDescriptor.ENGINE_ID;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.testkit.engine.EngineTestKit;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 class ServiceHelperExtensionTest {
 
-  @AfterEach
-  void afterEach() {
-    ServiceHelperCorrectUsage.resetAppInitInvocationCount();
+  @RegisterExtension
+  static final ServiceHelperExtension serviceHelperExtension =
+      ServiceHelperExtension.create(env -> {}, "test-service")
+          .conf("test.string", "value")
+          .conf("test.integer", 1);
+
+  @Test
+  void shouldPropagateStringConfigValue(ServiceHelper serviceHelper) {
+    assertThat(serviceHelper.getInstance().getConfig().getString("test.string"), is("value"));
   }
 
   @Test
-  void shouldFailToInstantiateTestClassWhenExtensionDeclaredUsingExtendWith() {
-    EngineTestKit.engine(ENGINE_ID)
-        .selectors(selectClass(ServiceHelperIncorrectUsage.class))
-        .execute()
-        .containers()
-        .assertStatistics(stats -> stats.failed(1));
-  }
-
-  @Test
-  void shouldExecuteTestsWhenExtensionDeclaredProgrammatically() {
-    EngineTestKit.engine(ENGINE_ID)
-        .selectors(selectClass(ServiceHelperCorrectUsage.class))
-        .execute()
-        .tests()
-        .assertStatistics(stats -> stats.started(2).succeeded(2));
+  void shouldPropagateIntegerConfigValue(ServiceHelper serviceHelper) {
+    assertThat(serviceHelper.getInstance().getConfig().getInt("test.integer"), is(1));
   }
 }
