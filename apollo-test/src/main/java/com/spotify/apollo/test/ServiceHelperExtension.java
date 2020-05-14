@@ -183,7 +183,7 @@ public final class ServiceHelperExtension
 
   @Override
   public ServiceHelperExtension conf(String key, Object value) {
-    serviceHelper.conf(key, key);
+    serviceHelper.conf(key, value);
     return this;
   }
 
