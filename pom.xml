@@ -52,6 +52,7 @@
         <netty.version>4.1.45.Final</netty.version>
         <jetty.version>9.4.19.v20190610</jetty.version>
         <junit.testkit.version>1.5.2</junit.testkit.version>
+        <slf4j.version>1.7.30</slf4j.version>
     </properties>
 
     <dependencyManagement>
@@ -202,7 +203,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.28</version>
+                <version>${slf4j.version}</version>
             </dependency>
 
             <dependency>
