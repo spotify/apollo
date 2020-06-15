@@ -49,7 +49,6 @@ class MetricIdModule extends AbstractApolloModule {
   public MetricId metricId(MetaDescriptor metaDescriptor) {
     return MetricId.build("apollo").tagged(
         "service-framework", "http-service",
-        "service-framework-version", metaDescriptor.apolloVersion(),
         "application", metaDescriptor.descriptor().serviceName());
   }
 
