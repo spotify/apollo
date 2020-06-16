@@ -198,7 +198,7 @@
             <dependency>
                 <groupId>com.spotify.ffwd</groupId>
                 <artifactId>ffwd-http-client</artifactId>
-                <version>0.4.0</version>
+                <version>0.4.2</version>
             </dependency>
 
             <dependency>
