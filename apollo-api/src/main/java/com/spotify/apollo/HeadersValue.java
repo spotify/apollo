@@ -23,6 +23,7 @@ import com.google.auto.value.AutoValue;
 import com.google.common.base.CharMatcher;
 
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -39,7 +40,7 @@ abstract class HeadersValue implements Headers {
   @Nonnull
   @Override
   public Optional<String> get(@Nonnull String name) {
-    return Optional.ofNullable(asMap().get(name.toLowerCase()));
+    return Optional.ofNullable(asMap().get(name.toLowerCase(Locale.ROOT)));
   }
 
   static Headers create(Map<String, String> headers) {
@@ -58,17 +59,14 @@ abstract class HeadersValue implements Headers {
   }
 
   private static boolean keysAlreadyLowerCase(Map<String, String> headers) {
-    return !headers.keySet().stream()
-        .filter(HeadersValue::hasUpperCase)
-        .findAny()
-        .isPresent();
+    return headers.keySet().stream().noneMatch(HeadersValue::hasUpperCase);
   }
 
   private static Map<String, String> toLowerCaseKeys(Map<String, String> headers) {
     Map<String, String> result = new LinkedHashMap<>(headers.size());
 
     for (Map.Entry<String, String> entry : headers.entrySet()) {
-      result.put(entry.getKey().toLowerCase(), entry.getValue());
+      result.put(entry.getKey().toLowerCase(Locale.ROOT), entry.getValue());
     }
 
     return result;

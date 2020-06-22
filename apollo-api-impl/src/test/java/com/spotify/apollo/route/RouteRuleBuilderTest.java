@@ -35,6 +35,7 @@ import org.junit.runner.RunWith;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -93,7 +94,7 @@ public class RouteRuleBuilderTest {
   public void helperMethodsShouldProduceCorrectRoutes(String method, RouteProvider provider) throws Exception {
     ApplicationRouter<Endpoint> router = Routers.newRouterFromInspecting(provider);
 
-    String lowerCaseMethod = method.toLowerCase();
+    String lowerCaseMethod = method.toLowerCase(Locale.ROOT);
     assertRequestResponse(router, lowerCaseMethod + "-method", "a-" + lowerCaseMethod,
                           request(method, "/test/" + "a-" + lowerCaseMethod));
   }

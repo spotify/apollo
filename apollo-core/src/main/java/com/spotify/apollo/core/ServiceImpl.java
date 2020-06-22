@@ -48,6 +48,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
@@ -167,7 +168,7 @@ class ServiceImpl implements Service {
       String envKey = var.getKey();
       if (envKey.startsWith(envVarPrefix + "_")) {
         String configKey = envKey.substring(envVarPrefix.length())
-            .toLowerCase()
+            .toLowerCase(Locale.ROOT)
             .replaceAll("(?<!_)_(?!_(__)*([^_]|$))", ".")
             .replaceAll("__", "_")
             .substring(1);
