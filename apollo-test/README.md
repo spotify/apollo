@@ -31,47 +31,6 @@ This library aims to help with testing your services with a few helpers:
 [`ServiceHelper`](src/main/java/com/spotify/apollo/test/ServiceHelper.java) and 
 [`StubClient`](src/main/java/com/spotify/apollo/test/StubClient.java).
 
-
-### We'll start with a minimal example:
-
-our application under test
-```java
-class MinimalApp {
-
-  static void main(String... args) throws LoadingException {
-    HttpService.boot(MinimalApp::init, "test", args);
-  }
-
-  static void init(Environment environment) {
-    environment.routingEngine()
-        .registerAutoRoute(Route.future("GET", "/beer", (ctx) -> beer(ctx)));
-  }
-
-  static CompletionStage<Response<String>> beer(RequestContext context) {
-    Request breweryRequest = Request.forUri("http://brewery/order");
-    CompletionStage<Response<ByteString>> orderRequest = context.requestScopedClient()
-        .send(breweryRequest);
-
-    return orderRequest.thenApply(orderResponse -> {
-      if (orderResponse.status().code() != Status.OK.code()) {
-        return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
-      }
-
-      // assume we get an order id as a plaintext payload
-      final String orderId = orderResponse.payload().get().utf8();
-
-      return Response.forPayload("your order is " + orderId);
-    });
-  }
-}
-```
-
-So we have a simple endpoint at `http://<app>/beer` that makes a GET call to the `brewery` service
-for an order (yes this isn't a nice API but thankfully it's imaginary). Then it transforms the
-response into a simple string response telling us what our order id is. It also checks the response
-code of the `brewery` call to make sure we got a `200 OK` back. If not, it will reply with a `500
-Internal Server Error`.
-
 ### Let's write some tests
 
 An example how tests that call this endpoint and mock the `brewery` calls would be written using the 

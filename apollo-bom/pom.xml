@@ -28,7 +28,6 @@
                 <version>${project.parent.version}</version>
             </dependency>
 
-            <!-- api & http service -->
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-api</artifactId>
@@ -62,11 +61,6 @@
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-metrics</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.spotify</groupId>
-                <artifactId>apollo-http-service</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
             <dependency>

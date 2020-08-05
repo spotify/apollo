@@ -9,7 +9,7 @@ The environment will contain a `RoutingEngine` and a configurable, managed
 
 The main module is `ApolloEnvironmentModule` providing an `ApolloEnvironment` instance that can be
 used to initialize an `AppInit` instance, returning a `RequestHandler` to be used with any
-server module (for example the [`jetty-http-server`](../modules/jetty-http-server)).
+server module.
 
 ## Configuration
 
@@ -18,41 +18,6 @@ key | type | required | note
 `apollo.domain` | string | optional | eg., `example.org`
 `apollo.logIncomingRequests` | boolean | optional | default `true`
 `apollo.logOutgoingRequests` | boolean | optional | default `true`
-
-
-## Example
-
-```java
-public static void main(String... args) {
-  final Service service = Services.usingName("ping")
-      .withModule(HttpServerModule.create())
-      .withModule(ApolloEnvironmentModule.create())
-      .build();
-
-  try (Service.Instance i = service.start(args)) {
-    // Create the application (possible to get instances from i.resolve())
-    final Application app = new App();
-
-    // Create Environment and call App.init(env)
-    final ApolloEnvironment env = ApolloEnvironmentModule.environment(i);
-    final RequestHandler handler = env.initialize(app);
-
-    // Create servers
-    final HttpServer httpServer = HttpServerModule.server(i);
-
-    // Servers will not be bound until these calls
-    httpServer.start(handler);
-
-    i.waitForShutdown();
-  } catch (InterruptedException | IOException e) {
-    // handle errors
-  }
-}
-```
-
-For a runnable example, see [`MinimalRunner`]
-(../apollo-http-service/src/test/java/com/spotify/apollo/httpservice/MinimalRunner.java)
-
 
 ## Extending incoming/outgoing request handling
 
