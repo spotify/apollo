@@ -28,9 +28,7 @@
         <module>apollo-test</module>
         <module>apollo-extra</module>
         <module>apollo-entity</module>
-        <module>apollo-http-service</module>
 
-        <module>modules/jetty-http-server</module>
         <module>modules/okhttp-client</module>
         <module>modules/metrics</module>
     </modules>
@@ -50,7 +48,6 @@
         <semantic-metrics.version>1.0.2</semantic-metrics.version>
         <guava.version>28.2-jre</guava.version>
         <netty.version>4.1.45.Final</netty.version>
-        <jetty.version>9.4.19.v20190610</jetty.version>
         <junit.testkit.version>1.5.2</junit.testkit.version>
         <slf4j.version>1.7.30</slf4j.version>
         <hamcrest.version>2.2</hamcrest.version>
@@ -207,16 +204,6 @@
                 <version>${slf4j.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-client</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-server</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
             <dependency>
                 <groupId>javax.annotation</groupId>
                 <artifactId>javax.annotation-api</artifactId>
