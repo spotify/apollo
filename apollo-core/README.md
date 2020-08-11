@@ -176,7 +176,4 @@ supports dynamic configuration (Dagger for example only supports
 static configuration).  Apollo Core extends Guice by making modules
 auto-loadable, and configuration-driven.
 
-Modules can be found under [modules](../modules):
-
-* [Http Server](../modules/jetty-http-server)
-* [Http Client](../modules/okhttp-client)
+Modules can be found under [modules](../modules).

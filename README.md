@@ -18,14 +18,8 @@ Apollo has been used in production at Spotify for a long time. As a part of the 
 
 There are three main libraries in Apollo:
 
-* [apollo-http-service](apollo-http-service)
 * [apollo-api](apollo-api)
 * [apollo-core](apollo-core)
-
-### Apollo HTTP Service
-The [apollo-http-service](apollo-http-service) library is a standardized assembly of Apollo
-modules. It incorporates both apollo-api and apollo-core and ties them together with other
-modules to get a standard api service using http for incoming and outgoing communication.
 
 ### Apollo API
 The [apollo-api](apollo-api) library is the Apollo library you are most likely to interact with.
@@ -56,23 +50,6 @@ as "plumbing". For more information about this library, see the [Apollo Core Rea
 In addition to the three main Apollo libraries listed above, to help you write tests for your
 service we have an additional library called [apollo-test](apollo-test). It has helpers to set up
 a service for testing, and to mock outgoing request responses.
-
-### Getting Started with Apollo
-Apollo will be distributed as a set of Maven artifacts, which makes it easy to get started no matter the build tool; Maven, Ant + Ivy or Gradle. Below is a very simple but functional service — more extensive examples are available in the [examples](examples) directory. Until these are released, you can build and install Apollo from source by running `mvn install`.
-
-```java
-public final class App {
-
-    public static void main(String... args) throws LoadingException {
-        HttpService.boot(App::init, "my-app", args);
-    }
-
-    static void init(Environment environment) {
-        environment.routingEngine()
-            .registerAutoRoute(Route.sync("GET", "/", rc -> "hello world"));
-    }
- }
-```
 
 ### Links
 

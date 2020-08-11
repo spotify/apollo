@@ -41,11 +41,6 @@
             apollo-core
           </a>
         </li>
-        <li>
-          <a href="https://github.com/spotify/apollo/tree/master/apollo-http-service">
-            apollo-http-service
-          </a>
-        </li>
       </ol>
     </div>
 
@@ -66,16 +61,6 @@
         need to interact directly with apollo-core; think of it merely
         as “plumbing.”
       </p>
-
-      <h3>Apollo HTTP Service</h3>
-
-      <p>
-        The apollo-http-service library is a standardized assembly of
-        Apollo modules. It incorporates both apollo-api and
-        apollo-core and ties them together with several other useful
-        modules to get a standard api service using HTTP for incoming
-        and outgoing communication.
-      </p>
     </div>
   </div>
 </section>
@@ -91,34 +76,6 @@
     in <a href="https://github.com/spotify/apollo/tree/master/examples">the
     GitHub repository</a>.
   </p>
-
-
-  <fieldset>
-    <legend>Use the latest maven artifact</legend>
-
-    <pre><code class="xml"><dependency>
-    <groupId>com.spotify</groupId>
-    <artifactId>apollo-http-service</artifactId>
-    <version><%= global.apolloVersion %></version>
-</dependency></code></pre>
-  </fieldset>
-
-
-  <fieldset>
-    <legend>Minimal Apollo Application</legend>
-
-    <pre><code class="java">public final class App {
-
-    public static void main(String... args) throws LoadingException {
-        HttpService.boot(App::init, "my-app", args);
-    }
-
-    static void init(Environment environment) {
-        environment.routingEngine()
-            .registerAutoRoute(Route.sync("GET", "/", rc -> "hello world"));
-    }
- }</code></pre>
-  </fieldset>
 
   <p>
     Find the <a href="http://spotify.github.io/apollo/maven/apidocs/">JavaDocs here</a>.

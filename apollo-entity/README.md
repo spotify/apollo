@@ -44,8 +44,6 @@ Add Maven dependency:
 </dependency>
 ```
 
-_See the [project skeleton] docs for how to use a Maven BOM for dependency versions_
-
 Create your Jackson `ObjectMapper` and the [`EntityMiddleware`][1] factory:
 
 ```java
@@ -138,4 +136,3 @@ See [`EntityMiddlewareTest`][3] for a complete list of route options and tests.
 [2]: src/main/java/com/spotify/apollo/entity/EntityCodec.java
 [3]: src/test/java/com/spotify/apollo/entity/EntityMiddlewareTest.java
 [4]: src/main/java/com/spotify/apollo/entity/JacksonEntityCodec.java
-[project skeleton]: https://github.com/spotify/apollo/tree/master/apollo-http-service#maven
