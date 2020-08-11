@@ -43,10 +43,11 @@
     <properties>
         <cucumber.version>4.8.0</cucumber.version>
         <auto-matter.version>0.15.3</auto-matter.version>
+        <auto-value.version>1.7.4</auto-value.version>
         <logback.version>1.2.3</logback.version>
-        <jackson.version>2.10.2</jackson.version>
+        <jackson.version>2.11.1</jackson.version>
         <semantic-metrics.version>1.0.2</semantic-metrics.version>
-        <guava.version>28.2-jre</guava.version>
+        <guava.version>29.0-jre</guava.version>
         <netty.version>4.1.45.Final</netty.version>
         <junit.testkit.version>1.5.2</junit.testkit.version>
         <slf4j.version>1.7.30</slf4j.version>
@@ -249,12 +250,12 @@
             <dependency>
                 <groupId>com.google.auto.value</groupId>
                 <artifactId>auto-value</artifactId>
-                <version>1.7</version>
+                <version>${auto-value.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.auto.value</groupId>
                 <artifactId>auto-value-annotations</artifactId>
-                <version>1.7</version>
+                <version>${auto-value.version}</version>
             </dependency>
 
             <!-- test dependencies -->
