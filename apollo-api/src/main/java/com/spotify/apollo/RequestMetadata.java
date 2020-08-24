@@ -1,4 +1,4 @@
-/*
+/*-
  * -\-\-
  * Spotify Apollo API Interfaces
  * --
@@ -21,6 +21,7 @@ package com.spotify.apollo;
 
 import java.time.Instant;
 import java.util.Optional;
+import javax.swing.text.html.Option;
 
 /**
  * Describes an API for retrieving metadata about an incoming request. Implementations that wish to
@@ -45,6 +46,13 @@ public interface RequestMetadata {
    * the network setup.
    */
   Optional<HostAndPort> remoteAddress();
+
+  /**
+   * Indicates the identity of the remote caller, if available.
+   */
+  default Optional<String> callerIdentity() {
+    return Optional.empty();
+  }
 
   /**
    * Defines an address
