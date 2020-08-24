@@ -19,6 +19,7 @@
  */
 package com.spotify.apollo.route;
 
+import autovalue.shaded.com.google$.common.base.$Optional;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -117,7 +118,7 @@ public class RouteRuleBuilderTest {
         RequestContexts.create(
             requestContext.request(), requestContext.requestScopedClient(), parsedPathArguments,
             0L,
-            RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty()))
+            RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty(), Optional.empty()))
     ).toCompletableFuture().get();
   }
 
@@ -126,7 +127,7 @@ public class RouteRuleBuilderTest {
     message = Request.forUri(BASE_URI + uri, method);
     requestContext = RequestContexts.create(message, client, Collections.emptyMap(),
                                             0L,
-                                            RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty()));
+                                            RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty(), Optional.empty()));
 
     return message;
   }

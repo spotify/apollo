@@ -29,6 +29,6 @@ import java.util.Optional;
 @AutoValue
 abstract class TestRequestMetadata implements RequestMetadata {
   static RequestMetadata empty() {
-    return new AutoValue_TestRequestMetadata(Instant.EPOCH, Optional.empty(), Optional.empty());
+    return new AutoValue_TestRequestMetadata(Instant.EPOCH, Optional.empty(), Optional.empty(), Optional.empty());
   }
 }

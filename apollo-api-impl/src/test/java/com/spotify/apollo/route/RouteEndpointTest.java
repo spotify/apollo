@@ -68,7 +68,7 @@ public class RouteEndpointTest {
     Request request = Request.forUri("http://foo");
     requestContext = RequestContexts.create(request, mock(Client.class), pathArgs,
                                             0L,
-                                            RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty()));
+                                            RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty(), Optional.empty()));
 
     theData = ByteString.encodeUtf8("theString");
     response = Response.forPayload(theData);

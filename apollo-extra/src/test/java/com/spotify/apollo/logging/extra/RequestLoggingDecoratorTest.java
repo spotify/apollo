@@ -253,6 +253,11 @@ public class RequestLoggingDecoratorTest {
             }
           });
         }
+
+        @Override
+        public Optional<String> callerIdentity() {
+          return Optional.empty();
+        }
       };
     }
   }

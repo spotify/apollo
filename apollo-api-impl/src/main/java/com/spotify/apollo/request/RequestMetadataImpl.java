@@ -1,8 +1,8 @@
-/*
+/*-
  * -\-\-
  * Spotify Apollo API Implementations
  * --
- * Copyright (C) 2013 - 2016 Spotify AB
+ * Copyright (C) 2013 - 2020 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  * limitations under the License.
  * -/-/-
  */
+
 package com.spotify.apollo.request;
 
 import com.google.auto.value.AutoValue;
@@ -35,12 +36,18 @@ public abstract class RequestMetadataImpl implements RequestMetadata {
 
   public static RequestMetadata create(Instant arrivalTime,
                                        Optional<HostAndPort> localAddress,
-                                       Optional<HostAndPort> remoteAddress) {
+                                       Optional<HostAndPort> remoteAddress,
+                                       Optional<String> callerIdentity) {
     return new AutoValue_RequestMetadataImpl(arrivalTime, localAddress, remoteAddress);
   }
 
   public static HostAndPort hostAndPort(String host, int port) {
     return new AutoValue_RequestMetadataImpl_HostAndPortImpl(host, port);
+  }
+
+  @Override
+  public Optional<String> callerIdentity() {
+    return Optional.empty();
   }
 
   @AutoValue

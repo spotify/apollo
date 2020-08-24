@@ -54,7 +54,7 @@ public abstract class RequestContexts implements RequestContext {
         client,
         pathArgs,
         arrivalTimeNanos,
-        RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty())
+        RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty(), Optional.empty())
     );
   }
 

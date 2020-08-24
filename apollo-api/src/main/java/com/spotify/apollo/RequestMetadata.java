@@ -47,6 +47,11 @@ public interface RequestMetadata {
   Optional<HostAndPort> remoteAddress();
 
   /**
+   * Indicates the identity of the remote caller, if available.
+   */
+  Optional<String> callerIdentity();
+
+  /**
    * Defines an address
    */
   interface HostAndPort {

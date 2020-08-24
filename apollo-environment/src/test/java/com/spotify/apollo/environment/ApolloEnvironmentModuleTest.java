@@ -272,7 +272,7 @@ public class ApolloEnvironmentModuleTest {
 
     @Override
     public RequestMetadata metadata() {
-      return RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty());
+      return RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     public Response<ByteString> getReply() {

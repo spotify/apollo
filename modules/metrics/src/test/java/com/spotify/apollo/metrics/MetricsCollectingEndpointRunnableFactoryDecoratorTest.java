@@ -80,7 +80,7 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
     request = Request.forUri("hm://foo");
     requestContext = RequestContexts.create(request, client, Collections.emptyMap(),
                                             0L,
-                                            RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty()));
+                                            RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty(), Optional.empty()));
 
     when(metrics.metricsForEndpointCall(any())).thenReturn(requestStats);
 

@@ -47,7 +47,7 @@ public class FakeOngoingRequest implements OngoingRequest {
   public FakeOngoingRequest(Request request) {
     this.request = request;
     this.requestMetadata =
-        RequestMetadataImpl.create(Instant.now(), Optional.empty(), Optional.empty());
+        RequestMetadataImpl.create(Instant.now(), Optional.empty(), Optional.empty(), Optional.empty());
   }
 
   @Override

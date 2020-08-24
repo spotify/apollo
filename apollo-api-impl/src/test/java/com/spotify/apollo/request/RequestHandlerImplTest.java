@@ -79,7 +79,7 @@ public class RequestHandlerImplTest {
   public void setUp() throws Exception {
     IncomingRequestAwareClient client = new NoopClient();
 
-    requestMetadata = RequestMetadataImpl.create(Instant.ofEpochSecond(4711L), Optional.empty(), Optional.empty());
+    requestMetadata = RequestMetadataImpl.create(Instant.ofEpochSecond(4711L), Optional.empty(), Optional.empty(), Optional.empty());
 
     when(ongoingRequest.metadata()).thenReturn(requestMetadata);
     when(ongoingRequest.request()).thenReturn(Request.forUri("http://foo"));

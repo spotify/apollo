@@ -93,6 +93,6 @@ public interface OngoingRequest {
    * Returns the metadata available for this request.
    */
   default RequestMetadata metadata() {
-    return RequestMetadataImpl.create(Instant.now(), Optional.empty(), Optional.empty());
+    return RequestMetadataImpl.create(Instant.now(), Optional.empty(), Optional.empty(), Optional.empty());
   }
 }
