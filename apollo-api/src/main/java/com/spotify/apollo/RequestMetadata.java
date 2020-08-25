@@ -1,4 +1,4 @@
-/*
+/*-
  * -\-\-
  * Spotify Apollo API Interfaces
  * --
@@ -45,6 +45,13 @@ public interface RequestMetadata {
    * the network setup.
    */
   Optional<HostAndPort> remoteAddress();
+
+  /**
+   * Indicates the identity of the remote caller, if available.
+   */
+  default Optional<String> callerIdentity() {
+    return Optional.empty();
+  }
 
   /**
    * Defines an address
