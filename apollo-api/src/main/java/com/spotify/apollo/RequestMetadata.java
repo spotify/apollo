@@ -21,7 +21,6 @@ package com.spotify.apollo;
 
 import java.time.Instant;
 import java.util.Optional;
-import javax.swing.text.html.Option;
 
 /**
  * Describes an API for retrieving metadata about an incoming request. Implementations that wish to
