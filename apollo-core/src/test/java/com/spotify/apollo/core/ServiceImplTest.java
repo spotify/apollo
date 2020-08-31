@@ -20,6 +20,7 @@
 package com.spotify.apollo.core;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.math.IntMath;
 
 import com.spotify.apollo.module.AbstractApolloModule;
@@ -576,6 +577,23 @@ public class ServiceImplTest {
     } finally {
       executorService.shutdownNow();
     }
+  }
+
+  @Test
+  public void testExtraModules() throws Exception {
+    Service service = ServiceImpl.builder("test")
+        .build();
+
+    try (Service.Instance instance = service.start(
+        new String[0], ConfigFactory.empty(), ImmutableSet.of(new NoopModule()))) {
+      NoopModule.Noop noop =
+          instance.resolve(NoopModule.Noop.class);
+      assertNotNull(noop);
+
+      instance.getSignaller().signalShutdown();
+      instance.waitForShutdown();
+    }
+
   }
 
   static class Shutdowner implements Callable<Void> {

@@ -164,8 +164,7 @@ class ServiceImpl implements Service {
       final ListeningScheduledExecutorService scheduledExecutorService =
           createScheduledExecutorService(closer);
 
-      final Set<ApolloModule> allModules = discoverAllModules();
-      allModules.addAll(extraModules);
+      final Set<ApolloModule> allModules = discoverAllModules(extraModules);
       
       final CoreModule coreModule =
           new CoreModule(this, config, signaller, closer, unprocessedArgs);
@@ -240,13 +239,14 @@ class ServiceImpl implements Service {
         shutdownRequested, stopped);
   }
 
-  Set<ApolloModule> discoverAllModules() {
+  Set<ApolloModule> discoverAllModules(
+      Set<ApolloModule> extraModules) {
     final Set<ApolloModule> allModules;
 
     if (moduleDiscovery) {
-      allModules = Sets.union(modules, ImmutableSet.copyOf(ServiceLoader.load(ApolloModule.class)));
+      allModules = Sets.union(Sets.union(modules, ImmutableSet.copyOf(ServiceLoader.load(ApolloModule.class))), extraModules);
     } else {
-      allModules = modules;
+      allModules = Sets.union(modules, extraModules);
     }
     return allModules;
   }
