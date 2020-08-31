@@ -45,6 +45,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
 
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,15 +121,20 @@ class ServiceImpl implements Service {
 
   @Override
   public Instance start(String[] args, Map<String, String> env) throws IOException {
-    return start(args, ConfigFactory.load(serviceName), env);
+    return start(args, ConfigFactory.load(serviceName), env, Collections.emptySet());
   }
 
   @Override
   public Instance start(final String[] args, final Config config) throws IOException {
-    return start(args, config, System.getenv());
+    return start(args, config, System.getenv(), Collections.emptySet());
   }
 
-  private Instance start(String[] args, Config serviceConfig, Map<String, String> env)
+  @Override
+  public Instance start(final String[] args, final Config config, final Set<ApolloModule> extraModules) throws IOException {
+    return start(args, config, System.getenv(), extraModules);
+  }
+
+  private Instance start(String[] args, Config serviceConfig, Map<String, String> env, Set<ApolloModule> extraModules)
       throws IOException {
     final Closer closer = Closer.create();
 
@@ -159,6 +165,8 @@ class ServiceImpl implements Service {
           createScheduledExecutorService(closer);
 
       final Set<ApolloModule> allModules = discoverAllModules();
+      allModules.addAll(extraModules);
+      
       final CoreModule coreModule =
           new CoreModule(this, config, signaller, closer, unprocessedArgs);
 

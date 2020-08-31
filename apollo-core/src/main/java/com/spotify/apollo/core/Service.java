@@ -31,6 +31,7 @@ import com.typesafe.config.Config;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -88,6 +89,25 @@ public interface Service {
    */
   @VisibleForTesting
   Instance start(String[] args, Config config) throws IOException;
+
+  /**
+   * Starts a new instance of this service that is fully initialized. It will initialize the service
+   * using the {@code config} passed as an argument and the environment variables and a set of extra
+   * {@link ApolloModule} that should always be loaded.
+   *
+   * @param args   Command-line arguments for the service.
+   * @param config Configuration for the service.
+   * @param extraModules  Set of modules that should be loaded in addition to the ones loaded by the
+   * {@link Builder}.
+   * @return a new instance of this service that is up and running.
+   * @throws ApolloHelpException   if the user wants to show command-line help and not start the
+   *                               application.
+   * @throws ApolloCliException    if something else related to CLI parsing failed.
+   * @throws java.io.IOException   if the application could not start for some other reason.
+   */
+  default Instance start(String[] args, Config config, Set<ApolloModule> extraModules) throws IOException {
+    return this.start(args, config);
+  }
 
   /**
    * A builder for a new service.
