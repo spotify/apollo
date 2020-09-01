@@ -593,7 +593,23 @@ public class ServiceImplTest {
       instance.getSignaller().signalShutdown();
       instance.waitForShutdown();
     }
+  }
 
+  @Test
+  public void testExtraModulesAreDeduped() throws Exception {
+    AtomicInteger count = new AtomicInteger(0);
+
+    Service service = ServiceImpl.builder("test")
+        .withModule(new CountingModuleWithPriority(0.0, count))
+        .build();
+
+    try (Service.Instance instance = service.start(
+        new String[0], ConfigFactory.empty(), ImmutableSet.of(new CountingModuleWithPriority(0.0, count)))) {
+
+      instance.getSignaller().signalShutdown();
+      instance.waitForShutdown();
+    }
+    assertThat(count.get(), is(1));
   }
 
   static class Shutdowner implements Callable<Void> {

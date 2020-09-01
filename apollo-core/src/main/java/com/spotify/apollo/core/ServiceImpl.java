@@ -1,4 +1,4 @@
-/*
+/*-
  * -\-\-
  * Spotify Apollo Service Core (aka Leto)
  * --
@@ -18,6 +18,10 @@
  * -/-/-
  */
 package com.spotify.apollo.core;
+
+import static com.google.common.collect.ImmutableList.of;
+import static com.google.common.collect.Iterables.concat;
+import static com.spotify.apollo.core.Services.CommonConfigKeys;
 
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
@@ -39,22 +43,17 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.name.Names;
-
 import com.spotify.apollo.module.ApolloModule;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
-
-import java.util.Collections;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -65,16 +64,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
+import java.util.stream.Collectors;
 import joptsimple.BuiltinHelpFormatter;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-
-import static com.google.common.collect.ImmutableList.of;
-import static com.google.common.collect.Iterables.concat;
-import static com.spotify.apollo.core.Services.CommonConfigKeys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class ServiceImpl implements Service {
 
@@ -165,7 +162,7 @@ class ServiceImpl implements Service {
           createScheduledExecutorService(closer);
 
       final Set<ApolloModule> allModules = discoverAllModules(extraModules);
-      
+
       final CoreModule coreModule =
           new CoreModule(this, config, signaller, closer, unprocessedArgs);
 
@@ -241,13 +238,18 @@ class ServiceImpl implements Service {
 
   Set<ApolloModule> discoverAllModules(
       Set<ApolloModule> extraModules) {
-    final Set<ApolloModule> allModules;
+
+    Set<ApolloModule> allModules =
+        Sets.union(
+            modules,
+            extraModules.stream()
+                .filter(m -> modules.stream().noneMatch(am -> m.getId().equals(am.getId())))
+                .collect(Collectors.toSet()));
 
     if (moduleDiscovery) {
-      allModules = Sets.union(Sets.union(modules, ImmutableSet.copyOf(ServiceLoader.load(ApolloModule.class))), extraModules);
-    } else {
-      allModules = Sets.union(modules, extraModules);
+      return Sets.union(allModules, ImmutableSet.copyOf(ServiceLoader.load(ApolloModule.class)));
     }
+
     return allModules;
   }
 
