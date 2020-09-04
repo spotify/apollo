@@ -581,18 +581,16 @@ public class ServiceImplTest {
 
   @Test
   public void testExtraModules() throws Exception {
+    AtomicInteger count = new AtomicInteger(0);
     Service service = ServiceImpl.builder("test")
         .build();
 
     try (Service.Instance instance = service.start(
-        new String[0], ConfigFactory.empty(), ImmutableSet.of(new NoopModule()))) {
-      NoopModule.Noop noop =
-          instance.resolve(NoopModule.Noop.class);
-      assertNotNull(noop);
-
+        new String[0], ConfigFactory.empty(), ImmutableSet.of(new CountingModuleWithPriority(0.0, count)))) {
       instance.getSignaller().signalShutdown();
       instance.waitForShutdown();
     }
+    assertThat(count.get(), is(1));
   }
 
   @Test
@@ -603,13 +601,34 @@ public class ServiceImplTest {
         .withModule(new CountingModuleWithPriority(0.0, count))
         .build();
 
+    try (Service.Instance instance =
+        service.start(
+            new String[0],
+            ConfigFactory.empty(),
+            ImmutableSet.of(new CountingModuleWithPriority(0.0, count), new CountingModuleWithPriority(0.0, count)))) {
+
+      instance.getSignaller().signalShutdown();
+      instance.waitForShutdown();
+    }
+    assertThat(count.get(), is(1));
+  }
+
+  @Test
+  public void testExtraModulesAreDedupedButNotOnesLoadedWithModule() throws Exception {
+    AtomicInteger count = new AtomicInteger(0);
+
+    Service service = ServiceImpl.builder("test")
+        .withModule(new CountingModuleWithPriority(0.0, count))
+        .withModule(new CountingModuleWithPriority(0.0, count))
+        .build();
+
     try (Service.Instance instance = service.start(
         new String[0], ConfigFactory.empty(), ImmutableSet.of(new CountingModuleWithPriority(0.0, count)))) {
 
       instance.getSignaller().signalShutdown();
       instance.waitForShutdown();
     }
-    assertThat(count.get(), is(1));
+    assertThat(count.get(), is(2));
   }
 
   static class Shutdowner implements Callable<Void> {
