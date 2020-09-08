@@ -31,11 +31,10 @@ import com.typesafe.config.Config;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-/**
- * A service that is controlled by Apollo.
- */
+/** A service that is controlled by Apollo. */
 public interface Service {
 
   /**
@@ -50,10 +49,10 @@ public interface Service {
    *
    * @param args Command-line arguments for the service.
    * @return a new instance of this service that is up and running.
-   * @throws ApolloHelpException   if the user wants to show command-line help and not start the
-   *                               application.
-   * @throws ApolloCliException    if something else related to CLI parsing failed.
-   * @throws java.io.IOException   if the application could not start for some other reason.
+   * @throws ApolloHelpException if the user wants to show command-line help and not start the
+   *     application.
+   * @throws ApolloCliException if something else related to CLI parsing failed.
+   * @throws java.io.IOException if the application could not start for some other reason.
    */
   Instance start(String... args) throws IOException;
 
@@ -62,14 +61,14 @@ public interface Service {
    * configuration from the *.conf file but can override keys using {@code env}.
    *
    * @param args Command-line arguments for the service.
-   * @param env  Environment variables for the service.  These are not additional environment
-   *             variables, but instead replaces the set of environment variables that Apollo sees,
-   *             generally used for testing.
+   * @param env Environment variables for the service. These are not additional environment
+   *     variables, but instead replaces the set of environment variables that Apollo sees,
+   *     generally used for testing.
    * @return a new instance of this service that is up and running.
-   * @throws ApolloHelpException   if the user wants to show command-line help and not start the
-   *                               application.
-   * @throws ApolloCliException    if something else related to CLI parsing failed.
-   * @throws java.io.IOException   if the application could not start for some other reason.
+   * @throws ApolloHelpException if the user wants to show command-line help and not start the
+   *     application.
+   * @throws ApolloCliException if something else related to CLI parsing failed.
+   * @throws java.io.IOException if the application could not start for some other reason.
    */
   @VisibleForTesting
   Instance start(String[] args, Map<String, String> env) throws IOException;
@@ -78,24 +77,43 @@ public interface Service {
    * Starts a new instance of this service that is fully initialized. It will initialize the service
    * using the {@code config} passed as an argument and the environment variables.
    *
-   * @param args   Command-line arguments for the service.
+   * @param args Command-line arguments for the service.
    * @param config Configuration for the service.
    * @return a new instance of this service that is up and running.
-   * @throws ApolloHelpException   if the user wants to show command-line help and not start the
-   *                               application.
-   * @throws ApolloCliException    if something else related to CLI parsing failed.
-   * @throws java.io.IOException   if the application could not start for some other reason.
+   * @throws ApolloHelpException if the user wants to show command-line help and not start the
+   *     application.
+   * @throws ApolloCliException if something else related to CLI parsing failed.
+   * @throws java.io.IOException if the application could not start for some other reason.
    */
   @VisibleForTesting
   Instance start(String[] args, Config config) throws IOException;
 
   /**
-   * A builder for a new service.
+   * Starts a new instance of this service that is fully initialized. It will initialize the service
+   * using the {@code config} passed as an argument and the environment variables and a set of extra
+   * {@link ApolloModule} that should always be loaded.
+   *
+   * @param args Command-line arguments for the service.
+   * @param config Configuration for the service.
+   * @param extraModules Set of modules that should be loaded in addition to the ones loaded by the
+   *     {@link Builder}. These modules will be deduplicated against other modules based on {@link
+   *     ApolloModule#getId()}.
+   * @return a new instance of this service that is up and running.
+   * @throws ApolloHelpException if the user wants to show command-line help and not start the
+   *     application.
+   * @throws ApolloCliException if something else related to CLI parsing failed.
+   * @throws java.io.IOException if the application could not start for some other reason.
    */
+  default Instance start(String[] args, Config config, Set<ApolloModule> extraModules)
+      throws IOException {
+    throw new UnsupportedOperationException(); // Default method that throws, to avoid breaking API
+  }
+
+  /** A builder for a new service. */
   interface Builder {
 
     /**
-     * Registers the specified module as loadable by this service.  This does not guarantee that the
+     * Registers the specified module as loadable by this service. This does not guarantee that the
      * module is actually loaded; the modules themselves will inspect the configuration and actually
      * determine if they should be loaded.
      *
@@ -106,40 +124,40 @@ public interface Service {
 
     /**
      * Enables or disables module discovery, which will use SPI to discover all available modules on
-     * the classpath.  By default, module discovery is disabled.
+     * the classpath. By default, module discovery is disabled.
      *
      * @param moduleDiscovery {@code true} if module discovery should be used, {@code false}
-     *                        otherwise.
+     *     otherwise.
      * @return This builder.
      */
     Builder usingModuleDiscovery(boolean moduleDiscovery);
 
     /**
      * Enables/disables whether the thread calling {@link Service#start(String...)} will be
-     * interrupted when the application is requested to shut down.  The default is to not interrupt
+     * interrupted when the application is requested to shut down. The default is to not interrupt
      * the thread.
      *
      * @param enabled {@code true} if {@link Thread#interrupt()} should be called on the thread that
-     *                called {@link #start(String...)} when the service is signalled to shut down;
-     *                {@code false} if nothing should happen.
+     *     called {@link #start(String...)} when the service is signalled to shut down; {@code
+     *     false} if nothing should happen.
      * @return This builder.
      */
     Builder withShutdownInterrupt(boolean enabled);
 
     /**
      * Enables/disables whether Apollo should handle the {@code --help/-h} flags and display
-     * command-line help.  The default is to handle the flags.
+     * command-line help. The default is to handle the flags.
      *
      * @param enabled {@code true} if Apollo should intercept {@code --help/-h}, {@code false}
-     *                otherwise.
+     *     otherwise.
      * @return This builder.
      */
     Builder withCliHelp(boolean enabled);
 
     /**
-     * Sets the prefix that is used to convert environment variables into configuration keys.  By
-     * default, the prefix is {@code "APOLLO"}, which means that an environment variable like
-     * {@code "APOLLO_DOMAIN_NAME"} is translated into the config key {@code "domain.name"}.
+     * Sets the prefix that is used to convert environment variables into configuration keys. By
+     * default, the prefix is {@code "APOLLO"}, which means that an environment variable like {@code
+     * "APOLLO_DOMAIN_NAME"} is translated into the config key {@code "domain.name"}.
      *
      * @param prefix The environment variable prefix to use.
      * @return This builder.
@@ -148,20 +166,20 @@ public interface Service {
 
     /**
      * Sets the timeout for how long Apollo will wait for the service to clean itself up upon
-     * shutdown.  Apollo will keep a reaper thread running as long as there are shutdown operations
-     * pending.  After the timeout has elapsed, the reaper thread will die, but other threads might
+     * shutdown. Apollo will keep a reaper thread running as long as there are shutdown operations
+     * pending. After the timeout has elapsed, the reaper thread will die, but other threads might
      * still linger.
      *
      * @param timeout The timeout value.
-     * @param unit    The time unit of the timeout value.
+     * @param unit The time unit of the timeout value.
      * @return This builder.
      */
     Builder withWatchdogTimeout(long timeout, TimeUnit unit);
 
     /**
-     * The Java runtime to use when constructing service instances.  This is only respected by
-     * Apollo itself; the service instance(s) configured by Apollo might decide to use the global
-     * runtime. The default is to use the global JVM runtime.
+     * The Java runtime to use when constructing service instances. This is only respected by Apollo
+     * itself; the service instance(s) configured by Apollo might decide to use the global runtime.
+     * The default is to use the global JVM runtime.
      *
      * @param runtime The Java runtime to use when constructing service instances.
      * @return This builder.
@@ -177,9 +195,7 @@ public interface Service {
     Service build();
   }
 
-  /**
-   * A running service instance.
-   */
+  /** A running service instance. */
   interface Instance extends Closeable {
 
     /**
@@ -198,7 +214,7 @@ public interface Service {
 
     /**
      * Returns a shared {@link com.google.common.util.concurrent.ListeningExecutorService} that has
-     * virtually infinite capacity and that can be used for long-running jobs.  This executor is
+     * virtually infinite capacity and that can be used for long-running jobs. This executor is
      * scoped along with the service instance, which avoids the need to use the very problematic
      * daemon threads.
      *
@@ -209,7 +225,7 @@ public interface Service {
     /**
      * Returns a shared {@link com.google.common.util.concurrent.ListeningScheduledExecutorService}
      * that has capacity appropriate for scheduled jobs, i.e. jobs that run periodically and have a
-     * limited execution time.  Use {@link #getExecutorService()} for jobs that run forever.  This
+     * limited execution time. Use {@link #getExecutorService()} for jobs that run forever. This
      * executor is scoped along with the service instance, which avoids the need to use the very
      * problematic daemon threads.
      *
@@ -233,9 +249,9 @@ public interface Service {
     ImmutableList<String> getUnprocessedArgs();
 
     /**
-     * Returns a signaller that can be used to send signals to this service instance.  It can be
-     * used to send signals to a running service instance, but after the service instance has
-     * exited, sending signals will be no-ops.
+     * Returns a signaller that can be used to send signals to this service instance. It can be used
+     * to send signals to a running service instance, but after the service instance has exited,
+     * sending signals will be no-ops.
      *
      * @return a signaller that can be used to send signals to this service instance.
      */
@@ -251,7 +267,7 @@ public interface Service {
     <T> T resolve(Class<T> type);
 
     /**
-     * A method that will block until the service has stopped.  This will wait until a signal from
+     * A method that will block until the service has stopped. This will wait until a signal from
      * the environment tells the service to shutdown, or an error occurs.
      */
     void waitForShutdown() throws InterruptedException;
@@ -265,14 +281,10 @@ public interface Service {
     boolean isShutdown();
   }
 
-  /**
-   * A way of sending signals to a service instance.
-   */
+  /** A way of sending signals to a service instance. */
   interface Signaller {
 
-    /**
-     * Signals the associated service instance to shut down, if it is still running.
-     */
+    /** Signals the associated service instance to shut down, if it is still running. */
     void signalShutdown();
   }
 }

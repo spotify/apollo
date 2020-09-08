@@ -1,4 +1,4 @@
-/*
+/*-
  * -\-\-
  * Spotify Apollo Service Core (aka Leto)
  * --
@@ -18,6 +18,10 @@
  * -/-/-
  */
 package com.spotify.apollo.core;
+
+import static com.google.common.collect.ImmutableList.of;
+import static com.google.common.collect.Iterables.concat;
+import static com.spotify.apollo.core.Services.CommonConfigKeys;
 
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
@@ -39,21 +43,17 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.name.Names;
-
 import com.spotify.apollo.module.ApolloModule;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -64,16 +64,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
+import java.util.stream.Collectors;
 import joptsimple.BuiltinHelpFormatter;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-
-import static com.google.common.collect.ImmutableList.of;
-import static com.google.common.collect.Iterables.concat;
-import static com.spotify.apollo.core.Services.CommonConfigKeys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class ServiceImpl implements Service {
 
@@ -120,15 +118,20 @@ class ServiceImpl implements Service {
 
   @Override
   public Instance start(String[] args, Map<String, String> env) throws IOException {
-    return start(args, ConfigFactory.load(serviceName), env);
+    return start(args, ConfigFactory.load(serviceName), env, Collections.emptySet());
   }
 
   @Override
   public Instance start(final String[] args, final Config config) throws IOException {
-    return start(args, config, System.getenv());
+    return start(args, config, System.getenv(), Collections.emptySet());
   }
 
-  private Instance start(String[] args, Config serviceConfig, Map<String, String> env)
+  @Override
+  public Instance start(final String[] args, final Config config, final Set<ApolloModule> extraModules) throws IOException {
+    return start(args, config, System.getenv(), extraModules);
+  }
+
+  private Instance start(String[] args, Config serviceConfig, Map<String, String> env, Set<ApolloModule> extraModules)
       throws IOException {
     final Closer closer = Closer.create();
 
@@ -158,7 +161,8 @@ class ServiceImpl implements Service {
       final ListeningScheduledExecutorService scheduledExecutorService =
           createScheduledExecutorService(closer);
 
-      final Set<ApolloModule> allModules = discoverAllModules();
+      final Set<ApolloModule> allModules = discoverAllModules(extraModules);
+
       final CoreModule coreModule =
           new CoreModule(this, config, signaller, closer, unprocessedArgs);
 
@@ -232,15 +236,17 @@ class ServiceImpl implements Service {
         shutdownRequested, stopped);
   }
 
-  Set<ApolloModule> discoverAllModules() {
-    final Set<ApolloModule> allModules;
+  Set<ApolloModule> discoverAllModules(
+      Set<ApolloModule> extraModules) {
 
-    if (moduleDiscovery) {
-      allModules = Sets.union(modules, ImmutableSet.copyOf(ServiceLoader.load(ApolloModule.class)));
-    } else {
-      allModules = modules;
-    }
-    return allModules;
+    Set<ApolloModule> baseModules = moduleDiscovery
+        ? Sets.union(modules, ImmutableSet.copyOf(ServiceLoader.load(ApolloModule.class)))
+        : modules;
+
+    return Sets.union(baseModules,
+            extraModules.stream()
+                .filter(m -> baseModules.stream().noneMatch(am -> m.getId().equals(am.getId())))
+                .collect(Collectors.toSet()));
   }
 
   ListeningScheduledExecutorService createScheduledExecutorService(Closer closer) {
