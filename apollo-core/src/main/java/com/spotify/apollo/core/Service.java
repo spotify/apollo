@@ -106,7 +106,7 @@ public interface Service {
    */
   default Instance start(String[] args, Config config, Set<ApolloModule> extraModules)
       throws IOException {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(); // Default method that throws, to avoid breaking API
   }
 
   /** A builder for a new service. */
