@@ -239,18 +239,14 @@ class ServiceImpl implements Service {
   Set<ApolloModule> discoverAllModules(
       Set<ApolloModule> extraModules) {
 
-    Set<ApolloModule> allModules =
-        Sets.union(
-            modules,
+    Set<ApolloModule> baseModules = moduleDiscovery
+        ? Sets.union(modules, ImmutableSet.copyOf(ServiceLoader.load(ApolloModule.class)))
+        : modules;
+
+    return Sets.union(baseModules,
             extraModules.stream()
-                .filter(m -> modules.stream().noneMatch(am -> m.getId().equals(am.getId())))
+                .filter(m -> baseModules.stream().noneMatch(am -> m.getId().equals(am.getId())))
                 .collect(Collectors.toSet()));
-
-    if (moduleDiscovery) {
-      return Sets.union(allModules, ImmutableSet.copyOf(ServiceLoader.load(ApolloModule.class)));
-    }
-
-    return allModules;
   }
 
   ListeningScheduledExecutorService createScheduledExecutorService(Closer closer) {
