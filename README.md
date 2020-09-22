@@ -16,7 +16,7 @@ Apollo is a set of Java libraries that we use at Spotify when writing microservi
 
 Apollo has been used in production at Spotify for a long time. As a part of the work to release version 1.0.0 we moved the development of Apollo into the open.
 
-There are three main libraries in Apollo:
+There are two main libraries in Apollo:
 
 * [apollo-api](apollo-api)
 * [apollo-core](apollo-core)
@@ -47,7 +47,7 @@ your service. You do not usually need to interact directly with apollo-core; thi
 as "plumbing". For more information about this library, see the [Apollo Core Readme](apollo-core).
 
 ### Apollo Test
-In addition to the three main Apollo libraries listed above, to help you write tests for your
+In addition to the two main Apollo libraries listed above, to help you write tests for your
 service we have an additional library called [apollo-test](apollo-test). It has helpers to set up
 a service for testing, and to mock outgoing request responses.
 
