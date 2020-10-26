@@ -45,7 +45,7 @@
         <auto-matter.version>0.15.3</auto-matter.version>
         <auto-value.version>1.7.4</auto-value.version>
         <logback.version>1.2.3</logback.version>
-        <jackson.version>2.11.1</jackson.version>
+        <jackson.version>2.11.2</jackson.version>
         <semantic-metrics.version>1.0.2</semantic-metrics.version>
         <guava.version>29.0-jre</guava.version>
         <netty.version>4.1.45.Final</netty.version>
