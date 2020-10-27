@@ -446,7 +446,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.1</version>
+                    <version>3.0.0-M5</version>
                     <configuration>
                         <!-- To avoid ForkedBooter loading issue -->
                         <useSystemClassLoader>false</useSystemClassLoader>
@@ -455,7 +455,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>2.22.1</version>
+                    <version>3.0.0-M5</version>
                     <configuration>
                         <!-- To avoid ForkedBooter loading issue -->
                         <useSystemClassLoader>false</useSystemClassLoader>
