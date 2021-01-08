@@ -169,6 +169,25 @@ ffwd.host = "localhost"
 ffwd.port = 19091
 ```
 
+### ffwd.type = `agentWithFlush`
+
+Includes a final flush of metrics on service shut down.
+
+key | type | required | note
+--- | ---- | -------- | ----
+`ffwd.interval` | int | optional | interval in seconds of reporting metrics to ffwd; default 30
+`ffwd.host` | string | optional | host where the ffwd agent is running. default `localhost`
+`ffwd.port` | int | optional | port where the ffwd agent is running. default `19091`
+
+#### Example
+
+```
+ffwd.type = agentWithFlush
+ffwd.interval = 30
+ffwd.host = "localhost"
+ffwd.port = 19091
+```
+
 ### ffwd.type = `http`
 
 key | type | required | note
@@ -180,6 +199,26 @@ key | type | required | note
 
 ```
 ffwd.type = http
+ffwd.interval = 30
+ffwd.discovery = {
+  type = "srv"
+  record = "_metrics-api._http.example.com."
+}
+```
+
+### ffwd.type = `httpWithFlush`
+
+Includes a final flush of metrics on service shut down.
+
+key | type | required | note
+--- | ---- | -------- | ----
+`ffwd.interval` | int | optional | interval in seconds of reporting metrics to ffwd; default 30
+`ffwd.discovery.type` | string | required | indicates how to discovery http endpoints. Available options are `static` and `srv`. See below for details.
+
+#### Example
+
+```
+ffwd.type = httpWithFlush
 ffwd.interval = 30
 ffwd.discovery = {
   type = "srv"

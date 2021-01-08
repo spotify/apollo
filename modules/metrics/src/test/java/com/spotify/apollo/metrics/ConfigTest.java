@@ -48,6 +48,19 @@ public class ConfigTest {
     }
 
     @Test
+    public void ffwdAgentWithFlushConfig() {
+      String json = "{\"ffwd\":{\"type\":\"agentWithFlush\"}}";
+      FfwdConfig.AgentWithFlush config =
+       (FfwdConfig.AgentWithFlush) FfwdConfig.fromConfig(conf(json));
+
+      assertEquals(FfwdConfig.AgentWithFlush.class, config.getClass());
+
+      assertEquals(Optional.empty(), config.getHost());
+      assertEquals(Optional.empty(), config.getPort());
+      assertEquals(30, config.getInterval());
+    }
+
+    @Test
     public void httpConfig() {
       String json =
           "{\"ffwd\":{\"type\":\"http\",\"discovery\":{\"type\":\"srv\",\"record\":\"hello\"}}}";
@@ -59,6 +72,21 @@ public class ConfigTest {
 
       assertEquals(30, http.getInterval());
     }
+
+    @Test
+    public void httpWithFlushConfig() {
+      String json =
+          "{\"ffwd\":{\"type\":\"httpWithFlush\",\"discovery\":{\"type\":\"srv\","
+          + "\"record\":\"hello\"}}}";
+      FfwdConfig config = FfwdConfig.fromConfig(conf(json));
+
+      assertEquals(FfwdConfig.HttpWithFlush.class, config.getClass());
+
+      final FfwdConfig.HttpWithFlush http = (FfwdConfig.HttpWithFlush) config;
+
+      assertEquals(30, http.getInterval());
+    }
+
 
     @Test
     public void ffwdScheduleCanBeSetFromConfig() {

@@ -52,14 +52,23 @@ interface FfwdConfig {
 
     final int interval = optionalInt(config, "interval").orElse(DEFAULT_INTERVAL);
 
+    //Agent
+    final Optional<String> host = optionalString(config, "host");
+    final Optional<Integer> port = optionalInt(config, "port");
+
     switch (type) {
       case "agent":
-        final Optional<String> host = optionalString(config, "host");
-        final Optional<Integer> port = optionalInt(config, "port");
         return new Agent(interval, host, port);
+      case "agentWithFlush":
+        return new AgentWithFlush(interval, host, port);
       case "http":
-        final DiscoveryConfig discovery = DiscoveryConfig.fromConfig(config.getConfig("discovery"));
-        return new Http(interval, discovery);
+        {final DiscoveryConfig discovery = DiscoveryConfig.fromConfig(config.getConfig(
+          "discovery"));
+        return new Http(interval, discovery);}
+      case "httpWithFlush":
+        {final DiscoveryConfig discovery = DiscoveryConfig.fromConfig(config.getConfig(
+          "discovery"));
+        return new HttpWithFlush(interval, discovery);}
       default:
         throw new RuntimeException("Unrecognized ffwd type: " + type);
     }
@@ -110,6 +119,51 @@ interface FfwdConfig {
     }
   }
 
+  class AgentWithFlush implements FfwdConfig {
+    private final int interval;
+    private final Optional<String> host;
+    private final Optional<Integer> port;
+
+    AgentWithFlush(final int interval, final Optional<String> host, final Optional<Integer> port) {
+      this.interval = interval;
+      this.host = host;
+      this.port = port;
+    }
+
+    int getInterval() {
+      return interval;
+    }
+
+    Optional<String> getHost() {
+      return host;
+    }
+
+    Optional<Integer> getPort() {
+      return port;
+    }
+
+    @Override
+    public Callable<FastForwardLifecycle> setup(
+        final SemanticMetricRegistry metricRegistry, final MetricId metricId,
+        final String searchDomain
+    ) {
+      final FastForwardReporter.Builder builder = FastForwardReporter
+          .forRegistry(metricRegistry)
+          .schedule(TimeUnit.SECONDS, interval)
+          .tagExtractor(new EnvironmentTagExtractor())
+          .prefix(metricId);
+
+      host.ifPresent(builder::host);
+      port.ifPresent(builder::port);
+
+      return () -> {
+        final FastForwardReporter reporter = builder.build();
+        reporter.start();
+        return reporter::stopWithFlush;
+      };
+    }
+  }
+
   class Http implements FfwdConfig {
     private final int interval;
     private final DiscoveryConfig discovery;
@@ -146,6 +200,46 @@ interface FfwdConfig {
         final FastForwardHttpReporter reporter = builder.build();
         reporter.start();
         return reporter::stop;
+      };
+    }
+  }
+
+  class HttpWithFlush implements FfwdConfig {
+    private final int interval;
+    private final DiscoveryConfig discovery;
+
+    HttpWithFlush(final int interval, final DiscoveryConfig discovery) {
+      this.interval = interval;
+      this.discovery = discovery;
+    }
+
+    int getInterval() {
+      return interval;
+    }
+
+    DiscoveryConfig getDiscovery() {
+      return discovery;
+    }
+
+    @Override
+    public Callable<FastForwardLifecycle> setup(
+        final SemanticMetricRegistry metricRegistry, final MetricId metricId,
+        final String searchDomain
+    ) {
+      final HttpClient.Builder httpClient = new HttpClient.Builder();
+      httpClient.discovery(discovery.toHttpDiscovery());
+      httpClient.searchDomain(searchDomain);
+
+      final FastForwardHttpReporter.Builder builder = FastForwardHttpReporter
+          .forRegistry(metricRegistry, httpClient.build())
+          .tagExtractor(new EnvironmentTagExtractor())
+          .schedule(interval, TimeUnit.SECONDS)
+          .prefix(metricId);
+
+      return () -> {
+        final FastForwardHttpReporter reporter = builder.build();
+        reporter.start();
+        return reporter::stopWithFlush;
       };
     }
   }
