@@ -133,7 +133,7 @@ public final class ResponseMatchers {
    * @param payloadMatcher {@link Matcher} for the payload.
    * @return A matcher
    */
-  public static <T> Matcher<Response<T>> hasPayload(Matcher<? super T> payloadMatcher) {
+  public static <T> Matcher<Response<? super T>> hasPayload(Matcher<? super T> payloadMatcher) {
     return new TypeSafeMatcher<Response<T>>() {
       @Override
       protected boolean matchesSafely(Response<T> item) {
