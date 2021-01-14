@@ -133,10 +133,10 @@ public final class ResponseMatchers {
    * @param payloadMatcher {@link Matcher} for the payload.
    * @return A matcher
    */
-  public static <T> Matcher<Response<T>> hasPayload(Matcher<? super T> payloadMatcher) {
-    return new TypeSafeMatcher<Response<T>>() {
+  public static <T> Matcher<Response<? super T>> hasPayload(Matcher<? super T> payloadMatcher) {
+    return new TypeSafeMatcher<Response<? super T>>() {
       @Override
-      protected boolean matchesSafely(Response<T> item) {
+      protected boolean matchesSafely(Response<? super T> item) {
         return item.payload()
             .map(payloadMatcher::matches)
             .orElse(false);
@@ -149,8 +149,8 @@ public final class ResponseMatchers {
       }
 
       @Override
-      protected void describeMismatchSafely(Response<T> item, Description mismatchDescription) {
-        final Optional<T> payload = item.payload();
+      protected void describeMismatchSafely(Response<? super T> item, Description mismatchDescription) {
+        final Optional<? super T> payload = item.payload();
         if (!payload.isPresent()) {
           mismatchDescription.appendText("there is no payload");
         } else {
