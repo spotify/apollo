@@ -19,6 +19,7 @@
  */
 package com.spotify.apollo.metrics;
 
+import static com.spotify.apollo.environment.ConfigUtil.optionalBoolean;
 import static com.spotify.apollo.environment.ConfigUtil.optionalInt;
 import static com.spotify.apollo.environment.ConfigUtil.optionalString;
 
@@ -51,15 +52,16 @@ interface FfwdConfig {
     final String type = optionalString(config, "type").orElse("agent");
 
     final int interval = optionalInt(config, "interval").orElse(DEFAULT_INTERVAL);
+    final boolean flush = optionalBoolean(config, "flush").orElse(Boolean.TRUE);
 
     switch (type) {
       case "agent":
         final Optional<String> host = optionalString(config, "host");
         final Optional<Integer> port = optionalInt(config, "port");
-        return new Agent(interval, host, port);
+        return new Agent(interval, flush, host, port);
       case "http":
         final DiscoveryConfig discovery = DiscoveryConfig.fromConfig(config.getConfig("discovery"));
-        return new Http(interval, discovery);
+        return new Http(interval, flush, discovery);
       default:
         throw new RuntimeException("Unrecognized ffwd type: " + type);
     }
@@ -67,17 +69,24 @@ interface FfwdConfig {
 
   class Agent implements FfwdConfig {
     private final int interval;
+    private final boolean flush;
     private final Optional<String> host;
     private final Optional<Integer> port;
 
-    Agent(final int interval, final Optional<String> host, final Optional<Integer> port) {
+    Agent(final int interval, final boolean flush, final Optional<String> host,
+     final Optional<Integer> port) {
       this.interval = interval;
+      this.flush = flush;
       this.host = host;
       this.port = port;
     }
 
     int getInterval() {
       return interval;
+    }
+
+    boolean getFlush() {
+      return flush;
     }
 
     Optional<String> getHost() {
@@ -105,22 +114,28 @@ interface FfwdConfig {
       return () -> {
         final FastForwardReporter reporter = builder.build();
         reporter.start();
-        return reporter::stop;
+        return flush ? reporter::stopWithFlush : reporter::stop;
       };
     }
   }
 
   class Http implements FfwdConfig {
     private final int interval;
+    private final boolean flush;
     private final DiscoveryConfig discovery;
 
-    Http(final int interval, final DiscoveryConfig discovery) {
+    Http(final int interval, final boolean flush, final DiscoveryConfig discovery) {
       this.interval = interval;
+      this.flush = flush;
       this.discovery = discovery;
     }
 
     int getInterval() {
       return interval;
+    }
+
+    boolean getFlush() {
+      return flush;
     }
 
     DiscoveryConfig getDiscovery() {
@@ -145,7 +160,7 @@ interface FfwdConfig {
       return () -> {
         final FastForwardHttpReporter reporter = builder.build();
         reporter.start();
-        return reporter::stop;
+        return flush ? reporter::stopWithFlush : reporter::stop;
       };
     }
   }

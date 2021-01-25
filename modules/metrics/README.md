@@ -157,6 +157,7 @@ will then emit a '0' value until the first time a certain status code shows up.
 key | type | required | note
 --- | ---- | -------- | ----
 `ffwd.interval` | int | optional | interval in seconds of reporting metrics to ffwd; default 30
+`ffwd.flush` | boolean | optional | include a final flush of metrics on service shut down; default `False`
 `ffwd.host` | string | optional | host where the ffwd agent is running. default `localhost`
 `ffwd.port` | int | optional | port where the ffwd agent is running. default `19091`
 
@@ -174,6 +175,7 @@ ffwd.port = 19091
 key | type | required | note
 --- | ---- | -------- | ----
 `ffwd.interval` | int | optional | interval in seconds of reporting metrics to ffwd; default 30
+`ffwd.flush` | boolean | optional | include a final flush of metrics on service shut down; default `False`
 `ffwd.discovery.type` | string | required | indicates how to discovery http endpoints. Available options are `static` and `srv`. See below for details.
 
 #### Example

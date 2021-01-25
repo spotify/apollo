@@ -46,7 +46,7 @@
         <auto-value.version>1.7.4</auto-value.version>
         <logback.version>1.2.3</logback.version>
         <jackson.version>2.11.2</jackson.version>
-        <semantic-metrics.version>1.0.2</semantic-metrics.version>
+        <semantic-metrics.version>1.1.6</semantic-metrics.version>
         <guava.version>29.0-jre</guava.version>
         <netty.version>4.1.45.Final</netty.version>
         <junit.testkit.version>1.5.2</junit.testkit.version>
@@ -580,6 +580,7 @@
                         <artifactId>missinglink-maven-plugin</artifactId>
                         <version>0.2.0</version>
                         <configuration>
+                            <includeScopes>compile,test,runtime</includeScopes>
                             <failOnConflicts>true</failOnConflicts>
                             <ignoreDestinationPackages>
                                 <!-- not always present for all modules, will be present in final artifact -->
@@ -601,6 +602,10 @@
                                 <!-- netty references this for < Java 7 JDKs -->
                                 <ignoreDestinationPackage>
                                     <package>com.jcraft.jzlib</package>
+                                </ignoreDestinationPackage>
+                                <!-- ignore references to Android util in okhttp3 -->
+                                <ignoreDestinationPackage>
+                                    <package>android.util</package>
                                 </ignoreDestinationPackage>
                             </ignoreDestinationPackages>
                             <ignoreSourcePackages>
