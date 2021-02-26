@@ -71,6 +71,10 @@
             <artifactId>config</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.spotify.ffwd</groupId>
+            <artifactId>ffwd-http-client</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.spotify.metrics</groupId>
             <artifactId>semantic-metrics-ffwd-reporter</artifactId>
         </dependency>
