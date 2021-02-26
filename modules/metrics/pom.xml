@@ -79,6 +79,10 @@
             <artifactId>semantic-metrics-ffwd-http-reporter</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.spotify.ffwd</groupId>
+            <artifactId>ffwd-http-client</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
