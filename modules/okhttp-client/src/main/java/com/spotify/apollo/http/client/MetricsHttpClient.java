@@ -30,18 +30,14 @@ import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import javax.annotation.Nullable;
 import okio.ByteString;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class LoggingHttpClient implements IncomingRequestAwareClient {
-
-  private static final Logger logger = LoggerFactory.getLogger(LoggingHttpClient.class);
+public class MetricsHttpClient implements IncomingRequestAwareClient {
 
   private final IncomingRequestAwareClient client;
   private final SemanticMetricRegistry metricRegistry;
   private final MetricId baseId = MetricId.build();
 
-  public LoggingHttpClient(
+  public MetricsHttpClient(
       IncomingRequestAwareClient client, SemanticMetricRegistry metricRegistry) {
     this.client = client;
     this.metricRegistry = metricRegistry;
@@ -63,7 +59,6 @@ public class LoggingHttpClient implements IncomingRequestAwareClient {
               final long elapsedMillis = System.currentTimeMillis() - start;
               if (throwable != null) {
                 logOutgoingRequest(request, elapsedMillis, null);
-                logger.error("Exception caught: ", throwable);
               } else {
                 logOutgoingRequest(request, elapsedMillis, response);
               }

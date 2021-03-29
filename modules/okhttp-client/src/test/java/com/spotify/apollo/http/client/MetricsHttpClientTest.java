@@ -44,13 +44,13 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.Strict.class)
-public class LoggingHttpClientTest {
+public class MetricsHttpClientTest {
 
   @Mock private IncomingRequestAwareClient client;
 
   private SemanticMetricRegistry semanticMetricRegistry = new SemanticMetricRegistry();
 
-  @InjectMocks private LoggingHttpClient sut;
+  @InjectMocks private MetricsHttpClient sut;
 
   private Request standardRequest = Request.forUri("http://www.spotify.com");
 
@@ -58,7 +58,7 @@ public class LoggingHttpClientTest {
 
   @Before
   public void setUp() {
-    sut = new LoggingHttpClient(client, semanticMetricRegistry);
+    sut = new MetricsHttpClient(client, semanticMetricRegistry);
   }
 
   @Test

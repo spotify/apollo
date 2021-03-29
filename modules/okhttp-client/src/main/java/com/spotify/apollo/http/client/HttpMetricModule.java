@@ -56,7 +56,7 @@ public class HttpMetricModule extends AbstractApolloModule {
     }
 
     public IncomingRequestAwareClient apply(IncomingRequestAwareClient baseClient) {
-      return new LoggingHttpClient(baseClient, this.metricsRegistry);
+      return new MetricsHttpClient(baseClient, this.metricsRegistry);
     }
   }
 }
