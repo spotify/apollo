@@ -36,6 +36,8 @@ import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import okio.ByteString;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -49,11 +51,7 @@ public class MetricsHttpClientTest {
 
   @Mock private IncomingRequestAwareClient client;
 
-  @Mock private SemanticMetricRegistry semanticMetricRegistry;
-
-  @Mock private Meter meter;
-
-  @Mock private Histogram histogram;
+  private SemanticMetricRegistry semanticMetricRegistry = new SemanticMetricRegistry();
 
   @InjectMocks private MetricsHttpClient sut;
 
@@ -61,59 +59,34 @@ public class MetricsHttpClientTest {
 
   @Rule public ExpectedException thrown = ExpectedException.none();
 
+  @Before
+  public void setUp() {
+    sut = new MetricsHttpClient(client, semanticMetricRegistry);
+  }
+
   @Test
   public void testNonHttpRequestSentAsStandard() throws ExecutionException, InterruptedException {
 
     final Request request = Request.forUri("ftp://a-thing.com");
     when(client.send(request, Optional.empty()))
         .thenReturn(CompletableFuture.completedFuture(Response.ok()));
-    final Response response = sut.send(request, Optional.empty()).toCompletableFuture().get();
+    final Response<ByteString> response =
+        sut.send(request, Optional.empty()).toCompletableFuture().get();
     assertThat(response.status(), is(Status.OK));
   }
 
   @Test
   public void testHttpRequestReturnsCompletionStage()
       throws ExecutionException, InterruptedException {
-    when(semanticMetricRegistry.meter(
-            MetricId.build()
-                .tagged("what", "message-rate")
-                .tagged("status-code", "200")
-                .tagged("target-host", "www.spotify.com")
-                .tagged("protocol", "http/https")
-                .tagged("unit", "request")))
-        .thenReturn(meter);
-    when(semanticMetricRegistry.histogram(
-            MetricId.build()
-                .tagged("what", "request-latency")
-                .tagged("unit", "ms")
-                .tagged("protocol", "http/https")
-                .tagged("target-host", "www.spotify.com")))
-        .thenReturn(histogram);
     when(client.send(standardRequest, Optional.empty()))
         .thenReturn(CompletableFuture.completedFuture(Response.ok()));
-    final Response response =
+    final Response<ByteString> response =
         sut.send(standardRequest, Optional.empty()).toCompletableFuture().get();
     assertThat(response.status(), is(Status.OK));
   }
 
   @Test
   public void testHttpRequestExceptionPath() throws ExecutionException, InterruptedException {
-    when(semanticMetricRegistry.meter(
-            MetricId.build()
-                .tagged("what", "message-rate")
-                .tagged("status-code", "EXCEPTION")
-                .tagged("target-host", "www.spotify.com")
-                .tagged("protocol", "http/https")
-                .tagged("unit", "request")))
-        .thenReturn(meter);
-    when(semanticMetricRegistry.histogram(
-            MetricId.build()
-                .tagged("what", "request-latency")
-                .tagged("unit", "ms")
-                .tagged("protocol", "http/https")
-                .tagged("target-host", "www.spotify.com")))
-        .thenReturn(histogram);
-
     when(client.send(standardRequest, Optional.empty()))
         .thenReturn(
             CompletableFuture.supplyAsync(
