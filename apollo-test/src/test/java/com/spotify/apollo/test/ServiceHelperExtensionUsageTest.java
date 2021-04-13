@@ -38,7 +38,7 @@ class ServiceHelperExtensionUsageTest {
     EngineTestKit.engine(ENGINE_ID)
         .selectors(selectClass(ServiceHelperIncorrectUsage.class))
         .execute()
-        .containers()
+        .containerEvents()
         .assertStatistics(stats -> stats.failed(1));
   }
 
@@ -47,7 +47,7 @@ class ServiceHelperExtensionUsageTest {
     EngineTestKit.engine(ENGINE_ID)
         .selectors(selectClass(ServiceHelperCorrectUsage.class))
         .execute()
-        .tests()
+        .testEvents()
         .assertStatistics(stats -> stats.started(2).succeeded(2));
   }
 }
