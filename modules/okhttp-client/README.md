@@ -56,3 +56,20 @@ public static class ProxyHandler implements RequestHandler {
   }
 }
 ```
+## Add metrics to outgoing http requests
+
+In order to have metrics for the outgoing http requests, the HttpMetricModule should be used
+ together with HttpClientModule. 
+
+```java
+public static void main(String[] args) throws Exception {
+
+   final Service service =
+          Services.usingName(SERVICE_NAME)
+              .withModule(StandaloneModule.create(Main::configure))
+              .withEnvVarPrefix("SPOTIFY")
+              .withModule(HttpClientModule.create())
+              .withModule(HttpMetricModule.create())
+              .build();
+}
+```
