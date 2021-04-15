@@ -42,7 +42,20 @@ class MetricsCollectingEndpointRunnableFactoryDecorator implements EndpointRunna
   @Override
   public EndpointRunnableFactory apply(EndpointRunnableFactory delegate) {
     return (request, requestContext, endpoint) -> {
-      final String endpointName = endpoint.info().getName();
+      final String endpointName;
+      // Normally request.request().method() and endpoint.info().getRequestMethod() are equal
+      // but since apollo lets GET endpoints also serve HEAD requests, they are different
+      // when the request is a HEAD request. The hack below makes sure we distinguish metrics
+      // for GET and HEAD requests.
+      // We could always take the else branch but I'm guessing that the comparison
+      // is cheaper than a needless concatenation.
+      if (request.request().method().equals(endpoint.info().getRequestMethod())) {
+        endpointName = endpoint.info().getName();
+      } else {
+        // but because GET endpoints serve HEAD requests info().getName() is
+        // wrong does not distinguish HEAD and GET requests
+        endpointName = request.request().method() + ":" + endpoint.info().getUri();
+      }
 
       // note: will not time duration of matching and dispatching
       final RequestMetrics requestStats = metrics.metricsForEndpointCall(endpointName);

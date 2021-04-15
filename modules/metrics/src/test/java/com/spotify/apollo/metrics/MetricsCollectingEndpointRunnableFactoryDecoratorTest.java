@@ -70,6 +70,7 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
 
   @Captor ArgumentCaptor<OngoingRequest> ongoingRequestCaptor;
   @Captor ArgumentCaptor<RequestContext> requestContextCaptor;
+  @Captor ArgumentCaptor<String> endpointNameCaptor;
 
   private EndpointRunnableFactory decorated;
   private RequestContext requestContext;
@@ -82,11 +83,13 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
                                             0L,
                                             RequestMetadataImpl.create(Instant.EPOCH, Optional.empty(), Optional.empty()));
 
-    when(metrics.metricsForEndpointCall(any())).thenReturn(requestStats);
+    when(metrics.metricsForEndpointCall(endpointNameCaptor.capture())).thenReturn(requestStats);
 
     when(ongoingRequest.request()).thenReturn(request);
     when(endpoint.info()).thenReturn(info);
-    when(info.getName()).thenReturn("foo");
+    when(info.getUri()).thenReturn("/foo");
+    when(info.getRequestMethod()).thenReturn("GET");
+    when(info.getName()).thenReturn("GET:/foo");
 
     when(delegate.create(ongoingRequestCaptor.capture(), requestContextCaptor.capture(), any()))
         .thenReturn(delegateRunnable);
@@ -165,5 +168,24 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
     RequestContext copied = requestContextCaptor.getValue();
 
     assertThat(copied.metadata(), is(requestContext.metadata()));
+  }
+
+  @Test
+  public void shouldCountRequestsByEndpoint() throws Exception {
+    decorated.create(ongoingRequest, requestContext, endpoint).run();
+
+    String copied = endpointNameCaptor.getValue();
+
+    assertThat(copied, is(info.getName()));
+  }
+
+  @Test
+  public void shouldCountHeadRequestsSeparateFromGetRequests() throws Exception {
+    when(ongoingRequest.request()).thenReturn(Request.forUri("hm://foo", "HEAD"));
+    decorated.create(ongoingRequest, requestContext, endpoint).run();
+
+    String copied = endpointNameCaptor.getValue();
+
+    assertThat(copied, is("HEAD:/foo"));
   }
 }
