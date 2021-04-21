@@ -23,11 +23,9 @@ import static com.spotify.apollo.environment.ConfigUtil.optionalBoolean;
 import static com.spotify.apollo.environment.ConfigUtil.optionalInt;
 import static com.spotify.apollo.environment.ConfigUtil.optionalString;
 
-import com.spotify.ffwd.http.HttpClient;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.spotify.metrics.ffwd.FastForwardReporter;
-import com.spotify.metrics.ffwdhttp.FastForwardHttpReporter;
 import com.spotify.metrics.tags.EnvironmentTagExtractor;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -60,8 +58,7 @@ interface FfwdConfig {
         final Optional<Integer> port = optionalInt(config, "port");
         return new Agent(interval, flush, host, port);
       case "http":
-        final DiscoveryConfig discovery = DiscoveryConfig.fromConfig(config.getConfig("discovery"));
-        return new Http(interval, flush, discovery);
+        throw new RuntimeException("ffwd type 'http' no longer supported");
       default:
         throw new RuntimeException("Unrecognized ffwd type: " + type);
     }
@@ -113,52 +110,6 @@ interface FfwdConfig {
 
       return () -> {
         final FastForwardReporter reporter = builder.build();
-        reporter.start();
-        return flush ? reporter::stopWithFlush : reporter::stop;
-      };
-    }
-  }
-
-  class Http implements FfwdConfig {
-    private final int interval;
-    private final boolean flush;
-    private final DiscoveryConfig discovery;
-
-    Http(final int interval, final boolean flush, final DiscoveryConfig discovery) {
-      this.interval = interval;
-      this.flush = flush;
-      this.discovery = discovery;
-    }
-
-    int getInterval() {
-      return interval;
-    }
-
-    boolean getFlush() {
-      return flush;
-    }
-
-    DiscoveryConfig getDiscovery() {
-      return discovery;
-    }
-
-    @Override
-    public Callable<FastForwardLifecycle> setup(
-        final SemanticMetricRegistry metricRegistry, final MetricId metricId,
-        final String searchDomain
-    ) {
-      final HttpClient.Builder httpClient = new HttpClient.Builder();
-      httpClient.discovery(discovery.toHttpDiscovery());
-      httpClient.searchDomain(searchDomain);
-
-      final FastForwardHttpReporter.Builder builder = FastForwardHttpReporter
-          .forRegistry(metricRegistry, httpClient.build())
-          .tagExtractor(new EnvironmentTagExtractor())
-          .schedule(interval, TimeUnit.SECONDS)
-          .prefix(metricId);
-
-      return () -> {
-        final FastForwardHttpReporter reporter = builder.build();
         reporter.start();
         return flush ? reporter::stopWithFlush : reporter::stop;
       };
