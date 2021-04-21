@@ -88,7 +88,6 @@ public class MetricsCollectingEndpointRunnableFactoryDecoratorTest {
     when(ongoingRequest.request()).thenReturn(request);
     when(endpoint.info()).thenReturn(info);
     when(info.getUri()).thenReturn("/foo");
-    when(info.getRequestMethod()).thenReturn("GET");
     when(info.getName()).thenReturn("GET:/foo");
 
     when(delegate.create(ongoingRequestCaptor.capture(), requestContextCaptor.capture(), any()))
