@@ -15,7 +15,7 @@
     <version>1.17.12-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <description>Java libraries for writing composable microservices</fdescription>
+    <description>Java libraries for writing composable microservices</description>
 
     <modules>
         <module>apollo-bom</module>
