@@ -162,19 +162,12 @@
             </dependency>
             <dependency>
                 <groupId>com.spotify.metrics</groupId>
-                <artifactId>semantic-metrics-core</artifactId>
+                <artifactId>semantic-metrics-bom</artifactId>
                 <version>${semantic-metrics.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>com.spotify.metrics</groupId>
-                <artifactId>semantic-metrics-ffwd-reporter</artifactId>
-                <version>${semantic-metrics.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.spotify.metrics</groupId>
-                <artifactId>semantic-metrics-ffwd-http-reporter</artifactId>
-                <version>${semantic-metrics.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
@@ -216,11 +209,6 @@
                 <groupId>com.spotify</groupId>
                 <artifactId>dns</artifactId>
                 <version>3.1.5</version>
-            </dependency>
-            <dependency>
-                <groupId>com.spotify.metrics</groupId>
-                <artifactId>semantic-metrics-api</artifactId>
-                <version>${semantic-metrics.version}</version>
             </dependency>
 
             <!-- provided scope -->
