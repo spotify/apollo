@@ -74,6 +74,13 @@
             <groupId>com.spotify.metrics</groupId>
             <artifactId>semantic-metrics-ffwd-reporter</artifactId>
         </dependency>
+        <!-- Not needed anymore, except for cases where the shaded imports
+            com.spotify.ffwd.http.xyz are used by mistake.
+            Remove this when the downstream imports have been cleaned up -->
+        <dependency>
+            <groupId>com.spotify.ffwd</groupId>
+            <artifactId>ffwd-http-client</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
