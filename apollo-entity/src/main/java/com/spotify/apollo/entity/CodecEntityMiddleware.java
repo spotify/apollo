@@ -29,6 +29,7 @@ import com.spotify.apollo.route.Middleware;
 import com.spotify.apollo.route.SyncHandler;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import javaslang.control.Either;
 import okio.ByteString;
@@ -176,21 +177,25 @@ class CodecEntityMiddleware implements EntityMiddleware {
       EntityResponseHandler<E, R> inner,
       Class<? extends E> entityClass) {
     //noinspection unchecked
-    return rc -> deserialize(rc, entityClass)
-        .map(inner.apply(rc))
-        .getOrElseGet(left -> (Response<R>) left);
+    return rc -> {
+      final Either<Response<E>, E> deserialized = deserialize(rc, entityClass);
+      final Either<Response<E>, Response<R>> mapped = deserialized.map(inner.apply(rc));
+      return mapped.getOrElseGet(left -> (Response<R>) left);
+    };
   }
 
   private <E, R> AsyncHandler<Response<R>> withEntityAsync(
       EntityAsyncResponseHandler<E, R> inner,
       Class<? extends E> entityClass) {
     //noinspection unchecked
-    return rc -> deserialize(rc, entityClass)
-        .map(inner.apply(rc))
-        .getOrElseGet(left -> completedFuture((Response<R>) left));
+    return rc -> {
+      final Either<Response<E>, E> deserialized = deserialize(rc, entityClass);
+      final Either<Response<E>, CompletionStage<Response<R>>> mapped = deserialized.map(inner.apply(rc));
+      return mapped.getOrElseGet(left -> completedFuture((Response<R>) left));
+    };
   }
 
-  private <E> Either<Response<?>, E> deserialize(RequestContext rc, Class<? extends E> entityClass) {
+  private <E> Either<Response<E>, E> deserialize(RequestContext rc, Class<? extends E> entityClass) {
     final Optional<ByteString> payloadOpt = rc.request().payload();
     if (!payloadOpt.isPresent()) {
       return Either.left(Response.forStatus(
