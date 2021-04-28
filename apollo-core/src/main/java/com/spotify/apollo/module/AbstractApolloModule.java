@@ -31,18 +31,28 @@ import java.util.Set;
  */
 public abstract class AbstractApolloModule extends AbstractModule implements ApolloModule {
 
-  private final ImmutableSet.Builder<Key<?>> lifecycleManagedBuilder;
+  private final ImmutableSet.Builder<Key<?>> preLifecycleManagedBuilder;
+  private final ImmutableSet.Builder<Key<?>> postLifecycleManagedBuilder;
 
   protected AbstractApolloModule() {
-    lifecycleManagedBuilder = ImmutableSet.builder();
+    preLifecycleManagedBuilder = ImmutableSet.builder();
+    postLifecycleManagedBuilder = ImmutableSet.builder();
   }
 
   protected void manageLifecycle(Key<?> key) {
-    lifecycleManagedBuilder.add(key);
+    postLifecycleManagedBuilder.add(key);
   }
 
   protected void manageLifecycle(Class<?> cls) {
-    lifecycleManagedBuilder.add(Key.get(cls));
+    postLifecycleManagedBuilder.add(Key.get(cls));
+  }
+
+  protected void manageLifecyclePre(Key<?> key) {
+    preLifecycleManagedBuilder.add(key);
+  }
+
+  protected void manageLifecyclePre(Class<?> cls) {
+    preLifecycleManagedBuilder.add(Key.get(cls));
   }
 
   @Override
@@ -52,7 +62,12 @@ public abstract class AbstractApolloModule extends AbstractModule implements Apo
 
   @Override
   public Set<? extends Key<?>> getLifecycleManaged() {
-    return lifecycleManagedBuilder.build();
+    return postLifecycleManagedBuilder.build();
+  }
+
+  @Override
+  public Set<? extends Key<?>> getLifecycleManagedPre() {
+    return preLifecycleManagedBuilder.build();
   }
 
   @Override

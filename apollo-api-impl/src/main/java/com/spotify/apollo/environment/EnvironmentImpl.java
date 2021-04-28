@@ -40,7 +40,8 @@ class EnvironmentImpl implements Environment {
   private final EnvironmentConfigResolver configResolver;
   private final Resolver resolver;
   private final RoutingContext routingContext;
-  private final Closer closer;
+  private final Closer preCloser;
+  private final Closer postCloser;
 
   EnvironmentImpl(
       String serviceName,
@@ -49,14 +50,16 @@ class EnvironmentImpl implements Environment {
       EnvironmentConfigResolver configResolver,
       Resolver resolver,
       RoutingContext routingContext,
-      Closer closer) {
+      Closer preCloser,
+      Closer postCloser) {
     this.serviceName = requireNonNull(serviceName, "serviceName");
     this.domain = requireNonNull(domain, "domain");
     this.client = requireNonNull(client, "client");
     this.configResolver = requireNonNull(configResolver, "configResolver");
     this.resolver = requireNonNull(resolver, "resolver");
     this.routingContext = requireNonNull(routingContext, "routingContext");
-    this.closer = requireNonNull(closer, "closer");
+    this.preCloser = requireNonNull(preCloser, "preCloser");
+    this.postCloser = requireNonNull(preCloser, "postCloser");
   }
 
   @Override
@@ -81,7 +84,12 @@ class EnvironmentImpl implements Environment {
 
   @Override
   public Closer closer() {
-    return closer;
+    return postCloser;
+  }
+
+  @Override
+  public Closer preCloser() {
+    return preCloser;
   }
 
   @Override

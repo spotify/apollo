@@ -133,7 +133,13 @@ class ServiceImpl implements Service {
 
   private Instance start(String[] args, Config serviceConfig, Map<String, String> env, Set<ApolloModule> extraModules)
       throws IOException {
-    final Closer closer = Closer.create();
+    final Closer preCloser = Closer.create();
+    final Closer postCloser = Closer.create();
+
+    // Since Closers operate as stacks, we can register the postCloser as the first element of the preCloser.
+    // That means that everything that that is registered on the postCloser will execute after everything that's
+    // registered on the preCloser
+    preCloser.register(postCloser);
 
     final CountDownLatch shutdownRequested = new CountDownLatch(1);
     final AtomicBoolean started = new AtomicBoolean(false);
@@ -156,18 +162,18 @@ class ServiceImpl implements Service {
       final Config config = addEnvOverrides(env, parsedArguments).resolve();
 
       final ListeningExecutorService executorService =
-          createExecutorService(closer);
+          createExecutorService(preCloser);
 
       final ListeningScheduledExecutorService scheduledExecutorService =
-          createScheduledExecutorService(closer);
+          createScheduledExecutorService(preCloser);
 
       final Set<ApolloModule> allModules = discoverAllModules(extraModules);
 
       final CoreModule coreModule =
-          new CoreModule(this, config, signaller, closer, unprocessedArgs);
+          new CoreModule(this, config, signaller, preCloser, postCloser, unprocessedArgs);
 
       final InstanceImpl instance = initInstance(
-          coreModule, allModules, closer, executorService,
+          coreModule, allModules, preCloser, postCloser, executorService,
           scheduledExecutorService, shutdownRequested,
           stopped);
 
@@ -175,7 +181,7 @@ class ServiceImpl implements Service {
       return instance;
     } catch (Throwable e) {
       try {
-        closer.close();
+        preCloser.close();
       } catch (Throwable ex) {
         e.addSuppressed(ex);
       }
@@ -203,7 +209,8 @@ class ServiceImpl implements Service {
   InstanceImpl initInstance(
       CoreModule coreModule,
       Set<ApolloModule> modules,
-      Closer closer,
+      Closer preCloser,
+      Closer postCloser,
       ListeningExecutorService executorService,
       ListeningScheduledExecutorService scheduledExecutorService,
       CountDownLatch shutdownRequested,
@@ -218,22 +225,31 @@ class ServiceImpl implements Service {
     Injector injector = Guice.createInjector(Stage.PRODUCTION, allModules);
 
     Set<Key<?>> keysToLoad = Sets.newLinkedHashSet();
+    Set<Key<?>> keysToLoadPre = Sets.newLinkedHashSet();
     for (ApolloModule apolloModule : modulesSortedOnPriority) {
       LOG.info("Loaded module {}", apolloModule);
       keysToLoad.addAll(apolloModule.getLifecycleManaged());
+      keysToLoadPre.addAll(apolloModule.getLifecycleManagedPre());
     }
 
+    for (Key<?> key : keysToLoadPre) {
+      Object obj = injector.getInstance(key);
+      if (Closeable.class.isAssignableFrom(obj.getClass())) {
+        LOG.info("Managing lifecycle (pre) of {}", key.getTypeLiteral());
+        preCloser.register(Closeable.class.cast(obj));
+      }
+    }
     for (Key<?> key : keysToLoad) {
       Object obj = injector.getInstance(key);
       if (Closeable.class.isAssignableFrom(obj.getClass())) {
-        LOG.info("Managing lifecycle of {}", key.getTypeLiteral());
-        closer.register(Closeable.class.cast(obj));
+        LOG.info("Managing lifecycle (post) of {}", key.getTypeLiteral());
+        postCloser.register(Closeable.class.cast(obj));
       }
     }
 
     return new InstanceImpl(
         injector, executorService, scheduledExecutorService,
-        shutdownRequested, stopped);
+        shutdownRequested, stopped, preCloser);
   }
 
   Set<ApolloModule> discoverAllModules(
@@ -597,16 +613,19 @@ class ServiceImpl implements Service {
     private final ListeningScheduledExecutorService scheduledExecutorService;
     private final CountDownLatch shutdownRequested;
     private final CountDownLatch stopped;
+    private final Closer preCloser;
 
     InstanceImpl(
-        Injector injector, ListeningExecutorService executorService,
-        ListeningScheduledExecutorService scheduledExecutorService,
-        CountDownLatch shutdownRequested, CountDownLatch stopped) {
+            Injector injector, ListeningExecutorService executorService,
+            ListeningScheduledExecutorService scheduledExecutorService,
+            CountDownLatch shutdownRequested, CountDownLatch stopped,
+            Closer preCloser) {
       this.injector = injector;
       this.executorService = executorService;
       this.scheduledExecutorService = scheduledExecutorService;
       this.shutdownRequested = shutdownRequested;
       this.stopped = stopped;
+      this.preCloser = preCloser;
     }
 
     @Override
@@ -631,7 +650,7 @@ class ServiceImpl implements Service {
 
     @Override
     public Closer getCloser() {
-      return resolve(Closer.class);
+      return preCloser;
     }
 
     @Override
@@ -666,7 +685,7 @@ class ServiceImpl implements Service {
     @Override
     public void close() throws IOException {
       try {
-        getCloser().close();
+        preCloser.close();
       } finally {
         stopped.countDown();
       }
@@ -691,16 +710,19 @@ class ServiceImpl implements Service {
     private final ServiceImpl service;
     private final Config config;
     private final Signaller signaller;
-    private final Closer closer;
+    private final Closer preCloser;
+    private final Closer postCloser;
     private final ImmutableList<String> unprocessedArgs;
 
     CoreModule(
         ServiceImpl service, Config config, Signaller signaller,
-        Closer closer, ImmutableList<String> unprocessedArgs) {
+        Closer preCloser, Closer postCloser,
+        ImmutableList<String> unprocessedArgs) {
       this.service = service;
       this.config = config;
       this.signaller = signaller;
-      this.closer = closer;
+      this.preCloser = preCloser;
+      this.postCloser = postCloser;
       this.unprocessedArgs = unprocessedArgs;
     }
 
@@ -715,7 +737,8 @@ class ServiceImpl implements Service {
       bind(Service.class).toInstance(service);
       bind(Config.class).toInstance(config);
       bind(Signaller.class).toInstance(signaller);
-      bind(Closer.class).toInstance(closer);
+      bind(Closer.class).toInstance(postCloser);
+      bind(Closer.class).annotatedWith(Names.named("pre-closer")).toInstance(preCloser);
       bind(SERVICE_NAME).toInstance(service.getServiceName());
       bind(UNPROCESSED_ARGS).toInstance(unprocessedArgs);
     }

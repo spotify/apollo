@@ -22,6 +22,7 @@ package com.spotify.apollo.module;
 import com.google.inject.Key;
 import com.google.inject.Module;
 
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -50,11 +51,25 @@ public interface ApolloModule extends Module {
 
   /**
    * Returns the immutable, idempotently determined and stable set of injection keys that should be
-   * bound to the service lifecycle; i.e. created on service start-up and destroyed on shutdown. All
+   * bound to the service lifecycle; i.e. created on service start-up and destroyed on shutdown,
+   * after all service instances have been closed. All
    * the instances for the keys returned by this method that implement {@link java.io.Closeable}
    * will be closed on shutdown.
    *
-   * @return the set of injection keys that should be bound to the service lifecycle.
+   * @return the set of injection keys that should be bound to the service post-lifecycle.
    */
   Set<? extends Key<?>> getLifecycleManaged();
+
+  /**
+   * Returns the immutable, idempotently determined and stable set of injection keys that should be
+   * bound to the service lifecycle; i.e. created on service start-up and destroyed on shutdown,
+   * before services instances have been closed. All
+   * the instances for the keys returned by this method that implement {@link java.io.Closeable}
+   * will be closed on shutdown.
+   *
+   * @return the set of injection keys that should be bound to the service pre-lifecycle.
+   */
+  default Set<? extends Key<?>> getLifecycleManagedPre() {
+    return Collections.emptySet();
+  }
 }

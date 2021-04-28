@@ -71,11 +71,22 @@ public interface Environment {
 
   /**
    * Returns a {@link Closer} which can be used to register resources that need to be closed on
-   * application shutdown.
+   * application shutdown after other closers
+   * (typically dependencies such as channels, clients, caches, database connections, etc).
    *
-   * @return the {@link Closer} of this application
+   * @return the post-{@link Closer} of this application
    */
   Closer closer();
+
+  /**
+   * Returns a {@link Closer} which can be used to register resources that need to be closed on
+   * application shutdown before other closers (typically servers).
+   *
+   * @return the pre-{@link Closer} of this application
+   */
+  default Closer preCloser() {
+    throw new RuntimeException("preCloser() is not implemented");
+  }
 
   /**
    * Resolves an instance of a class out of the underlying apollo-core module system.

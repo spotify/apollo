@@ -30,25 +30,28 @@ class EnvironmentFactoryImpl implements EnvironmentFactory {
   private final Client client;
   private final EnvironmentConfigResolver configResolver;
   private Resolver resolver;
-  private final Closer closer;
+  private final Closer preCloser;
+  private final Closer postCloser;
 
   EnvironmentFactoryImpl(
       String backendDomain,
       Client client,
       EnvironmentConfigResolver configResolver,
       Resolver resolver,
-      Closer closer) {
+      Closer preCloser,
+      Closer postCloser) {
     this.backendDomain = backendDomain;
     this.client = client;
     this.configResolver = configResolver;
     this.resolver = resolver;
-    this.closer = closer;
+    this.preCloser = preCloser;
+    this.postCloser = postCloser;
   }
 
   @Override
   public Environment create(String serviceName, RoutingContext routingContext) {
     return new EnvironmentImpl(
-        serviceName, backendDomain, client, configResolver, resolver, routingContext, closer);
+        serviceName, backendDomain, client, configResolver, resolver, routingContext, preCloser, postCloser);
   }
 
   @Override

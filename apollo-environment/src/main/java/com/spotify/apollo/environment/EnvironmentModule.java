@@ -69,14 +69,15 @@ class EnvironmentModule extends AbstractModule {
   EnvironmentFactory environmentFactory(
       Config configNode,
       ApolloConfig apolloConfig,
-      Closer closer,
+      @Named("pre-closer") Closer preCloser,
+      Closer postCloser,
       Injector injector,
       IncomingRequestAwareClient incomingRequestAwareClient) {
 
     final String backend = apolloConfig.backend();
     final Client unawareClient = incomingRequestAwareClient.asUnawareClient();
 
-    return EnvironmentFactoryBuilder.newBuilder(backend, unawareClient, closer, injector::getInstance)
+    return EnvironmentFactoryBuilder.newBuilder(backend, unawareClient, preCloser, postCloser, injector::getInstance)
         .withStaticConfig(configNode)
         .build();
   }
