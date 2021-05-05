@@ -25,7 +25,6 @@ import static com.spotify.apollo.core.Services.CommonConfigKeys;
 
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Ordering;
@@ -208,11 +207,9 @@ class ServiceImpl implements Service {
       ListeningScheduledExecutorService scheduledExecutorService,
       CountDownLatch shutdownRequested,
       CountDownLatch stopped) {
-    List<ApolloModule> modulesSortedOnPriority = FluentIterable.from(modules)
-        .toSortedList(
-            Ordering.natural()
-                .reverse()
-                .onResultOf(ModulePriorityOrdering.INSTANCE));
+      List<ApolloModule> modulesSortedOnPriority =
+              modules.stream().sorted(Ordering.natural().reverse().onResultOf(ModulePriorityOrdering.INSTANCE))
+                     .collect(Collectors.toList());
 
     Iterable<Module> allModules = concat(of(coreModule), modulesSortedOnPriority);
     Injector injector = Guice.createInjector(Stage.PRODUCTION, allModules);
