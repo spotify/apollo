@@ -66,6 +66,11 @@ public class ConfigTest {
     }
   }
 
+  @Test
+  public void ffwdHttpClassesAvailable() throws ClassNotFoundException {
+    Class.forName(com.spotify.ffwd.http.google.common.base.Ascii.class.getName());
+  }
+
   private static Config conf(String json) {
     return ConfigFactory.parseString(json);
   }

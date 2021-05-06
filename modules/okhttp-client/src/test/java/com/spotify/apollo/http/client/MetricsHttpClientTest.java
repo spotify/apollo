@@ -25,13 +25,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.isA;
 import static org.mockito.Mockito.when;
 
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Meter;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
-import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
