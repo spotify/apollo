@@ -76,7 +76,7 @@
         </dependency>
         <!-- Not needed anymore, except for cases where the shaded imports
             com.spotify.ffwd.http.xyz are used by mistake.
-            Remove this when the downstream imports have been cleaned up -->
+            Remove this when the downstream imports have been cleaned up. -->
         <dependency>
             <groupId>com.spotify.ffwd</groupId>
             <artifactId>ffwd-http-client</artifactId>
