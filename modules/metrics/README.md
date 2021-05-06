@@ -138,7 +138,7 @@ key | type | required | note
 `metrics.server` | string list | optional | list of [`What`](src/main/java/com/spotify/apollo/metrics/semantic/What.java) names to enable; defaults to [ENDPOINT_REQUEST_RATE, ENDPOINT_REQUEST_DURATION, ENDPOINT_REQUEST_DURATION_THRESHOLD_RATE, DROPPED_REQUEST_RATE, ERROR_RATIO, ERROR_RATIO_4XX, ERROR_RATIO_5XX]
 `metrics.precreate-codes` | int list | optional | list of status codes to precreate request-rate meters for, default empty
 `metrics.reservoir-ttl` | int | optional | When to purge old values from the histogram, defaults to 300 seconds. Note, setting this to a large value will increase the amount of memory used to keep track samples.
-`ffwd.type` | string | optional | indicates which type of ffwd reporter to use. Available types are `agent` and `http`. see below for details. default is `agent`.
+`ffwd.type` | string | optional | indicates which type of ffwd reporter to use. The only available type is `agent`, `http` is not supported anymore.
 `endpoint-duration-goal`  | int map  | optional |  sets request duration thresholds in milliseconds to track how many requests meet a duration objective
 
 You may not want to enable all the metrics Apollo can create, since some of them can be expensive
@@ -168,59 +168,6 @@ ffwd.type = agent
 ffwd.interval = 30
 ffwd.host = "localhost"
 ffwd.port = 19091
-```
-
-### ffwd.type = `http`
-
-key | type | required | note
---- | ---- | -------- | ----
-`ffwd.interval` | int | optional | interval in seconds of reporting metrics to ffwd; default 30
-`ffwd.flush` | boolean | optional | include a final flush of metrics on service shut down; default `False`
-`ffwd.discovery.type` | string | required | indicates how to discovery http endpoints. Available options are `static` and `srv`. See below for details.
-
-#### Example
-
-```
-ffwd.type = http
-ffwd.interval = 30
-ffwd.discovery = {
-  type = "srv"
-  record = "_metrics-api._http.example.com."
-}
-```
-
-### ffwd.discovery.type = `static`
-
-Provides a "hardcoded" endpoint to send metrics to. This is primarily useful during testing since it doesn't provide any fallback mechanisms in case a remote endpoint goes down.
-
-key | type | required | note
---- | ---- | -------- | ----
-`ffwd.discovery.host` | string | required | host to send metric batches to.
-`ffwd.discovery.port` | int | required | port to send metric batches to.
-
-#### Example
-
-```
-ffwd.discovery = {
-  type = static
-  host = "localhost"
-  port = "8080"
-}
-```
-
-### ffwd.discovery.type = `srv`
-
-key | type | required | note
---- | ---- | -------- | ----
-`ffwd.discovery.record` | string | required | SRV record to use when looking up http endpoints. if this _does not_ end with a dot (`.`), it will use `apollo.domain` as a search domain.
-
-#### Example
-
-```
-ffwd.discovery = {
-  type = srv
-  record = "_metrics-api._http.example.com."
-}
 ```
 
 ### endpoint-duration-goal

@@ -58,80 +58,11 @@ public class ConfigTest {
     }
 
     @Test
-    public void httpConfig() {
-      String json =
-          "{\"ffwd\":{\"type\":\"http\",\"discovery\":{\"type\":\"srv\",\"record\":\"hello\"}}}";
-      FfwdConfig config = FfwdConfig.fromConfig(conf(json));
-
-      assertEquals(FfwdConfig.Http.class, config.getClass());
-
-      final FfwdConfig.Http http = (FfwdConfig.Http) config;
-
-      assertEquals(30, http.getInterval());
-      assertEquals(Boolean.TRUE, http.getFlush());
-    }
-
-    @Test
-    public void httpConfigWithFlush() {
-      String json =
-          "{\"ffwd\":{\"type\":\"http\",\"flush\":\"false\",\"discovery\":{\"type\":\"srv\","
-          + "\"record\":\"hello\"}}}";
-      FfwdConfig config = FfwdConfig.fromConfig(conf(json));
-
-      assertEquals(FfwdConfig.Http.class, config.getClass());
-
-      final FfwdConfig.Http http = (FfwdConfig.Http) config;
-
-      assertEquals(30, http.getInterval());
-      assertEquals(Boolean.FALSE, http.getFlush());
-    }
-
-    @Test
     public void ffwdScheduleCanBeSetFromConfig() {
       String json = "{\"ffwd\":{ \"interval\": 15}}";
       FfwdConfig.Agent ffwd = (FfwdConfig.Agent) FfwdConfig.fromConfig(conf(json));
 
       assertEquals(15, ffwd.getInterval());
-    }
-  }
-
-  public static class DiscoveryConfigTest {
-    @Test
-    public void testSrv() {
-      final DiscoveryConfig discovery =
-          DiscoveryConfig.fromConfig(conf("{\"type\":\"srv\",\"record\":\"foo\"}"));
-
-      assertEquals(DiscoveryConfig.Srv.class, discovery.getClass());
-      final DiscoveryConfig.Srv srv = (DiscoveryConfig.Srv) discovery;
-
-      assertEquals("foo", srv.getRecord());
-    }
-
-    @Test(expected = ConfigException.Missing.class)
-    public void testSrvMissingRecord() {
-      DiscoveryConfig.fromConfig(conf("{\"type\":\"srv\"}"));
-    }
-
-    @Test
-    public void testStatic() {
-      final DiscoveryConfig discovery =
-          DiscoveryConfig.fromConfig(conf("{\"type\":\"static\",\"host\":\"foo\",\"port\":12345}"));
-
-      assertEquals(DiscoveryConfig.Static.class, discovery.getClass());
-      final DiscoveryConfig.Static st = (DiscoveryConfig.Static) discovery;
-
-      assertEquals("foo", st.getHost());
-      assertEquals(12345, st.getPort());
-    }
-
-    @Test(expected = ConfigException.Missing.class)
-    public void testStaticMissingHost() {
-      DiscoveryConfig.fromConfig(conf("{\"type\":\"static\",\"port\":12345}"));
-    }
-
-    @Test(expected = ConfigException.Missing.class)
-    public void testStaticMissingPort() {
-      DiscoveryConfig.fromConfig(conf("{\"type\":\"static\",\"host\":\"foo\"}"));
     }
   }
 
