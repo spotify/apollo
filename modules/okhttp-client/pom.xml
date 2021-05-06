@@ -64,6 +64,10 @@
         </dependency>
         <dependency>
             <groupId>com.spotify.metrics</groupId>
+            <artifactId>semantic-metrics-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify.metrics</groupId>
             <artifactId>semantic-metrics-core</artifactId>
         </dependency>
 
