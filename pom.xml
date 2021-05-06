@@ -247,6 +247,12 @@
 
             <!-- test dependencies -->
             <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.13.2</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
               <groupId>org.junit</groupId>
               <artifactId>junit-bom</artifactId>
               <version>5.7.1</version>
