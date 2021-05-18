@@ -39,13 +39,20 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
         </dependency>
 
         <!-- provided -->
@@ -54,17 +61,27 @@
             <artifactId>auto-value</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <!-- test dependencies -->
-        <dependency>
-            <groupId>com.spotify</groupId>
-            <artifactId>apollo-test</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>io.norberg</groupId>
             <artifactId>auto-matter</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.norberg</groupId>
+            <artifactId>auto-matter-annotation</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>apollo-test</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.norberg</groupId>
