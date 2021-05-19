@@ -486,6 +486,7 @@
                         <failOnWarning>true</failOnWarning>
                         <ignoreNonCompile>true</ignoreNonCompile>
                         <ignoredUnusedDeclaredDependencies>
+                            <dependency>:junit-vintage-engine::</dependency>
                             <!-- dependency:analyze uses bytecode so it doesn't see annotations and constants -->
                             <dependency>:auto-matter::</dependency>
                             <dependency>:auto-service-annotations::</dependency>

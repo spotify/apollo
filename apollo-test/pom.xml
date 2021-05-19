@@ -104,6 +104,10 @@
             <artifactId>junit-platform-engine</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>compile</scope>
@@ -174,7 +178,7 @@
                                                 <limit>
                                                     <counter>INSTRUCTION</counter>
                                                     <value>COVEREDRATIO</value>
-                                                    <minimum>0.16</minimum>
+                                                    <minimum>0.48</minimum>
                                                 </limit>
                                             </limits>
                                         </rule>
