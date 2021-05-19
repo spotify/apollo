@@ -491,7 +491,7 @@
                             <dependency>:auto-service-annotations::</dependency>
                             <dependency>:auto-value-annotations::</dependency>
                             <dependency>javax.annotation:javax.annotation-api::</dependency>
-                            <dependency>com.google.code.findbugs::</dependency>
+                            <dependency>com.google.code.findbugs:::</dependency>
                         </ignoredUnusedDeclaredDependencies>                    
                     </configuration>
                 </execution>
