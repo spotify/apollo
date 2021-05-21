@@ -475,6 +475,30 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
             <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                <execution>
+                    <id>analyze</id>
+                    <goals>
+                        <goal>analyze-only</goal>
+                    </goals>
+                    <configuration>
+                        <failOnWarning>true</failOnWarning>
+                        <ignoreNonCompile>true</ignoreNonCompile>
+                        <ignoredUnusedDeclaredDependencies>
+                            <dependency>:junit-vintage-engine::</dependency>
+                            <!-- dependency:analyze uses bytecode so it doesn't see annotations and constants -->
+                            <dependency>:auto-matter::</dependency>
+                            <dependency>:auto-service-annotations::</dependency>
+                            <dependency>:auto-value-annotations::</dependency>
+                            <dependency>javax.annotation:javax.annotation-api::</dependency>
+                            <dependency>com.google.code.findbugs:::</dependency>
+                        </ignoredUnusedDeclaredDependencies>                    
+                    </configuration>
+                </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
             </plugin>
