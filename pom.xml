@@ -71,7 +71,7 @@
             <dependency>
                 <groupId>com.squareup.okio</groupId>
                 <artifactId>okio</artifactId>
-                <version>2.7.0</version>
+                <version>2.9.0</version>
             </dependency>
             <dependency>
                 <groupId>com.google.inject</groupId>
@@ -153,12 +153,12 @@
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-core</artifactId>
-                <version>4.0.2</version>
+                <version>4.0.5</version>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-jvm</artifactId>
-                <version>4.0.2</version>
+                <version>4.0.5</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify.metrics</groupId>
