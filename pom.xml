@@ -328,7 +328,7 @@
                 <plugin>
                     <groupId>com.spotify</groupId>
                     <artifactId>missinglink-maven-plugin</artifactId>
-                    <version>0.2.0</version>
+                    <version>0.2.2</version>
                     <configuration>
                         <failOnConflicts>true</failOnConflicts>
                     </configuration>
@@ -466,7 +466,7 @@
                             <dependency>:auto-value-annotations::</dependency>
                             <dependency>javax.annotation:javax.annotation-api::</dependency>
                             <dependency>com.google.code.findbugs:::</dependency>
-                        </ignoredUnusedDeclaredDependencies>                    
+                        </ignoredUnusedDeclaredDependencies>
                     </configuration>
                 </execution>
                 </executions>
@@ -575,7 +575,7 @@
                     <plugin>
                         <groupId>com.spotify</groupId>
                         <artifactId>missinglink-maven-plugin</artifactId>
-                        <version>0.2.0</version>
+                        <version>0.2.2</version>
                         <configuration>
                             <includeScopes>compile,test,runtime</includeScopes>
                             <failOnConflicts>true</failOnConflicts>
