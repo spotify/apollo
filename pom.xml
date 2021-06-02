@@ -80,6 +80,18 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
+            <!--
+              From Guice 5+ multi-bindings is officially part of the its core library.
+              From Guice 4.2.x Guice already transferred the code into its core library,
+              but left the artifact `guice-multibindings` with no code in it for backward compatibility.
+              We are explicitly settings this version here so that we can move our users to Guice 5.0.1
+              without breaking their projects.
+              We should delete this dependency as soon as we can guarantee everyone moved to 5.0.1 -->
+            <dependency>
+                <groupId>com.google.inject.extensions</groupId>
+                <artifactId>guice-multibindings</artifactId>
+                <version>4.2.3</version>
+            </dependency>
             <dependency>
                 <groupId>net.sf.jopt-simple</groupId>
                 <artifactId>jopt-simple</artifactId>
