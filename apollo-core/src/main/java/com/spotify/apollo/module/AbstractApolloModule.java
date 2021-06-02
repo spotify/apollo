@@ -22,6 +22,7 @@ package com.spotify.apollo.module;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
+import com.google.inject.Module;
 import com.google.inject.Key;
 
 import java.util.Set;
@@ -43,6 +44,16 @@ public abstract class AbstractApolloModule extends AbstractModule implements Apo
 
   protected void manageLifecycle(Class<?> cls) {
     lifecycleManagedBuilder.add(Key.get(cls));
+  }
+
+  @Override
+  protected void install(final Module module) {
+    super.install(module);
+    if (module instanceof ApolloModule) {
+      for (Key<?> key : ((ApolloModule) module).getLifecycleManaged()) {
+        manageLifecycle(key);
+      }
+    }
   }
 
   @Override

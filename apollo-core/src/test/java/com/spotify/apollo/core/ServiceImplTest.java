@@ -447,6 +447,27 @@ public class ServiceImplTest {
   }
 
   @Test
+  public void testChildModuleClassesAreLifecycleManaged() throws Exception {
+    AtomicBoolean created = new AtomicBoolean(false);
+    AtomicBoolean closed = new AtomicBoolean(false);
+    AtomicBoolean childCreated = new AtomicBoolean(false);
+    AtomicBoolean childClosed = new AtomicBoolean(false);
+    ModuleWithLifecycledKeys lifecycleModule =
+        new ModuleWithLifecycledKeys(created, closed, childCreated, childClosed);
+    Service service = ServiceImpl.builder("test")
+        .withModule(lifecycleModule)
+        .build();
+
+    try (Service.Instance instance = service.start()) {
+      instance.getSignaller().signalShutdown();
+      instance.waitForShutdown();
+    }
+
+    assertThat(childCreated.get(), is(true));
+    assertThat(childClosed.get(), is(true));
+  }
+
+  @Test
   public void testResolve() throws Exception {
     AtomicBoolean created = new AtomicBoolean(false);
     AtomicBoolean closed = new AtomicBoolean(false);
