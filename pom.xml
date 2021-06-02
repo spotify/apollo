@@ -577,7 +577,6 @@
                     <plugin>
                         <groupId>com.spotify</groupId>
                         <artifactId>missinglink-maven-plugin</artifactId>
-                        <version>0.2.2</version>
                         <configuration>
                             <includeScopes>compile,test,runtime</includeScopes>
                             <failOnConflicts>true</failOnConflicts>
