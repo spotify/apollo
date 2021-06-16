@@ -100,7 +100,7 @@ request entity as an input.
 * `asyncSerializerDirect(R.class)` middleware : `AsyncHandler<R>`
   - `CompletionStage<R> handler()`
 * `asyncSerializerResponse(R.class)` middleware : `AsyncHandler<Response<R>>`
-- `CompletionStage<Response<R>> handler()`
+  - `CompletionStage<Response<R>> handler()`
 
 ### Curried form
 
