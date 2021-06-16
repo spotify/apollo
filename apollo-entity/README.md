@@ -1,11 +1,11 @@
 Apollo Entity
 =============
 
-A set of Apollo Middleware for working with entity types in route handlers.
+A set of Apollo middleware for working with entity types in route handlers.
 
 ## Why
 
-A common pattern when writing route handlers is to serialize and deserialize to some API level
+A common pattern when writing route handlers is to serialize and deserialize to some API-level
 entity types. Writing such (de)serialization code quickly becomes repetitive and always looks
 the same.
 
@@ -29,7 +29,7 @@ However, this does not work. Theres nothing handling how the `Person` type is be
 from a `ByteString` which is the payload type Apollo works with.
 
 At this point, you'll start writing some custom middlewares using something like Jackson. This
-library contains exactly those middlewares, ready to use directly with your routes.
+library contains exactly those middleware, ready to use directly with your routes.
 
 
 ## Getting started
@@ -71,20 +71,20 @@ class MyApplication {
 
 [`EntityMiddleware`][1] also support custom codecs through the `forCodec(EntityCodec)` static
 constructor. An [`EntityCodec`][2] defines how to read and write entity types from the `ByteString`
-payloads that apollo handle natively. Since Jackson is so commonly used, we have a bundled
+payloads that Apollo handles natively. Since Jackson is so commonly used, we have a bundled
 implementation called [`JacksonEntityCodec`][4].
 
 ## Handler signatures
 
-The [`EntityMiddleware`][1] interface can create middlewares for several types of handler
+The [`EntityMiddleware`][1] interface can create middleware for several types of handler
 signatures.
 
 * `direct(E.class[, R.class])` middleware : `EntityHandler<E, R>`
- - `R handler(E)`
+  - `R handler(E)`
 * `response(E.class[, R.class])` middleware : `EntityResponseHandler<E, R>`
- - `Response<R> handler(E)`
+  - `Response<R> handler(E)`
 * `asyncDirect(E.class[, R.class])` middleware : `EntityAsyncHandler<E, R>`
- - `CompletionStage<R> handler(E)`
+  - `CompletionStage<R> handler(E)`
 * `asyncResponse(E.class[, R.class])` middleware : `EntityAsyncResponseHandler<E, R>`
   - `CompletionStage<Response<R>> handler(E)`
 
@@ -94,13 +94,13 @@ On top of these, there's also just a serializing middleware for handlers that do
 request entity as an input.
 
 * `serializerDirect(R.class)` middleware : `SyncHandler<R>`
- - `R handler()`
+  - `R handler()`
 * `serializerResponse(R.class)` middleware : `SyncHandler<Response<R>>`
- - `Response<R> handler()`
+  - `Response<R> handler()`
 * `asyncSerializerDirect(R.class)` middleware : `AsyncHandler<R>`
- - `CompletionStage<R> handler()`
+  - `CompletionStage<R> handler()`
 * `asyncSerializerResponse(R.class)` middleware : `AsyncHandler<Response<R>>`
- - `CompletionStage<Response<R>> handler()`
+- `CompletionStage<Response<R>> handler()`
 
 ### Curried form
 
