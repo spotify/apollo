@@ -200,11 +200,6 @@
                 <artifactId>rut</artifactId>
                 <version>1.0</version>
             </dependency>
-            <dependency>
-                <groupId>com.spotify</groupId>
-                <artifactId>dns</artifactId>
-                <version>3.1.5</version>
-            </dependency>
 
             <!-- provided scope -->
             <dependency>
