@@ -42,7 +42,13 @@ class MetricsCollectingEndpointRunnableFactoryDecorator implements EndpointRunna
   @Override
   public EndpointRunnableFactory apply(EndpointRunnableFactory delegate) {
     return (request, requestContext, endpoint) -> {
-      final String endpointName = endpoint.info().getName();
+      // Since endpoint.info().getName() is inaccurate for endpoints that accept multiple
+      // methods we use request.request().method() + ":" + endpoint.info().getUri()
+      // instead. The call to getName() performs a similar concatenation so this doesn't
+      // lead to extra creation of String objects.
+        // but because GET endpoints serve HEAD requests info().getName() is
+        // wrong does not distinguish HEAD and GET requests
+      final String endpointName = request.request().method() + ":" + endpoint.info().getUri();
 
       // note: will not time duration of matching and dispatching
       final RequestMetrics requestStats = metrics.metricsForEndpointCall(endpointName);
