@@ -38,21 +38,23 @@ public final class EnvironmentFactoryBuilder {
 
   private final String backendDomain;
   private final Client client;
-  private final Closer closer;
+  private final Closer preCloser;
+  private final Closer postCloser;
   private final Resolver resolver;
 
   private final Optional<EnvironmentConfigResolver> configResolver;
 
-  EnvironmentFactoryBuilder(String backendDomain, Client client, Closer closer, Resolver resolver) {
-    this(backendDomain, client, closer, resolver, Optional.empty());
+  EnvironmentFactoryBuilder(String backendDomain, Client client, Closer preCloser, Closer postCloser, Resolver resolver) {
+    this(backendDomain, client, preCloser, postCloser, resolver, Optional.empty());
   }
 
   EnvironmentFactoryBuilder(
-      String backendDomain, Client client, Closer closer, Resolver resolver,
+      String backendDomain, Client client, Closer preCloser, Closer postCloser, Resolver resolver,
       Optional<EnvironmentConfigResolver> configResolver) {
     this.backendDomain = requireNonNull(backendDomain, "backendDomain");
     this.client = requireNonNull(client, "client");
-    this.closer = requireNonNull(closer, "closer");
+    this.preCloser = requireNonNull(preCloser, "preCloser");
+    this.postCloser = requireNonNull(postCloser, "postCloser");
     this.resolver = requireNonNull(resolver, "resolver");
     this.configResolver = requireNonNull(configResolver, "configResolver");
   }
@@ -71,7 +73,7 @@ public final class EnvironmentFactoryBuilder {
   public EnvironmentFactoryBuilder withConfigResolver(EnvironmentConfigResolver configResolver) {
     checkState(!this.configResolver.isPresent(), "Configuration resolution already set");
 
-    return new EnvironmentFactoryBuilder(backendDomain, client, closer, resolver,
+    return new EnvironmentFactoryBuilder(backendDomain, client, preCloser, postCloser, resolver,
                                          Optional.of(configResolver));
   }
 
@@ -89,7 +91,7 @@ public final class EnvironmentFactoryBuilder {
   public EnvironmentFactoryBuilder withStaticConfig(Config configNode) {
     checkState(!this.configResolver.isPresent(), "Configuration resolution already set");
 
-    return new EnvironmentFactoryBuilder(backendDomain, client, closer, resolver,
+    return new EnvironmentFactoryBuilder(backendDomain, client, preCloser, postCloser, resolver,
                                          Optional.of(new StaticConfigResolver(configNode)));
   }
 
@@ -107,7 +109,7 @@ public final class EnvironmentFactoryBuilder {
   public EnvironmentFactoryBuilder withClassLoader(ClassLoader classLoader) {
     checkState(!this.configResolver.isPresent(), "Configuration resolution already set");
 
-    return new EnvironmentFactoryBuilder(backendDomain, client, closer, resolver,
+    return new EnvironmentFactoryBuilder(backendDomain, client, preCloser, postCloser, resolver,
                                          Optional.of(new LazyConfigResolver(classLoader)));
   }
 
@@ -116,12 +118,18 @@ public final class EnvironmentFactoryBuilder {
         ? this.configResolver.get()
         : new LazyConfigResolver();
 
-    return new EnvironmentFactoryImpl(backendDomain, client, configResolver, resolver, closer);
+    return new EnvironmentFactoryImpl(backendDomain, client, configResolver, resolver, preCloser, postCloser);
+  }
+
+  @Deprecated
+  public static EnvironmentFactoryBuilder newBuilder(
+      String backendDomain, Client client, Closer closer, Resolver resolver) {
+    return new EnvironmentFactoryBuilder(backendDomain, client, closer, closer, resolver);
   }
 
   public static EnvironmentFactoryBuilder newBuilder(
-      String backendDomain, Client client, Closer closer, Resolver resolver) {
-    return new EnvironmentFactoryBuilder(backendDomain, client, closer, resolver);
+      String backendDomain, Client client, Closer preCloser, Closer postCloser, Resolver resolver) {
+    return new EnvironmentFactoryBuilder(backendDomain, client, preCloser, postCloser, resolver);
   }
 
   static class StaticConfigResolver implements EnvironmentConfigResolver {

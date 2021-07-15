@@ -63,13 +63,15 @@ public class EnvironmentFactoryTest {
   @Mock Config configNode;
   @Mock ClassLoader classLoader;
 
-  Closer closer = Closer.create();
+  Closer preCloser = Closer.create();
+  Closer postCloser = Closer.create();
 
   EnvironmentFactoryBuilder sut;
 
   @Before
   public void setUp() throws Exception {
-    sut = EnvironmentFactoryBuilder.newBuilder(BACKEND_DOMAIN, client, closer, resolver);
+    postCloser.register(preCloser);
+    sut = EnvironmentFactoryBuilder.newBuilder(BACKEND_DOMAIN, client, preCloser, postCloser, resolver);
   }
 
   @Test
