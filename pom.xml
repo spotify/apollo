@@ -75,10 +75,8 @@
             </dependency>
             <dependency>
                 <groupId>com.google.inject</groupId>
-                <artifactId>guice-bom</artifactId>
+                <artifactId>guice</artifactId>
                 <version>5.0.1</version>
-                <scope>import</scope>
-                <type>pom</type>
             </dependency>
             <!--
               From Guice 5+ multi-bindings is officially part of the its core library.
