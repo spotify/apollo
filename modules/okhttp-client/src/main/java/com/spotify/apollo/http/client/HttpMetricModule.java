@@ -35,7 +35,7 @@ import com.spotify.metrics.core.SemanticMetricRegistry;
  * <blockquote>
  *
  * See <a href="https://github.com/spotify/apollo/issues/362">issue#362</a> for more information *
- * of why the order matters.
+ * on why the order matters.
  *
  * </blockquote>
  *
