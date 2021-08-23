@@ -56,7 +56,7 @@ public static class ProxyHandler implements RequestHandler {
   }
 }
 ```
-## Add metrics to outgoing http requests
+## Adding metrics to outgoing http requests
 
 In order to have metrics for the outgoing http requests, the HttpMetricModule should be used
  together with HttpClientModule. 
@@ -73,3 +73,5 @@ public static void main(String[] args) throws Exception {
               .build();
 }
 ```
+
+It's important that `HttpMetricModule` to be declared **AFTER** `HttpClientModule`, otherwise the decorator won't work as expected. This is a short-coming of the framework that we [plan](https://github.com/spotify/apollo/issues/362) to fix in the future.

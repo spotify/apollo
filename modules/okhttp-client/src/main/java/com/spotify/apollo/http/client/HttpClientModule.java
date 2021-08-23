@@ -19,17 +19,29 @@
  */
 package com.spotify.apollo.http.client;
 
+import com.google.inject.multibindings.Multibinder;
 import com.spotify.apollo.environment.ClientDecorator;
+import com.spotify.apollo.environment.IncomingRequestAwareClient;
 import com.spotify.apollo.module.AbstractApolloModule;
 import com.spotify.apollo.module.ApolloModule;
-
-import com.google.inject.multibindings.Multibinder;
 import com.squareup.okhttp.OkHttpClient;
 
+/**
+ * Module extends {@link IncomingRequestAwareClient} to be able to handle HTTP calls.
+ *
+ * <p>You can also use the {@link OkHttpClient} in case you don't want to use the apollo client, but
+ * doing so won't provide you with metrics (which still needs to be enabled by using the {@link
+ * HttpMetricModule}).
+ *
+ * @see OkHttpClientProvider
+ * @see HttpMetricModule
+ * @see IncomingRequestAwareClient
+ * @see com.spotify.apollo.Client
+ * @see com.spotify.apollo.Environment#client()
+ */
 public class HttpClientModule extends AbstractApolloModule {
 
-  private HttpClientModule() {
-  }
+  private HttpClientModule() {}
 
   public static ApolloModule create() {
     return new HttpClientModule();
@@ -38,7 +50,8 @@ public class HttpClientModule extends AbstractApolloModule {
   @Override
   protected void configure() {
     Multibinder.newSetBinder(binder(), ClientDecorator.class)
-        .addBinding().to(HttpClientDecorator.class);
+        .addBinding()
+        .to(HttpClientDecorator.class);
 
     bind(HttpClient.class);
     bind(OkHttpClient.class).toProvider(OkHttpClientProvider.class);
