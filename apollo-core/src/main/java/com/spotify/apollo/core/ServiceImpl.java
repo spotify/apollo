@@ -2,7 +2,7 @@
  * -\-\-
  * Spotify Apollo Service Core (aka Leto)
  * --
- * Copyright (C) 2013 - 2015 Spotify AB
+ * Copyright (C) 2013 - 2021 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import joptsimple.BuiltinHelpFormatter;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -71,6 +72,12 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ApplicationContext;
+import org.springframework.guice.annotation.EnableGuiceModules;
+import org.springframework.guice.injector.SpringInjector;
+import org.springframework.guice.module.BeanFactoryProvider;
+import org.springframework.guice.module.SpringModule;
 
 class ServiceImpl implements Service {
 
@@ -207,12 +214,27 @@ class ServiceImpl implements Service {
       ListeningScheduledExecutorService scheduledExecutorService,
       CountDownLatch shutdownRequested,
       CountDownLatch stopped) {
-      List<ApolloModule> modulesSortedOnPriority =
+
+    List<ApolloModule> modulesSortedOnPriority =
               modules.stream().sorted(Ordering.natural().reverse().onResultOf(ModulePriorityOrdering.INSTANCE))
                      .collect(Collectors.toList());
 
     Iterable<Module> allModules = concat(of(coreModule), modulesSortedOnPriority);
-    Injector injector = Guice.createInjector(Stage.PRODUCTION, allModules);
+
+    final SpringApplicationBuilder springApplicationBuilder = new SpringApplicationBuilder()
+        .properties(
+           //Prefer Spring bean if present in both Guice and application context
+            "spring.guice.dedup=true",
+           //Do not create default instances if there is no instance in the context
+           "spring.guice.autowireJIT=false",
+          //Allow overriding of bean definitions from different modules
+           "spring.main.allow-bean-definition-overriding=true")
+        .sources(GuiceSpringBridge.class)
+        .initializers(new ApolloInitializer(serviceName, allModules));
+
+    springApplicationBuilder.run();
+
+    Injector injector = springApplicationBuilder.context().getBean(Injector.class);
 
     Set<Key<?>> keysToLoad = Sets.newLinkedHashSet();
     for (ApolloModule apolloModule : modulesSortedOnPriority) {

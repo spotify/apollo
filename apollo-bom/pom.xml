@@ -15,7 +15,15 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
+          <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-dependencies</artifactId>
+            <version>${spring.version}</version>
+            <scope>import</scope>
+            <type>pom</type>
+          </dependency>
+
+          <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-core</artifactId>
                 <version>${project.parent.version}</version>

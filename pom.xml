@@ -51,6 +51,7 @@
         <junit.testkit.version>1.7.1</junit.testkit.version>
         <slf4j.version>1.7.30</slf4j.version>
         <hamcrest.version>2.2</hamcrest.version>
+        <spring.version>2.5.3</spring.version>
     </properties>
 
     <dependencyManagement>
@@ -473,6 +474,8 @@
                             <dependency>:auto-value-annotations::</dependency>
                             <dependency>javax.annotation:javax.annotation-api::</dependency>
                             <dependency>com.google.code.findbugs:::</dependency>
+                            <dependency>org.springframework:::</dependency>
+                            <dependency>org.springframework.boot:::</dependency>
                         </ignoredUnusedDeclaredDependencies>
                     </configuration>
                 </execution>
