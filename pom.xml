@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>apollo-parent</artifactId>
-    <version>1.20.1-SNAPSHOT</version>
+    <version>1.20.1</version>
     <packaging>pom</packaging>
 
     <description>Java libraries for writing composable microservices</description>
@@ -37,7 +37,7 @@
         <url>https://github.com/spotify/apollo</url>
         <connection>scm:git:git@github.com:spotify/apollo.git</connection>
         <developerConnection>scm:git:git@github.com:spotify/apollo.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v1.20.1</tag>
     </scm>
 
     <properties>
@@ -53,7 +53,7 @@
         <hamcrest.version>2.2</hamcrest.version>
         
         <distributionManagement.snapshotRepository.id>ossrh</distributionManagement.snapshotRepository.id>
-        <distributionManagement.snapshotRepository.url>>https://s01.oss.sonatype.org/content/repositories/snapshots</distributionManagement.snapshotRepository.url>
+        <distributionManagement.snapshotRepository.url>&gt;https://s01.oss.sonatype.org/content/repositories/snapshots</distributionManagement.snapshotRepository.url>
         <distributionManagement.repository.id>ossrh</distributionManagement.repository.id>
         <distributionManagement.repository.url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</distributionManagement.repository.url>
     </properties>
