@@ -2,15 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.spotify</groupId>
-        <artifactId>apollo-parent</artifactId>
-        <version>1.19.2-SNAPSHOT</version>
-    </parent>
-
     <name>Spotify Apollo Bill of Materials</name>
 
+    <groupId>com.spotify</groupId>
     <artifactId>apollo-bom</artifactId>
+    <version>1.19.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <dependencyManagement>
@@ -18,55 +14,55 @@
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-core</artifactId>
-                <version>${project.parent.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <!-- modules -->
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-okhttp-client</artifactId>
-                <version>${project.parent.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-api</artifactId>
-                <version>${project.parent.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-api-impl</artifactId>
-                <version>${project.parent.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-environment</artifactId>
-                <version>${project.parent.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-route</artifactId>
-                <version>${project.parent.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-extra</artifactId>
-                <version>${project.parent.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-entity</artifactId>
-                <version>${project.parent.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-metrics</artifactId>
-                <version>${project.parent.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.spotify</groupId>
                 <artifactId>apollo-test</artifactId>
-                <version>${project.parent.version}</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -76,5 +72,9 @@
             <id>ossrh</id>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
     </distributionManagement>
 </project>

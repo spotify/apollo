@@ -56,6 +56,13 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>com.spotify</groupId>
+                <artifactId>apollo-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
                 <version>${jackson.version}</version>
