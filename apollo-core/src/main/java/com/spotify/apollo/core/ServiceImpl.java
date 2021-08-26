@@ -172,10 +172,13 @@ class ServiceImpl implements Service {
       final CoreModule coreModule =
           new CoreModule(this, config, signaller, closer, unprocessedArgs);
 
+      boolean useSpring = "true".equals(System.getenv("APOLLO_SPRING_ENABLED")) ||
+                          (config.hasPath("apollo.spring.enabled") && config.getBoolean("apollo.spring.enabled"));
+
       final InstanceImpl instance = initInstance(
           coreModule, allModules, closer, executorService,
           scheduledExecutorService, shutdownRequested,
-          stopped);
+          stopped, useSpring);
 
       started.set(true);
       return instance;
@@ -214,6 +217,18 @@ class ServiceImpl implements Service {
       ListeningScheduledExecutorService scheduledExecutorService,
       CountDownLatch shutdownRequested,
       CountDownLatch stopped) {
+    return initInstance(coreModule, modules, closer, executorService, scheduledExecutorService, shutdownRequested, stopped, false);
+  }
+
+  InstanceImpl initInstance(
+      CoreModule coreModule,
+      Set<ApolloModule> modules,
+      Closer closer,
+      ListeningExecutorService executorService,
+      ListeningScheduledExecutorService scheduledExecutorService,
+      CountDownLatch shutdownRequested,
+      CountDownLatch stopped,
+      boolean useSpring) {
 
     List<ApolloModule> modulesSortedOnPriority =
               modules.stream().sorted(Ordering.natural().reverse().onResultOf(ModulePriorityOrdering.INSTANCE))
@@ -221,20 +236,25 @@ class ServiceImpl implements Service {
 
     Iterable<Module> allModules = concat(of(coreModule), modulesSortedOnPriority);
 
-    final SpringApplicationBuilder springApplicationBuilder = new SpringApplicationBuilder()
-        .properties(
-           //Prefer Spring bean if present in both Guice and application context
-            "spring.guice.dedup=true",
-           //Do not create default instances if there is no instance in the context
-           "spring.guice.autowireJIT=false",
-          //Allow overriding of bean definitions from different modules
-           "spring.main.allow-bean-definition-overriding=true")
-        .sources(GuiceSpringBridge.class)
-        .initializers(new ApolloInitializer(serviceName, allModules));
+    Injector injector;
+    if (useSpring) {
+      final SpringApplicationBuilder springApplicationBuilder;
+      springApplicationBuilder = new SpringApplicationBuilder()
+          .properties(
+             //Prefer Spring bean if present in both Guice and application context
+              "spring.guice.dedup=true",
+             //Do not create default instances if there is no instance in the context
+             "spring.guice.autowireJIT=false",
+            //Allow overriding of bean definitions from different modules
+             "spring.main.allow-bean-definition-overriding=true")
+          .sources(GuiceSpringBridge.class)
+          .initializers(new ApolloInitializer(serviceName, allModules));
 
-    springApplicationBuilder.run();
-
-    Injector injector = springApplicationBuilder.context().getBean(Injector.class);
+      springApplicationBuilder.run();
+      injector = springApplicationBuilder.context().getBean(Injector.class);
+    } else {
+      injector = Guice.createInjector(Stage.PRODUCTION, allModules);
+    }
 
     Set<Key<?>> keysToLoad = Sets.newLinkedHashSet();
     for (ApolloModule apolloModule : modulesSortedOnPriority) {
