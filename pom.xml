@@ -674,7 +674,6 @@
                 <maven.compiler.release>8</maven.compiler.release>
             </properties>
         </profile>
-
     </profiles>
 
     <distributionManagement>
