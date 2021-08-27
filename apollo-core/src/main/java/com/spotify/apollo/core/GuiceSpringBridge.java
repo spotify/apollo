@@ -19,25 +19,16 @@
  */
 package com.spotify.apollo.core;
 
-import com.typesafe.config.Config;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.guice.annotation.EnableGuiceModules;
 
+/** Glue to knit together Guice, Spring and make the Spring component scan work. */
 @Configuration
 @EnableGuiceModules
 @SpringBootConfiguration
 @EnableAutoConfiguration
-public class GuiceSpringBridge {
-
-  @Bean
-  CommandLineRunner commandLineRunner(Config config, ApplicationContext applicationContext, @Value("${spring.application.name}") String name) {
-    return (args) -> System.err.println(name + ":" + config);
-  }
-
-}
+@ComponentScan(basePackages = "com.spotify")
+public class GuiceSpringBridge {}

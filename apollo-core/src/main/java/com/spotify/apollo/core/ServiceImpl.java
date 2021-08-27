@@ -64,7 +64,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import joptsimple.BuiltinHelpFormatter;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -73,11 +72,6 @@ import joptsimple.OptionSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.ApplicationContext;
-import org.springframework.guice.annotation.EnableGuiceModules;
-import org.springframework.guice.injector.SpringInjector;
-import org.springframework.guice.module.BeanFactoryProvider;
-import org.springframework.guice.module.SpringModule;
 
 class ServiceImpl implements Service {
 
@@ -238,6 +232,8 @@ class ServiceImpl implements Service {
 
     Injector injector;
     if (useSpring) {
+      LOG.info("Spring-boot support is enabled");
+
       final SpringApplicationBuilder springApplicationBuilder;
       springApplicationBuilder = new SpringApplicationBuilder()
           .properties(
@@ -252,6 +248,8 @@ class ServiceImpl implements Service {
 
       springApplicationBuilder.run();
       injector = springApplicationBuilder.context().getBean(Injector.class);
+
+      LOG.info("ApplicationContext has been created");
     } else {
       injector = Guice.createInjector(Stage.PRODUCTION, allModules);
     }
