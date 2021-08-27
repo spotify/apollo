@@ -6,7 +6,7 @@
 
     <groupId>com.spotify</groupId>
     <artifactId>apollo-bom</artifactId>
-    <version>1.20.2</version>
+    <version>1.20.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
