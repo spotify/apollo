@@ -4,6 +4,12 @@
 
     <name>Spotify Apollo Bill of Materials</name>
 
+    <parent>
+        <groupId>com.spotify</groupId>
+        <artifactId>foss-root</artifactId>
+        <version>10</version>
+    </parent>
+
     <groupId>com.spotify</groupId>
     <artifactId>apollo-bom</artifactId>
     <version>1.20.3-SNAPSHOT</version>
