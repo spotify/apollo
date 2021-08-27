@@ -12,7 +12,7 @@
 
     <groupId>com.spotify</groupId>
     <artifactId>apollo-bom</artifactId>
-    <version>1.20.4</version>
+    <version>1.20.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -106,8 +106,4 @@
             <url>${distributionManagement.repository.url}</url>
         </repository>
     </distributionManagement>
-
-  <scm>
-    <tag>v1.20.4</tag>
-  </scm>
 </project>
