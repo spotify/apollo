@@ -11,7 +11,7 @@
 
     <properties>
         <distributionManagement.snapshotRepository.id>ossrh</distributionManagement.snapshotRepository.id>
-        <distributionManagement.snapshotRepository.url>&gt;https://s01.oss.sonatype.org/content/repositories/snapshots</distributionManagement.snapshotRepository.url>
+        <distributionManagement.snapshotRepository.url>https://s01.oss.sonatype.org/content/repositories/snapshots</distributionManagement.snapshotRepository.url>
         <distributionManagement.repository.id>ossrh</distributionManagement.repository.id>
         <distributionManagement.repository.url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</distributionManagement.repository.url>
     </properties>
