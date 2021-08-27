@@ -78,6 +78,16 @@ public class ServiceImplTest {
   }
 
   @Test
+  public void testUseSpring() throws Exception {
+    Service service = ServiceImpl.builder("test").build();
+
+    try (Service.Instance instance = service.start("-Dapollo.spring.enabled=true")) {
+      assertThat(instance.getConfig().getString("apollo.spring.enabled"), is("true"));
+      assertThat(instance.isShutdown(), is(false));
+    }
+  }
+
+  @Test
   public void testEnvConfig() throws Exception {
     Service service = ServiceImpl.builder("test").build();
 
