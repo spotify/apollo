@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>apollo-parent</artifactId>
-    <version>1.19.2-SNAPSHOT</version>
+    <version>1.20.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>Java libraries for writing composable microservices</description>
@@ -51,11 +51,22 @@
         <junit.testkit.version>1.7.1</junit.testkit.version>
         <slf4j.version>1.7.30</slf4j.version>
         <hamcrest.version>2.2</hamcrest.version>
-        <spring-boot.version>2.5.3</spring-boot.version>
+
+        <distributionManagement.snapshotRepository.id>ossrh</distributionManagement.snapshotRepository.id>
+        <distributionManagement.snapshotRepository.url>https://s01.oss.sonatype.org/content/repositories/snapshots</distributionManagement.snapshotRepository.url>
+        <distributionManagement.repository.id>ossrh</distributionManagement.repository.id>
+        <distributionManagement.repository.url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</distributionManagement.repository.url>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.spotify</groupId>
+                <artifactId>apollo-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
@@ -669,12 +680,12 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+            <id>${distributionManagement.snapshotRepository.id}</id>
+            <url>${distributionManagement.snapshotRepository.url}</url>
         </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>${distributionManagement.repository.id}</id>
+            <url>${distributionManagement.repository.url}</url>
         </repository>
     </distributionManagement>
 
