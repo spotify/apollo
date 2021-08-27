@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <name>Spotify Apollo Parent</name>
@@ -241,11 +243,11 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-              <groupId>org.junit</groupId>
-              <artifactId>junit-bom</artifactId>
-              <version>5.7.1</version>
-              <scope>import</scope>
-              <type>pom</type>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>5.7.1</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>org.junit.platform</groupId>
@@ -350,6 +352,28 @@
                     <version>0.2.2</version>
                     <configuration>
                         <failOnConflicts>true</failOnConflicts>
+                        <excludeDependencies>
+                            <excludeDependency>
+                                <groupId>org.springframework.boot</groupId>
+                                <artifactId>spring-boot</artifactId>
+                            </excludeDependency>
+                            <excludeDependency>
+                                <groupId>org.springframework</groupId>
+                                <artifactId>spring-jcl</artifactId>
+                            </excludeDependency>
+                            <excludeDependency>
+                                <groupId>org.springframework</groupId>
+                                <artifactId>spring-beans</artifactId>
+                            </excludeDependency>
+                            <excludeDependency>
+                                <groupId>org.springframework</groupId>
+                                <artifactId>spring-context</artifactId>
+                            </excludeDependency>
+                            <excludeDependency>
+                                <groupId>org.springframework</groupId>
+                                <artifactId>spring-core</artifactId>
+                            </excludeDependency>
+                        </excludeDependencies>
                     </configuration>
                     <executions>
                         <execution>
@@ -398,21 +422,21 @@
                         </execution>
                     </executions>
                     <dependencies>
-                      <dependency>
-                        <groupId>org.glassfish.jaxb</groupId>
-                        <artifactId>jaxb-core</artifactId>
-                        <version>2.3.0</version>
-                      </dependency>
-                      <dependency>
-                        <groupId>org.glassfish.jaxb</groupId>
-                        <artifactId>jaxb-runtime</artifactId>
-                        <version>2.3.0</version>
-                      </dependency>
-                      <dependency>
-                        <groupId>javax.activation</groupId>
-                        <artifactId>javax.activation-api</artifactId>
-                        <version>1.2.0</version>
-                      </dependency>
+                        <dependency>
+                            <groupId>org.glassfish.jaxb</groupId>
+                            <artifactId>jaxb-core</artifactId>
+                            <version>2.3.0</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.glassfish.jaxb</groupId>
+                            <artifactId>jaxb-runtime</artifactId>
+                            <version>2.3.0</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>javax.activation</groupId>
+                            <artifactId>javax.activation-api</artifactId>
+                            <version>1.2.0</version>
+                        </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
@@ -469,27 +493,27 @@
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
-                <execution>
-                    <id>analyze</id>
-                    <goals>
-                        <goal>analyze-only</goal>
-                    </goals>
-                    <configuration>
-                        <failOnWarning>true</failOnWarning>
-                        <ignoreNonCompile>true</ignoreNonCompile>
-                        <ignoredUnusedDeclaredDependencies>
-                            <dependency>:junit-vintage-engine::</dependency>
-                            <!-- dependency:analyze uses bytecode so it doesn't see annotations and constants -->
-                            <dependency>:auto-matter::</dependency>
-                            <dependency>:auto-service-annotations::</dependency>
-                            <dependency>:auto-value-annotations::</dependency>
-                            <dependency>javax.annotation:javax.annotation-api::</dependency>
-                            <dependency>com.google.code.findbugs:::</dependency>
-                            <dependency>org.springframework:::</dependency>
-                            <dependency>org.springframework.boot:::</dependency>
-                        </ignoredUnusedDeclaredDependencies>
-                    </configuration>
-                </execution>
+                    <execution>
+                        <id>analyze</id>
+                        <goals>
+                            <goal>analyze-only</goal>
+                        </goals>
+                        <configuration>
+                            <failOnWarning>true</failOnWarning>
+                            <ignoreNonCompile>true</ignoreNonCompile>
+                            <ignoredUnusedDeclaredDependencies>
+                                <dependency>:junit-vintage-engine::</dependency>
+                                <!-- dependency:analyze uses bytecode so it doesn't see annotations and constants -->
+                                <dependency>:auto-matter::</dependency>
+                                <dependency>:auto-service-annotations::</dependency>
+                                <dependency>:auto-value-annotations::</dependency>
+                                <dependency>javax.annotation:javax.annotation-api::</dependency>
+                                <dependency>com.google.code.findbugs:::</dependency>
+                                <dependency>org.springframework:::</dependency>
+                                <dependency>org.springframework.boot:::</dependency>
+                            </ignoredUnusedDeclaredDependencies>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -630,7 +654,8 @@
                                     <package>io.netty.util.internal</package>
                                 </ignoreSourcePackage>
                                 <ignoreSourcePackage>
-                                    <package>com.spotify.ffwd.http.okhttp3.internal.platform</package>
+                                    <package>com.spotify.ffwd.http.okhttp3.internal.platform
+                                    </package>
                                 </ignoreSourcePackage>
                                 <!-- optional references to Android -->
                                 <ignoreSourcePackage>
@@ -670,9 +695,9 @@
                 <jdk>[9,)</jdk>
             </activation>
             <properties>
-            <!-- Javac introduced the "release" option only in Java 9+.  It
-                properly sets up source, target and boot classpath for the best
-                compatibility with different versions of Java. -->
+                <!-- Javac introduced the "release" option only in Java 9+.  It
+                    properly sets up source, target and boot classpath for the best
+                    compatibility with different versions of Java. -->
                 <maven.compiler.release>8</maven.compiler.release>
             </properties>
         </profile>
