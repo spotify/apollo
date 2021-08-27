@@ -5,24 +5,12 @@
     <parent>
         <groupId>com.spotify</groupId>
         <artifactId>apollo-parent</artifactId>
-        <version>1.19.2-SNAPSHOT</version>
+        <version>1.20.5-SNAPSHOT</version>
     </parent>
 
     <name>Spotify Apollo API Implementations</name>
     <artifactId>apollo-api-impl</artifactId>
     <packaging>jar</packaging>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.spotify</groupId>
-                <artifactId>apollo-bom</artifactId>
-                <version>${project.parent.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>
