@@ -166,7 +166,7 @@ class ServiceImpl implements Service {
       final CoreModule coreModule =
           new CoreModule(this, config, signaller, closer, unprocessedArgs);
 
-      boolean useSpring = "true".equals(System.getenv("APOLLO_SPRING_ENABLED")) ||
+      boolean useSpring = "true".equals(env.get("APOLLO_SPRING_ENABLED")) ||
                           (config.hasPath("apollo.spring.enabled") && config.getBoolean("apollo.spring.enabled"));
 
       final InstanceImpl instance = initInstance(

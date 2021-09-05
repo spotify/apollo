@@ -28,7 +28,6 @@ import org.springframework.guice.annotation.EnableGuiceModules;
 /** Glue to knit together Guice, Spring and make the Spring component scan work. */
 @Configuration
 @EnableGuiceModules
-@SpringBootConfiguration
 @EnableAutoConfiguration
 @ComponentScan(basePackages = "com.spotify")
 public class GuiceSpringBridge {}
