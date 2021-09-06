@@ -17,7 +17,7 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.core;
+package com.spotify.apollo.core.spring;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;

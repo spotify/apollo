@@ -1,4 +1,4 @@
-/*
+/*-
  * -\-\-
  * Spotify Apollo Service Core (aka Leto)
  * --
@@ -17,17 +17,28 @@
  * limitations under the License.
  * -/-/-
  */
+
 package com.spotify.apollo.core;
 
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.guice.annotation.EnableGuiceModules;
+import com.google.inject.Injector;
+import java.io.IOException;
+import java.util.Map;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-/** Glue to knit together Guice, Spring and make the Spring component scan work. */
-@Configuration
-@EnableGuiceModules
-@EnableAutoConfiguration
-@ComponentScan(basePackages = "com.spotify")
-public class GuiceSpringBridge {}
+@SpringBootApplication
+public class TestSpringBootApplication {
+
+  private final Injector injector;
+
+  public static Service.Instance instance;
+
+  public TestSpringBootApplication(Injector injector) {
+    this.injector = injector;
+  }
+
+
+  public static void main(String[] args, Map<String, String> env) throws IOException {
+    Service service = ServiceImpl.builder("test").build();
+    instance = service.start(args, env);
+  }
+}

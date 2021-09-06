@@ -42,6 +42,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -750,9 +751,8 @@ public class ServiceImplTest {
   @Timeout(1000)
   public void testSpringBeansAreAvailableWhenSpringIsEnabled()
       throws IOException, InterruptedException {
-    Service service = ServiceImpl.builder("test")
-        .build();
-    try (Service.Instance instance = service.start(new String[]{"-Dapollo.spring.enabled=true"})) {
+    TestSpringBootApplication.main(new String[]{"-Dapollo.spring.enabled=true"}, new HashMap<>());
+    try (Service.Instance instance = TestSpringBootApplication.instance) {
       assertThat("Should have Spring enabled",
                  instance.getConfig().hasPath("apollo.spring.enabled") && instance.getConfig()
                      .getBoolean("apollo.spring.enabled"));
@@ -767,11 +767,10 @@ public class ServiceImplTest {
   @Timeout(1000)
   public void testSpringBeansAreAvailableWhenSpringIsEnabledViaSystemEnvironment()
       throws IOException, InterruptedException {
-    Service service = ServiceImpl.builder("test")
-        .build();
-    try (Service.Instance instance = service.start(new String[]{},
-                                                   ImmutableMap.of("APOLLO_SPRING_ENABLED",
-                                                                   "true"))) {
+    TestSpringBootApplication.main(new String[]{}, ImmutableMap.of(
+       "APOLLO_SPRING_ENABLED", "true"
+    ));
+    try (Service.Instance instance = TestSpringBootApplication.instance) {
       assertThat("Should find configured Spring beans",
                  instance.resolve(TestBean.class) != null);
       instance.getSignaller().signalShutdown();
@@ -784,10 +783,9 @@ public class ServiceImplTest {
   @ValueSource(strings = {"", "-Dapollo.spring.enabled=false"})
   public void testSpringBeansAreNotAvailableWhenSpringIsNotEnabled(String args)
       throws IOException, InterruptedException {
-    Service service = ServiceImpl.builder("test")
-        .build();
 
-    try (Service.Instance instance = service.start(new String[]{args})) {
+    TestSpringBootApplication.main(new String[]{args}, new HashMap<>());
+    try (Service.Instance instance = TestSpringBootApplication.instance) {
       assertThat("Should not have Spring enabled",
                  !instance.getConfig().hasPath("apollo.spring.enabled") ||
                  !instance.getConfig().getBoolean("apollo.spring.enabled"));

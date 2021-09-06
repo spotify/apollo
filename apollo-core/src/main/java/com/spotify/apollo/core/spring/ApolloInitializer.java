@@ -17,7 +17,7 @@
  * limitations under the License.
  * -/-/-
  */
-package com.spotify.apollo.core;
+package com.spotify.apollo.core.spring;
 
 import com.google.inject.Module;
 import com.spotify.apollo.module.ApolloModule;

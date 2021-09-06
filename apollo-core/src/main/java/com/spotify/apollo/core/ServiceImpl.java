@@ -42,6 +42,8 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.name.Names;
+import com.spotify.apollo.core.spring.ApolloInitializer;
+import com.spotify.apollo.core.spring.GuiceSpringBridge;
 import com.spotify.apollo.module.ApolloModule;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -71,6 +73,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
 class ServiceImpl implements Service {
@@ -234,6 +237,9 @@ class ServiceImpl implements Service {
     if (useSpring) {
       LOG.info("Spring-boot support is enabled");
 
+      final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+
+
       final SpringApplicationBuilder springApplicationBuilder;
       springApplicationBuilder = new SpringApplicationBuilder()
           .properties(
@@ -243,8 +249,20 @@ class ServiceImpl implements Service {
              "spring.guice.autowireJIT=false",
             //Allow overriding of bean definitions from different modules
              "spring.main.allow-bean-definition-overriding=true")
-          .sources(GuiceSpringBridge.class)
-          .initializers(new ApolloInitializer(serviceName, allModules));
+          .sources(GuiceSpringBridge.class);
+      for (StackTraceElement stackTraceElement : stackTrace) {
+        try {
+          Class<?> candidate = Class.forName(stackTraceElement.getClassName());
+        if (candidate.getAnnotation(SpringBootApplication.class) != null) {
+          LOG.info("Found SpringBootApplication-annotated class {} - will add as configuration source for component scanning", candidate.getName());
+          springApplicationBuilder.sources(candidate);
+        }
+        } catch (ClassNotFoundException e) {
+          e.printStackTrace();
+        }
+      }
+
+      springApplicationBuilder.initializers(new ApolloInitializer(serviceName, allModules));
 
       springApplicationBuilder.run();
       injector = springApplicationBuilder.context().getBean(Injector.class);
