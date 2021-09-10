@@ -398,7 +398,7 @@
                 <plugin>
                     <groupId>com.github.siom79.japicmp</groupId>
                     <artifactId>japicmp-maven-plugin</artifactId>
-                    <version>0.6.2</version>
+                    <version>0.15.3</version>
                     <configuration>
                         <oldVersion>
                             <dependency>
@@ -415,8 +415,16 @@
                         <parameter>
                             <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications>
                             <onlyBinaryIncompatible>true</onlyBinaryIncompatible>
-                            <!-- If this option is not set the plugin will fail on optional dependencies, i.e. spring-core -->
-                            <ignoreMissingClasses>true</ignoreMissingClasses>
+                            <!-- Added to stop failure due to added default method
+                            in com.spotify.apollo.core.Service interface -->
+                            <overrideCompatibilityChangeParameters>
+                              <overrideCompatibilityChangeParameter>
+                                <compatibilityChange>METHOD_NEW_DEFAULT</compatibilityChange>
+                                <binaryCompatible>true</binaryCompatible>
+                                <sourceCompatible>true</sourceCompatible>
+                                <semanticVersionLevel>PATCH</semanticVersionLevel>
+                              </overrideCompatibilityChangeParameter>
+                            </overrideCompatibilityChangeParameters>
                         </parameter>
                     </configuration>
                     <executions>
