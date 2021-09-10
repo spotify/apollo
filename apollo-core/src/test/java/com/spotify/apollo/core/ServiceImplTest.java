@@ -54,6 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -780,8 +781,8 @@ public class ServiceImplTest {
 
   @ParameterizedTest
   @Timeout(1000)
-  @ValueSource(strings = {"", "-Dapollo.spring.enabled=false"})
-  public void testSpringBeansAreNotAvailableWhenSpringIsNotEnabled(String args)
+  @ValueSource(strings = {"-Dapollo.spring.enabled=false"})
+  public void testSpringBeansAreNotAvailableWhenSpringIsDisabledWithSpringBootApplicationPresent(String args)
       throws IOException, InterruptedException {
 
     TestSpringBootApplication.main(new String[]{args}, new HashMap<>());
@@ -797,6 +798,19 @@ public class ServiceImplTest {
     }
   }
 
+  @Test
+  @Timeout(1000)
+  public void testSpringBeansAreAvailableWhenSpringBootApplicationIsPresent()
+      throws IOException, InterruptedException {
+
+    TestSpringBootApplication.main(new String[]{}, new HashMap<>());
+    try (Service.Instance instance = TestSpringBootApplication.instance) {
+
+      Assertions.assertNotNull(instance.resolve(TestBean.class));
+      instance.getSignaller().signalShutdown();
+      instance.waitForShutdown();
+    }
+  }
   static class Shutdowner implements Callable<Void> {
 
     private final Service.Signaller signaller;
