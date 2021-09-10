@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -66,6 +66,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import joptsimple.BuiltinHelpFormatter;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -169,13 +170,14 @@ class ServiceImpl implements Service {
       final CoreModule coreModule =
           new CoreModule(this, config, signaller, closer, unprocessedArgs);
 
-      boolean useSpring = "true".equals(env.get("APOLLO_SPRING_ENABLED")) ||
-                          (config.hasPath("apollo.spring.enabled") && config.getBoolean("apollo.spring.enabled"));
+      boolean activateSpringSupportIfDiscovered =
+          !("false".equals(env.get("APOLLO_SPRING_ENABLED")) ||
+                          (config.hasPath("apollo.spring.enabled") && !config.getBoolean("apollo.spring.enabled")));
 
       final InstanceImpl instance = initInstance(
           coreModule, allModules, closer, executorService,
           scheduledExecutorService, shutdownRequested,
-          stopped, useSpring);
+          stopped, activateSpringSupportIfDiscovered);
 
       started.set(true);
       return instance;
@@ -234,38 +236,30 @@ class ServiceImpl implements Service {
     Iterable<Module> allModules = concat(of(coreModule), modulesSortedOnPriority);
 
     Injector injector;
-    if (useSpring) {
-      LOG.info("Spring-boot support is enabled");
-
-      final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-
-
-      final SpringApplicationBuilder springApplicationBuilder;
-      springApplicationBuilder = new SpringApplicationBuilder()
-          .properties(
-             //Prefer Spring bean if present in both Guice and application context
-              "spring.guice.dedup=true",
-             //Do not create default instances if there is no instance in the context
-             "spring.guice.autowireJIT=false",
-            //Allow overriding of bean definitions from different modules
-             "spring.main.allow-bean-definition-overriding=true")
-          .sources(GuiceSpringBridge.class);
-      for (StackTraceElement stackTraceElement : stackTrace) {
-        try {
-          Class<?> candidate = Class.forName(stackTraceElement.getClassName());
+    //Find if the stack contains any @SpringBootApplication-annotated classes
+    List<Class<?>> springBootAnnotatedClasses = Arrays.stream(Thread.currentThread().getStackTrace())
+        .flatMap(stackTraceElement -> {
+      try {
+        Class<?> candidate = Class.forName(stackTraceElement.getClassName());
         if (candidate.getAnnotation(SpringBootApplication.class) != null) {
           LOG.info("Found SpringBootApplication-annotated class {} - will add as configuration source for component scanning", candidate.getName());
-          springApplicationBuilder.sources(candidate);
+          return Stream.of(candidate);
         }
-        } catch (ClassNotFoundException e) {
-          e.printStackTrace();
-        }
+      } catch (ClassNotFoundException | NoClassDefFoundError e) {
+        LOG.error("Unexpected error while inspecting startup stack: {} ", e.getMessage(), e);
+        LOG.error("This error can be ignored unless you are trying to activate Spring support in Apollo." );
       }
+      return Stream.empty();
+    }).collect(Collectors.toList());
 
-      springApplicationBuilder.initializers(new ApolloInitializer(serviceName, allModules));
-
-      springApplicationBuilder.run();
-      injector = springApplicationBuilder.context().getBean(Injector.class);
+    //If we found any @SpringBootApplication-annotated classes and the user has not set Spring support
+    // to false in the properties we activate the Spring bridge so that the application can use Spring Boot starters and any
+    // Spring configuration the application has set up.
+    if (shouldActivateSpringSupport(springBootAnnotatedClasses, useSpring)) {
+      LOG.info("Spring Boot support is enabled");
+      if (!springBootAnnotatedClasses.isEmpty()) {
+        LOG.info("Disable Spring support by either removing the @SpringBootApplication annotation on your main class or setting apollo.spring.enabled=false");
+      }
 
       injector = new SpringBootInitializer().initialize(serviceName, allModules, springBootAnnotatedClasses);
       LOG.info("ApplicationContext has been created");
@@ -290,6 +284,45 @@ class ServiceImpl implements Service {
     return new InstanceImpl(
         injector, executorService, scheduledExecutorService,
         shutdownRequested, stopped);
+  }
+
+  static class SpringBootInitializer {
+    Injector initialize(String serviceName,
+                        Iterable<Module> allModules,
+                        List<Class<?>> springBootAnnotatedClasses) {
+      final SpringApplicationBuilder springApplicationBuilder;
+      springApplicationBuilder = new SpringApplicationBuilder()
+          .properties(
+              //Prefer Spring bean if present in both Guice and application context
+              "spring.guice.dedup=true",
+              //Do not create default instances if there is no instance in the context
+              "spring.guice.autowireJIT=false",
+              //Allow overriding of bean definitions from different modules
+              "spring.main.allow-bean-definition-overriding=true")
+          .sources(GuiceSpringBridge.class);
+      springBootAnnotatedClasses.forEach(
+          springApplicationBuilder::sources
+      );
+
+      springApplicationBuilder.initializers(new ApolloInitializer(serviceName, allModules));
+
+      springApplicationBuilder.run();
+      return springApplicationBuilder.context().getBean(Injector.class);
+    }
+  }
+
+  private boolean shouldActivateSpringSupport(List<Class<?>> springBootAnnotatedClasses,
+                                              boolean useSpring) {
+   if (!useSpring) {
+     return false;
+   }
+   try {
+     Class.forName("org.springframework.boot.autoconfigure.SpringBootApplication");
+   } catch (ClassNotFoundException e) {
+     LOG.warn("Spring support was requested, but no SpringBootApplication class was found. Please include spring-boot-autoconfigure in dependencies to enable Spring support");
+     return false;
+   }
+   return !springBootAnnotatedClasses.isEmpty() || useSpring;
   }
 
   Set<ApolloModule> discoverAllModules(
