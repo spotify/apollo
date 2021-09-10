@@ -267,6 +267,7 @@ class ServiceImpl implements Service {
       springApplicationBuilder.run();
       injector = springApplicationBuilder.context().getBean(Injector.class);
 
+      injector = new SpringBootInitializer().initialize(serviceName, allModules, springBootAnnotatedClasses);
       LOG.info("ApplicationContext has been created");
     } else {
       injector = Guice.createInjector(Stage.PRODUCTION, allModules);

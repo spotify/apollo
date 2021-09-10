@@ -16,8 +16,6 @@
     <packaging>pom</packaging>
 
     <properties>
-        <spring-boot.version>2.5.3</spring-boot.version>
-
         <distributionManagement.snapshotRepository.id>ossrh</distributionManagement.snapshotRepository.id>
         <distributionManagement.snapshotRepository.url>https://s01.oss.sonatype.org/content/repositories/snapshots</distributionManagement.snapshotRepository.url>
         <distributionManagement.repository.id>ossrh</distributionManagement.repository.id>
@@ -26,13 +24,6 @@
 
     <dependencyManagement>
         <dependencies>
-          <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-dependencies</artifactId>
-            <version>${spring-boot.version}</version>
-            <scope>import</scope>
-            <type>pom</type>
-          </dependency>
 
           <dependency>
                 <groupId>com.spotify</groupId>
