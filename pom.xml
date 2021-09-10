@@ -47,7 +47,7 @@
         <auto-matter.version>0.15.3</auto-matter.version>
         <auto-value.version>1.7.4</auto-value.version>
         <logback.version>1.2.3</logback.version>
-        <jackson.version>2.12.3</jackson.version>
+        <jackson.version>2.12.4</jackson.version>
         <semantic-metrics.version>1.1.8</semantic-metrics.version>
         <guava.version>30.1.1-jre</guava.version>
         <junit.testkit.version>1.7.1</junit.testkit.version>
@@ -235,7 +235,16 @@
                 <version>${auto-value.version}</version>
             </dependency>
 
-            <!-- test dependencies -->
+          <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-dependencies</artifactId>
+            <version>2.5.3</version>
+            <scope>import</scope>
+            <type>pom</type>
+          </dependency>
+
+
+          <!-- test dependencies -->
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
@@ -326,11 +335,6 @@
                 <groupId>org.freemarker</groupId>
                 <artifactId>freemarker</artifactId>
                 <version>2.3.22</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-test</artifactId>
-                <version>4.2.3.RELEASE</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
