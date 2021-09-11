@@ -678,6 +678,11 @@
                                 <ignoreSourcePackage>
                                     <package>ch.qos.logback.classic.spi</package>
                                 </ignoreSourcePackage>
+                                <!-- The Spring dependencies are optional - this package is only loaded
+                                if they are available on the classpath -->
+                                <ignoreSourcePackage>
+                                  <package>com.spotify.apollo.core.spring</package>
+                                </ignoreSourcePackage>
                             </ignoreSourcePackages>
                         </configuration>
                         <executions>

@@ -42,8 +42,7 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.name.Names;
-import com.spotify.apollo.core.spring.ApolloInitializer;
-import com.spotify.apollo.core.spring.GuiceSpringBridge;
+import com.spotify.apollo.core.spring.SpringBootInitializer;
 import com.spotify.apollo.module.ApolloModule;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -75,7 +74,6 @@ import joptsimple.OptionSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 
 class ServiceImpl implements Service {
 
@@ -284,31 +282,6 @@ class ServiceImpl implements Service {
     return new InstanceImpl(
         injector, executorService, scheduledExecutorService,
         shutdownRequested, stopped);
-  }
-
-  static class SpringBootInitializer {
-    Injector initialize(String serviceName,
-                        Iterable<Module> allModules,
-                        List<Class<?>> springBootAnnotatedClasses) {
-      final SpringApplicationBuilder springApplicationBuilder;
-      springApplicationBuilder = new SpringApplicationBuilder()
-          .properties(
-              //Prefer Spring bean if present in both Guice and application context
-              "spring.guice.dedup=true",
-              //Do not create default instances if there is no instance in the context
-              "spring.guice.autowireJIT=false",
-              //Allow overriding of bean definitions from different modules
-              "spring.main.allow-bean-definition-overriding=true")
-          .sources(GuiceSpringBridge.class);
-      springBootAnnotatedClasses.forEach(
-          springApplicationBuilder::sources
-      );
-
-      springApplicationBuilder.initializers(new ApolloInitializer(serviceName, allModules));
-
-      springApplicationBuilder.run();
-      return springApplicationBuilder.context().getBean(Injector.class);
-    }
   }
 
   private boolean shouldActivateSpringSupport(List<Class<?>> springBootAnnotatedClasses,
