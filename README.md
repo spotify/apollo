@@ -6,11 +6,9 @@ Apollo
 [![Maven Central](https://img.shields.io/maven-central/v/com.spotify/apollo-parent.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.spotify%22%20apollo*)
 [![License](https://img.shields.io/github/license/spotify/apollo.svg)](LICENSE.txt)
 
-## Status: Bug-fix only
+## Status: Archived
 
-Apollo is heavily used within Spotify, however, most of its development is currently done internally leveraging Apollo's module system. We want to signal this current state to the community by putting the project in maintenance mode.   
-This project will no longer have new features or accept PRs for new features. We will continue to accept bug fixes and update dependencies. 
-
+> ⚠️ Apollo is heavily used within Spotify, however, most of its development is currently done internally leveraging Apollo's module system. We want to signal this current state to the community by putting the project in archive mode. This means this project will no longer have new features, bug fixes or accept PRs for new features. Apollo development will continue internally in Spotify.
 
 Apollo is a set of Java libraries that we use at Spotify when writing microservices. Apollo includes modules such as an HTTP server and a URI routing system, making it trivial to implement restful API services. 
 
