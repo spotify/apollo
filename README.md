@@ -8,7 +8,7 @@ Apollo
 
 ## Status: Archived
 
-> ⚠️ Apollo is heavily used within Spotify, however, most of its development is currently done internally leveraging Apollo's module system. We want to signal this current state to the community by putting the project in archive mode. This means this project will no longer have new features, bug fixes or accept PRs for new features. Apollo development will continue internally in Spotify.
+> ⚠️ Apollo is heavily used within Spotify, however, most of its development has recently been done internally leveraging Apollo's module system. Because of this, and the fact that Apollo has very little (if any) use outside Spotify we want to signal this current state to the community by putting the project in archive mode. This means this project will no longer have new features, bug fixes or accept PRs for new features. Apollo development will continue internally in Spotify.
 
 Apollo is a set of Java libraries that we use at Spotify when writing microservices. Apollo includes modules such as an HTTP server and a URI routing system, making it trivial to implement restful API services. 
 
